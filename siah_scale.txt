@@ -1,0 +1,25 @@
+//siah_scale
+//An ImageJ macro to scale a folder of bmps and save as tiff stack
+//Run it like this:
+//java -jar /usr/share/java/ij.jar -batch /home/neil/.imagej/macros/siah_scale.txt '/home/neil/test_stack/:/home/neil/test_stack/test_stack:0.5'
+//Might have to specify path to macro
+//args are in one string seperated by :
+//Arg[0] = dir with tifs
+//Arg[1] = out directory
+//Arg[1] = scale factor
+
+args = getArgument;
+if (args=="") exit ("No argument!");
+arg_array = split(args,":");
+print(arg_array[0]);
+list = getFileList(arg_array[0]);
+run("Close All");
+setBatchMode(true);
+out_path = arg_array[1];
+scale_fac = arg_array[2];
+zdepth = floor(list.length * scale_fac);
+run("Image Sequence...", "open=" + arg_array[0] + list[0] +" file=[] or=[] sort use");
+run("Scale...", "x="+scale_fac + " y=" + scale_fac +  " z="+scale_fac + " depth=" + zdepth + " depth interpolation=Bicubic average process create title=test_stack-1");
+//saveAs("Tiff", "/home/neil/test_stack/test_stack-2.tif");
+run("Nrrd ... ", "nrrd=" + out_path + ".nrrd");
+close();
