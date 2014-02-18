@@ -4,10 +4,11 @@ import Image
 import argparse
 import sys
 import os
-import glob
+import fnmatch
 import numpy as np
 from numpy.core.fromnumeric import mean
 from multiprocessing import Pool
+import re
 #from matplotlib import pyplot as plt
 
 imdims = None
@@ -70,7 +71,7 @@ def do_the_crop(images, crop_vals, out_dir):
     rcrop = imdims[0] - crop_vals[2] + 10
     if rcrop > imdims[0] -1: rcrop = imdims[0] -1
     bcrop = imdims[1] - crop_vals[3] + 10
-    if rcrop > imdims[1] -1: bcrop = imdims[1] -1
+    if bcrop > imdims[1] -1: bcrop = imdims[1] -1
     print("cropping with the following box: left:{0}, top:{1}, right:{2}, bottom{3}".format(
         lcrop, tcrop, rcrop, bcrop))
     #Crop and save
@@ -82,9 +83,6 @@ def do_the_crop(images, crop_vals, out_dir):
         im.save(crop_out)
 
 
-
-
-
 def main():
     parser = argparse.ArgumentParser(description='crop a stack of bitmaps')
     parser.add_argument('-i', dest='in_dir', help='dir with bmps to crop', required=True)
@@ -93,8 +91,16 @@ def main():
     parser.add_argument('-d', nargs=4, type=int, dest='def_crop', help='set defined boundaries for crop')
     args = parser.parse_args()
 
-    #Get the files and complain if none found
-    files = sorted(glob.glob(os.path.join(args.in_dir,"*." + args.file_type)))
+
+    #Get the file list exclude ones we dont want
+    #Note fnmatch is case insensitive by default so with fnd BMP and bmp
+    files = []
+
+    for fn in os.listdir(args.in_dir):
+        if fnmatch.fnmatch(fn, '*spr.bmp'):
+            continue
+        if fnmatch.fnmatch(fn, '*.BMP'):
+            files.append(fn)
     if len(files) < 1:
         sys.exit("no image files found in" + args.in_dir)
 
