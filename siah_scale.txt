@@ -1,25 +1,71 @@
 //siah_scale
 //An ImageJ macro to scale a folder of bmps and save as tiff stack
 //Run it like this:
-//java -jar /usr/share/java/ij.jar -batch /home/neil/.imagej/macros/siah_scale.txt '/home/neil/test_stack/:/home/neil/test_stack/test_stack:0.5'
+//java -jar /usr/share/java/ij.jar -batch /home/neil/.imagej/macros/siah_scale.txt '/home/neil/test_stack/:/home/neil/test_stack/test_stack:0.5,0.25,0.14'
 //Might have to specify path to macro
 //args are in one string seperated by :
 //Arg[0] = dir with tifs
 //Arg[1] = out directory
-//Arg[1] = scale factor
+//Arg[1....] = scale factors seperated by commas
+
+
+//TODO: Can't select the window by title of the supposedly newly created window from the (Scale.. ) commannd
 
 args = getArgument;
 if (args=="") exit ("No argument!");
+
 arg_array = split(args,":");
 print(arg_array[0]);
-list = getFileList(arg_array[0]);
+
+image_list = getFileList(arg_array[0]);
+//Not sure what this is for
 run("Close All");
+
 setBatchMode(true);
+
 out_path = arg_array[1];
-scale_fac = arg_array[2];
-zdepth = floor(list.length * scale_fac);
-run("Image Sequence...", "open=" + arg_array[0] + list[0] +" file=[] or=[] sort use");
-run("Scale...", "x="+scale_fac + " y=" + scale_fac +  " z="+scale_fac + " depth=" + zdepth + " depth interpolation=Bicubic average process create title=test_stack-1");
-//saveAs("Tiff", "/home/neil/test_stack/test_stack-2.tif");
-run("Nrrd ... ", "nrrd=" + out_path + ".nrrd");
-close();
+scale_factors = split(arg_array[2],",");
+
+//open the image sequence as a stack
+run("Image Sequence...", "open=" + arg_array[0] + image_list[0] +" file=[] or=[] sort use");
+rename("unscaled");
+//run('Nrrd ... ', "nrrd=" + "/home/neil/test/test.nrrd");
+
+for(i = 0; i < scale_factors.length; i++){
+	//Set number of images in stack
+	scale = scale_factors[i];
+
+	zdepth = floor(image_list.length * scale);
+
+	//select the main stack
+
+	//run the scaling
+	selectWindow("unscaled");
+	scale_string = replace(scale, '.', '-');
+	run("Scale...", "x=" + scale + " y=" + scale +  " z="+scale + " depth=" + zdepth + " depth interpolation=Bicubic average process create title=new");
+	selectWindow("new");
+	print(getTitle + "???????????????????????");
+	//Save the output - //saveAs("Tiff", "/home/neil/test_stack/test_stack-2.tif");
+
+	//Create directory
+	
+	File.makeDirectory(out_path + scale_string);
+	
+	
+	run('Nrrd ... ', "nrrd=" + out_path + scale_string + "/"+ scale_string + ".nrrd");
+	
+};
+
+
+
+//Just for testing. Print out list of windows
+names = newArray(nImages);
+ids = newArray(nImages);
+for (i=0; i < ids.length; i++){
+        selectImage(i+1);
+        ids[i] = getImageID();
+        names[i] = getTitle();
+        print(ids[i] + " = " + names[i]);
+}
+
+
