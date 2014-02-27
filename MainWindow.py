@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Feb 21 17:07:57 2014
+# Created: Mon Feb 24 13:36:31 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,14 +26,14 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1219, 986)
+        MainWindow.resize(1376, 986)
         font = QtGui.QFont()
         font.setPointSize(12)
         MainWindow.setFont(font)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.frame = QtGui.QFrame(self.centralwidget)
-        self.frame.setGeometry(QtCore.QRect(10, 20, 1181, 921))
+        self.frame.setGeometry(QtCore.QRect(10, 20, 1271, 921))
         self.frame.setFrameShape(QtGui.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtGui.QFrame.Raised)
         self.frame.setObjectName(_fromUtf8("frame"))
@@ -56,18 +56,18 @@ class Ui_MainWindow(object):
         self.lineEditOutput.setFont(font)
         self.lineEditOutput.setObjectName(_fromUtf8("lineEditOutput"))
         self.gridLayoutFileSelect.addWidget(self.lineEditOutput, 1, 1, 1, 1)
-        self.pushButtonOutput = QtGui.QPushButton(self.gridLayoutWidget)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.pushButtonOutput.setFont(font)
-        self.pushButtonOutput.setObjectName(_fromUtf8("pushButtonOutput"))
-        self.gridLayoutFileSelect.addWidget(self.pushButtonOutput, 1, 0, 1, 1)
         self.pushButtonInput = QtGui.QPushButton(self.gridLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.pushButtonInput.setFont(font)
         self.pushButtonInput.setObjectName(_fromUtf8("pushButtonInput"))
         self.gridLayoutFileSelect.addWidget(self.pushButtonInput, 0, 0, 1, 1)
+        self.pushButtonOutput = QtGui.QPushButton(self.gridLayoutWidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.pushButtonOutput.setFont(font)
+        self.pushButtonOutput.setObjectName(_fromUtf8("pushButtonOutput"))
+        self.gridLayoutFileSelect.addWidget(self.pushButtonOutput, 1, 0, 1, 1)
         self.groupBoxOPTOnly = QtGui.QGroupBox(self.frame)
         self.groupBoxOPTOnly.setGeometry(QtCore.QRect(20, 570, 1131, 241))
         font = QtGui.QFont()
@@ -438,7 +438,7 @@ class Ui_MainWindow(object):
         self.pushButtonAutopop.setFont(font)
         self.pushButtonAutopop.setObjectName(_fromUtf8("pushButtonAutopop"))
         self.groupBoxID = QtGui.QGroupBox(self.frame)
-        self.groupBoxID.setGeometry(QtCore.QRect(20, 200, 601, 111))
+        self.groupBoxID.setGeometry(QtCore.QRect(20, 200, 601, 131))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxID.setFont(font)
@@ -559,7 +559,7 @@ class Ui_MainWindow(object):
         self.lineEditName.setObjectName(_fromUtf8("lineEditName"))
         self.gridLayoutName.addWidget(self.lineEditName, 0, 1, 1, 1)
         self.groupBoxOptions = QtGui.QGroupBox(self.frame)
-        self.groupBoxOptions.setGeometry(QtCore.QRect(640, 110, 501, 201))
+        self.groupBoxOptions.setGeometry(QtCore.QRect(640, 110, 621, 201))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxOptions.setFont(font)
@@ -825,7 +825,7 @@ class Ui_MainWindow(object):
         self.pushButtonGo.setObjectName(_fromUtf8("pushButtonGo"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1219, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1376, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -835,7 +835,13 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.actionChange_ID = QtGui.QAction(MainWindow)
         self.actionChange_ID.setObjectName(_fromUtf8("actionChange_ID"))
+        self.actionManually_select_output_folder = QtGui.QAction(MainWindow)
+        self.actionManually_select_output_folder.setObjectName(_fromUtf8("actionManually_select_output_folder"))
+        self.actionAccurate_folder_size_calculation = QtGui.QAction(MainWindow)
+        self.actionAccurate_folder_size_calculation.setObjectName(_fromUtf8("actionAccurate_folder_size_calculation"))
         self.menuOptions.addAction(self.actionChange_ID)
+        self.menuOptions.addAction(self.actionManually_select_output_folder)
+        self.menuOptions.addAction(self.actionAccurate_folder_size_calculation)
         self.menubar.addAction(self.menuOptions.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -843,8 +849,8 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "SIaH: Image Processor", None))
-        self.pushButtonOutput.setText(_translate("MainWindow", "Output folder", None))
         self.pushButtonInput.setText(_translate("MainWindow", "Input folder", None))
+        self.pushButtonOutput.setText(_translate("MainWindow", "Output folder", None))
         self.groupBoxOPTOnly.setTitle(_translate("MainWindow", "OPT only", None))
         self.checkBox_4.setText(_translate("MainWindow", "Channel 1", None))
         self.pushButton_9.setText(_translate("MainWindow", "Pick recon log", None))
@@ -908,6 +914,8 @@ class Ui_MainWindow(object):
         self.labelFile.setText(_translate("MainWindow", "Folder size (Mb)", None))
         self.labelPixel.setText(_translate("MainWindow", "Pixel size (µm)", None))
         self.pushButtonGo.setText(_translate("MainWindow", "Go!", None))
-        self.menuOptions.setTitle(_translate("MainWindow", "Options", None))
+        self.menuOptions.setTitle(_translate("MainWindow", "Adv. Options", None))
         self.actionChange_ID.setText(_translate("MainWindow", "Allow identification to be changed", None))
+        self.actionManually_select_output_folder.setText(_translate("MainWindow", "Manually select output folder", None))
+        self.actionAccurate_folder_size_calculation.setText(_translate("MainWindow", "Accurate folder size calculation", None))
 

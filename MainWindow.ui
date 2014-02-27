@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1219</width>
+    <width>1203</width>
     <height>986</height>
    </rect>
   </property>
@@ -65,18 +65,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="pushButtonOutput">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Output folder</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <widget class="QPushButton" name="pushButtonInput">
         <property name="font">
@@ -89,13 +77,25 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="pushButtonOutput">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Output folder</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
     <widget class="QGroupBox" name="groupBoxOPTOnly">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>570</y>
+       <y>580</y>
        <width>1131</width>
        <height>241</height>
       </rect>
@@ -774,7 +774,7 @@ QGroupBox::title
        <x>20</x>
        <y>200</y>
        <width>601</width>
-       <height>111</height>
+       <height>131</height>
       </rect>
      </property>
      <property name="font">
@@ -1307,7 +1307,7 @@ QGroupBox::title
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>347</y>
+       <y>360</y>
        <width>301</width>
        <height>191</height>
       </rect>
@@ -1583,15 +1583,17 @@ QGroupBox::title
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1219</width>
+     <width>1203</width>
      <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
-     <string>Options</string>
+     <string>Adv. Options</string>
     </property>
     <addaction name="actionChange_ID"/>
+    <addaction name="actionManually_select_output_folder"/>
+    <addaction name="actionAccurate_folder_size_calculation"/>
    </widget>
    <addaction name="menuOptions"/>
   </widget>
@@ -1599,6 +1601,16 @@ QGroupBox::title
   <action name="actionChange_ID">
    <property name="text">
     <string>Allow identification to be changed</string>
+   </property>
+  </action>
+  <action name="actionManually_select_output_folder">
+   <property name="text">
+    <string>Allow manually selection of output folder</string>
+   </property>
+  </action>
+  <action name="actionAccurate_folder_size_calculation">
+   <property name="text">
+    <string>Accurate folder size calculation</string>
    </property>
   </action>
  </widget>
