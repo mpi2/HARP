@@ -12,8 +12,11 @@ import re
 import sys
 from matplotlib import  pyplot as plt
 import time
+import math
+from collections import Counter
 
-# Once this is working, implement in C++/Qt http://qt-project.org/doc/qt-4.8/qimage.html
+
+#Once this is working, implement in C++/Qt http://qt-project.org/doc/qt-4.8/qimage.html
 
 imdims = None
 
@@ -35,94 +38,114 @@ class Processor:
         im = Image.open(filename)
         matrix = np.array(im)
         crops = {}
-        crops["x"] = np.mean(matrix, axis=0) * np.std(matrix, axis=0)
-        crops["y"] = np.mean(matrix, axis=1) * np.mean(matrix, axis=1)
+        #crops["x"] = np.mean(matrix, axis=0) * np.std(matrix, axis=0)
+        #crops["y"] = np.mean(matrix, axis=1) * np.mean(matrix, axis=1)
+
+        #for shannon
+        crops["x"] = np.std(matrix, axis=0)
+        crops["y"] = np.std(matrix, axis=1)
 
         return(crops)
 
+
 class Cropper:
-    '''
-    Each output image is cropped and saved with this class
-    Running as seperate processes
-    '''
     def __init__(self, crop_box, out_dir):
-        '''
-        param: crop_vals tuple of the crop box coords
-        '''
         self.crop_box = crop_box
         self.out_dir = out_dir
 
     def __call__(self, img):
-        '''
-        @param img str, path to file
-        '''
         im = Image.open(img)
-        im = im.crop((self.crop_box[0], self.crop_box[1], self.crop_box[2], self.crop_box[3]))
+        im = im.crop((self.crop_box[0], self.crop_box[1], self.crop_box[2], self.crop_box[3] ))
         filename = os.path.basename(img)
-        crop_out = os.path.join(self.out_dir, filename)
+        crop_out = os.path.join(self.out_dir,filename)
         im.save(crop_out)
+
 
 def do_the_crop(images, crop_vals, out_dir):
     '''
-    Check cropping values add padding and farm off the file
-    names of images to seperate Cropper processes
-
     @param: images list of image files
     @param: crop_vals tuple of the crop box coords
     @param: out_dir str dir to output cropped images
-    '''
 
+    '''
     print("doing the crop")
     global imdims
-    padding = np.mean(imdims) * 0.01
-
+    padding = int(np.mean(imdims)*0.01)
+    #Get the crop values. Add a padding of 10 pixels
     lcrop = crop_vals[0] - padding
     if lcrop < 0: lcrop = 0
     tcrop = crop_vals[1] - padding
     if tcrop < 0: tcrop = 0
     rcrop = imdims[0] - crop_vals[2] + padding
-    if rcrop > imdims[0] - 1: rcrop = imdims[0] - 1
+    if rcrop > imdims[0] -1: rcrop = imdims[0] -1
     bcrop = imdims[1] - crop_vals[3] + padding
-    if bcrop > imdims[1] - 1: bcrop = imdims[1] - 1
+    if bcrop > imdims[1] -1: bcrop = imdims[1] -1
 
     print("cropping with the following box: left:{0}, top:{1}, right:{2}, bottom{3}".format(
         lcrop, tcrop, rcrop, bcrop))
     print("ImageJ friendly box: makeRectangle({0},{1},{2},{3})".format(
-        lcrop, tcrop, rcrop - lcrop, bcrop - tcrop))
+        lcrop, tcrop, rcrop -lcrop, bcrop - tcrop))
+    sys.exit()
+    #Crop and save
 
-    # Run the Cropper processes
-    cropper = Cropper(map(int, (lcrop, tcrop, rcrop, bcrop)), out_dir)
+    cropper = Cropper((lcrop, tcrop, rcrop, bcrop), out_dir)
     pool = Pool()
     pool.map(cropper, images)
-    end = time.time()
-    curr_time = end - start
-    print("All done. Time to here: {0}".format(curr_time))
+    #end = time.time()
+    #curr_time = end - start
+    #print("All done. Time to here: {0}".format(curr_time) )
     return
 
 
-def get_cropping_box(slices, side, threshold, rev=False):
-    '''
-    Calculates the cropping coordiantes
-    @param slices list
-    @param side str, x or y
-    @param rev bool, search backwards (for right and bottom)
-    '''
-    vals = [x[side] for x in slices]
-    means = map(np.std, zip(*vals))
+def get_cropping_box(slices, side, threshold, rev = False):
 
-    # Uncomment if you want a to view graph of the metric used for the thresholding
-    # plt.plot(means)
-    # plt.show()
+    #Vals = array of arrays with each sub-array containing the
+    # the metric calculated in Process for each row/column
+    #vals = [x[side] for x in slices]
+
+
+    vals = [lowvals(x[side]) for x in slices]
+
+    #filterout low values
+    means = map(np.std, zip(*vals))
+    #means = map(entropy, zip(*vals))
+
+    plt.plot(means)
+    plt.xlabel("Pixels")
+    plt.ylabel("Metric")
+    plt.show()
+    #sys.exit()
 
     if rev == True:
-        return next((i for i, v in enumerate(reversed(means)) if v > threshold), -1)
+        return next((i for i, v in enumerate(reversed(means)) if v > threshold ), -1)
     else:
-        return next((i for i, v in enumerate(means) if v > threshold), -1)
+        return next((i for i, v in enumerate(means) if v > threshold ), -1)
+
+
+
+def entropy(array):
+    p, lns = Counter(round_down(array, 4)), float(len(array))
+    return -sum( count/lns * math.log(count/lns, 2) for count in p.values())
+
+
+def round_down(array, divisor):
+    for n in array:
+        yield n - (n%divisor)
+
+
+def lowvals(array):
+    low_values_indices = array < 10  # Where values are low
+    array[low_values_indices] = 0
+    return array
+
+
 
 
 def run(args):
-
+    #Get the file list exclude ones we dont want
+    #Note fnmatch is case insensitive by default so with fnd BMP and bmp
     files = []
+
 
     for fn in os.listdir(args.in_dir):
         if fnmatch.fnmatch(fn, '*spr.bmp'):
@@ -132,34 +155,34 @@ def run(args):
     if len(files) < 1:
         sys.exit("no image files found in" + args.in_dir)
 
-    # get image dimensions from first file
+    #get image dimensions from first file
     img = Image.open(files[0])
     global imdims
     imdims = img.size
+    #map(open_files, files)
+    #sys.exit()
 
     if args.def_crop:
         do_the_crop(files, args.def_crop, args.out_dir)
-
-    else:  # Do the autocrop
+    else: #Do the autocrop
         print("No region specified. Trying autocrop")
-        threshold = 4
+        threshold = 0.01
         proc = Processor(threshold)
         pool = Pool(8)
-
-        # Just use a subset of files to determine crop
-        sparse_files = files [0::20]
+        #Just use a subset of files to determine crop
+        sparse_files = files [0::10]
         slices = pool.map(proc, sparse_files)
         end = time.time()
         curr_time = end - start
-        print("Files read and means calculated. Time to here: {0}".format(curr_time))
+        print("Files read and means calculated. Time to here: {0}".format(curr_time) )
+        #print slices
+        #sys.exit()
 
         lcrop = get_cropping_box(slices, "x", threshold)
         tcrop = get_cropping_box(slices, "y", threshold)
-        # sys.exit() Uncomment for testing threshold metrics
         rcrop = get_cropping_box(slices, "x", threshold, True)
         bcrop = get_cropping_box(slices, "y", threshold, True)
         crop = (lcrop, tcrop, rcrop, bcrop)
-        print crop
 
         do_the_crop(files, crop, args.out_dir)
         sys.exit()
@@ -177,9 +200,10 @@ def main():
     parser.add_argument('-o', dest='out_dir', help='destination for cropped images', required=True)
     parser.add_argument('-t', dest='file_type', help='tif or bmp', default="bmp", required=True)
     parser.add_argument('-d', nargs=4, type=int, dest='def_crop', help='set defined boundaries for crop')
+    parser.add_argument('-p', dest='p', help='set defined boundaries for crop')
     args = parser.parse_args()
     run(args)
-    # sys.exit()
+    #sys.exit()
 
 
 if __name__ == '__main__':
