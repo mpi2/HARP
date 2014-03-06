@@ -41,21 +41,20 @@ class RunProcessing:
 
         if param.SF2 == "yes" :
             session.write("Scaling SF2 started\n");
-            pro = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", dir+"/siah_scale.ijm",
+            pro = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", dir+"/siah_scale.txt",
                          param.imageJ+":2"])
 
         if param.SF3 == "yes" :
             session.write("Scaling SF3 started\n");
-            subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", "/mnt/MyShare/siah_scale.ijm",
+            subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", dir+"/siah_scale.txt",
                       param.imageJ+":3"])
 
         if param.SF4 == "yes" :
             session.write("Scaling SF3 started\n");
-            subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", "/mnt/MyShare/siah_scale.ijm",
+            subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", dir+"/siah_scale.txt",
                         param.imageJ+":4"])
 
-        stdoutdata, stderrdata = pro.communicate()
-        print pro.returncode
+
 
 
 def main():

@@ -89,7 +89,7 @@ def do_the_crop(images, crop_vals, out_dir):
         lcrop, tcrop, rcrop, bcrop))
     print("ImageJ friendly box: makeRectangle({0},{1},{2},{3})".format(
         lcrop, tcrop, rcrop -lcrop, bcrop - tcrop))
-    sys.exit()
+    #sys.exit()
     #Crop and save
 
     cropper = Cropper((lcrop, tcrop, rcrop, bcrop), out_dir)
@@ -158,7 +158,7 @@ def run(args):
             files.append(os.path.join(args.in_dir, fn))
     if len(files) < 1:
         sys.exit("no image files found in" + args.in_dir)
-
+    print files
     #get image dimensions from first file
     img = Image.open(files[0])
     global imdims
@@ -202,7 +202,7 @@ def main():
     parser = argparse.ArgumentParser(description='crop a stack of bitmaps')
     parser.add_argument('-i', dest='in_dir', help='dir with bmps to crop', required=True)
     parser.add_argument('-o', dest='out_dir', help='destination for cropped images', required=True)
-    parser.add_argument('-t', dest='file_type', help='tif or bmp', default="bmp", required=True)
+    parser.add_argument('-t', dest='file_type', help='tif or bmp', default="bmp")
     parser.add_argument('-d', nargs=4, type=int, dest='def_crop', help='set defined boundaries for crop')
     parser.add_argument('-p', dest='p', help='set defined boundaries for crop')
     args = parser.parse_args()

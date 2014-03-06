@@ -13,11 +13,16 @@
 
 
 //TODO: Can't select the window by title of the supposedly newly created window from the (Scale.. ) commannd
+print("###############################");
+print("siah_scale macro started");
+print("###############################");
+
 
 args = getArgument;
 if (args=="") exit ("No argument!");
 
 arg_array = split(args,":");
+print("input folder:");
 print(arg_array[0]);
 
 image_list = getFileList(arg_array[0]);
@@ -29,8 +34,13 @@ setBatchMode(true);
 out_path = arg_array[1];
 scale = arg_array[2];
 
+print("output folder:");
+print(out_path);
+print("scale factor:");
+print(scale);
+
 //open the image sequence as a stack
-run("Image Sequence...", "open=" + arg_array[0] + image_list[0] + " file=[] or=[] sort use");
+run("Image Sequence...", "open=[" + arg_array[0] + image_list[0] + "] file=[] or=[] sort use");
 rename("unscaled");
 //run('Nrrd ... ', "nrrd=" + "/home/neil/test/test.nrrd");
 
@@ -51,6 +61,6 @@ selectWindow("scaled");
 File.makeDirectory(out_path + scale_string);
 saveAs("Tiff", out_path + scale_string + "/"+ scale_string + ".tif");
 //run('Nrrd ... ', "nrrd=" + out_path + scale_string + "/"+ scale_string + ".nrrd");
-	
+
 
 
