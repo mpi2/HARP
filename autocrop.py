@@ -109,11 +109,11 @@ def get_cropping_box(slices, side, threshold, rev = False):
     #filterout low values
     means = map(np.std, zip(*vals))
     #means = map(entropy, zip(*vals))
-
-    plt.plot(means)
-    plt.xlabel("Pixels")
-    plt.ylabel("Metric")
-    plt.show()
+#
+#     plt.plot(means)
+#     plt.xlabel("Pixels")
+#     plt.ylabel("Metric")
+#     plt.show()
     #sys.exit()
 
     if rev == True:
