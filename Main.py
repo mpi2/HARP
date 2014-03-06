@@ -191,10 +191,12 @@ class MainWindow(QtGui.QMainWindow):
             self.full_name = folder_name
 
         except IndexError as e:
-            self.error = "Warning: Name ID is not in the correct format.\nAutocomplete is not possible."
+            pass
+            self.error = "Warning: Name ID is not in the correct format.\nAutocomplete of name is not possible."
             print "Name incorrect", sys.exc_info()[0]
             self.errorDialog = ErrorMessage(self.error)
             self.full_name = ""
+
         except:
             self.error = "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
             print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
