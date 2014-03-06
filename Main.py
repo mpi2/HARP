@@ -15,6 +15,7 @@ import pickle
 import pprint
 import time
 import shutil
+import uuid
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -28,6 +29,13 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self):
        '''  Constructor: Checks for buttons which have been pressed and responds accordingly. '''
+
+       # Make unique ID if this is the first time mainwindow has been called
+       self.unique_ID = uuid.uuid1()
+       print "ID for session:"+str(self.unique_ID)
+
+       # Make a unique folder in the tmp directory which will store tracking information
+       os.makedirs("/tmp/siah/"+str(self.unique_ID))
 
        # Standard setup of class from qt designer Ui class
        super(MainWindow, self).__init__()
@@ -299,6 +307,9 @@ class MainWindow(QtGui.QMainWindow):
         '''
         print "\nOpen progress report for user"
 
+        # Get the directory of the script
+        dir = os.path.dirname(os.path.abspath(__file__))
+
         # Perform some checks before any processing is carried out
         self.errorCheck()
 
@@ -309,7 +320,7 @@ class MainWindow(QtGui.QMainWindow):
             self.getParamaters()
 
             # Perform analysis
-            subprocess.Popen(["python", "/mnt/MyShare/RunProcessing.py", "-i",self.config_path])
+            subprocess.Popen(["python", dir+"/RunProcessing.py", "-i",self.config_path])
 
             # Show progress dialog window to keep track of what is being processed
             self.pro = Progress()
@@ -400,6 +411,9 @@ class MainWindow(QtGui.QMainWindow):
         #### Write to config file ####
         configOb = ConfigClass()
 
+        # ID for session
+        configOb.unique_ID = str(self.unique_ID)
+        configOb.full_name = self.full_name
         configOb.input_folder = inputFolder
         configOb.output_folder = outputFolder
         configOb.crop_option = str(crop)
@@ -416,6 +430,8 @@ class MainWindow(QtGui.QMainWindow):
         configOb.recon_pixel_size = self.pixel_size
 
         # write the config information into an easily readable log file
+        log.write("Session_ID    "+configOb.unique_ID+"\n");
+        log.write("full_name    "+configOb.full_name+"\n");
         log.write("Input_folder    "+configOb.input_folder+"\n");
         log.write("Output_folder    "+configOb.output_folder+"\n");
         log.write("Crop_option    "+configOb.crop_option+"\n");
@@ -446,6 +462,9 @@ class Progress(QtGui.QDialog):
        self.ui=Ui_Progress()
        self.ui.setupUi(self)
        self.show()
+
+
+
 
 
 class ErrorMessage(QtGui.QDialog):
