@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Import PyQT module
+# Import PyQT module.
 from PyQt4 import QtGui
 # Import MainWindow class from QT Designer
 from MainWindow import *

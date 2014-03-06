@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ErrorMessage.ui'
+# Form implementation generated from reading ui  file 'ErrorMessage.ui'
 #
 # Created: Wed Mar 05 14:12:35 2014
 #      by: PyQt4 UI code generator 4.10.3
