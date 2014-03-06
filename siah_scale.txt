@@ -61,6 +61,7 @@ selectWindow("scaled");
 File.makeDirectory(out_path + scale_string);
 saveAs("Tiff", out_path + scale_string + "/"+ scale_string + ".tif");
 //run('Nrrd ... ', "nrrd=" + out_path + scale_string + "/"+ scale_string + ".nrrd");
+print("Scaling Finished");
 
 
 
