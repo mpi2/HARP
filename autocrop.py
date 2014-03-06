@@ -158,7 +158,7 @@ def run(args):
             files.append(os.path.join(args.in_dir, fn))
     if len(files) < 1:
         sys.exit("no image files found in" + args.in_dir)
-    print files
+
     #get image dimensions from first file
     img = Image.open(files[0])
     global imdims
