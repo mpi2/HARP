@@ -1,6 +1,10 @@
 #!/usr/bin/python
 
-import Image
+try:
+    import Image
+except ImportError:
+    from PIL import Image
+
 import argparse
 import sys
 import os
