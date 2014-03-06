@@ -5,7 +5,7 @@ import argparse
 import sys
 import os
 import numpy as np
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 
 
 parser = argparse.ArgumentParser(description='get a z-projection from a stack of bitmaps')
@@ -43,9 +43,10 @@ def process(chunk):
 
 if __name__ == '__main__':
 
-    p = Pool(4)
+    poolsize = cpu_count()
+    p = Pool(poolsize)
 
-    chunksize = int(len(files)/4) +1
+    chunksize = int(len(files)/poolsize) +1
     chunks = [files[i:i+chunksize]
               for i in range(0, len(files), chunksize)]
 
