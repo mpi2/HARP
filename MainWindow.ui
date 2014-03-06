@@ -40,7 +40,7 @@
        <x>20</x>
        <y>20</y>
        <width>601</width>
-       <height>62</height>
+       <height>66</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayoutFileSelect">
@@ -144,7 +144,7 @@ QGroupBox::title
         <x>11</x>
         <y>32</y>
         <width>261</width>
-        <height>190</height>
+        <height>206</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayoutCh1">
@@ -278,7 +278,7 @@ QGroupBox::title
         <x>290</x>
         <y>32</y>
         <width>261</width>
-        <height>190</height>
+        <height>206</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_4">
@@ -412,7 +412,7 @@ QGroupBox::title
         <x>570</x>
         <y>32</y>
         <width>261</width>
-        <height>190</height>
+        <height>206</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_5">
@@ -546,7 +546,7 @@ QGroupBox::title
         <x>850</x>
         <y>32</y>
         <width>261</width>
-        <height>190</height>
+        <height>206</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_6">
@@ -986,7 +986,7 @@ QGroupBox::title
        <x>640</x>
        <y>110</y>
        <width>501</width>
-       <height>201</height>
+       <height>221</height>
       </rect>
      </property>
      <property name="font">
@@ -1199,7 +1199,7 @@ QGroupBox::title
        <rect>
         <x>155</x>
         <y>33</y>
-        <width>31</width>
+        <width>41</width>
         <height>17</height>
        </rect>
       </property>
@@ -1215,9 +1215,9 @@ QGroupBox::title
      <widget class="QCheckBox" name="checkBoxSF3">
       <property name="geometry">
        <rect>
-        <x>196</x>
+        <x>203</x>
         <y>33</y>
-        <width>31</width>
+        <width>41</width>
         <height>17</height>
        </rect>
       </property>
@@ -1233,7 +1233,7 @@ QGroupBox::title
      <widget class="QCheckBox" name="checkBoxSF4">
       <property name="geometry">
        <rect>
-        <x>236</x>
+        <x>250</x>
         <y>33</y>
         <width>41</width>
         <height>17</height>
@@ -1253,7 +1253,7 @@ QGroupBox::title
        <rect>
         <x>10</x>
         <y>172</y>
-        <width>111</width>
+        <width>121</width>
         <height>16</height>
        </rect>
       </property>
@@ -1271,7 +1271,7 @@ QGroupBox::title
        <rect>
         <x>155</x>
         <y>171</y>
-        <width>70</width>
+        <width>81</width>
         <height>17</height>
        </rect>
       </property>
@@ -1287,9 +1287,9 @@ QGroupBox::title
      <widget class="QCheckBox" name="checkBox_2">
       <property name="geometry">
        <rect>
-        <x>240</x>
+        <x>245</x>
         <y>169</y>
-        <width>131</width>
+        <width>161</width>
         <height>21</height>
        </rect>
       </property>
@@ -1300,6 +1300,42 @@ QGroupBox::title
       </property>
       <property name="text">
        <string>Original recons</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>200</y>
+        <width>131</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Replace folders</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBoxRF">
+      <property name="geometry">
+       <rect>
+        <x>156</x>
+        <y>200</y>
+        <width>70</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Yes</string>
       </property>
      </widget>
     </widget>
@@ -1584,7 +1620,7 @@ QGroupBox::title
      <x>0</x>
      <y>0</y>
      <width>1203</width>
-     <height>21</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">

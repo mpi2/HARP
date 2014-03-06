@@ -5,13 +5,16 @@ from PyQt4 import QtGui
 from MainWindow import *
 from Progress import *
 from ErrorMessage import *
+#from RunProcessing import *
 import sys
 import subprocess
 import os
 import re
 # cPickle is faster than pickel and is pretty much the same
-import cPickle as pickle
+import pickle
 import pprint
+import time
+import shutil
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -35,6 +38,7 @@ class MainWindow(QtGui.QMainWindow):
        self.modality = "Not_selected"
        self.selected = "Not_selected"
        self.error = "None"
+       self.stop = None
 
        # get input folder
        self.ui.pushButtonInput.clicked.connect(self.selectFileIn)
@@ -47,7 +51,6 @@ class MainWindow(QtGui.QMainWindow):
 
        # uCT selection
        self.ui.radioButtonuCT.clicked.connect(self.getuCTonly)
-
 
        # auto-populate based on input folder and modality selection
        self.ui.pushButtonAutopop.clicked.connect(self.autopop)
@@ -90,7 +93,7 @@ class MainWindow(QtGui.QMainWindow):
 
         try:
             filename = ""
-            # for loop to go through the recon log file
+            # for loop to go through the directory
             for line in os.listdir(input) :
                 line =str(line)
                 print line+"\n"
@@ -183,6 +186,7 @@ class MainWindow(QtGui.QMainWindow):
             self.error = "Warning: Name ID is not in the correct format.\nAutocomplete is not possible."
             print "Name incorrect", sys.exc_info()[0]
             self.errorDialog = ErrorMessage(self.error)
+            self.full_name = ""
         except:
             self.error = "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
             print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
@@ -209,7 +213,8 @@ class MainWindow(QtGui.QMainWindow):
 
         try:
             # This will change depending on the location of the program (e.g linux/windows and what drive the MicroCT folder is set to)
-            recon_log_path = "N:\\MicroCT\\project-IMPC_MCT\\recons\\"+folder_name+"\\"+folder_name+".log"
+            recon_log_path = os.path.join(path,folder_name,folder_name+".log")
+
             # To make sure the path is in the correct format (not sure if necessary
             self.recon_log_path = os.path.abspath(recon_log_path)
 
@@ -241,7 +246,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def autoFileOut(self):
-        ''' Get info for the output file and create a new folder
+        ''' Get info for the output file and create a new folder NEED TO ADD CREATE FOLDER FUNCTION
         '''
         try :
             input = str(self.ui.lineEditInput.text())
@@ -249,7 +254,8 @@ class MainWindow(QtGui.QMainWindow):
             path,folder_name = os.path.split(input)
 
             output_path  = path.replace("recons", "processed recons")
-            output_full = output_path+"\\"+self.full_name
+            output_full = os.path.join(output_path,self.full_name)
+            print "TESTT"+output_full
             self.ui.lineEditOutput.setText(output_full)
 
         except:
@@ -291,17 +297,24 @@ class MainWindow(QtGui.QMainWindow):
         '''
         This will set off all the processing scripts and shows the dialog box to keep track of progress
         '''
-        self.close()
         print "\nOpen progress report for user"
-        self.getParamaters()
 
         # Perform some checks before any processing is carried out
         self.errorCheck()
 
-        # Show progess dialog window to keep track of what is being processed
-        self.pro = Progress()
+        if self.stop != True :
 
-        # Run the programs. A script needs to be written to run on linux to run the back end processing
+            self.close()
+
+            self.getParamaters()
+
+            # Perform analysis
+            subprocess.Popen(["python", "/mnt/MyShare/RunProcessing.py", "-i",self.config_path])
+
+            # Show progress dialog window to keep track of what is being processed
+            self.pro = Progress()
+
+            # Run the programs. A script needs to be written to run on linux to run the back end processing
 
 
 
@@ -309,10 +322,29 @@ class MainWindow(QtGui.QMainWindow):
         '''
         To check the required inputs for the processing to be run
         '''
+        # Get input and output folders (As the text is always from the text box it will hopefully keep track of
+        #any changes the user might have made
+        inputFolder = str(self.ui.lineEditInput.text())
+        outputFolder = str(self.ui.lineEditOutput.text())
+
         # Input folder contains image files
 
+        if self.ui.checkBoxRF.isChecked():
+            print "CheckBox has been checked so file will be replaced\nCreating Output folder"
+            shutil.rmtree(outputFolder)
+            os.makedirs(outputFolder)
+            self.stop = None
+        # Check if output folder already exists. Ask if it is ok to overwrite
+        elif os.path.exists(outputFolder):
+            print "Output folder already exists and user has not approved overwrite"
+            # Running dialog box to inform user of options
+            self.errorDialog = ErrorMessage("Output folder already exists\n Tick the 'Replace folder button' in the options sections if files are to be replaced")
+            self.stop = True
+        else :
+            print "Creating output folder"
+            os.makedirs(outputFolder)
+            self.stop = None
 
-        # Check if output folder already exists. Ask if it is ok to overide
 
         # Check if name has been completed
 
@@ -329,12 +361,12 @@ class MainWindow(QtGui.QMainWindow):
         outputFolder = str(self.ui.lineEditOutput.text())
 
         # OS path used for compatibility issues between Linux and windows directory spacing
-        config_path = os.path.join(outputFolder,"configObject.txt")
-        log_path = os.path.join(outputFolder,"config4user.log")
+        self.config_path = os.path.join(outputFolder,"configObject.txt")
+        self.log_path = os.path.join(outputFolder,"config4user.log")
 
         # Create config file and log file
-        config = open(config_path, 'w')
-        log = open(log_path, 'w')
+        config = open(self.config_path, 'w')
+        log = open(self.log_path, 'w')
 
         ##### Get cropping option #####
         crop = self.ui.comboBoxCrop.currentText()
@@ -346,16 +378,24 @@ class MainWindow(QtGui.QMainWindow):
             hcrop = str(self.ui.lineEditH.text())
 
         ##### Get Scaling factors ####
-        if self.ui.checkBoxSF2.isChecked:
-          SF = "2"
-        if self.ui.checkBoxSF3.isChecked:
-          SF = SF+"^"+"3"
-        if self.ui.checkBoxSF3.isChecked:
-          SF = SF+"^"+"4"
+        if self.ui.checkBoxSF2.isChecked() :
+            SF2 = "yes"
+        else :
+            SF2 = "no"
+
+        if self.ui.checkBoxSF3.isChecked() :
+            SF3 = "yes"
+        else :
+            SF3 = "no"
+
+        if self.ui.checkBoxSF4.isChecked() :
+            SF4 = "yes"
+        else :
+            SF4 = "no"
 
         # If using windows it is important to put \ at the end of folder name
         # Combining scaling and SF into input for imageJ macro
-        imageJconfig = inputFolder+'^'+outputFolder+'^'+SF
+        imageJconfig = outputFolder+'/cropped/:'+outputFolder+'/'
 
         #### Write to config file ####
         configOb = ConfigClass()
@@ -368,6 +408,9 @@ class MainWindow(QtGui.QMainWindow):
         else :
             configOb.crop_manual = "Not_applicable"
         configOb.imageJ = imageJconfig
+        configOb.SF2 = SF2
+        configOb.SF3 = SF3
+        configOb.SF4 = SF4
         configOb.recon_log_file = self.recon_log_path
         configOb.recon_folder_size = self.f_size_out_gb
         configOb.recon_pixel_size = self.pixel_size
@@ -377,6 +420,9 @@ class MainWindow(QtGui.QMainWindow):
         log.write("Output_folder    "+configOb.output_folder+"\n");
         log.write("Crop_option    "+configOb.crop_option+"\n");
         log.write("Crop_manual    "+configOb.crop_manual+"\n");
+        log.write("Downsize_by_factor_2?    "+configOb.SF2+"\n");
+        log.write("Downsize_by_factor_3?    "+configOb.SF3+"\n");
+        log.write("Downsize_by_factor_4?    "+configOb.SF4+"\n");
         log.write("ImageJconfig    "+configOb.imageJ+"\n");
         log.write("Recon_log_file    "+configOb.recon_log_file+"\n");
         log.write("Recon_folder_size   "+configOb.recon_folder_size+"\n");
@@ -413,9 +459,20 @@ class ErrorMessage(QtGui.QDialog):
        self.ui=Ui_DialogErrMessage()
        self.ui.setupUi(self)
        self.show()
+       self.replace_folder = None
+       # Stop further processing
+       self.stop = True
 
        self.ui.objectNameErrMessage.setText(str(error))
 
+       self.ui.pushButtonOK.clicked.connect(self.errorOK)
+
+
+    def errorOK(self):
+        ''' Action to take place after OK button has been pressed for error message '''
+        print "errorOK button has been pressed"
+
+        self.hide()
 
 
 

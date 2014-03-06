@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ErrorMessage.ui'
 #
-# Created: Tue Feb 25 16:48:09 2014
+# Created: Wed Mar 05 14:12:35 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -38,10 +38,24 @@ class Ui_DialogErrMessage(object):
         font.setPointSize(14)
         self.objectNameErrMessage.setFont(font)
         self.objectNameErrMessage.setObjectName(_fromUtf8("objectNameErrMessage"))
+        self.pushButtonOK = QtGui.QPushButton(self.frame)
+        self.pushButtonOK.setGeometry(QtCore.QRect(340, 230, 61, 23))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.pushButtonOK.setFont(font)
+        self.pushButtonOK.setObjectName(_fromUtf8("pushButtonOK"))
+        self.pushButton_2 = QtGui.QPushButton(self.frame)
+        self.pushButton_2.setGeometry(QtCore.QRect(410, 230, 61, 23))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.pushButton_2.setFont(font)
+        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
 
         self.retranslateUi(DialogErrMessage)
         QtCore.QMetaObject.connectSlotsByName(DialogErrMessage)
 
     def retranslateUi(self, DialogErrMessage):
         DialogErrMessage.setWindowTitle(_translate("DialogErrMessage", "Dialog", None))
+        self.pushButtonOK.setText(_translate("DialogErrMessage", "OK", None))
+        self.pushButton_2.setText(_translate("DialogErrMessage", "Cancel", None))
 
