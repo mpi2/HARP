@@ -730,6 +730,9 @@ QGroupBox::title
       <property name="text">
        <string>µCT</string>
       </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QRadioButton" name="radioButtonOPT">
       <property name="geometry">
@@ -1023,7 +1026,7 @@ QGroupBox::title
      <widget class="QLabel" name="label_5">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>9</x>
         <y>33</y>
         <width>101</width>
         <height>19</height>
@@ -1092,41 +1095,14 @@ QGroupBox::title
        <string>Cropping</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBoxCrop">
-      <property name="geometry">
-       <rect>
-        <x>155</x>
-        <y>60</y>
-        <width>231</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <item>
-       <property name="text">
-        <string>Automatic</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Manual</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>No crop</string>
-       </property>
-      </item>
-     </widget>
      <widget class="QLineEdit" name="lineEditX">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>155</x>
-        <y>99</y>
+        <y>94</y>
         <width>51</width>
         <height>20</height>
        </rect>
@@ -1139,12 +1115,18 @@ QGroupBox::title
       <property name="text">
        <string>x</string>
       </property>
+      <property name="readOnly">
+       <bool>false</bool>
+      </property>
      </widget>
      <widget class="QLineEdit" name="lineEditY">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>215</x>
-        <y>99</y>
+        <y>94</y>
         <width>51</width>
         <height>20</height>
        </rect>
@@ -1159,10 +1141,13 @@ QGroupBox::title
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEditW">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>275</x>
-        <y>99</y>
+        <y>94</y>
         <width>51</width>
         <height>20</height>
        </rect>
@@ -1177,10 +1162,13 @@ QGroupBox::title
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEditH">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>335</x>
-        <y>99</y>
+        <y>94</y>
         <width>51</width>
         <height>20</height>
        </rect>
@@ -1197,7 +1185,7 @@ QGroupBox::title
      <widget class="QCheckBox" name="checkBoxSF2">
       <property name="geometry">
        <rect>
-        <x>155</x>
+        <x>153</x>
         <y>33</y>
         <width>41</width>
         <height>17</height>
@@ -1338,6 +1326,87 @@ QGroupBox::title
        <string>Yes</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="pushButtonGetDimensions">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>90</y>
+        <width>101</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Get dimensions</string>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="radioButtonAuto">
+      <property name="geometry">
+       <rect>
+        <x>247</x>
+        <y>60</y>
+        <width>105</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Sans Serif</family>
+        <pointsize>12</pointsize>
+        <italic>false</italic>
+       </font>
+      </property>
+      <property name="text">
+       <string>Automatic</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="radioButtonMan">
+      <property name="geometry">
+       <rect>
+        <x>153</x>
+        <y>60</y>
+        <width>105</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Sans Serif</family>
+        <pointsize>12</pointsize>
+        <italic>false</italic>
+       </font>
+      </property>
+      <property name="text">
+       <string>Manual</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="radioButtonNo">
+      <property name="geometry">
+       <rect>
+        <x>359</x>
+        <y>60</y>
+        <width>105</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Sans Serif</family>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>No crop</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QGroupBox" name="groupBoxuCTOnly">
      <property name="geometry">
@@ -1384,7 +1453,7 @@ QGroupBox::title
       <bool>true</bool>
      </property>
      <property name="checked">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <widget class="QWidget" name="formLayoutWidget_9">
       <property name="geometry">

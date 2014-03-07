@@ -1,10 +1,12 @@
 #!/usr/bin/python
 # Import PyQT module
 from PyQt4 import QtGui
+from PyQt4.QtCore import pyqtSlot,SIGNAL,SLOT
 # Import MainWindow class from QT Designer
 from MainWindow import *
 from Progress import *
 from ErrorMessage import *
+import crop
 #from RunProcessing import *
 import sys
 import subprocess
@@ -33,9 +35,9 @@ class MainWindow(QtGui.QMainWindow):
        # Make unique ID if this is the first time mainwindow has been called
        self.unique_ID = uuid.uuid1()
        print "ID for session:"+str(self.unique_ID)
-
+       self.ID_folder = os.path.join("/tmp","siah",str(self.unique_ID))
        # Make a unique folder in the tmp directory which will store tracking information
-       os.makedirs("/tmp/siah/"+str(self.unique_ID))
+       os.makedirs(self.ID_folder)
 
        # Standard setup of class from qt designer Ui class
        super(MainWindow, self).__init__()
@@ -66,8 +68,43 @@ class MainWindow(QtGui.QMainWindow):
        # If Go button is pressed move onto track progress dialog box
        self.ui.pushButtonGo.clicked.connect(self.process)
 
+       # Set cropping options
+       # Auto crop (disable buttons)
+       self.ui.radioButtonAuto.clicked.connect(self.manCropOff)
+       # No crop (disable buttons)
+       self.ui.radioButtonNo.clicked.connect(self.manCropOff)
+       # Man crop (enable buttons).
+       self.ui.radioButtonMan.clicked.connect(self.manCropOn)
+       # If the get dimensions button is pressed the
+       self.ui.pushButtonGetDimensions.clicked.connect(self.getDimensions)
+
        # to make the window visible
        self.show()
+
+    def getDimensions(self):
+        ''' disables boxes for cropping manually '''
+        crop.run(callback, image)
+
+    def callback(box):
+        print box
+
+
+
+    def manCropOff(self):
+        ''' disables boxes for cropping manually '''
+        self.ui.lineEditX.setEnabled(False)
+        self.ui.lineEditY.setEnabled(False)
+        self.ui.lineEditW.setEnabled(False)
+        self.ui.lineEditH.setEnabled(False)
+        self.ui.pushButtonGetDimensions.setEnabled(False)
+
+    def manCropOn(self):
+        ''' enables boxes for cropping manually '''
+        self.ui.lineEditX.setEnabled(True)
+        self.ui.lineEditY.setEnabled(True)
+        self.ui.lineEditW.setEnabled(True)
+        self.ui.lineEditH.setEnabled(True)
+        self.ui.pushButtonGetDimensions.setEnabled(True)
 
 
     def getOPTonly(self):
@@ -325,7 +362,7 @@ class MainWindow(QtGui.QMainWindow):
             subprocess.Popen(["python", dir+"/RunProcessing.py", "-i",self.config_path])
 
             # Show progress dialog window to keep track of what is being processed
-            self.pro = Progress()
+            self.pro = Progress(self.configOb)
 
             # Run the programs. A script needs to be written to run on linux to run the back end processing
 
@@ -382,13 +419,16 @@ class MainWindow(QtGui.QMainWindow):
         log = open(self.log_path, 'w')
 
         ##### Get cropping option #####
-        crop = self.ui.comboBoxCrop.currentText()
-
-        if crop == "Manual" :
+        if self.ui.radioButtonMan.isChecked() :
             xcrop = str(self.ui.lineEditX.text())
             ycrop = str(self.ui.lineEditY.text())
             wcrop = str(self.ui.lineEditW.text())
             hcrop = str(self.ui.lineEditH.text())
+            crop = "Manual"
+        elif self.ui.radioButtonAuto.isChecked() :
+            crop = "Automatic"
+        elif self.ui.radioButtonNo.isChecked() :
+            crop = "No_crop"
 
         ##### Get Scaling factors ####
         if self.ui.checkBoxSF2.isChecked() :
@@ -411,43 +451,43 @@ class MainWindow(QtGui.QMainWindow):
         imageJconfig = outputFolder+'/cropped/:'+outputFolder+'/'
 
         #### Write to config file ####
-        configOb = ConfigClass()
+        self.configOb = ConfigClass()
 
         # ID for session
-        configOb.unique_ID = str(self.unique_ID)
-        configOb.full_name = self.full_name
-        configOb.input_folder = inputFolder
-        configOb.output_folder = outputFolder
-        configOb.crop_option = str(crop)
+        self.configOb.unique_ID = str(self.unique_ID)
+        self.configOb.full_name = self.full_name
+        self.configOb.input_folder = inputFolder
+        self.configOb.output_folder = outputFolder
+        self.configOb.crop_option = str(crop)
         if crop =="Manual" :
-            configOb.crop_manual = xcrop+" "+ycrop+" "+wcrop+" "+hcrop
+            self.configOb.crop_manual = xcrop+" "+ycrop+" "+wcrop+" "+hcrop
         else :
-            configOb.crop_manual = "Not_applicable"
-        configOb.imageJ = imageJconfig
-        configOb.SF2 = SF2
-        configOb.SF3 = SF3
-        configOb.SF4 = SF4
-        configOb.recon_log_file = self.recon_log_path
-        configOb.recon_folder_size = self.f_size_out_gb
-        configOb.recon_pixel_size = self.pixel_size
+            self.configOb.crop_manual = "Not_applicable"
+        self.configOb.imageJ = imageJconfig
+        self.configOb.SF2 = SF2
+        self.configOb.SF3 = SF3
+        self.configOb.SF4 = SF4
+        self.configOb.recon_log_file = self.recon_log_path
+        self.configOb.recon_folder_size = self.f_size_out_gb
+        self.configOb.recon_pixel_size = self.pixel_size
 
         # write the config information into an easily readable log file
-        log.write("Session_ID    "+configOb.unique_ID+"\n");
-        log.write("full_name    "+configOb.full_name+"\n");
-        log.write("Input_folder    "+configOb.input_folder+"\n");
-        log.write("Output_folder    "+configOb.output_folder+"\n");
-        log.write("Crop_option    "+configOb.crop_option+"\n");
-        log.write("Crop_manual    "+configOb.crop_manual+"\n");
-        log.write("Downsize_by_factor_2?    "+configOb.SF2+"\n");
-        log.write("Downsize_by_factor_3?    "+configOb.SF3+"\n");
-        log.write("Downsize_by_factor_4?    "+configOb.SF4+"\n");
-        log.write("ImageJconfig    "+configOb.imageJ+"\n");
-        log.write("Recon_log_file    "+configOb.recon_log_file+"\n");
-        log.write("Recon_folder_size   "+configOb.recon_folder_size+"\n");
-        log.write("Recon_pixel_size  "+configOb.recon_pixel_size+"\n");
+        log.write("Session_ID    "+self.configOb.unique_ID+"\n");
+        log.write("full_name    "+self.configOb.full_name+"\n");
+        log.write("Input_folder    "+self.configOb.input_folder+"\n");
+        log.write("Output_folder    "+self.configOb.output_folder+"\n");
+        log.write("Crop_option    "+self.configOb.crop_option+"\n");
+        log.write("Crop_manual    "+self.configOb.crop_manual+"\n");
+        log.write("Downsize_by_factor_2?    "+self.configOb.SF2+"\n");
+        log.write("Downsize_by_factor_3?    "+self.configOb.SF3+"\n");
+        log.write("Downsize_by_factor_4?    "+self.configOb.SF4+"\n");
+        log.write("ImageJconfig    "+self.configOb.imageJ+"\n");
+        log.write("Recon_log_file    "+self.configOb.recon_log_file+"\n");
+        log.write("Recon_folder_size   "+self.configOb.recon_folder_size+"\n");
+        log.write("Recon_pixel_size  "+self.configOb.recon_pixel_size+"\n");
 
         # Pickle the class to a file
-        pickle.dump(configOb, config)
+        pickle.dump(self.configOb, config)
 
         config.close()
         log.close()
@@ -459,12 +499,24 @@ class Progress(QtGui.QDialog):
     '''
 
     # Create a constructor
-    def __init__(self):
+    def __init__(self,param):
        super(Progress, self).__init__()
        self.ui=Ui_Progress()
        self.ui.setupUi(self)
        self.show()
 
+       self.ID_folder = os.path.join("/tmp","siah",str(param.unique_ID))
+       print "Check folders"+str(os.listdir(self.ID_folder))
+       self.ui.label_1.setText(param.full_name)
+
+
+       while True:
+            time.sleep(0.05)
+            value = self.ui.progressBar_1.value() + 1
+            self.ui.progressBar_1.setValue(value)
+            QtGui.qApp.processEvents()
+            if (value >= 30):
+                break
 
 
 
