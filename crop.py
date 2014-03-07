@@ -19,7 +19,7 @@ class MyMainWindow(QtGui.QMainWindow):
         self.widget.resize(1000, 1000)
         self.setCentralWidget(self.widget)
         self.widget.show()
-        print "main window started"
+
         #Do not allow resizing for now as the rubber band does not move in proportion with the image
         self.setFixedSize(QtCore.QSize(1050, 1050))
         self.action = QtGui.QAction(self.tr("&crop"), self)
@@ -43,7 +43,7 @@ class MainWidget(QtGui.QWidget):
         layout.addWidget(self.view)
         self.setLayout(layout)
 
-        print "main widget started"
+
         self.image = QtGui.QPixmap(image)
         #Scale y to 1000 pixs. Use same scaling for x in case of differring dimensions
         self.orig_width = self.image.width()
@@ -77,6 +77,8 @@ class MainWidget(QtGui.QWidget):
         '''
         Called when mouse is moved with button pressed
         '''
+        pos = (event.pos().x(), event.pos().y())
+        print pos
         if self.drawing:
             self.height = event.pos().y() - self.y
             self.width = event.pos().x() - self.x
@@ -106,7 +108,7 @@ class MainWidget(QtGui.QWidget):
 
         #Fet the current mouse pos
         pos = (event.pos().x(), event.pos().y())
-
+        #print pos
         #Get ccords of current rubber band
         rect = self.rubberBand.geometry().getCoords()
 
@@ -175,7 +177,7 @@ class MainWidget(QtGui.QWidget):
 
     def mouseRelease(self, event):
         '''
-        On first mouse release, prevent futher drawing of rubberbands
+        On first mouse release, prevent further drawing of rubberbands
         So that box can be resized
         '''
         if self.drawing:
@@ -184,9 +186,16 @@ class MainWidget(QtGui.QWidget):
 
 
 
+def run_from_cli(callback, image):
+    app = QtGui.QApplication(sys.argv)
+    window = MyMainWindow(callback, image)
+    window.show()
+    sys.exit(app.exec_())
+
 def run(callback, image):
     window = MyMainWindow(callback, image)
     window.show()
 
+
 if __name__ == "__main__":
-    run() #create def for printing box
+    run_from_cli() #create def for printing box
