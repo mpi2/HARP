@@ -27,7 +27,6 @@ class MainWidget(QtGui.QWidget):
         self.orig_height = self.image.height()
         self.y_scale = 950.00 / self.orig_height
         x_width = self.orig_width * self.y_scale
-
         self.pixmap_item = QtGui.QGraphicsPixmapItem(self.image.scaled(x_width, 950), None, self.scene)
 
         self.pixmap_item.mousePressEvent = self.mousePress
@@ -41,17 +40,15 @@ class MainWidget(QtGui.QWidget):
         self.height = 40
         self.drawing = True
         self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
-        #setGeometry ( int x, int y, int width, int height )
         self.rubberBand.setGeometry(QtCore.QRect(10, 100, 20, 20))
         self.rubberBand.updatesEnabled()
         self.rubberBand.show()
 
 
-
-
     def mouseMove(self, event):
-        #We are dragging the band
-
+        '''
+        Called when mouse is moved with button pressed
+        '''
         if self.drawing:
             self.height = event.pos().y() - self.y
             self.width = event.pos().x() - self.x
@@ -60,13 +57,12 @@ class MainWidget(QtGui.QWidget):
             self.resizeRect(event)
 
 
-
     def mousePress(self, event):
         button = event.button()
         if button == 1:
             self.setCorner(event)
         if button == 2:
-            pass
+            pass #maybe clear the box and start over
 
 
     def setCorner(self, event):
@@ -86,7 +82,6 @@ class MainWidget(QtGui.QWidget):
         #Get ccords of current rubber band
         rect = self.rubberBand.geometry().getCoords()
 
-
         topLx = rect[0]
         topLy = rect[1]
         botRx= rect[2]
@@ -103,42 +98,41 @@ class MainWidget(QtGui.QWidget):
         #get the nearest side. Sides numbered 1-4 clockwise from top
         side = 1
         if corner == 1:
-          k = {1: abs(pos[1] - topLy),
+            k = {1: abs(pos[1] - topLy),
                4: abs(pos[0] - topLx)}
-          side = min(k.iteritems(), key=operator.itemgetter(1))[0]
+            side = min(k.iteritems(), key=operator.itemgetter(1))[0]
 
         if corner == 2:
-          k = {2: abs(pos[0] - botRx),
+            k = {2: abs(pos[0] - botRx),
                1: abs(pos[1] - topLy)}
-          side = min(k.iteritems(), key=operator.itemgetter(1))[0]
+            side = min(k.iteritems(), key=operator.itemgetter(1))[0]
 
         if corner == 3:
-          k = {2: abs(pos[0] - botRx),
+            k = {2: abs(pos[0] - botRx),
                3: abs(pos[1] - botRy)}
-          side = min(k.iteritems(), key=operator.itemgetter(1))[0]
+            side = min(k.iteritems(), key=operator.itemgetter(1))[0]
 
         if corner == 4:
-          k = {4: abs(pos[0] - topLx),
+            k = {4: abs(pos[0] - topLx),
                3: abs(pos[1] - botRy)}
-          side = min(k.iteritems(), key=operator.itemgetter(1))[0]
-
+            side = min(k.iteritems(), key=operator.itemgetter(1))[0]
 
         r = self.rubberBand.geometry()
 
         if side == 1:
-          r.setTop(pos[1])
-          self.rubberBand.setGeometry(r)
-          #print r.getRect()
+            r.setTop(pos[1])
+            self.rubberBand.setGeometry(r)
+            #print r.getRect()
         if side == 2:
-          r.setRight(pos[0])
-          self.rubberBand.setGeometry(r)
+            r.setRight(pos[0])
+            self.rubberBand.setGeometry(r)
         if side == 3:
-          r.setBottom(pos[1])
-          self.rubberBand.setGeometry(r)
-          #print r.getRect()
+            r.setBottom(pos[1])
+            self.rubberBand.setGeometry(r)
+            #print r.getRect()
         if side == 4:
-          r.setLeft(pos[0])
-          self.rubberBand.setGeometry(r)
+            r.setLeft(pos[0])
+            self.rubberBand.setGeometry(r)
 
         #Get the coords of the original image
         small_box = r.getCoords()
@@ -149,13 +143,11 @@ class MainWidget(QtGui.QWidget):
         print "ij", "makeRectangle("+str(int(large_box[0])) + "," + str(int(large_box[1])) + "," + width + "," + height + ");"
 
 
-
-
-
-
-
-
     def mouseRelease(self, event):
+        '''
+        On first mouse release, prevent futher drawing of rubberbands
+        So that box can be resized
+        '''
         if self.drawing:
             self.drawing = False
 
