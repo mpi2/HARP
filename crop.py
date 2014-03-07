@@ -10,8 +10,6 @@ Crop.py open an image (probably a max intensity z-projection)
 User draws a cropping box. returns the coordinates
 '''
 
-
-
 class MyMainWindow(QtGui.QMainWindow):
 
     def __init__(self, callback, image, parent=None):
@@ -22,7 +20,8 @@ class MyMainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.widget)
         self.widget.show()
 
-
+        #Do not allow resizing for now as the rubber band does not move in proportion with the image
+        self.setFixedSize(QtCore.QSize(1050, 1050))
         self.action = QtGui.QAction(self.tr("&crop"), self)
         self.action.triggered.connect(self.cropMenuAction)
         self.menubar = self.menuBar()
@@ -91,7 +90,7 @@ class MainWidget(QtGui.QWidget):
         if button == 1:
             self.setCorner(event)
         if button == 2:
-            pass #self.drawing = True #maybe clear the box and start over
+            self.doTheCrop() #self.drawing = True #maybe clear the box and start over
 
 
     def setCorner(self, event):
@@ -186,10 +185,8 @@ class MainWidget(QtGui.QWidget):
 
 
 def run(callback, image):
-    app = QtGui.QApplication(sys.argv)
     window = MyMainWindow(callback, image)
     window.show()
-    sys.exit(app.exec_())
 
 if __name__ == "__main__":
     run() #create def for printing box
