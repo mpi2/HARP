@@ -6,7 +6,10 @@ from PyQt4.QtCore import pyqtSlot,SIGNAL,SLOT
 from MainWindow import *
 from Progress import *
 from ErrorMessage import *
+import zproject
+from crop import *
 import crop
+
 #from RunProcessing import *
 import sys
 import subprocess
@@ -32,17 +35,17 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self):
        '''  Constructor: Checks for buttons which have been pressed and responds accordingly. '''
 
+       # Standard setup of class from qt designer Ui class
+       super(MainWindow, self).__init__()
+       self.ui=Ui_MainWindow()
+       self.ui.setupUi(self)
+
        # Make unique ID if this is the first time mainwindow has been called
        self.unique_ID = uuid.uuid1()
        print "ID for session:"+str(self.unique_ID)
        self.ID_folder = os.path.join("/tmp","siah",str(self.unique_ID))
        # Make a unique folder in the tmp directory which will store tracking information
        os.makedirs(self.ID_folder)
-
-       # Standard setup of class from qt designer Ui class
-       super(MainWindow, self).__init__()
-       self.ui=Ui_MainWindow()
-       self.ui.setupUi(self)
 
        # Initialise modality variable
        self.modality = "Not_selected"
@@ -66,7 +69,7 @@ class MainWindow(QtGui.QMainWindow):
        self.ui.pushButtonAutopop.clicked.connect(self.autopop)
 
        # If Go button is pressed move onto track progress dialog box
-       self.ui.pushButtonGo.clicked.connect(self.process)
+       self.ui.pushButtonGo.clicked.connect(self.processGo)
 
        # Set cropping options
        # Auto crop (disable buttons)
@@ -81,13 +84,19 @@ class MainWindow(QtGui.QMainWindow):
        # to make the window visible
        self.show()
 
-    def getDimensions(self):
-        ''' disables boxes for cropping manually '''
-        crop.run(callback, image)
-
     def callback(box):
         print box
 
+    def getDimensions(self):
+        ''' Perform a z projection and then allows user to crop based on z projection'''
+        #zp = zproject.Zproject(img_dir)
+        #self.getDimensions = crop()
+        #app = QtGui.QApplication(sys.argv)
+
+        window = MyMainWindow(self.callback, "/home/tom/Desktop/HyperStack0000.bmp")
+        window.show()
+
+        #crop.run(self.callback, "/home/tom/Desktop/HyperStack0000.bmp")
 
 
     def manCropOff(self):
@@ -340,7 +349,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditOutput.setText(self.fileDialog.getExistingDirectory(self, "Select Directory"))
 
 
-    def process(self):
+    def processGo(self):
         '''
         This will set off all the processing scripts and shows the dialog box to keep track of progress
         '''
