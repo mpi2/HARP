@@ -23,7 +23,7 @@ class MyMainWindow(QtGui.QMainWindow):
         self.widget.show()
 
 
-        self.action = QtGui.QAction(self.tr("&crop;"), self)
+        self.action = QtGui.QAction(self.tr("&crop"), self)
         self.action.triggered.connect(self.cropMenuAction)
         self.menubar = self.menuBar()
         fileMenu = self.menubar.addMenu('&crop')
@@ -32,8 +32,6 @@ class MyMainWindow(QtGui.QMainWindow):
     def cropMenuAction(self):
         self.widget.doTheCrop()
 
-
-        #pp.installEventFilter(widget)
 
 
 class MainWidget(QtGui.QWidget):
@@ -47,7 +45,7 @@ class MainWidget(QtGui.QWidget):
         self.setLayout(layout)
 
 
-        self.image = QtGui.QPixmap(sys.argv[1])
+        self.image = QtGui.QPixmap(image)
         #Scale y to 1000 pixs. Use same scaling for x in case of differring dimensions
         self.orig_width = self.image.width()
         self.orig_height = self.image.height()
@@ -93,7 +91,7 @@ class MainWidget(QtGui.QWidget):
         if button == 1:
             self.setCorner(event)
         if button == 2:
-            pass #maybe clear the box and start over
+            pass #self.drawing = True #maybe clear the box and start over
 
 
     def setCorner(self, event):
@@ -149,7 +147,9 @@ class MainWidget(QtGui.QWidget):
             side = min(k.iteritems(), key=operator.itemgetter(1))[0]
 
         r = self.rubberBand.geometry()
+
         #Get the nearest side. Sides numbered 1-4 clockwise from top
+        print "corner:" , corner, " side:", side
         if side == 1:
             r.setTop(pos[1])
             self.rubberBand.setGeometry(r)
