@@ -10,16 +10,42 @@ Crop.py open an image (probably a max intensity z-projection)
 User draws a cropping box. returns the coordinates
 '''
 
+
+
+class MyMainWindow(QtGui.QMainWindow):
+
+    def __init__(self, callback, image, parent=None):
+
+        super(MyMainWindow, self).__init__(parent)
+        self.widget = MainWidget(self, callback, image)
+        self.widget.resize(1000, 1000)
+        self.setCentralWidget(self.widget)
+        self.widget.show()
+
+
+        self.action = QtGui.QAction(self.tr("&crop;"), self)
+        self.action.triggered.connect(self.cropMenuAction)
+        self.menubar = self.menuBar()
+        fileMenu = self.menubar.addMenu('&crop')
+        fileMenu.addAction(self.action)
+
+    def cropMenuAction(self):
+        self.widget.doTheCrop()
+
+
+        #pp.installEventFilter(widget)
+
+
 class MainWidget(QtGui.QWidget):
-    def __init__(self, parent=None):
-        #QtGui.QWidget.__init__(self, parent)
+    def __init__(self, parent, callback, image):
         super(MainWidget, self).__init__()
         self.scene = QtGui.QGraphicsScene()
-        #self.scene.setSceneRect(self.scecone.itemsBoundingRect())
+        self.callback = callback
         self.view = QtGui.QGraphicsView(self.scene)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.view)
         self.setLayout(layout)
+
 
         self.image = QtGui.QPixmap(sys.argv[1])
         #Scale y to 1000 pixs. Use same scaling for x in case of differring dimensions
@@ -39,11 +65,16 @@ class MainWidget(QtGui.QWidget):
         self.width = 40
         self.height = 40
         self.drawing = True
+        self.cropBox = None
         self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
         self.rubberBand.setGeometry(QtCore.QRect(10, 100, 20, 20))
         self.rubberBand.updatesEnabled()
         self.rubberBand.show()
 
+
+    def doTheCrop(self):
+        self.callback(self.cropBox)
+        ##print self.cropBox
 
     def mouseMove(self, event):
         '''
@@ -95,7 +126,7 @@ class MainWidget(QtGui.QWidget):
 
         corner = min(dists.iteritems(), key=operator.itemgetter(1))[0]
 
-        #get the nearest side. Sides numbered 1-4 clockwise from top
+        #get the corner. Corner numbered 1-4 clockwise from top-left
         side = 1
         if corner == 1:
             k = {1: abs(pos[1] - topLy),
@@ -118,7 +149,7 @@ class MainWidget(QtGui.QWidget):
             side = min(k.iteritems(), key=operator.itemgetter(1))[0]
 
         r = self.rubberBand.geometry()
-
+        #Get the nearest side. Sides numbered 1-4 clockwise from top
         if side == 1:
             r.setTop(pos[1])
             self.rubberBand.setGeometry(r)
@@ -137,10 +168,10 @@ class MainWidget(QtGui.QWidget):
         #Get the coords of the original image
         small_box = r.getCoords()
         large_box = [(1/self.y_scale)* x for x in small_box]
-        print small_box, large_box
+        #print small_box, large_box
         width = str(int(large_box[2] - large_box[0]))
         height = str(int(large_box[3] - large_box[1]))
-        print "ij", "makeRectangle("+str(int(large_box[0])) + "," + str(int(large_box[1])) + "," + width + "," + height + ");"
+        self.cropBox =  "makeRectangle("+str(int(large_box[0])) + "," + str(int(large_box[1])) + "," + width + "," + height + ");"
 
 
     def mouseRelease(self, event):
@@ -152,10 +183,13 @@ class MainWidget(QtGui.QWidget):
             self.drawing = False
 
 
-if __name__ == "__main__":
+
+
+def run(callback, image):
     app = QtGui.QApplication(sys.argv)
-    widget = MainWidget()
-    widget.resize(1000, 1000)
-    app.installEventFilter(widget)
-    widget.show()
+    window = MyMainWindow(callback, image)
+    window.show()
     sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    run() #create def for printing box
