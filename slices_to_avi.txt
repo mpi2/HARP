@@ -1,0 +1,18 @@
+//siah_scale
+//An ImageJ macro to create an avi from a stack of images
+//Run it like this:
+// imagej -b slices_to_avi.txt "/input.tif:/home/neil/out/video.avi"
+
+
+args = getArgument;
+if (args=="") exit ("No argument!");
+arg_array = split(args,":");
+
+input_volume = arg_array[0];
+output_image = arg_array[1];
+;
+//open the image
+open(input_volume);
+
+//Make the avi
+run("AVI... ", "compression=JPEG frame=12 save=" + output_image);
