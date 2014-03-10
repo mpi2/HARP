@@ -516,6 +516,10 @@ class MainWindow(QtGui.QMainWindow):
         self.configOb.scan_folder = self.scan_folder
         self.configOb.crop_option = str(crop)
         if crop =="Manual" :
+            self.configOb.xcrop = xcrop
+            self.configOb.ycrop = ycrop
+            self.configOb.wcrop = wcrop
+            self.configOb.hcrop = hcrop
             self.configOb.crop_manual = xcrop+" "+ycrop+" "+wcrop+" "+hcrop
         else :
             self.configOb.crop_manual = "Not_applicable"

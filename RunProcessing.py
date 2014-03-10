@@ -34,10 +34,21 @@ class RunProcessing:
         if not os.path.exists(cropped_path):
             os.makedirs(cropped_path)
 
-        session.write("Autocrop started\n")
-        subprocess.call(["python", dir+"/autocrop.py","-i",param.input_folder,"-o",
-                         cropped_path, "-t", "tif"])
-        session.write("Autocrop finished\n")
+        if param.crop_option == "Manual" :
+            session.write("manual crop started\n")
+            subprocess.call(["python", dir+"/autocrop.py","-i",param.input_folder,"-o",
+                         cropped_path, "-t", "tif","-d",param.xcrop, param.ycrop, param.wcrop, param.hcrop])
+            session.write("manual crop finished\n")
+
+        if param.crop_option == "Automatic" :
+            session.write("Autocrop started\n")
+            subprocess.call(["python", dir+"/autocrop.py","-i",param.input_folder,"-o",
+                         cropped_path, "-t", "tif",])
+            session.write("Autocrop finished\n")
+
+        if param.crop_option == "None" :
+            session.write("No crop carried outAutocrop started\n")
+
 
         if param.SF2 == "yes" :
             session.write("Scaling SF2 started\n")
