@@ -4,6 +4,7 @@ try:
     import Image
 except ImportError:
     from PIL import Image
+import crop
 
 import sys
 import os
@@ -44,7 +45,8 @@ class Zproject:
         max_arrays = np.array(p.map(proc, chunks))
         maxi = np.amax(max_arrays, axis=0) #finds maximum along first axis
         img = Image.fromarray(np.uint8(maxi)) #should be of shape (4000, 4000)
-        img.save("max_intensity.tif")
+        #img.save("max_intensity.tif")
+        return img # Let the gui control where the image will be saved
 
 
 class Process:

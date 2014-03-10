@@ -10,11 +10,11 @@ Crop.py open an image (probably a max intensity z-projection)
 User draws a cropping box. returns the coordinates
 '''
 
-class MyMainWindow(QtGui.QMainWindow):
+class Crop(QtGui.QMainWindow):
 
     def __init__(self, callback, image, parent=None):
 
-        super(MyMainWindow, self).__init__(parent)
+        super(Crop, self).__init__(parent)
         self.setWindowTitle("Manual cropping")
         self.widget = MainWidget(self, callback, image)
         self.widget.resize(950, 950)
@@ -100,7 +100,8 @@ class MainWidget(QtGui.QWidget):
 
         width = str(int(large_box[2] - large_box[0]) )
         height = str(int(large_box[3] - large_box[1]))
-        cropBox =  "makeRectangle("+str(int(large_box[0] -100)) + "," + str(int(large_box[1] -70)) + "," + width + "," + height + ");"
+        #cropBox =  "makeRectangle("+str(int(large_box[0] -100)) + "," + str(int(large_box[1] -70)) + "," + width + "," + height + ");"
+        cropBox = (int(large_box[0] -100), int(large_box[1] -70), width, height )
         self.callback(cropBox)
 
 
@@ -111,9 +112,9 @@ class MainWidget(QtGui.QWidget):
         #print "frame ", self.parent.geometry().width()
         #print "widget ", self.geometry().width()
         pos = (event.pos().x(), event.pos().y())
-        print pos
+        #print pos
         if self.drawing:
-            print self.x, ":", self.y
+            #print self.x, ":", self.y
             self.height = event.pos().y() - self.y
             self.width = event.pos().x() - self.x
             self.pixmap_item.rubberBand.setGeometry(self.x, self.y, self.width, self.height)
@@ -122,7 +123,6 @@ class MainWidget(QtGui.QWidget):
 
 
     def mousePress(self, event):
-        print ""
         button = event.button()
         if button == 1:
             #self.pixmap_item.rubberBand.setGeometry(1, 1, 200, 200)
@@ -219,12 +219,12 @@ class MainWidget(QtGui.QWidget):
 
 def run_from_cli(callback, image):
     app = QtGui.QApplication(sys.argv)
-    window = MyMainWindow(callback, image)
+    window = Crop(callback, image)
     window.show()
     sys.exit(app.exec_())
 
 def run(callback, image):
-    window = MyMainWindow(callback, image)
+    window = Crop(callback, image)
     window.show()
 
 

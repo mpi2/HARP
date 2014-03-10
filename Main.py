@@ -6,7 +6,7 @@ from MainWindow import Ui_MainWindow
 from Progress import Ui_Progress
 from ErrorMessage import Ui_DialogErrMessage
 import zproject
-from crop import MyMainWindow
+import crop
 
 #from RunProcessing import *
 import sys
@@ -19,6 +19,10 @@ import pprint
 import time
 import shutil
 import uuid
+try:
+    import Image
+except ImportError:
+    from PIL import Image
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -79,11 +83,26 @@ class MainWindow(QtGui.QMainWindow):
        # If the get dimensions button is pressed the
        self.ui.pushButtonGetDimensions.clicked.connect(self.getDimensions)
 
+       #Get the output folder name when input updated
+       self.ui.lineEditOutput.textChanged.connect(self.outputFolderChanged)
+       self.ui.lineEditInput.textChanged.connect(self.inputFolderChanged)
+
        # to make the window visible
        self.show()
 
-    def callback(self, box):
+
+    def inputFolderChanged(self, text):
+        self.inputFolder = text
+
+    def outputFolderChanged(self, text):
+        self.outputFolder = text
+
+    def cropCallback(self, box):
         print "callback test:", box
+        self.ui.lineEditX.setText(str(box[0]))
+        self.ui.lineEditY.setText(str(box[1]))
+        self.ui.lineEditW.setText(str(box[2]))
+        self.ui.lineEditH.setText(str(box[3]))
 
     def getDimensions(self):
         ''' Perform a z projection and then allows user to crop based on z projection'''
@@ -91,10 +110,34 @@ class MainWindow(QtGui.QMainWindow):
         #zp = zproject.Zproject(img_dir)
 
         # Opens MyMainWindow from crop.py
-        window = MyMainWindow(self.callback, "/home/tom/Desktop/HyperStack0000.bmp",self)
+        input_folder = str(self.ui.lineEditInput.text())
+        zp = zproject.Zproject(input_folder)
+        zp_img = zp.run()
+        print zp_img
+        #save the z-projection
 
-        # Opens MyMainWindow from crop.py
-        window.show()
+        crop_success = False
+        try:
+            os.mkdir(os.path.join(str(self.outputFolder), "z_projection"))
+        except IOError as e:
+            print("cannot make directory for saving the z-projection: {0}".format(e))
+
+        try:
+            zp_img.save(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
+            crop_success = True
+
+        except IOError as e:
+            print("cannot save the z-projection: {0}".format(e))
+
+        # Now run crop if all went well
+        if crop_success:
+            self.runCrop(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
+        else:
+            pass# Raise a warning too the user?
+
+    def runCrop(self, img_path):
+        cropper = crop.Crop(self.cropCallback, img_path, self)
+        cropper.show()
 
 
 
