@@ -65,7 +65,7 @@ class Cropper:
         im.save(crop_out)
 
 
-def do_the_crop(images, crop_vals, out_dir):
+def do_the_crop(images, crop_vals, out_dir,  padding=0):
     '''
     @param: images list of image files
     @param: crop_vals tuple of the crop box coords
@@ -73,8 +73,6 @@ def do_the_crop(images, crop_vals, out_dir):
 
     '''
     print("doing the crop")
-    global imdims
-    padding = int(np.mean(imdims)*0.01)
     #Get the crop values. Add a padding of 10 pixels
     lcrop = crop_vals[0] - padding
     if lcrop < 0: lcrop = 0
@@ -188,7 +186,9 @@ def run(args):
         bcrop = get_cropping_box(slices, "y", threshold, True)
         crop = (lcrop, tcrop, rcrop, bcrop)
 
-        do_the_crop(files, crop, args.out_dir)
+        global imdims
+        padding = int(np.mean(imdims)*0.01)
+        do_the_crop(files, crop, args.out_dir, padding)
         sys.exit()
 
 
