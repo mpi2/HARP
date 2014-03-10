@@ -1,14 +1,12 @@
 #!/usr/bin/python
 # Import PyQT module
 from PyQt4 import QtGui
-from PyQt4.QtCore import pyqtSlot,SIGNAL,SLOT
 # Import MainWindow class from QT Designer
-from MainWindow import *
-from Progress import *
-from ErrorMessage import *
+from MainWindow import Ui_MainWindow
+from Progress import Ui_Progress
+from ErrorMessage import Ui_DialogErrMessage
 import zproject
-from crop import *
-import crop
+from crop import MyMainWindow
 
 #from RunProcessing import *
 import sys
@@ -84,19 +82,20 @@ class MainWindow(QtGui.QMainWindow):
        # to make the window visible
        self.show()
 
-    def callback(box):
-        print box
+    def callback(self, box):
+        print "callback test:", box
 
     def getDimensions(self):
         ''' Perform a z projection and then allows user to crop based on z projection'''
+        #
         #zp = zproject.Zproject(img_dir)
-        #self.getDimensions = crop()
-        #app = QtGui.QApplication(sys.argv)
 
-        window = MyMainWindow(self.callback, "/home/tom/Desktop/HyperStack0000.bmp")
+        # Opens MyMainWindow from crop.py
+        window = MyMainWindow(self.callback, "/home/tom/Desktop/HyperStack0000.bmp",self)
+
+        # Opens MyMainWindow from crop.py
         window.show()
 
-        #crop.run(self.callback, "/home/tom/Desktop/HyperStack0000.bmp")
 
 
     def manCropOff(self):
