@@ -422,6 +422,10 @@ class MainWindow(QtGui.QMainWindow):
         self.config_path = os.path.join(outputFolder,"configObject.txt")
         self.log_path = os.path.join(outputFolder,"config4user.log")
 
+        # Get Scan folder location (needs to be updated so that this can be assigned manually)
+        self.scan_folder  = inputFolder.replace("recons", "scan")
+
+
         # Create config file and log file
         config = open(self.config_path, 'w')
         log = open(self.log_path, 'w')
@@ -466,6 +470,7 @@ class MainWindow(QtGui.QMainWindow):
         self.configOb.full_name = self.full_name
         self.configOb.input_folder = inputFolder
         self.configOb.output_folder = outputFolder
+        self.configOb.scan_folder = self.scan_folder
         self.configOb.crop_option = str(crop)
         if crop =="Manual" :
             self.configOb.crop_manual = xcrop+" "+ycrop+" "+wcrop+" "+hcrop
@@ -484,6 +489,7 @@ class MainWindow(QtGui.QMainWindow):
         log.write("full_name    "+self.configOb.full_name+"\n");
         log.write("Input_folder    "+self.configOb.input_folder+"\n");
         log.write("Output_folder    "+self.configOb.output_folder+"\n");
+        log.write("Scan_folder    "+self.configOb.scan_folder+"\n");
         log.write("Crop_option    "+self.configOb.crop_option+"\n");
         log.write("Crop_manual    "+self.configOb.crop_manual+"\n");
         log.write("Downsize_by_factor_2?    "+self.configOb.SF2+"\n");
