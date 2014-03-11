@@ -15,4 +15,4 @@ output_image = arg_array[1];
 open(input_volume);
 
 //Make the avi
-run("AVI... ", "compression=JPEG frame=12 save=" + output_image);
+run("AVI... ", "compression=JPEG frame=8 save=" + output_image);
