@@ -67,9 +67,6 @@ class MainWindow(QtGui.QMainWindow):
        # uCT selection
        self.ui.radioButtonuCT.clicked.connect(self.getuCTonly)
 
-       # auto-populate based on input folder and modality selection
-       self.ui.pushButtonAutopop.clicked.connect(self.autopop)
-
        # If Go button is pressed move onto track progress dialog box
        self.ui.pushButtonGo.clicked.connect(self.processGo)
 
@@ -361,8 +358,12 @@ class MainWindow(QtGui.QMainWindow):
             print "Unexpected error in getting new folder output name:", sys.exc_info()[0]
             self.errorDialog = ErrorMessage(self.error)
 
-    def autopop(self):
-        ''' Runs methods for autopopulation button '''
+
+    def selectFileIn(self):
+        ''' Get the info for the selected file'''
+        self.fileDialog = QtGui.QFileDialog(self)
+        self.ui.lineEditInput.setText(self.fileDialog.getExistingDirectory(self, "Select Directory"))
+
         input = str(self.ui.lineEditInput.text())
 
         self.getName()
@@ -379,11 +380,6 @@ class MainWindow(QtGui.QMainWindow):
         if self.error == "None" :
             self.folderSizeApprox()
 
-
-    def selectFileIn(self):
-        ''' Get the info for the selected file'''
-        self.fileDialog = QtGui.QFileDialog(self)
-        self.ui.lineEditInput.setText(self.fileDialog.getExistingDirectory(self, "Select Directory"))
 
     def selectFileOut(self):
         ''' Select output folder (this should be blocked as standard'''

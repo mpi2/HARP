@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1203</width>
+    <width>1274</width>
     <height>986</height>
    </rect>
   </property>
@@ -24,7 +24,7 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>1181</width>
+      <width>1251</width>
       <height>921</height>
      </rect>
     </property>
@@ -39,7 +39,7 @@
       <rect>
        <x>20</x>
        <y>20</y>
-       <width>601</width>
+       <width>711</width>
        <height>66</height>
       </rect>
      </property>
@@ -678,9 +678,9 @@ QGroupBox::title
     <widget class="QGroupBox" name="groupBoxModality">
      <property name="geometry">
       <rect>
-       <x>640</x>
+       <x>740</x>
        <y>20</y>
-       <width>241</width>
+       <width>501</width>
        <height>61</height>
       </rect>
      </property>
@@ -753,30 +753,12 @@ QGroupBox::title
       </property>
      </widget>
     </widget>
-    <widget class="QPushButton" name="pushButtonAutopop">
-     <property name="geometry">
-      <rect>
-       <x>890</x>
-       <y>21</y>
-       <width>251</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Autopopulate</string>
-     </property>
-    </widget>
     <widget class="QGroupBox" name="groupBoxID">
      <property name="geometry">
       <rect>
        <x>20</x>
        <y>200</y>
-       <width>601</width>
+       <width>711</width>
        <height>131</height>
       </rect>
      </property>
@@ -816,7 +798,7 @@ QGroupBox::title
        <rect>
         <x>10</x>
         <y>32</y>
-        <width>581</width>
+        <width>691</width>
         <height>31</height>
        </rect>
       </property>
@@ -951,7 +933,7 @@ QGroupBox::title
        <rect>
         <x>10</x>
         <y>67</y>
-        <width>581</width>
+        <width>691</width>
         <height>31</height>
        </rect>
       </property>
@@ -986,7 +968,7 @@ QGroupBox::title
     <widget class="QGroupBox" name="groupBoxOptions">
      <property name="geometry">
       <rect>
-       <x>640</x>
+       <x>740</x>
        <y>110</y>
        <width>501</width>
        <height>221</height>
@@ -1407,6 +1389,28 @@ QGroupBox::title
        <string>No crop</string>
       </property>
      </widget>
+     <zorder>label_5</zorder>
+     <zorder>label_13</zorder>
+     <zorder>checkBoxMovie_2</zorder>
+     <zorder>label_14</zorder>
+     <zorder>lineEditX</zorder>
+     <zorder>lineEditY</zorder>
+     <zorder>lineEditW</zorder>
+     <zorder>lineEditH</zorder>
+     <zorder>checkBoxSF2</zorder>
+     <zorder>checkBoxSF3</zorder>
+     <zorder>checkBoxSF4</zorder>
+     <zorder>label</zorder>
+     <zorder>checkBox</zorder>
+     <zorder>checkBox_2</zorder>
+     <zorder>label_2</zorder>
+     <zorder>checkBoxRF</zorder>
+     <zorder>pushButtonGetDimensions</zorder>
+     <zorder>radioButtonAuto</zorder>
+     <zorder>radioButtonMan</zorder>
+     <zorder>radioButtonNo</zorder>
+     <zorder>radioButtonuCT</zorder>
+     <zorder>radioButtonOPT</zorder>
     </widget>
     <widget class="QGroupBox" name="groupBoxuCTOnly">
      <property name="geometry">
@@ -1553,7 +1557,7 @@ QGroupBox::title
       <rect>
        <x>20</x>
        <y>109</y>
-       <width>601</width>
+       <width>711</width>
        <height>81</height>
       </rect>
      </property>
@@ -1602,7 +1606,7 @@ QGroupBox::title
        <rect>
         <x>10</x>
         <y>33</y>
-        <width>581</width>
+        <width>691</width>
         <height>31</height>
        </rect>
       </property>
@@ -1688,7 +1692,7 @@ QGroupBox::title
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1203</width>
+     <width>1274</width>
      <height>29</height>
     </rect>
    </property>
