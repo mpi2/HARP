@@ -13,9 +13,9 @@ from multiprocessing import Pool, cpu_count
 
 class Zproject:
 
-    def __init__(self, img_dir):
+    def __init__(self, img_dir, out_dir):
         self.img_dir = img_dir
-
+        self.out_dir = out_dir
 
     def run(self):
 
@@ -64,8 +64,15 @@ class Process:
 
 
 if __name__ == "__main__":
-    z = Zproject(sys.argv[1])
-    z.run()
+    z = Zproject(sys.argv[1],sys.argv[2])
+    zp_img = z.run()
+    try:
+        zp_img.save(os.path.join(str(z.out_dir), "z_projection", "max_intensity_z.tif"))
+        crop_success = True
+
+    except IOError as e:
+        print("cannot save the z-projection: {0}".format(e))
+
 
 
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Tue Mar 11 10:49:16 2014
+# Created: Tue Mar 11 16:51:53 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -729,6 +729,10 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         self.radioButtonNo.setFont(font)
         self.radioButtonNo.setObjectName(_fromUtf8("radioButtonNo"))
+        self.label_zwait = QtGui.QLabel(self.groupBoxOptions)
+        self.label_zwait.setGeometry(QtCore.QRect(337, 120, 151, 21))
+        self.label_zwait.setText(_fromUtf8(""))
+        self.label_zwait.setObjectName(_fromUtf8("label_zwait"))
         self.groupBoxuCTOnly = QtGui.QGroupBox(self.frame)
         self.groupBoxuCTOnly.setGeometry(QtCore.QRect(20, 350, 301, 221))
         font = QtGui.QFont()
@@ -807,20 +811,20 @@ class Ui_MainWindow(object):
         self.comboBoxCh.setObjectName(_fromUtf8("comboBoxCh"))
         self.comboBoxCh.addItem(_fromUtf8(""))
         self.formLayoutuCTOnly.setWidget(4, QtGui.QFormLayout.LabelRole, self.comboBoxCh)
-        self.pushButton = QtGui.QPushButton(self.formLayoutWidget_9)
+        self.pushButtonScan = QtGui.QPushButton(self.formLayoutWidget_9)
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Sans Serif"))
         font.setPointSize(12)
-        self.pushButton.setFont(font)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.formLayoutuCTOnly.setWidget(3, QtGui.QFormLayout.LabelRole, self.pushButton)
-        self.lineEdit = QtGui.QLineEdit(self.formLayoutWidget_9)
+        self.pushButtonScan.setFont(font)
+        self.pushButtonScan.setObjectName(_fromUtf8("pushButtonScan"))
+        self.formLayoutuCTOnly.setWidget(3, QtGui.QFormLayout.LabelRole, self.pushButtonScan)
+        self.lineEditScan = QtGui.QLineEdit(self.formLayoutWidget_9)
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Abyssinica SIL"))
         font.setPointSize(12)
-        self.lineEdit.setFont(font)
-        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
-        self.formLayoutuCTOnly.setWidget(3, QtGui.QFormLayout.FieldRole, self.lineEdit)
+        self.lineEditScan.setFont(font)
+        self.lineEditScan.setObjectName(_fromUtf8("lineEditScan"))
+        self.formLayoutuCTOnly.setWidget(3, QtGui.QFormLayout.FieldRole, self.lineEditScan)
         self.groupBoxReconInfo = QtGui.QGroupBox(self.frame)
         self.groupBoxReconInfo.setGeometry(QtCore.QRect(20, 109, 711, 81))
         font = QtGui.QFont()
@@ -967,7 +971,7 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Compress files", None))
         self.checkBox.setText(_translate("MainWindow", "Scans", None))
         self.checkBox_2.setText(_translate("MainWindow", "Original recons", None))
-        self.label_2.setText(_translate("MainWindow", "Replace folders", None))
+        self.label_2.setText(_translate("MainWindow", "Replace files", None))
         self.checkBoxRF.setText(_translate("MainWindow", "Yes", None))
         self.pushButtonGetDimensions.setText(_translate("MainWindow", "Get dimensions", None))
         self.radioButtonAuto.setText(_translate("MainWindow", "Automatic", None))
@@ -978,7 +982,7 @@ class Ui_MainWindow(object):
         self.pushButtonCTSPR.setText(_translate("MainWindow", "Pick SPR", None))
         self.pushButtonCTARC.setText(_translate("MainWindow", "Pick ARC", None))
         self.comboBoxCh.setItemText(0, _translate("MainWindow", "Ch-X", None))
-        self.pushButton.setText(_translate("MainWindow", "Scan folder", None))
+        self.pushButtonScan.setText(_translate("MainWindow", "Scan folder", None))
         self.groupBoxReconInfo.setTitle(_translate("MainWindow", "Recon File Info", None))
         self.labelFile.setText(_translate("MainWindow", "Folder size (Mb)", None))
         self.labelPixel.setText(_translate("MainWindow", "Pixel size (µm)", None))

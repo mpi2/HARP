@@ -19,6 +19,7 @@ import pprint
 import time
 import shutil
 import uuid
+from multiprocessing import Process
 try:
     import Image
 except ImportError:
@@ -103,10 +104,19 @@ class MainWindow(QtGui.QMainWindow):
             self.getReconLog()
 
         if self.error == "None" :
+            # Get Scan folder location (needs to be updated so that this can be assigned manually)
+            self.scan_folder  = input.replace("recons", "scan")
+            self.ui.lineEditScan.setText(input.replace("recons", "scan"))
+
+        if self.error == "None" :
             self.autouCTOnly()
 
         if self.error == "None" :
             self.folderSizeApprox()
+
+        self.error = "None"
+
+
 
 
     def selectFileOut(self):
@@ -131,18 +141,14 @@ class MainWindow(QtGui.QMainWindow):
     def getDimensions(self):
         ''' Perform a z projection and then allows user to crop based on z projection'''
         #
-        #zp = zproject.Zproject(img_dir)
 
         self.folderCheck("dimension")
+        dir = os.path.dirname(os.path.abspath(__file__))
 
         # Opens MyMainWindow from crop.py
         input_folder = str(self.ui.lineEditInput.text())
-        zp = zproject.Zproject(input_folder)
-        zp_img = zp.run()
-        print zp_img
-        #save the z-projection
-
-        crop_success = False
+        output_folder = str(self.ui.lineEditOutput.text())
+        print input_folder
         zproj_path = os.path.join(str(self.outputFolder), "z_projection")
 
         if self.ui.checkBoxRF.isChecked():
@@ -162,20 +168,18 @@ class MainWindow(QtGui.QMainWindow):
                 print("cannot make directory for saving the z-projection: {0}".format(e))
                 self.errorDialog = ErrorMessage("cannot make directory for saving the z-projection: {0}".format(e))
 
-        print self.stop
         if self.stop == None :
-            try:
-                zp_img.save(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
-                crop_success = True
 
-            except IOError as e:
-                print("cannot save the z-projection: {0}".format(e))
+            p = subprocess.Popen(["python", dir+"/zproject.py",input_folder,output_folder])
+            print "Waiting"
+            self.ui.label_zwait.setText("Waiting")
+            waiting_for_z = QtGui.QMessageBox.information(self,  'Message',  'Please wait while maximum intensity of slices is being calculated')
 
-        # Now run crop if all went well
-        if crop_success:
+            p.communicate()
+            self.ui.label_zwait.setText("z project done")
             self.runCrop(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
-        else:
-            pass# Raise a warning too the user?
+            self.ui.label_zwait.setText("Dimensions selected")
+
 
     def runCrop(self, img_path):
         cropper = crop.Crop(self.cropCallback, img_path, self)
@@ -507,10 +511,6 @@ class MainWindow(QtGui.QMainWindow):
         # OS path used for compatibility issues between Linux and windows directory spacing
         self.config_path = os.path.join(outputFolder,"configObject.txt")
         self.log_path = os.path.join(outputFolder,"config4user.log")
-
-        # Get Scan folder location (needs to be updated so that this can be assigned manually)
-        self.scan_folder  = inputFolder.replace("recons", "scan")
-
 
         # Create config file and log file
         config = open(self.config_path, 'w')
