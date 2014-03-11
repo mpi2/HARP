@@ -98,11 +98,18 @@ class MainWidget(QtGui.QWidget):
         small_box = self.pixmap_item.rubberBand.geometry().getCoords()
         large_box = [(1/self.y_scale)* x for x in small_box]
 
-        width = str(int(large_box[2] - large_box[0]) )
-        height = str(int(large_box[3] - large_box[1]))
-        #cropBox =  "makeRectangle("+str(int(large_box[0] -100)) + "," + str(int(large_box[1] -70)) + "," + width + "," + height + ");"
-        cropBox = (int(large_box[0] -100), int(large_box[1] -70), width, height )
+        x1 = int(large_box[0] -100)
+        y1 = int(large_box[1] -70)
+        width = int(large_box[2] - large_box[0])
+        height = int(large_box[3] - large_box[1])
+        x2 = self.orig_width - int(large_box[2])
+        y2 = self.orig_height - int(large_box[3])
+
+        ijCropBox = (x1, y1, width, height )
+        print "ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox))
+        cropBox = (x1, y1, x2, y2)
         self.callback(cropBox)
+        self.parent.close()
 
 
     def mouseMove(self, event):

@@ -20,8 +20,6 @@ import math
 from collections import Counter
 
 
-#Once this is working, implement in C++/Qt http://qt-project.org/doc/qt-4.8/qimage.html
-
 imdims = None
 
 class Processor:
@@ -42,10 +40,6 @@ class Processor:
         im = Image.open(filename)
         matrix = np.array(im)
         crops = {}
-        #crops["x"] = np.mean(matrix, axis=0) * np.std(matrix, axis=0)
-        #crops["y"] = np.mean(matrix, axis=1) * np.mean(matrix, axis=1)
-
-        #for shannon
         crops["x"] = np.std(matrix, axis=0)
         crops["y"] = np.std(matrix, axis=1)
 
@@ -68,18 +62,25 @@ class Cropper:
 def do_the_crop(images, crop_vals, out_dir,  padding=0):
     '''
     @param: images list of image files
-    @param: crop_vals tuple of the crop box coords
+    @param: crop_vals tuple of the crop box coords (distance from their respective sides)
     @param: out_dir str dir to output cropped images
 
     '''
     print("doing the crop")
-    #Get the crop values. Add a padding of 10 pixels
+    global imdims
+    print imdims
+
     lcrop = crop_vals[0] - padding
     if lcrop < 0: lcrop = 0
+
     tcrop = crop_vals[1] - padding
     if tcrop < 0: tcrop = 0
+
+    #Get distance from left side
     rcrop = imdims[0] - crop_vals[2] + padding
     if rcrop > imdims[0] -1: rcrop = imdims[0] -1
+
+    #get distance from top
     bcrop = imdims[1] - crop_vals[3] + padding
     if bcrop > imdims[1] -1: bcrop = imdims[1] -1
 
@@ -87,15 +88,10 @@ def do_the_crop(images, crop_vals, out_dir,  padding=0):
         lcrop, tcrop, rcrop, bcrop))
     print("ImageJ friendly box: makeRectangle({0},{1},{2},{3})".format(
         lcrop, tcrop, rcrop -lcrop, bcrop - tcrop))
-    #sys.exit()
-    #Crop and save
 
     cropper = Cropper((lcrop, tcrop, rcrop, bcrop), out_dir)
     pool = Pool()
     pool.map(cropper, images)
-    #end = time.time()
-    #curr_time = end - start
-    #print("All done. Time to here: {0}".format(curr_time) )
     return
 
 
@@ -104,19 +100,10 @@ def get_cropping_box(slices, side, threshold, rev = False):
     #Vals = array of arrays with each sub-array containing the
     # the metric calculated in Process for each row/column
     #vals = [x[side] for x in slices]
-
-
     vals = [lowvals(x[side]) for x in slices]
 
     #filterout low values
     means = map(np.std, zip(*vals))
-    #means = map(entropy, zip(*vals))
-#
-#     plt.plot(means)
-#     plt.xlabel("Pixels")
-#     plt.ylabel("Metric")
-#     plt.show()
-    #sys.exit()
 
     if rev == True:
         return next((i for i, v in enumerate(reversed(means)) if v > threshold ), -1)
@@ -126,6 +113,9 @@ def get_cropping_box(slices, side, threshold, rev = False):
 
 
 def entropy(array):
+    '''
+    not currently used
+    '''
     p, lns = Counter(round_down(array, 4)), float(len(array))
     return -sum( count/lns * math.log(count/lns, 2) for count in p.values())
 
@@ -166,6 +156,7 @@ def run(args):
 
     if args.def_crop:
         do_the_crop(files, args.def_crop, args.out_dir)
+        sys.exit()
     else: #Do the autocrop
         print("No region specified. Trying autocrop")
         threshold = 0.01
@@ -180,13 +171,13 @@ def run(args):
         #print slices
         #sys.exit()
 
+        #Distances of cropping boxes from their respective sides
         lcrop = get_cropping_box(slices, "x", threshold)
         tcrop = get_cropping_box(slices, "y", threshold)
         rcrop = get_cropping_box(slices, "x", threshold, True)
         bcrop = get_cropping_box(slices, "y", threshold, True)
         crop = (lcrop, tcrop, rcrop, bcrop)
 
-        global imdims
         padding = int(np.mean(imdims)*0.01)
         do_the_crop(files, crop, args.out_dir, padding)
         sys.exit()
