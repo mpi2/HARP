@@ -14,10 +14,12 @@ file_ = sys.argv[1]
 reader =  vtkTIFFReader()
 #reader.SetFileName(file_)
 reader.ReadVolume(file_)
+reader.Update()
 
-
-
-
+cast = vtkImageCast()
+cast.SetInputConnection(reader.GetOutputPort() )
+cast.SetOutputScalarTypeToUnsignedChar()
+cast.ClampOverflowOn()
 
 # Color
 colorTransferFunction = vtkColorTransferFunction()
@@ -38,7 +40,7 @@ isoFunction.SetIsoValue(160.0)
 
 volumeMapper = vtkVolumeRayCastMapper()
 volumeMapper.SetVolumeRayCastFunction( isoFunction )
-volumeMapper.SetInputConnection(reader.GetOutputPort())
+volumeMapper.SetInputConnection(cast.GetOutputPort())
 
 volume = vtkVolume()
 volume.SetMapper(volumeMapper)
@@ -47,7 +49,7 @@ volume.SetProperty(volumeProperty)
 
 # Bounding box.
 outlineData = vtkOutlineFilter()
-outlineData.SetInputConnection(reader.GetOutputPort())
+outlineData.SetInputConnection(cast.GetOutputPort())
 outlineMapper = vtkPolyDataMapper()
 outlineMapper.SetInputConnection(outlineData.GetOutputPort())
 outline = vtkActor()
