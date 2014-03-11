@@ -87,6 +87,33 @@ class MainWindow(QtGui.QMainWindow):
        # to make the window visible
        self.show()
 
+    def selectFileIn(self):
+        ''' Get the info for the selected file'''
+        self.fileDialog = QtGui.QFileDialog(self)
+        self.ui.lineEditInput.setText(self.fileDialog.getExistingDirectory(self, "Select Directory"))
+
+        input = str(self.ui.lineEditInput.text())
+
+        self.getName()
+
+        if self.error == "None" :
+            self.autoFileOut()
+
+        if self.error == "None" :
+            self.getReconLog()
+
+        if self.error == "None" :
+            self.autouCTOnly()
+
+        if self.error == "None" :
+            self.folderSizeApprox()
+
+
+    def selectFileOut(self):
+        ''' Select output folder (this should be blocked as standard'''
+        self.fileDialog = QtGui.QFileDialog(self)
+        self.ui.lineEditOutput.setText(self.fileDialog.getExistingDirectory(self, "Select Directory"))
+
 
     def inputFolderChanged(self, text):
         self.inputFolder = text
@@ -106,6 +133,8 @@ class MainWindow(QtGui.QMainWindow):
         #
         #zp = zproject.Zproject(img_dir)
 
+        self.folderCheck("dimension")
+
         # Opens MyMainWindow from crop.py
         input_folder = str(self.ui.lineEditInput.text())
         zp = zproject.Zproject(input_folder)
@@ -114,17 +143,33 @@ class MainWindow(QtGui.QMainWindow):
         #save the z-projection
 
         crop_success = False
-        try:
-            os.mkdir(os.path.join(str(self.outputFolder), "z_projection"))
-        except IOError as e:
-            print("cannot make directory for saving the z-projection: {0}".format(e))
+        zproj_path = os.path.join(str(self.outputFolder), "z_projection")
 
-        try:
-            zp_img.save(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
-            crop_success = True
+        if self.ui.checkBoxRF.isChecked():
+            print "CheckBox has been checked so files will be replaced\n"
+            self.stop = None
+        elif os.path.exists(zproj_path):
+            print "Output folder for z project already exists and user has not approved overwrite"
+            # Running dialog box to inform user of options
+            self.errorDialog = ErrorMessage("Output folder already exists\n Tick the 'Replace folder button' in the options sections if files are to be replaced")
+            self.stop = True
+        else :
+            try:
+                print "Creating output folder"
+                os.makedirs(zproj_path)
+                self.stop = None
+            except IOError as e:
+                print("cannot make directory for saving the z-projection: {0}".format(e))
+                self.errorDialog = ErrorMessage("cannot make directory for saving the z-projection: {0}".format(e))
 
-        except IOError as e:
-            print("cannot save the z-projection: {0}".format(e))
+        print self.stop
+        if self.stop == None :
+            try:
+                zp_img.save(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
+                crop_success = True
+
+            except IOError as e:
+                print("cannot save the z-projection: {0}".format(e))
 
         # Now run crop if all went well
         if crop_success:
@@ -359,32 +404,6 @@ class MainWindow(QtGui.QMainWindow):
             self.errorDialog = ErrorMessage(self.error)
 
 
-    def selectFileIn(self):
-        ''' Get the info for the selected file'''
-        self.fileDialog = QtGui.QFileDialog(self)
-        self.ui.lineEditInput.setText(self.fileDialog.getExistingDirectory(self, "Select Directory"))
-
-        input = str(self.ui.lineEditInput.text())
-
-        self.getName()
-
-        if self.error == "None" :
-            self.getReconLog()
-
-        if self.error == "None" :
-            self.autouCTOnly()
-
-        if self.error == "None" :
-            self.autoFileOut()
-
-        if self.error == "None" :
-            self.folderSizeApprox()
-
-
-    def selectFileOut(self):
-        ''' Select output folder (this should be blocked as standard'''
-        self.fileDialog = QtGui.QFileDialog(self)
-        self.ui.lineEditOutput.setText(self.fileDialog.getExistingDirectory(self, "Select Directory"))
 
 
     def processGo(self):
@@ -413,6 +432,33 @@ class MainWindow(QtGui.QMainWindow):
 
             # Run the programs. A script needs to be written to run on linux to run the back end processing
 
+    def folderCheck(self,option):
+        '''
+        To check if folders already exist
+        '''
+        # Get input and output folders (As the text is always from the text box it will hopefully keep track of
+        #any changes the user might have made
+        inputFolder = str(self.ui.lineEditInput.text())
+        outputFolder = str(self.ui.lineEditOutput.text())
+
+        # Input folder contains image files
+
+        if self.ui.checkBoxRF.isChecked():
+            print "CheckBox has been checked so files will be replaced\n"
+            # Too dangerous to delete everything in a folder
+            # shutil.rmtree(outputFolder)
+            # os.makedirs(outputFolder)
+            self.stop = None
+        # Check if output folder already exists. Ask if it is ok to overwrite
+        elif os.path.exists(outputFolder):
+            print "Output folder already exists and user has not approved overwrite"
+            # Running dialog box to inform user of options
+            self.errorDialog = ErrorMessage("Output folder already exists\n Tick the 'Replace folder button' in the options sections if files are to be replaced")
+            self.stop = True
+        else :
+            print "Creating output folder"
+            os.makedirs(outputFolder)
+            self.stop = None
 
 
     def errorCheck(self):
@@ -427,9 +473,10 @@ class MainWindow(QtGui.QMainWindow):
         # Input folder contains image files
 
         if self.ui.checkBoxRF.isChecked():
-            print "CheckBox has been checked so file will be replaced\nCreating Output folder"
-            shutil.rmtree(outputFolder)
-            os.makedirs(outputFolder)
+            print "CheckBox has been checked so files will be replaced\n"
+            # Too dangerous to delete everything in a folder
+            # shutil.rmtree(outputFolder)
+            # os.makedirs(outputFolder)
             self.stop = None
         # Check if output folder already exists. Ask if it is ok to overwrite
         elif os.path.exists(outputFolder):
