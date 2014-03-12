@@ -20,6 +20,7 @@ import time
 import shutil
 import uuid
 from multiprocessing import Process
+from PyQt4.uic.Compiler.qtproxies import QtCore
 try:
     import Image
 except ImportError:
@@ -170,15 +171,16 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.stop == None :
 
+            self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
             p = subprocess.Popen(["python", dir+"/zproject.py",input_folder,output_folder])
             print "Waiting"
-            self.ui.label_zwait.setText("Waiting")
-            waiting_for_z = QtGui.QMessageBox.information(self,  'Message',  'Please wait while maximum intensity of slices is being calculated')
 
             p.communicate()
-            self.ui.label_zwait.setText("z project done")
+            self.ui.textEditStatusMessages.setText("Z-projection finished")
+            #self.ui.label_zwait.setText("z project done")
             self.runCrop(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
             self.ui.label_zwait.setText("Dimensions selected")
+
 
 
     def runCrop(self, img_path):

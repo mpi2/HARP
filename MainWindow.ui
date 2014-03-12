@@ -40,7 +40,7 @@
        <x>20</x>
        <y>20</y>
        <width>711</width>
-       <height>66</height>
+       <height>72</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayoutFileSelect">
@@ -144,7 +144,7 @@ QGroupBox::title
         <x>11</x>
         <y>32</y>
         <width>261</width>
-        <height>206</height>
+        <height>224</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayoutCh1">
@@ -278,7 +278,7 @@ QGroupBox::title
         <x>290</x>
         <y>32</y>
         <width>261</width>
-        <height>206</height>
+        <height>224</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_4">
@@ -412,7 +412,7 @@ QGroupBox::title
         <x>570</x>
         <y>32</y>
         <width>261</width>
-        <height>206</height>
+        <height>224</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_5">
@@ -546,7 +546,7 @@ QGroupBox::title
         <x>850</x>
         <y>32</y>
         <width>261</width>
-        <height>206</height>
+        <height>224</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_6">
@@ -799,7 +799,7 @@ QGroupBox::title
         <x>11</x>
         <y>28</y>
         <width>691</width>
-        <height>31</height>
+        <height>34</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayoutIDs">
@@ -883,7 +883,7 @@ QGroupBox::title
         <x>10</x>
         <y>100</y>
         <width>691</width>
-        <height>31</height>
+        <height>34</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayoutName">
@@ -919,7 +919,7 @@ QGroupBox::title
         <x>11</x>
         <y>64</y>
         <width>691</width>
-        <height>31</height>
+        <height>34</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayoutIDs_2">
@@ -1490,7 +1490,7 @@ QGroupBox::title
         <x>10</x>
         <y>35</y>
         <width>261</width>
-        <height>171</height>
+        <height>183</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayoutuCTOnly">
@@ -1733,6 +1733,16 @@ QGroupBox::title
       <bool>false</bool>
      </property>
     </widget>
+    <widget class="QTextEdit" name="textEditStatusMessages">
+     <property name="geometry">
+      <rect>
+       <x>340</x>
+       <y>350</y>
+       <width>851</width>
+       <height>51</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -1741,7 +1751,7 @@ QGroupBox::title
      <x>0</x>
      <y>0</y>
      <width>1274</width>
-     <height>29</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
