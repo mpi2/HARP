@@ -4,6 +4,7 @@ import sys
 from PyQt4 import QtCore, QtGui
 import math
 import operator
+import sys
 
 '''
 Crop.py open an image (probably a max intensity z-projection)
@@ -53,6 +54,7 @@ class MainWidget(QtGui.QWidget):
         self.parent = parent
         super(MainWidget, self).__init__()
         self.scene = QtGui.QGraphicsScene()
+        self.scene.setSceneRect(0, 0, 950, 950)
         self.callback = callback
         self.view = QtGui.QGraphicsView(self.scene)
         layout = QtGui.QVBoxLayout()
@@ -61,33 +63,33 @@ class MainWidget(QtGui.QWidget):
 
 
         self.image = QtGui.QPixmap(image)
-        #Scale y to 1000 pixs. Use same scaling for x in case of differring dimensions
+        #Scale the largest dimension to 950 pixs. Use same scaling for the other dimensions
         self.orig_width = self.image.width()
         self.orig_height = self.image.height()
-        self.y_scale = 950.00 / self.orig_height
-        x_width = self.orig_width * self.y_scale
+        idx, max_dimen = min(enumerate([self.orig_width, self.orig_height]))
+        self.scaleFact = 950.00 / max_dimen
+        print "jhg ", self.scaleFact
+        x = self.orig_width * self.scaleFact
+        y = self.orig_height * self.scaleFact
 
-        #self.dist_from_x_to_window - parent.
-        #self.dist_from_y_to_window - None
-
-
-        self.pixmap_item = QtGui.QGraphicsPixmapItem(self.image.scaled(x_width, 950), None, self.scene)
+        self.pixmap_item = QtGui.QGraphicsPixmapItem(self.image.scaled(x, y), None, self.scene)
         self.pixmap_item.mousePressEvent = self.mousePress
         self.pixmap_item.mouseMoveEvent = self.mouseMove
         self.pixmap_item.mouseReleaseEvent = self.mouseRelease
 
         self.click_positions = []
-        self.x = None
-        self.y = None
+        self.x = 2
+        self.y = 2
         self.width = 1
         self.height = 1
         self.drawing = True
         self.cropBox = None
+        self.cornerSet = False
 
         #Hack. Mouse events give me position of mouse relative to image
-        #But setiing geometry on rubberband does it relative to mani window
-        self.img_dist_top = 73/2
-        self.img_dist_left = 105/2
+        #TODO: set this dynamically
+        self.img_dist_top = 35 #
+        self.img_dist_left = 50
         self.pixmap_item.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
         self.pixmap_item.rubberBand.setGeometry(QtCore.QRect(1, 1, 1, 1))
         self.pixmap_item.rubberBand.updatesEnabled()
@@ -95,21 +97,26 @@ class MainWidget(QtGui.QWidget):
 
 
     def doTheCrop(self):
+        #Get the coords of the rubber band
         small_box = self.pixmap_item.rubberBand.geometry().getCoords()
-        large_box = [(1/self.y_scale)* x for x in small_box]
+        #Convert this to the dimensions of the unscaled image
+        large_box = [(1/self.scaleFact)* x for x in small_box]
 
-        x1 = int(large_box[0] -100)
-        y1 = int(large_box[1] -70)
+        #To get the ruuber band to fit on the pixmap I added self.distance from x + y
+        # So need to remove that * the scaling factor of the image (yscale = xscale)
+        x1 = int(large_box[0] - (self.img_dist_left / self.scaleFact ))
+        y1 = int(large_box[1] - (self.img_dist_top / self.scaleFact))
         width = int(large_box[2] - large_box[0])
         height = int(large_box[3] - large_box[1])
-        x2 = self.orig_width - int(large_box[2])
-        y2 = self.orig_height - int(large_box[3])
+        x2 = self.orig_width - (int(large_box[2] - (self.img_dist_left / self.scaleFact )))
+        y2 = self.orig_height - (int(large_box[3] - (self.img_dist_top / self.scaleFact)))
 
         ijCropBox = (x1, y1, width, height )
         print "ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox))
         cropBox = (x1, y1, x2, y2)
         self.callback(cropBox)
-        self.parent.close()
+        print self.cropBox
+        #self.parent.close()
 
 
     def mouseMove(self, event):
@@ -118,12 +125,20 @@ class MainWidget(QtGui.QWidget):
         '''
         #print "frame ", self.parent.geometry().width()
         #print "widget ", self.geometry().width()
-        pos = (event.pos().x(), event.pos().y())
+        pos = (event.pos().x() + self.img_dist_left, event.pos().y() + self.img_dist_top)
+        if not self.cornerSet:
+            self.x = pos[0]
+            self.y = pos[1]
+            self.cornerSet = True
+            print "corner: ",self.x, " ", self.y
+            return
+
+        print "event: ", pos
         #print pos
         if self.drawing:
             #print self.x, ":", self.y
-            self.height = event.pos().y() - self.y
-            self.width = event.pos().x() - self.x
+            self.height = pos[1] - self.y
+            self.width = pos[0] - self.x
             self.pixmap_item.rubberBand.setGeometry(self.x, self.y, self.width, self.height)
         else:#Band has been drawn, bow resize it
             self.resizeRect(event)
@@ -133,14 +148,15 @@ class MainWidget(QtGui.QWidget):
         button = event.button()
         if button == 1:
             #self.pixmap_item.rubberBand.setGeometry(1, 1, 200, 200)
-            self.setCorner(event) #
+            #self.setCorner(event) #
+            pass
         if button == 2:
             self.doTheCrop() #self.drawing = True #maybe clear the box and start over
 
 
-    def setCorner(self, event):
-        self.x = event.pos().x()
-        self.y = event.pos().y()
+#     def setCorner(self, event):
+#         #if self.drawing:
+#         pass
 
 
     def resizeRect(self, event):
@@ -150,7 +166,7 @@ class MainWidget(QtGui.QWidget):
         '''
 
         #Fet the current mouse pos
-        pos = (event.pos().x() - 50, event.pos().y() -35)
+        pos = (event.pos().x() + self.img_dist_left, event.pos().y() + self.img_dist_top)
         #print pos
         #Get ccords of current rubber band
         rect = self.pixmap_item.rubberBand.geometry().getCoords()
@@ -234,6 +250,9 @@ def run(callback, image):
     window = Crop(callback, image)
     window.show()
 
+def dummyCallback(output):
+    print output
 
 if __name__ == "__main__":
-    run_from_cli() #create def for printing box
+    image = sys.argv[1]
+    run_from_cli(dummyCallback, image) #create def for printing box
