@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Wed Mar 12 11:42:24 2014
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Wed Mar 12 15:36:42 2014
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -24,7 +33,7 @@ class Ui_MainWindow(object):
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.frame = QtGui.QFrame(self.centralwidget)
-        self.frame.setGeometry(QtCore.QRect(10, 20, 1251, 921))
+        self.frame.setGeometry(QtCore.QRect(20, 20, 1251, 921))
         self.frame.setFrameShape(QtGui.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtGui.QFrame.Raised)
         self.frame.setObjectName(_fromUtf8("frame"))
@@ -883,12 +892,37 @@ class Ui_MainWindow(object):
         self.pushButtonGo.setFont(font)
         self.pushButtonGo.setDefault(False)
         self.pushButtonGo.setObjectName(_fromUtf8("pushButtonGo"))
-        self.textEditStatusMessages = QtGui.QTextEdit(self.frame)
-        self.textEditStatusMessages.setGeometry(QtCore.QRect(340, 350, 851, 51))
+        self.groupBoxModality_2 = QtGui.QGroupBox(self.frame)
+        self.groupBoxModality_2.setGeometry(QtCore.QRect(740, 350, 501, 121))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.groupBoxModality_2.setFont(font)
+        self.groupBoxModality_2.setStyleSheet(_fromUtf8("QGroupBox\n"
+"{\n"
+"    background-color:transparent;\n"
+"    border: 1px solid #acacac;\n"
+"    margin-top: 5px;\n"
+"}\n"
+"\n"
+"QGroupBox::title\n"
+"{\n"
+"    subcontrol-origin: margin;    \n"
+"    border-top-left-radius: 3px;\n"
+"    border-top-right-radius: 3px;\n"
+"    border: 1px solid #0b477b;\n"
+"    border-bottom: none;\n"
+"    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
+"        stop: 0 #005192, stop: 1 #002f60);\n"
+"    padding: 2 2px;\n"
+"    color: white;   \n"
+"}"))
+        self.groupBoxModality_2.setObjectName(_fromUtf8("groupBoxModality_2"))
+        self.textEditStatusMessages = QtGui.QTextEdit(self.groupBoxModality_2)
+        self.textEditStatusMessages.setGeometry(QtCore.QRect(30, 30, 461, 71))
         self.textEditStatusMessages.setObjectName(_fromUtf8("textEditStatusMessages"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 30))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 29))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -911,78 +945,79 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "SIaH: Image Processor", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonInput.setText(QtGui.QApplication.translate("MainWindow", "Input folder", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonOutput.setText(QtGui.QApplication.translate("MainWindow", "Output folder", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBoxOPTOnly.setTitle(QtGui.QApplication.translate("MainWindow", "OPT only", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox_4.setText(QtGui.QApplication.translate("MainWindow", "Channel 1", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_9.setText(QtGui.QApplication.translate("MainWindow", "Pick recon log", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_10.setText(QtGui.QApplication.translate("MainWindow", "Pick viewEND", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_11.setText(QtGui.QApplication.translate("MainWindow", "Pick SPR", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_12.setText(QtGui.QApplication.translate("MainWindow", "Pick ARC", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox_3.setItemText(0, QtGui.QApplication.translate("MainWindow", "Ch-MPH", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox_5.setText(QtGui.QApplication.translate("MainWindow", "Channel 2", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_13.setText(QtGui.QApplication.translate("MainWindow", "Pick recon log", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_14.setText(QtGui.QApplication.translate("MainWindow", "Pick viewEND", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_15.setText(QtGui.QApplication.translate("MainWindow", "Pick SPR", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_16.setText(QtGui.QApplication.translate("MainWindow", "Pick ARC", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox_4.setItemText(0, QtGui.QApplication.translate("MainWindow", "Ch-MPH", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox_6.setText(QtGui.QApplication.translate("MainWindow", "Channel 3", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_17.setText(QtGui.QApplication.translate("MainWindow", "Pick recon log", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_18.setText(QtGui.QApplication.translate("MainWindow", "Pick viewEND", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_19.setText(QtGui.QApplication.translate("MainWindow", "Pick SPR", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_20.setText(QtGui.QApplication.translate("MainWindow", "Pick ARC", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox_5.setItemText(0, QtGui.QApplication.translate("MainWindow", "Ch-MPH", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox_7.setText(QtGui.QApplication.translate("MainWindow", "Channel 4", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_21.setText(QtGui.QApplication.translate("MainWindow", "Pick recon log", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_22.setText(QtGui.QApplication.translate("MainWindow", "Pick viewEND", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_23.setText(QtGui.QApplication.translate("MainWindow", "Pick SPR", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_24.setText(QtGui.QApplication.translate("MainWindow", "Pick ARC", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox_6.setItemText(0, QtGui.QApplication.translate("MainWindow", "Ch-MPH", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBoxModality.setTitle(QtGui.QApplication.translate("MainWindow", "Imaging modality", None, QtGui.QApplication.UnicodeUTF8))
-        self.radioButtonuCT.setText(QtGui.QApplication.translate("MainWindow", "µCT", None, QtGui.QApplication.UnicodeUTF8))
-        self.radioButtonOPT.setText(QtGui.QApplication.translate("MainWindow", "OPT", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBoxID.setTitle(QtGui.QApplication.translate("MainWindow", "Identification", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelAge.setText(QtGui.QApplication.translate("MainWindow", "Stage", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelDate.setText(QtGui.QApplication.translate("MainWindow", "Date", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelGroup.setText(QtGui.QApplication.translate("MainWindow", "Gene", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelName.setText(QtGui.QApplication.translate("MainWindow", "Full name", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelLitter.setText(QtGui.QApplication.translate("MainWindow", "Litter", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelSex.setText(QtGui.QApplication.translate("MainWindow", "Sex", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelZygosity.setText(QtGui.QApplication.translate("MainWindow", "Zygosity", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBoxOptions.setTitle(QtGui.QApplication.translate("MainWindow", "Options", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_5.setText(QtGui.QApplication.translate("MainWindow", "Downsize", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_13.setText(QtGui.QApplication.translate("MainWindow", "Create movie", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxMovie_2.setText(QtGui.QApplication.translate("MainWindow", "Yes", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_14.setText(QtGui.QApplication.translate("MainWindow", "Cropping", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEditX.setText(QtGui.QApplication.translate("MainWindow", "x", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEditY.setText(QtGui.QApplication.translate("MainWindow", "y", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEditW.setText(QtGui.QApplication.translate("MainWindow", "w", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEditH.setText(QtGui.QApplication.translate("MainWindow", "h", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxSF2.setText(QtGui.QApplication.translate("MainWindow", "2", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxSF3.setText(QtGui.QApplication.translate("MainWindow", "3", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxSF4.setText(QtGui.QApplication.translate("MainWindow", "4", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("MainWindow", "Compress files", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox.setText(QtGui.QApplication.translate("MainWindow", "Scans", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox_2.setText(QtGui.QApplication.translate("MainWindow", "Original recons", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Replace files", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxRF.setText(QtGui.QApplication.translate("MainWindow", "Yes", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonGetDimensions.setText(QtGui.QApplication.translate("MainWindow", "Get dimensions", None, QtGui.QApplication.UnicodeUTF8))
-        self.radioButtonAuto.setText(QtGui.QApplication.translate("MainWindow", "Automatic", None, QtGui.QApplication.UnicodeUTF8))
-        self.radioButtonMan.setText(QtGui.QApplication.translate("MainWindow", "Manual", None, QtGui.QApplication.UnicodeUTF8))
-        self.radioButtonNo.setText(QtGui.QApplication.translate("MainWindow", "No crop", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBoxuCTOnly.setTitle(QtGui.QApplication.translate("MainWindow", "µCT only", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonCTRecon.setText(QtGui.QApplication.translate("MainWindow", "Pick recon log", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonCTSPR.setText(QtGui.QApplication.translate("MainWindow", "Pick SPR", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonCTARC.setText(QtGui.QApplication.translate("MainWindow", "Pick ARC", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBoxCh.setItemText(0, QtGui.QApplication.translate("MainWindow", "Ch-X", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonScan.setText(QtGui.QApplication.translate("MainWindow", "Scan folder", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBoxReconInfo.setTitle(QtGui.QApplication.translate("MainWindow", "Recon File Info", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelFile.setText(QtGui.QApplication.translate("MainWindow", "Folder size (Mb)", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelPixel.setText(QtGui.QApplication.translate("MainWindow", "Pixel size (µm)", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonGo.setText(QtGui.QApplication.translate("MainWindow", "Go!", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuOptions.setTitle(QtGui.QApplication.translate("MainWindow", "Adv. Options", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionChange_ID.setText(QtGui.QApplication.translate("MainWindow", "Allow identification to be changed", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionManually_select_output_folder.setText(QtGui.QApplication.translate("MainWindow", "Allow manually selection of output folder", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionAccurate_folder_size_calculation.setText(QtGui.QApplication.translate("MainWindow", "Accurate folder size calculation", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(_translate("MainWindow", "SIaH: Image Processor", None))
+        self.pushButtonInput.setText(_translate("MainWindow", "Input folder", None))
+        self.pushButtonOutput.setText(_translate("MainWindow", "Output folder", None))
+        self.groupBoxOPTOnly.setTitle(_translate("MainWindow", "OPT only", None))
+        self.checkBox_4.setText(_translate("MainWindow", "Channel 1", None))
+        self.pushButton_9.setText(_translate("MainWindow", "Pick recon log", None))
+        self.pushButton_10.setText(_translate("MainWindow", "Pick viewEND", None))
+        self.pushButton_11.setText(_translate("MainWindow", "Pick SPR", None))
+        self.pushButton_12.setText(_translate("MainWindow", "Pick ARC", None))
+        self.comboBox_3.setItemText(0, _translate("MainWindow", "Ch-MPH", None))
+        self.checkBox_5.setText(_translate("MainWindow", "Channel 2", None))
+        self.pushButton_13.setText(_translate("MainWindow", "Pick recon log", None))
+        self.pushButton_14.setText(_translate("MainWindow", "Pick viewEND", None))
+        self.pushButton_15.setText(_translate("MainWindow", "Pick SPR", None))
+        self.pushButton_16.setText(_translate("MainWindow", "Pick ARC", None))
+        self.comboBox_4.setItemText(0, _translate("MainWindow", "Ch-MPH", None))
+        self.checkBox_6.setText(_translate("MainWindow", "Channel 3", None))
+        self.pushButton_17.setText(_translate("MainWindow", "Pick recon log", None))
+        self.pushButton_18.setText(_translate("MainWindow", "Pick viewEND", None))
+        self.pushButton_19.setText(_translate("MainWindow", "Pick SPR", None))
+        self.pushButton_20.setText(_translate("MainWindow", "Pick ARC", None))
+        self.comboBox_5.setItemText(0, _translate("MainWindow", "Ch-MPH", None))
+        self.checkBox_7.setText(_translate("MainWindow", "Channel 4", None))
+        self.pushButton_21.setText(_translate("MainWindow", "Pick recon log", None))
+        self.pushButton_22.setText(_translate("MainWindow", "Pick viewEND", None))
+        self.pushButton_23.setText(_translate("MainWindow", "Pick SPR", None))
+        self.pushButton_24.setText(_translate("MainWindow", "Pick ARC", None))
+        self.comboBox_6.setItemText(0, _translate("MainWindow", "Ch-MPH", None))
+        self.groupBoxModality.setTitle(_translate("MainWindow", "Imaging modality", None))
+        self.radioButtonuCT.setText(_translate("MainWindow", "µCT", None))
+        self.radioButtonOPT.setText(_translate("MainWindow", "OPT", None))
+        self.groupBoxID.setTitle(_translate("MainWindow", "Identification", None))
+        self.labelAge.setText(_translate("MainWindow", "Stage", None))
+        self.labelDate.setText(_translate("MainWindow", "Date", None))
+        self.labelGroup.setText(_translate("MainWindow", "Gene", None))
+        self.labelName.setText(_translate("MainWindow", "Full name", None))
+        self.labelLitter.setText(_translate("MainWindow", "Litter", None))
+        self.labelSex.setText(_translate("MainWindow", "Sex", None))
+        self.labelZygosity.setText(_translate("MainWindow", "Zygosity", None))
+        self.groupBoxOptions.setTitle(_translate("MainWindow", "Options", None))
+        self.label_5.setText(_translate("MainWindow", "Downsize", None))
+        self.label_13.setText(_translate("MainWindow", "Create movie", None))
+        self.checkBoxMovie_2.setText(_translate("MainWindow", "Yes", None))
+        self.label_14.setText(_translate("MainWindow", "Cropping", None))
+        self.lineEditX.setText(_translate("MainWindow", "x", None))
+        self.lineEditY.setText(_translate("MainWindow", "y", None))
+        self.lineEditW.setText(_translate("MainWindow", "w", None))
+        self.lineEditH.setText(_translate("MainWindow", "h", None))
+        self.checkBoxSF2.setText(_translate("MainWindow", "2", None))
+        self.checkBoxSF3.setText(_translate("MainWindow", "3", None))
+        self.checkBoxSF4.setText(_translate("MainWindow", "4", None))
+        self.label.setText(_translate("MainWindow", "Compress files", None))
+        self.checkBox.setText(_translate("MainWindow", "Scans", None))
+        self.checkBox_2.setText(_translate("MainWindow", "Original recons", None))
+        self.label_2.setText(_translate("MainWindow", "Replace files", None))
+        self.checkBoxRF.setText(_translate("MainWindow", "Yes", None))
+        self.pushButtonGetDimensions.setText(_translate("MainWindow", "Get dimensions", None))
+        self.radioButtonAuto.setText(_translate("MainWindow", "Automatic", None))
+        self.radioButtonMan.setText(_translate("MainWindow", "Manual", None))
+        self.radioButtonNo.setText(_translate("MainWindow", "No crop", None))
+        self.groupBoxuCTOnly.setTitle(_translate("MainWindow", "µCT only", None))
+        self.pushButtonCTRecon.setText(_translate("MainWindow", "Pick recon log", None))
+        self.pushButtonCTSPR.setText(_translate("MainWindow", "Pick SPR", None))
+        self.pushButtonCTARC.setText(_translate("MainWindow", "Pick ARC", None))
+        self.comboBoxCh.setItemText(0, _translate("MainWindow", "Ch-X", None))
+        self.pushButtonScan.setText(_translate("MainWindow", "Scan folder", None))
+        self.groupBoxReconInfo.setTitle(_translate("MainWindow", "Recon File Info", None))
+        self.labelFile.setText(_translate("MainWindow", "Folder size (Mb)", None))
+        self.labelPixel.setText(_translate("MainWindow", "Pixel size (µm)", None))
+        self.pushButtonGo.setText(_translate("MainWindow", "Go!", None))
+        self.groupBoxModality_2.setTitle(_translate("MainWindow", "Status", None))
+        self.menuOptions.setTitle(_translate("MainWindow", "Adv. Options", None))
+        self.actionChange_ID.setText(_translate("MainWindow", "Allow identification to be changed", None))
+        self.actionManually_select_output_folder.setText(_translate("MainWindow", "Allow manually selection of output folder", None))
+        self.actionAccurate_folder_size_calculation.setText(_translate("MainWindow", "Accurate folder size calculation", None))
 

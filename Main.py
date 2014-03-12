@@ -171,15 +171,17 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.stop == None :
 
-            self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
+
             p = subprocess.Popen(["python", dir+"/zproject.py",input_folder,output_folder])
-            print "Waiting"
+            print "Whats going on!"
+            self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
+            message = QtGui.QMessageBox.information(self, 'Message', 'Maximum intensity (z projection) of slices is being calculated, press OK and the Z projection image will pop up when ready.')
 
             p.communicate()
-            self.ui.textEditStatusMessages.setText("Z-projection finished")
-            #self.ui.label_zwait.setText("z project done")
+
             self.runCrop(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
-            self.ui.label_zwait.setText("Dimensions selected")
+            self.ui.textEditStatusMessages.setText("Dimensions selected")
+
 
 
 
