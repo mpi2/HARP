@@ -6,15 +6,11 @@ except ImportError:
     from PIL import Image
 
 import argparse
-import sys
 import os
 import fnmatch
 import numpy as np
-from numpy.core.fromnumeric import mean
 from multiprocessing import Pool
-import re
 import sys
-from matplotlib import  pyplot as plt
 import time
 import math
 from collections import Counter
@@ -62,7 +58,7 @@ class Cropper:
 def do_the_crop(images, crop_vals, out_dir,  padding=0):
     '''
     @param: images list of image files
-    @param: crop_vals tuple of the crop box coords (distance from their respective sides)
+    @param: crop_vals tuple of the crop box (x, y, w, h)
     @param: out_dir str dir to output cropped images
 
     '''
@@ -77,11 +73,13 @@ def do_the_crop(images, crop_vals, out_dir,  padding=0):
     if tcrop < 0: tcrop = 0
 
     #Get distance from left side
-    rcrop = imdims[0] - crop_vals[2] + padding
+    #rcrop = imdims[0] - crop_vals[2] + padding
+    rcrop = crop_vals[2] + padding
     if rcrop > imdims[0] -1: rcrop = imdims[0] -1
 
     #get distance from top
-    bcrop = imdims[1] - crop_vals[3] + padding
+    #bcrop = imdims[1] - crop_vals[3] + padding
+    bcrop = crop_vals[3] + padding
     if bcrop > imdims[1] -1: bcrop = imdims[1] -1
 
     print("cropping with the following box: left:{0}, top:{1}, right:{2}, bottom{3}".format(
@@ -165,22 +163,29 @@ def run(args):
         #Just use a subset of files to determine crop
         sparse_files = files [0::10]
         slices = pool.map(proc, sparse_files)
-        end = time.time()
-        curr_time = end - start
-        print("Files read and means calculated. Time to here: {0}".format(curr_time) )
+        #end = time.time()
+        #curr_time = end - start
+        #print("Files read and means calculated. Time to here: {0}".format(curr_time) )
         #print slices
         #sys.exit()
 
         #Distances of cropping boxes from their respective sides
-        lcrop = get_cropping_box(slices, "x", threshold)
-        tcrop = get_cropping_box(slices, "y", threshold)
-        rcrop = get_cropping_box(slices, "x", threshold, True)
-        bcrop = get_cropping_box(slices, "y", threshold, True)
-        crop = (lcrop, tcrop, rcrop, bcrop)
+        ldist = get_cropping_box(slices, "x", threshold)
+        tdist = get_cropping_box(slices, "y", threshold)
+        rdist = get_cropping_box(slices, "x", threshold, True)
+        bdist = get_cropping_box(slices, "y", threshold, True)
+        cropBox = convertDistFromEdgesToXYWH((ldist, tdist, rdist, bdist))
 
         padding = int(np.mean(imdims)*0.01)
-        do_the_crop(files, crop, args.out_dir, padding)
+        do_the_crop(files, cropBox, args.out_dir, padding)
         sys.exit()
+
+
+def convertDistFromEdgesToXYWH(distances):
+    global imdims
+    width = imdims[0] - distances[2]
+    height = imdims[1] - distances[3]
+    return((distances[0], distances[1], width, height))
 
 
 def main():
