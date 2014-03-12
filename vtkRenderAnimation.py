@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Volume rendering of Liver data
+#This script was made using vtk 6.1
 
 from vtk import *
 import sys
@@ -61,7 +61,7 @@ camera.SetPosition(-2, -2, -2)
 
 # Create the Renderer, Window and Interator
 ren = vtkRenderer()
-ren.AddActor(outline)
+#ren.AddActor(outline)
 ren.AddVolume(volume)
 ren.SetBackground(0.1, 0.1, 0.2)
 ren.SetActiveCamera(camera)
@@ -72,45 +72,63 @@ renWin.AddRenderer(ren)
 renWin.SetWindowName("CT iso-surface");
 renWin.SetSize(500, 500)
 
-iren = vtkRenderWindowInteractor()
-iren.SetRenderWindow(renWin)
 
 
 def Keypress(obj, event):
 
     key = obj.GetKeySym()
+    # make a movie by rotating the scence 360 degrees
+    if key == "r":
+        rotate(obj, event)
+    if key == "i":
+        isovalues(obj, event)
 
+
+def rotate(ob, event):
     global renWin, ren
+    path = os.getcwd()
+    for i in range(0, 180,1):
+        w2i = vtkWindowToImageFilter()
+        w2i.SetInput(renWin)
+        writer = vtkPNGWriter()
+        #writer.SetQuality(100)
+        writer.SetInputData(w2i.GetOutput())
+        filename = 'movie_'+'0'*(6-len(str(i)))+str(i)+".png"
+        writer.SetFileName(os.path.join(path, filename))
+        writer.Write()
+        print os.path.join(path, filename)
+        if i <> 720:
+            ren.GetActiveCamera().Azimuth(2.0)
+        renWin.Render()
 
+
+def isovalues(obj, event):
+    '''
+    Gradually dissolve away the embryo using varrying ios values
+    '''
+
+    global renWin, ren, isoFunction
     path = os.getcwd()
     # make a movie by rotating the scence 360 degrees
-    if key == "m":
-        for i in range(0, 180,1):
+    for i in range(0, 180,1):
 
-            renWin.Render()
-            w2i = vtkWindowToImageFilter()
-            w2i.SetInput(renWin)
-            writer = vtkPNGWriter()
-            #writer.SetQuality(100)
-            writer.SetInputData(w2i.GetOutput())
-            filename = 'movie_'+'0'*(6-len(str(i)))+str(i)+".png"
-            writer.SetFileName(os.path.join(path, filename))
-            writer.Write()
-            print os.path.join(path, filename)
-            if i <> 720:
-                ren.GetActiveCamera().Azimuth(2.0)
-
-                # cam1.Azimuth(0.5)
+        isoFunction.SetIsoValue(i)
+        w2i = vtkWindowToImageFilter()
+        w2i.SetInput(renWin)
+        writer = vtkPNGWriter()
+        writer.SetInputData(w2i.GetOutput())
+        filename = 'movie_'+'0'*(6-len(str(i)))+str(i)+".png"
+        writer.SetFileName(os.path.join(path, filename))
+        writer.Write()
+        print os.path.join(path, filename)
+        renWin.Render()
 
 
+iren = vtkRenderWindowInteractor()
 iren.AddObserver("KeyPressEvent", Keypress)
-
-
-
-
+iren.SetRenderWindow(renWin)
 iren.Initialize()
 renWin.Render()
 iren.Start()
-
 
 
