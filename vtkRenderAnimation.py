@@ -71,16 +71,16 @@ renWin = vtkRenderWindow()
 renWin.AddRenderer(ren)
 renWin.SetWindowName("CT iso-surface");
 renWin.SetSize(500, 500)
-
+print type(renWin)
 
 
 def Keypress(obj, event):
 
     key = obj.GetKeySym()
     # make a movie by rotating the scence 360 degrees
-    if key == "r":
+    if key == "x":
         rotate(obj, event)
-    if key == "i":
+    if key == "z":
         isovalues(obj, event)
 
 
@@ -89,14 +89,17 @@ def rotate(ob, event):
     path = os.getcwd()
     for i in range(0, 180,1):
         w2i = vtkWindowToImageFilter()
+        w2i.Modified()
         w2i.SetInput(renWin)
-        writer = vtkPNGWriter()
-        #writer.SetQuality(100)
-        writer.SetInputData(w2i.GetOutput())
-        filename = 'movie_'+'0'*(6-len(str(i)))+str(i)+".png"
-        writer.SetFileName(os.path.join(path, filename))
+        w2i.Update()
+
+        writer = vtkJPEGWriter()
+        writer.SetQuality(100)
+        writer.SetInputData(w2i.GetOutput())#SetInput is deprecated???
+        filename = 'movie_'+'0'*(6-len(str(i)))+str(i)+".jpg"
+        writer.SetFileName(filename)
         writer.Write()
-        print os.path.join(path, filename)
+        print filename
         if i <> 720:
             ren.GetActiveCamera().Azimuth(2.0)
         renWin.Render()
@@ -119,7 +122,7 @@ def isovalues(obj, event):
         writer.SetInputData(w2i.GetOutput())
         filename = 'movie_'+'0'*(6-len(str(i)))+str(i)+".png"
         writer.SetFileName(os.path.join(path, filename))
-        writer.Write()
+        #writer.Write()
         print os.path.join(path, filename)
         renWin.Render()
 
