@@ -116,7 +116,7 @@ class MainWidget(QtGui.QWidget):
         cropBox = (x1, y1, x2, y2)
         self.callback(cropBox)
         print self.cropBox
-        #self.parent.close()
+        self.parent.close()
 
 
     def mouseMove(self, event):
