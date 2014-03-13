@@ -117,7 +117,7 @@
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     background:url(:/assets/subWindowBackground);
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
@@ -126,7 +126,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -699,7 +699,7 @@ QGroupBox::title
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border: 1px solid #0b477b;
@@ -707,7 +707,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -779,7 +779,7 @@ QGroupBox::title
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border: 1px solid #0b477b;
@@ -787,7 +787,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -1025,7 +1025,7 @@ QGroupBox::title
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border: 1px solid #0b477b;
@@ -1033,7 +1033,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -1461,7 +1461,7 @@ QGroupBox::title
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border: 1px solid #0b477b;
@@ -1469,7 +1469,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -1591,7 +1591,7 @@ QGroupBox::title
         <widget class="QLineEdit" name="lineEditScan">
          <property name="font">
           <font>
-           <family>Sans Serif</family>
+           <family>Abyssinica SIL</family>
            <pointsize>12</pointsize>
           </font>
          </property>
@@ -1629,7 +1629,7 @@ QGroupBox::title
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border: 1px solid #0b477b;
@@ -1637,7 +1637,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -1757,7 +1757,7 @@ QGroupBox::title
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border: 1px solid #0b477b;
@@ -1765,7 +1765,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">

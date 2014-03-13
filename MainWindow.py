@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Thu Mar 13 09:25:57 2014
+# Created: Thu Mar 13 13:57:12 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -84,7 +84,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    background:url(:/assets/subWindowBackground);\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
@@ -93,7 +93,7 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxOPTOnly.setCheckable(True)
         self.groupBoxOPTOnly.setChecked(False)
@@ -408,7 +408,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
 "    border: 1px solid #0b477b;\n"
@@ -416,7 +416,7 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxModality.setObjectName(_fromUtf8("groupBoxModality"))
         self.radioButtonuCT = QtGui.QRadioButton(self.groupBoxModality)
@@ -448,7 +448,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
 "    border: 1px solid #0b477b;\n"
@@ -456,7 +456,7 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxID.setObjectName(_fromUtf8("groupBoxID"))
         self.gridLayoutWidget_3 = QtGui.QWidget(self.groupBoxID)
@@ -588,7 +588,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
 "    border: 1px solid #0b477b;\n"
@@ -596,7 +596,7 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxOptions.setObjectName(_fromUtf8("groupBoxOptions"))
         self.label_5 = QtGui.QLabel(self.groupBoxOptions)
@@ -747,7 +747,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
 "    border: 1px solid #0b477b;\n"
@@ -755,7 +755,7 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxuCTOnly.setFlat(False)
         self.groupBoxuCTOnly.setCheckable(True)
@@ -820,7 +820,7 @@ class Ui_MainWindow(object):
         self.formLayoutuCTOnly.setWidget(3, QtGui.QFormLayout.LabelRole, self.pushButtonScan)
         self.lineEditScan = QtGui.QLineEdit(self.formLayoutWidget_9)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily(_fromUtf8("Abyssinica SIL"))
         font.setPointSize(12)
         self.lineEditScan.setFont(font)
         self.lineEditScan.setObjectName(_fromUtf8("lineEditScan"))
@@ -842,7 +842,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
 "    border: 1px solid #0b477b;\n"
@@ -850,7 +850,7 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxReconInfo.setFlat(False)
         self.groupBoxReconInfo.setCheckable(False)
@@ -906,7 +906,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
 "    border: 1px solid #0b477b;\n"
@@ -914,7 +914,7 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxModality_2.setObjectName(_fromUtf8("groupBoxModality_2"))
         self.textEditStatusMessages = QtGui.QTextEdit(self.groupBoxModality_2)
