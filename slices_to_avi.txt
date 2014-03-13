@@ -10,9 +10,12 @@ arg_array = split(args,":");
 
 input_volume = arg_array[0];
 output_image = arg_array[1];
-;
+
 //open the image
 open(input_volume);
 
 //Make the avi
 run("AVI... ", "compression=JPEG frame=8 save=" + output_image);
+
+
+//Can it return a message to say if the conversion was successful?
