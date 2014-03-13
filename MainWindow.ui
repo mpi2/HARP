@@ -1591,7 +1591,7 @@ QGroupBox::title
         <widget class="QLineEdit" name="lineEditScan">
          <property name="font">
           <font>
-           <family>Abyssinica SIL</family>
+           <family>Sans Serif</family>
            <pointsize>12</pointsize>
           </font>
          </property>

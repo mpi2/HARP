@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Wed Mar 12 15:36:42 2014
+# Created: Thu Mar 13 09:25:57 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -820,7 +820,7 @@ class Ui_MainWindow(object):
         self.formLayoutuCTOnly.setWidget(3, QtGui.QFormLayout.LabelRole, self.pushButtonScan)
         self.lineEditScan = QtGui.QLineEdit(self.formLayoutWidget_9)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Abyssinica SIL"))
+        font.setFamily(_fromUtf8("Sans Serif"))
         font.setPointSize(12)
         self.lineEditScan.setFont(font)
         self.lineEditScan.setObjectName(_fromUtf8("lineEditScan"))
