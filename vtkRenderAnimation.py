@@ -2,6 +2,9 @@
 
 '''
 This script was made using vtk 6.1
+TODO:
+Add option to hide the window when processing
+
 '''
 
 from vtk import *
@@ -14,11 +17,15 @@ import subprocess as sub
 
 
 class Animator:
-    def __init__(self, tiff, outputDir):
-        file_ = sys.argv[1]
+    def __init__(self, tiff, out_dir):
+        self.out_dir = out_dir
         reader =  vtkTIFFReader()
-        reader.SetFileName(file_)
+        reader.SetFileName(tiff)
         reader.Update()
+        self.makeMovie()
+        sys.exit()
+
+
 
         # Color
         colorTransferFunction = vtkColorTransferFunction()
@@ -103,12 +110,14 @@ class Animator:
             writer = vtkPNGWriter()
             #writer.SetQuality(100)
             writer.SetInputData(w2i.GetOutput())#SetInput is deprecated???
-            filename = 'movie_'+'0'*(6-len(str(i)))+str(i)+".png"
+            basename = 'movie_'+'0'*(6-len(str(i)))+str(i)+".png"
+            filename = os.path.join(self.out_dir, basename)
             writer.SetFileName(filename)
             writer.Write()
             print filename
             if i <> 720:
                 self.ren.GetActiveCamera().Azimuth(2.0)
+                self.ren.GetActiveCamera().Roll(2.0)
             self.renWin.Render()
         self.makeMovie()
 
@@ -131,12 +140,14 @@ class Animator:
             filename = 'movie_'+'0'*(6-len(str(i)))+str(i)+".png"
             writer.SetFileName(os.path.join(path, filename))
             #writer.Write()
-            print os.path.join(path, filename)
+            #print os.path.join(path, filename)
             self.renWin.Render()
 
 
     def makeMovie(self):
-        sub.call([])
+        imagej_arg_string = self.out_dir + ':'+ os.path.join(self.out_dir,'test_isosurfce_animation.avi')
+        #print imagej_arg_string
+        sub.call(["imagej", "-b", "slices_to_avi.txt", imagej_arg_string ])
 
 if __name__=="__main__":
     tiffVol = sys.argv[1]
