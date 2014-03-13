@@ -29,7 +29,7 @@ class RunProcessing:
         session_log = os.path.join("/tmp","siah",param.unique_ID,param.full_name+"_session.log")
 
         # Create session log file
-        session = open(session_log, 'w')
+        session = open(session_log, 'w+')
 
         if not os.path.exists(cropped_path):
             os.makedirs(cropped_path)

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1274</width>
-    <height>986</height>
+    <height>1009</height>
    </rect>
   </property>
   <property name="font">
@@ -23,9 +23,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>20</y>
+      <y>10</y>
       <width>1251</width>
-      <height>921</height>
+      <height>941</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -963,7 +963,7 @@ QGroupBox::title
         </widget>
        </item>
        <item row="0" column="5">
-        <widget class="QLineEdit" name="lineEdit_2">
+        <widget class="QLineEdit" name="lineEditSex">
          <property name="font">
           <font>
            <family>Sans Serif</family>
@@ -1591,7 +1591,7 @@ QGroupBox::title
         <widget class="QLineEdit" name="lineEditScan">
          <property name="font">
           <font>
-           <family>Abyssinica SIL</family>
+           <family>Sans Serif</family>
            <pointsize>12</pointsize>
           </font>
          </property>
@@ -1779,6 +1779,12 @@ QGroupBox::title
         <width>461</width>
         <height>71</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Sans Serif</family>
+        <pointsize>12</pointsize>
+       </font>
       </property>
      </widget>
     </widget>

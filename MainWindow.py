@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Thu Mar 13 13:57:12 2014
+# Created: Thu Mar 13 14:43:48 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,14 +26,14 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1274, 986)
+        MainWindow.resize(1274, 1009)
         font = QtGui.QFont()
         font.setPointSize(12)
         MainWindow.setFont(font)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.frame = QtGui.QFrame(self.centralwidget)
-        self.frame.setGeometry(QtCore.QRect(20, 20, 1251, 921))
+        self.frame.setGeometry(QtCore.QRect(20, 10, 1251, 941))
         self.frame.setFrameShape(QtGui.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtGui.QFrame.Raised)
         self.frame.setObjectName(_fromUtf8("frame"))
@@ -552,13 +552,13 @@ class Ui_MainWindow(object):
         self.labelSex.setFont(font)
         self.labelSex.setObjectName(_fromUtf8("labelSex"))
         self.gridLayoutIDs_2.addWidget(self.labelSex, 0, 4, 1, 1)
-        self.lineEdit_2 = QtGui.QLineEdit(self.gridLayoutWidget_5)
+        self.lineEditSex = QtGui.QLineEdit(self.gridLayoutWidget_5)
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Sans Serif"))
         font.setPointSize(12)
-        self.lineEdit_2.setFont(font)
-        self.lineEdit_2.setObjectName(_fromUtf8("lineEdit_2"))
-        self.gridLayoutIDs_2.addWidget(self.lineEdit_2, 0, 5, 1, 1)
+        self.lineEditSex.setFont(font)
+        self.lineEditSex.setObjectName(_fromUtf8("lineEditSex"))
+        self.gridLayoutIDs_2.addWidget(self.lineEditSex, 0, 5, 1, 1)
         self.lineEditZygosity = QtGui.QLineEdit(self.gridLayoutWidget_5)
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -820,7 +820,7 @@ class Ui_MainWindow(object):
         self.formLayoutuCTOnly.setWidget(3, QtGui.QFormLayout.LabelRole, self.pushButtonScan)
         self.lineEditScan = QtGui.QLineEdit(self.formLayoutWidget_9)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Abyssinica SIL"))
+        font.setFamily(_fromUtf8("Sans Serif"))
         font.setPointSize(12)
         self.lineEditScan.setFont(font)
         self.lineEditScan.setObjectName(_fromUtf8("lineEditScan"))
@@ -919,6 +919,10 @@ class Ui_MainWindow(object):
         self.groupBoxModality_2.setObjectName(_fromUtf8("groupBoxModality_2"))
         self.textEditStatusMessages = QtGui.QTextEdit(self.groupBoxModality_2)
         self.textEditStatusMessages.setGeometry(QtCore.QRect(30, 30, 461, 71))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setPointSize(12)
+        self.textEditStatusMessages.setFont(font)
         self.textEditStatusMessages.setObjectName(_fromUtf8("textEditStatusMessages"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)

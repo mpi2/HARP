@@ -143,7 +143,6 @@ class MainWindow(QtGui.QMainWindow):
         ''' Perform a z projection and then allows user to crop based on z projection'''
         #
 
-        self.folderCheck("dimension")
         dir = os.path.dirname(os.path.abspath(__file__))
 
         # Opens MyMainWindow from crop.py
@@ -158,8 +157,11 @@ class MainWindow(QtGui.QMainWindow):
         elif os.path.exists(zproj_path):
             print "Output folder for z project already exists and user has not approved overwrite"
             # Running dialog box to inform user of options
-            self.errorDialog = ErrorMessage("Output folder already exists\n Tick the 'Replace folder button' in the options sections if files are to be replaced")
-            self.stop = True
+            message = QtGui.QMessageBox.question(self, 'Message', 'Folder already exists for Z projection. Can this file be overwritten?', QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            if message == QtGui.QMessageBox.Yes:
+                self.stop = None
+            if message == QtGui.QMessageBox.No:
+                self.stop = True
         else :
             try:
                 print "Creating output folder"
@@ -172,14 +174,15 @@ class MainWindow(QtGui.QMainWindow):
         if self.stop == None :
 
             self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
-            p = subprocess.Popen(["python", dir+"/zproject.py",input_folder,output_folder])
+            p = subprocess.Popen(["python", dir+"/zproject.py",input_folder,output_folder],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print "Waiting"
-
+            message = QtGui.QMessageBox.information(self, 'Message', 'Maximum intensity (z projection) of slices is being calculated, press OK and the Z projection image will pop up when ready.')
             p.communicate()
             self.ui.textEditStatusMessages.setText("Z-projection finished")
             #self.ui.label_zwait.setText("z project done")
             self.runCrop(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
-            self.ui.label_zwait.setText("Dimensions selected")
+            self.ui.textEditStatusMessages.setText("Dimensions selected")
+
 
 
 
@@ -314,6 +317,8 @@ class MainWindow(QtGui.QMainWindow):
             age = name_list[2]
             litter = name_list[3]
             zygosity = name_list[4]
+            sex = name_list[5]
+
 
             #print date,group,age,litter,zygosity
             self.ui.lineEditDate.setText(date)
@@ -321,6 +326,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEditAge.setText(age)
             self.ui.lineEditLitter.setText(litter)
             self.ui.lineEditZygosity.setText(zygosity)
+            self.ui.lineEditSex.setText(sex)
             self.ui.lineEditName.setText(folder_name)
 
             # The full name should be made changable at some point..
@@ -332,7 +338,6 @@ class MainWindow(QtGui.QMainWindow):
             print "Name incorrect", sys.exc_info()[0]
             self.errorDialog = ErrorMessage(self.error)
             self.full_name = ""
-
         except:
             self.error = "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
             print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
@@ -424,14 +429,14 @@ class MainWindow(QtGui.QMainWindow):
         # Perform some checks before any processing is carried out
         self.errorCheck()
 
-        if self.stop != True :
+        if self.stop == None :
 
             self.close()
 
             self.getParamaters()
 
             # Perform analysis
-            subprocess.Popen(["python", dir+"/RunProcessing.py", "-i",self.config_path])
+            runPro_p = subprocess.Popen(["python", dir+"/RunProcessing.py", "-i",self.config_path],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             # Show progress dialog window to keep track of what is being processed
             self.pro = Progress(self.configOb)
@@ -459,8 +464,12 @@ class MainWindow(QtGui.QMainWindow):
         elif os.path.exists(outputFolder):
             print "Output folder already exists and user has not approved overwrite"
             # Running dialog box to inform user of options
-            self.errorDialog = ErrorMessage("Output folder already exists\n Tick the 'Replace folder button' in the options sections if files are to be replaced")
-            self.stop = True
+            message = QtGui.QMessageBox.question(self, 'Message', 'Folder already exists for the location:{0} Can this folder be overwritten?'.format(outputFolder) , QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+
+            if message == QtGui.QMessageBox.Yes:
+                self.stop = None
+            if message == QtGui.QMessageBox.No:
+                self.stop = True
         else :
             print "Creating output folder"
             os.makedirs(outputFolder)
@@ -488,8 +497,11 @@ class MainWindow(QtGui.QMainWindow):
         elif os.path.exists(outputFolder):
             print "Output folder already exists and user has not approved overwrite"
             # Running dialog box to inform user of options
-            self.errorDialog = ErrorMessage("Output folder already exists\n Tick the 'Replace folder button' in the options sections if files are to be replaced")
-            self.stop = True
+            message = QtGui.QMessageBox.question(self, 'Message', 'Folder already exists for the location:\n{0}\nCan this folder be overwritten?'.format(outputFolder) , QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            if message == QtGui.QMessageBox.Yes:
+                self.stop = None
+            if message == QtGui.QMessageBox.No:
+                self.stop = True
         else :
             print "Creating output folder"
             os.makedirs(outputFolder)
@@ -606,24 +618,37 @@ class Progress(QtGui.QDialog):
 
     # Create a constructor
     def __init__(self,param):
-       super(Progress, self).__init__()
-       self.ui=Ui_Progress()
-       self.ui.setupUi(self)
-       self.show()
+        print "Progress has started"
+        super(Progress, self).__init__()
+        self.ui=Ui_Progress()
+        self.ui.setupUi(self)
+        self.show()
 
-       self.ID_folder = os.path.join("/tmp","siah",str(param.unique_ID))
-       print "Check folders"+str(os.listdir(self.ID_folder))
-       self.ui.label_1.setText(param.full_name)
+        self.ID_folder = os.path.join("/tmp","siah",str(param.unique_ID))
+        print "Check folders"+str(os.listdir(self.ID_folder))
+        self.ui.label_1.setText(param.full_name)
 
-
-       while True:
+        # Get the session log file
+        session_log = os.path.join("/tmp","siah",param.unique_ID,param.full_name+"_session.log")
+        session = open(session_log, 'w+')
+        text = session.read()
+        '''
+        while True:
             time.sleep(0.05)
             value = self.ui.progressBar_1.value() + 1
             self.ui.progressBar_1.setValue(value)
+            if 'started' in text:
+                print "Autocrop Started"
+                self.ui.progressBar_1.setValue(30)
+                self.ui.label1_tracking.setText('Autocrop Running')
+            if 'finished' in text:
+                self.ui.progressBar_1.setValue(30)
+                self.ui.label1_tracking.setText('Autocrop finished')
+                break
             QtGui.qApp.processEvents()
             if (value >= 30):
                 break
-
+        '''
 
 
 
