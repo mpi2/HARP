@@ -178,4 +178,3 @@ class Ui_Progress(object):
         self.label_3.setText(_translate("Progress", "...", None))
         self.label5_Tracking.setText(_translate("Progress", "...", None))
         self.pushButtonAddMore.setText(_translate("Progress", "Add another recon to process", None))
-

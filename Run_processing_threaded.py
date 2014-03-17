@@ -31,30 +31,50 @@ class Progress(QtGui.QDialog):
         session_log = os.path.join("/tmp","siah",configOb.unique_ID,configOb.full_name+"_session.log")
         session = open(session_log, 'w+')
         text = session.read()
-        print configOb.config_path
+        self.configOb = configOb
         self.test(configOb)
+
+        self.ui.pushButtonAddMore.clicked.connect(self.AddMore)
+
+    def AddMore(self):
+        print "test test test"
 
     def add(self,test):
         # Updates the GUI to tell the user what the stage the processing is at
-        self.ui.label1_tracking.setText(test)
-        if test == "Crop finished" :
-            self.ui.progressBar_1.setValue(50)
-        if test == "Scaling finished" :
-            self.ui.progressBar_1.setValue(100)
+        if self.configOb.slot == "1" :
+            self.ui.label1_tracking.setText(test)
+            if test == "Crop finished" :
+                    self.ui.progressBar_1.setValue(50)
+            if test == "Processing finished" :
+                    self.ui.progressBar_1.setValue(100)
+
+        if self.configOb.slot == "2" :
+            self.ui.label2_tracking.setText(test)
+            if test == "Crop finished" :
+                    self.ui.progressBar_2.setValue(50)
+            if test == "Processing finished" :
+                    self.ui.progressBar_2.setValue(100)
+
+        if self.configOb.slot == "3" :
+            self.ui.label3_tracking.setText(test)
+            if test == "Crop finished" :
+                    self.ui.progressBar_3.setValue(50)
+            if test == "Processing finished" :
+                    self.ui.progressBar_3.setValue(100)
 
     def test(self,configOb):
         self.threadPool = []
-        self.threadPool.append( WorkThread(configOb,self.ui) )
+        self.threadPool.append( WorkThread(configOb) )
         self.connect( self.threadPool[len(self.threadPool)-1], QtCore.SIGNAL("update(QString)"), self.add )
         self.threadPool[len(self.threadPool)-1].start()
 
 
 
 class WorkThread(QtCore.QThread):
-    def __init__(self,configOb,ui):
+    def __init__(self,configOb):
         QtCore.QThread.__init__(self)
         self.configOb = configOb
-        self.ui = ui
+
     def __del__(self):
         self.wait()
 
@@ -144,7 +164,7 @@ class WorkThread(QtCore.QThread):
             session.write(outputSF4);
             session.write(outerrSF4);
 
-        self.emit( QtCore.SIGNAL('update(QString)'), "finished processing" )
+        self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
         print "processing finished"
 
 def main():
