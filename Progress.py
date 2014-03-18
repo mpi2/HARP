@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Progress.ui'
 #
-# Created: Fri Mar  7 09:53:38 2014
+# Created: Mon Mar 17 18:43:36 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -178,3 +178,4 @@ class Ui_Progress(object):
         self.label_3.setText(_translate("Progress", "...", None))
         self.label5_Tracking.setText(_translate("Progress", "...", None))
         self.pushButtonAddMore.setText(_translate("Progress", "Add another recon to process", None))
+

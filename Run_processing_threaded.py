@@ -49,14 +49,14 @@ class Progress(QtGui.QDialog):
                     self.ui.progressBar_1.setValue(100)
 
         if self.configOb.slot == "2" :
-            self.ui.label2_tracking.setText(test)
+            self.ui.label2_Tracking.setText(test)
             if test == "Crop finished" :
                     self.ui.progressBar_2.setValue(50)
             if test == "Processing finished" :
                     self.ui.progressBar_2.setValue(100)
 
         if self.configOb.slot == "3" :
-            self.ui.label3_tracking.setText(test)
+            self.ui.label3_Tracking.setText(test)
             if test == "Crop finished" :
                     self.ui.progressBar_3.setValue(50)
             if test == "Processing finished" :
