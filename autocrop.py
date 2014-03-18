@@ -104,8 +104,8 @@ def get_cropping_box(slices, side, threshold, rev = False):
 
     #filterout low values
     means = map(np.std, zip(*vals))
-    plt.plot(means)
-    plt.show()
+    #plt.plot(means)
+    #plt.show()
 
     if rev == True:
         return next((i for i, v in enumerate(reversed(means)) if v > threshold ), -1)
