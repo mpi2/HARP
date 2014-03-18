@@ -49,9 +49,6 @@ class MainWindow(QtGui.QMainWindow):
        # Make unique ID if this is the first time mainwindow has been called
        self.unique_ID = uuid.uuid1()
        print "ID for session:"+str(self.unique_ID)
-       self.ID_folder = os.path.join("/tmp","siah",str(self.unique_ID))
-       # Make a unique folder in the tmp directory which will store tracking information
-       os.makedirs(self.ID_folder)
 
        # Initialise modality variable
        self.modality = "Not_selected"
@@ -381,7 +378,7 @@ class MainWindow(QtGui.QMainWindow):
             recon_log_file = open(self.recon_log_path, 'r')
 
             # create a regex to pixel size
-            prog = re.compile("Pixel Size \(um\)\=(\w+.\w+)")
+            prog = re.compile("^Pixel Size \(um\)\=(\w+.\w+)")
 
             # for loop to go through the recon log file
             for line in recon_log_file:
@@ -501,9 +498,14 @@ class MainWindow(QtGui.QMainWindow):
         #### Write to config file ####
         self.configOb = ConfigClass()
 
+        # Create a folder for the metadata
+        self.meta_path = os.path.join(outputFolder,"Metadata")
+        if not os.path.exists(self.meta_path):
+            os.makedirs(self.meta_path)
+
         # OS path used for compatibility issues between Linux and windows directory spacing
-        self.config_path = os.path.join(outputFolder,"configObject.txt")
-        self.log_path = os.path.join(outputFolder,"config4user.log")
+        self.config_path = os.path.join(self.meta_path,"configObject.txt")
+        self.log_path = os.path.join(self.meta_path,"config4user.log")
 
         # Create config file and log file
         config = open(self.config_path, 'w')
@@ -549,6 +551,7 @@ class MainWindow(QtGui.QMainWindow):
         self.configOb.input_folder = inputFolder
         self.configOb.output_folder = outputFolder
         self.configOb.scan_folder = self.scan_folder
+        self.configOb.meta_path = self.meta_path
         self.configOb.crop_option = str(crop)
         if crop =="Manual" :
             self.configOb.xcrop = xcrop
@@ -646,17 +649,11 @@ class Progress(QtGui.QDialog):
         self.ui=Ui_Progress()
         self.ui.setupUi(self)
         self.show()
+        self.configOb = configOb
 
-        self.ID_folder = os.path.join("/tmp","siah",str(configOb.unique_ID))
-        print "Check folders"+str(os.listdir(self.ID_folder))
         self.ui.label_1.setText(configOb.full_name)
 
-        # Get the session log file
-        session_log = os.path.join("/tmp","siah",configOb.unique_ID,configOb.full_name+"_session.log")
-        session = open(session_log, 'w+')
-        text = session.read()
-        self.configOb = configOb
-        self.test(configOb)
+        self.thread(configOb)
 
         self.ui.pushButtonAddMore.clicked.connect(self.AddMore)
 
@@ -674,7 +671,7 @@ class Progress(QtGui.QDialog):
             self.ui.progressBar_1.setValue(100)
 
 
-    def test(self,configOb):
+    def thread(self,configOb):
         self.threadPool = []
         self.threadPool.append( WorkThread(configOb) )
         self.connect( self.threadPool[len(self.threadPool)-1], QtCore.SIGNAL("update(QString)"), self.add )
@@ -692,36 +689,36 @@ class WorkThread(QtCore.QThread):
 
     def run(self):
         self.emit( QtCore.SIGNAL('update(QString)'), "Started Processing" )
-        print self.configOb.full_name
-        cropped_path = os.path.join(self.configOb.output_folder,"cropped")
-
         # Get the directory of the script
         dir = os.path.dirname(os.path.abspath(__file__))
 
-        # Store tracking information in the session tmp folder
-        print "Creating log file"
-        # Create path for session log file
-        session_log = os.path.join("/tmp","siah",self.configOb.unique_ID,self.configOb.full_name+"_session.log")
-        self.emit( QtCore.SIGNAL('update(QString)'), "Creating log file" )
-        # Create session log file
-        session = open(session_log, 'w+')
+        # Get the session log file
+        self.session_log_path = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_session.log")
+        self.session_log_path2 = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_session2.log")
 
+        # Save as object to print to
+        session = open(self.session_log_path, 'w+')
+        session.write("Name of recon:"+self.configOb.full_name)
+
+
+        # Make crop folder
+        session.write("Name of recon:"+self.configOb.full_name)
+        cropped_path = os.path.join(self.configOb.output_folder,"cropped")
         if not os.path.exists(cropped_path):
             os.makedirs(cropped_path)
 
+        # Perform the manual crop if required
         if self.configOb.crop_option == "Manual" :
-            print "performing manual crop"
             session.write("Performing manual crop\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing manual crop" )
             manpro = subprocess.call(["python", dir+"/autocrop.py","-i",self.configOb.input_folder,"-o",
                          cropped_path, "-t", "tif","-d",self.configOb.xcrop, self.configOb.ycrop, self.configOb.wcrop, self.configOb.hcrop],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
-            print "Manual Crop finished"
             session.write("Crop finished\n")
 
+        # Perform the automatic crop if required
         if self.configOb.crop_option == "Automatic" :
-            print "Autocrop started"
             session.write("Performing autocrop\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Autocrop started" )
             aupro = subprocess.call(["python", dir+"/autocrop.py","-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
@@ -729,54 +726,51 @@ class WorkThread(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
             session.write("Crop finished\n")
 
+        # Do not perform any crop as user specified
         if self.configOb.crop_option == "None" :
             self.emit( QtCore.SIGNAL('update(QString)'), "No Crop carried out" )
             print "No crop carried out"
             session.write("No crop carried out\n")
 
+        # Open log file again for
+        self.scale_log_path = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_session_scale.log")
+        scale_log = open(self.session_log_path, 'w+')
 
+        # Perform scaling as subprocess with Popen (they should be done in the background)
         if self.configOb.SF2 == "yes" :
             session.write("Performing scaling (SF2)\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "SF2 Scaling started" )
             proSF2 = subprocess.Popen(["imagej", "-b", dir+"/siah_scale.txt", self.configOb.imageJ+":0.5"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            print "SF2 standard out and error\n"
-            outputSF2 = proSF2.stdout.read()
-            outerrSF2 = proSF2.stderr.read()
+            for line in iter(proSF2.stdout.readline, b''):
+                session.write(line,)
 
-        # NEED TO PUT INTO FUNCTION
         if self.configOb.SF3 == "yes" :
             session.write("Performing scaling (SF3)\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "SF3 Scaling started" )
             proSF3 = subprocess.Popen(["imagej", "-b", dir+"/siah_scale.txt", self.configOb.imageJ+":0.3333"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            print "SF3 standard out and error\n"
-            outputSF3 = proSF3.stdout.read()
-            outerrSF3 = proSF3.stderr.read()
 
         if self.configOb.SF4 == "yes" :
             session.write("Performing scaling (SF4)\n");
             self.emit( QtCore.SIGNAL('update(QString)'), "SF4 Scaling started" )
             proSF4 = subprocess.Popen(["imagej", "-b", dir+"/siah_scale.txt", self.configOb.imageJ+":0.25"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            print "SF2 standard out and error\n"
-            outputSF4 = proSF4.stdout.read()
-            outerrSF4 = proSF4.stderr.read()
 
         if self.configOb.SF2 == "yes" :
             session.write("#####SF2 standard out and error\n#####")
-            session.write(outputSF2);
-            session.write(outerrSF2);
+            session.write(proSF2.stdout.read())
+            session.write(proSF2.stderr.read())
 
         if self.configOb.SF3 == "yes" :
             session.write("#####SF3 standard out and error\n#####")
-            session.write(outputSF3);
-            session.write(outerrSF3);
+            session.write(proSF3.stdout.read())
+            session.write(proSF3.stderr.read())
 
         if self.configOb.SF4 == "yes" :
             session.write("#####SF4 standard out and error\n#####")
-            session.write(outputSF4);
-            session.write(outerrSF4);
+            session.write(proSF4.stdout.read())
+            session.write(proSF4.stderr.read())
 
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
-        print "processing finished"
+
 
 def main():
     app = QtGui.QApplication(sys.argv)
