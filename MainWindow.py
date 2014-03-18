@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Mon Mar 17 18:04:37 2014
+# Created: Tue Mar 18 10:23:45 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -395,7 +395,7 @@ class Ui_MainWindow(object):
         self.comboBox_6.addItem(_fromUtf8(""))
         self.formLayout_6.setWidget(5, QtGui.QFormLayout.LabelRole, self.comboBox_6)
         self.groupBoxModality = QtGui.QGroupBox(self.frame)
-        self.groupBoxModality.setGeometry(QtCore.QRect(740, 20, 191, 61))
+        self.groupBoxModality.setGeometry(QtCore.QRect(740, 20, 501, 61))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxModality.setFont(font)
@@ -924,62 +924,6 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         self.textEditStatusMessages.setFont(font)
         self.textEditStatusMessages.setObjectName(_fromUtf8("textEditStatusMessages"))
-        self.groupBoxProcessingSlot = QtGui.QGroupBox(self.frame)
-        self.groupBoxProcessingSlot.setGeometry(QtCore.QRect(940, 20, 301, 61))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.groupBoxProcessingSlot.setFont(font)
-        self.groupBoxProcessingSlot.setStyleSheet(_fromUtf8("QGroupBox\n"
-"{\n"
-"    background-color:transparent;\n"
-"    border: 1px solid #acacac;\n"
-"    margin-top: 5px;\n"
-"}\n"
-"\n"
-"QGroupBox::title\n"
-"{\n"
-"    subcontrol-origin: margin;\n"
-"    border-top-left-radius: 3px;\n"
-"    border-top-right-radius: 3px;\n"
-"    border: 1px solid #0b477b;\n"
-"    border-bottom: none;\n"
-"    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
-"        stop: 0 #005192, stop: 1 #002f60);\n"
-"    padding: 2 2px;\n"
-"    color: white;\n"
-"}"))
-        self.groupBoxProcessingSlot.setObjectName(_fromUtf8("groupBoxProcessingSlot"))
-        self.radioButtonSlot1 = QtGui.QRadioButton(self.groupBoxProcessingSlot)
-        self.radioButtonSlot1.setGeometry(QtCore.QRect(9, 30, 41, 17))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.radioButtonSlot1.setFont(font)
-        self.radioButtonSlot1.setChecked(True)
-        self.radioButtonSlot1.setObjectName(_fromUtf8("radioButtonSlot1"))
-        self.radioButtonSlot2 = QtGui.QRadioButton(self.groupBoxProcessingSlot)
-        self.radioButtonSlot2.setGeometry(QtCore.QRect(60, 30, 51, 17))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.radioButtonSlot2.setFont(font)
-        self.radioButtonSlot2.setObjectName(_fromUtf8("radioButtonSlot2"))
-        self.radioButtonSlot3 = QtGui.QRadioButton(self.groupBoxProcessingSlot)
-        self.radioButtonSlot3.setGeometry(QtCore.QRect(110, 30, 51, 17))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.radioButtonSlot3.setFont(font)
-        self.radioButtonSlot3.setObjectName(_fromUtf8("radioButtonSlot3"))
-        self.radioButtonSlot4 = QtGui.QRadioButton(self.groupBoxProcessingSlot)
-        self.radioButtonSlot4.setGeometry(QtCore.QRect(160, 30, 51, 17))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.radioButtonSlot4.setFont(font)
-        self.radioButtonSlot4.setObjectName(_fromUtf8("radioButtonSlot4"))
-        self.radioButtonSlot5 = QtGui.QRadioButton(self.groupBoxProcessingSlot)
-        self.radioButtonSlot5.setGeometry(QtCore.QRect(210, 30, 51, 17))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.radioButtonSlot5.setFont(font)
-        self.radioButtonSlot5.setObjectName(_fromUtf8("radioButtonSlot5"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 29))
@@ -1076,12 +1020,6 @@ class Ui_MainWindow(object):
         self.labelPixel.setText(_translate("MainWindow", "Pixel size (µm)", None))
         self.pushButtonGo.setText(_translate("MainWindow", "Go!", None))
         self.groupBoxModality_2.setTitle(_translate("MainWindow", "Status", None))
-        self.groupBoxProcessingSlot.setTitle(_translate("MainWindow", "Processing slot", None))
-        self.radioButtonSlot1.setText(_translate("MainWindow", "1", None))
-        self.radioButtonSlot2.setText(_translate("MainWindow", "2", None))
-        self.radioButtonSlot3.setText(_translate("MainWindow", "3", None))
-        self.radioButtonSlot4.setText(_translate("MainWindow", "4", None))
-        self.radioButtonSlot5.setText(_translate("MainWindow", "5", None))
         self.menuOptions.setTitle(_translate("MainWindow", "Adv. Options", None))
         self.actionChange_ID.setText(_translate("MainWindow", "Allow identification to be changed", None))
         self.actionManually_select_output_folder.setText(_translate("MainWindow", "Allow manually selection of output folder", None))
