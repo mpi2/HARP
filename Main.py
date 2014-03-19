@@ -85,10 +85,14 @@ class MainWindow(QtGui.QMainWindow):
        self.ui.lineEditOutput.textChanged.connect(self.outputFolderChanged)
        self.ui.lineEditInput.textChanged.connect(self.inputFolderChanged)
 
+       # If the get dimensions button is pressed the
+       self.ui.pushButtonCTRecon.clicked.connect(self.getReconMan)
 
 
        # to make the window visible
        self.show()
+
+
 
     def check(self):
         print "asdsada"
@@ -107,11 +111,6 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.error == "None" :
             self.getReconLog()
-
-        if self.error == "None" :
-            # Get Scan folder location (needs to be updated so that this can be assigned manually)
-            self.scan_folder  = input.replace("recons", "scan")
-            self.ui.lineEditScan.setText(input.replace("recons", "scan"))
 
         if self.error == "None" :
             self.autouCTOnly()
@@ -241,7 +240,7 @@ class MainWindow(QtGui.QMainWindow):
         input = str(self.ui.lineEditInput.text())
 
         # create a regex get example recon file
-        prog = re.compile("(.*)_rec\d+\.bmp")
+        prog = re.compile("(.*)_rec\d+\.(bmp|tif)")
 
         try:
             filename = ""
@@ -259,6 +258,7 @@ class MainWindow(QtGui.QMainWindow):
 
             num_files = len([f for f in os.listdir(input) if ((f[-4:] == ".bmp") or (f[-4:] == ".tif")) and
                           ((f[-7:] != "spr.bmp") or (f[-7:] != "spr.tif"))])
+
 
             approx_size = num_files*file1_size
 
@@ -351,7 +351,33 @@ class MainWindow(QtGui.QMainWindow):
 
     def autouCTOnly(self):
         ''' Automatically fills out the uCT only section    '''
+        input = str(self.ui.lineEditInput.text())
+        # Set recon log path
         self.ui.lineEditCTRecon.setText(str(self.recon_log_path))
+
+        # Set the scan folder
+        self.scan_folder  = input.replace("recons", "scan")
+        self.ui.lineEditScan.setText(self.scan_folder)
+
+#          Get the SPR file
+#         SPR_file_bmp = os.path.join(input,self.full_name+"_spr.bmp")
+#         SPR_file_tif = os.path.join(input,self.full_name+"_spr.tif")
+#         print SPR_file_bmp
+#         if os.path.isfile(SPR_file_bmp):
+#             self.ui.lineEditSPR.setText(SPR_file_bmp)
+#         elif os.path.isfile(SPR_file_bmp):
+#             self.ui.lineEditSPR.setText(SPR_file_tif)
+#         else:
+#             self.error = "Cannot find SPR file, proceed if this is not a problem"
+#             self.errorDialog = ErrorMessage(self.error)
+
+
+        self.ui.lineEditScan.setText(self.scan_folder)
+
+
+    def getReconMan(self):
+        self.fileDialog = QtGui.QFileDialog(self)
+        self.ui.lineEditCTRecon.setText(self.fileDialog.getOpenFileName())
 
     def getReconLog(self):
         '''
@@ -694,16 +720,15 @@ class WorkThread(QtCore.QThread):
 
         # Get the session log file
         self.session_log_path = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_session.log")
-        self.session_log_path2 = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_session2.log")
 
         # Save as object to print to
         session = open(self.session_log_path, 'w+')
-        session.write("Name of recon:"+self.configOb.full_name)
-
+        session.write("Name of recon:"+self.configOb.full_name+"\n")
 
         # Make crop folder
-        session.write("Name of recon:"+self.configOb.full_name)
         cropped_path = os.path.join(self.configOb.output_folder,"cropped")
+
+
         if not os.path.exists(cropped_path):
             os.makedirs(cropped_path)
 
@@ -732,43 +757,35 @@ class WorkThread(QtCore.QThread):
             print "No crop carried out"
             session.write("No crop carried out\n")
 
-        # Open log file again for
-        self.scale_log_path = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_session_scale.log")
-        scale_log = open(self.session_log_path, 'w+')
-
         # Perform scaling as subprocess with Popen (they should be done in the background)
         if self.configOb.SF2 == "yes" :
-            session.write("Performing scaling (SF2)\n")
-            self.emit( QtCore.SIGNAL('update(QString)'), "SF2 Scaling started" )
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling (SF2)" )
             proSF2 = subprocess.Popen(["imagej", "-b", dir+"/siah_scale.txt", self.configOb.imageJ+":0.5"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            for line in iter(proSF2.stdout.readline, b''):
-                session.write(line,)
 
         if self.configOb.SF3 == "yes" :
-            session.write("Performing scaling (SF3)\n")
-            self.emit( QtCore.SIGNAL('update(QString)'), "SF3 Scaling started" )
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling (SF3)" )
             proSF3 = subprocess.Popen(["imagej", "-b", dir+"/siah_scale.txt", self.configOb.imageJ+":0.3333"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 
         if self.configOb.SF4 == "yes" :
-            session.write("Performing scaling (SF4)\n");
-            self.emit( QtCore.SIGNAL('update(QString)'), "SF4 Scaling started" )
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling (SF4)" )
             proSF4 = subprocess.Popen(["imagej", "-b", dir+"/siah_scale.txt", self.configOb.imageJ+":0.25"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 
         if self.configOb.SF2 == "yes" :
-            session.write("#####SF2 standard out and error\n#####")
-            session.write(proSF2.stdout.read())
-            session.write(proSF2.stderr.read())
+            out2, err2 = proSF2.communicate()
+            session.write(out2)
+            session.write(err2)
 
         if self.configOb.SF3 == "yes" :
-            session.write("#####SF3 standard out and error\n#####")
-            session.write(proSF3.stdout.read())
-            session.write(proSF3.stderr.read())
+            out3, err3 = proSF3.communicate()
+            session.write(out3)
+            session.write(err3)
 
         if self.configOb.SF4 == "yes" :
-            session.write("#####SF4 standard out and error\n#####")
-            session.write(proSF4.stdout.read())
-            session.write(proSF4.stderr.read())
+            out4, err4 = proSF4.communicate()
+            session.write(out4)
+            session.write(err4)
 
+        session.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
 
 

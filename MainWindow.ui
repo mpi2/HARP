@@ -822,6 +822,9 @@ QGroupBox::title
            <pointsize>12</pointsize>
           </font>
          </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item row="0" column="1">
@@ -840,6 +843,9 @@ QGroupBox::title
          <property name="text">
           <string/>
          </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item row="0" column="5">
@@ -848,6 +854,9 @@ QGroupBox::title
           <font>
            <pointsize>12</pointsize>
           </font>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -907,7 +916,7 @@ QGroupBox::title
           </font>
          </property>
          <property name="readOnly">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -948,6 +957,9 @@ QGroupBox::title
          <property name="text">
           <string/>
          </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item row="0" column="4">
@@ -970,6 +982,9 @@ QGroupBox::title
            <pointsize>12</pointsize>
           </font>
          </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item row="0" column="3">
@@ -981,6 +996,9 @@ QGroupBox::title
          </property>
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -1076,6 +1094,9 @@ QGroupBox::title
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBoxMovie_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>155</x>
@@ -1271,6 +1292,9 @@ QGroupBox::title
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBox">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>155</x>
@@ -1289,6 +1313,9 @@ QGroupBox::title
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBox_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>245</x>
@@ -1541,6 +1568,9 @@ QGroupBox::title
        </item>
        <item row="2" column="0">
         <widget class="QPushButton" name="pushButtonCTARC">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -1553,6 +1583,9 @@ QGroupBox::title
        </item>
        <item row="2" column="1">
         <widget class="QLineEdit" name="lineEditCTARC">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="font">
           <font>
            <pointsize>12</pointsize>
