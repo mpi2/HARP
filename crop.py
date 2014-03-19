@@ -66,7 +66,8 @@ class MainWidget(QtGui.QWidget):
         #Scale the largest dimension to 950 pixs. Use same scaling for the other dimensions
         self.orig_width = self.image.width()
         self.orig_height = self.image.height()
-        idx, max_dimen = min(enumerate([self.orig_width, self.orig_height]))
+        max_dimen = max([float(self.orig_width), float(self.orig_height)])
+        print "dim", max_dimen
         self.scaleFact = 950.00 / max_dimen
         print "jhg ", self.scaleFact
         x = self.orig_width * self.scaleFact
