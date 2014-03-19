@@ -30,7 +30,7 @@ class Zproject:
             sys.exit("no image files found in" + self.img_dir)
 
         im = Image.open(files[0])
-        self.imdims = im.size
+        self.imdims = (im.size[1], im.size[0])
         #make a new list by removing every second image
         files = files[0::5]
 
@@ -56,8 +56,12 @@ class Process:
 
     def __call__(self, chunk):
         max_ = np.zeros(self.imdims)
+        print "imdims: ", self.imdims
+
         for im in chunk:
+            #Numpy is flipping the coordinates around. WTF!. So T is for transpose
             im_array = np.asarray(Image.open(im))
+            print "im: ", im_array.shape
             max_ = np.maximum(max_, im_array)
         print "chunk done"
         return max_
@@ -66,7 +70,9 @@ class Process:
 if __name__ == "__main__":
     z = Zproject(sys.argv[1],sys.argv[2])
     zp_img = z.run()
+    #assert zp_img.__class__ == "Image.Image"
     try:
+        os.mkdir(os.path.join(str(z.out_dir), "z_projection",))
         zp_img.save(os.path.join(str(z.out_dir), "z_projection", "max_intensity_z.tif"))
         crop_success = True
 
