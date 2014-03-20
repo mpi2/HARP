@@ -78,15 +78,21 @@ class MainWindow(QtGui.QMainWindow):
        self.ui.radioButtonNo.clicked.connect(self.manCropOff)
        # Man crop (enable buttons).
        self.ui.radioButtonMan.clicked.connect(self.manCropOn)
-       # If the get dimensions button is pressed the
+       # If the get dimensions button is pressed
        self.ui.pushButtonGetDimensions.clicked.connect(self.getDimensions)
 
        #Get the output folder name when input updated
        self.ui.lineEditOutput.textChanged.connect(self.outputFolderChanged)
        self.ui.lineEditInput.textChanged.connect(self.inputFolderChanged)
 
-       # If the get dimensions button is pressed the
+       # Get recon file manually
        self.ui.pushButtonCTRecon.clicked.connect(self.getReconMan)
+
+       # Get scan file manually
+       self.ui.pushButtonScan.clicked.connect(self.getScanMan)
+
+       # Get SPR file manually
+       self.ui.pushButtonCTSPR.clicked.connect(self.getSPRMan)
 
 
        # to make the window visible
@@ -100,33 +106,37 @@ class MainWindow(QtGui.QMainWindow):
     def selectFileIn(self):
         ''' Get the info for the selected file'''
         self.fileDialog = QtGui.QFileDialog(self)
-        self.ui.lineEditInput.setText(self.fileDialog.getExistingDirectory(self, "Select Directory"))
+        folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
 
-        input = str(self.ui.lineEditInput.text())
+        if folder == "":
+            print "User has pressed cancel"
+        else :
+            self.ui.lineEditInput.setText(folder)
+            self.getName()
 
-        self.getName()
+            if self.error == "None" :
+                self.autoFileOut()
 
-        if self.error == "None" :
-            self.autoFileOut()
+            if self.error == "None" :
+                self.getReconLog()
 
-        if self.error == "None" :
-            self.getReconLog()
+            if self.error == "None" :
+                self.autouCTOnly()
 
-        if self.error == "None" :
-            self.autouCTOnly()
+            if self.error == "None" :
+                self.folderSizeApprox()
 
-        if self.error == "None" :
-            self.folderSizeApprox()
-
-        self.error = "None"
-
-
+            self.error = "None"
 
 
     def selectFileOut(self):
         ''' Select output folder (this should be blocked as standard'''
         self.fileDialog = QtGui.QFileDialog(self)
-        self.ui.lineEditOutput.setText(self.fileDialog.getExistingDirectory(self, "Select Directory"))
+        folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
+        if folder == "":
+            print "User has pressed cancel"
+        else:
+            self.ui.lineEditOutput.setText(folder)
 
 
     def inputFolderChanged(self, text):
@@ -191,16 +201,6 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.textEditStatusMessages.setText("Dimensions selected")
 
 
-    def update(self,test):
-        # Updates the GUI to tell the user what the stage the processing is at
-        self.ui.label1_tracking.setText(test)
-        if test == "Crop finished" :
-            self.ui.progressBar_1.setValue(50)
-        if test == "Processing finished" :
-            self.ui.progressBar_1.setValue(100)
-
-
-
     def runCrop(self, img_path):
         cropper = crop.Crop(self.cropCallback, img_path, self)
         cropper.show()
@@ -251,15 +251,15 @@ class MainWindow(QtGui.QMainWindow):
         input = str(self.ui.lineEditInput.text())
 
         # create a regex get example recon file
-        prog = re.compile("(.*)_rec\d+\.(bmp|tif)")
+        prog = re.compile("(.*)_rec\d+\.(bmp|tif)",re.IGNORECASE)
 
         try:
             filename = ""
             # for loop to go through the directory
             for line in os.listdir(input) :
                 line =str(line)
-                print line+"\n"
-                # if the line matches the regex print
+                #print line+"\n"
+                # if the line matches the regex break
                 if prog.match(line) :
                     filename = line
                     break
@@ -267,8 +267,9 @@ class MainWindow(QtGui.QMainWindow):
             filename = input+"/"+filename
             file1_size = os.stat(filename).st_size
 
-            num_files = len([f for f in os.listdir(input) if ((f[-4:] == ".bmp") or (f[-4:] == ".tif")) and
-                          ((f[-7:] != "spr.bmp") or (f[-7:] != "spr.tif"))])
+            num_files = len([f for f in os.listdir(input) if ((f[-4:] == ".bmp") or (f[-4:] == ".tif") or
+                          (f[-7:] != "spr.bmp") or (f[-7:] != "spr.tif") or (f[-4:] == ".BMP") or (f[-4:] == ".TIF") or
+                          (f[-7:] != "spr.BMP") or (f[-7:] != "spr.TIF"))])
 
 
             approx_size = num_files*file1_size
@@ -370,17 +371,24 @@ class MainWindow(QtGui.QMainWindow):
         self.scan_folder  = input.replace("recons", "scan")
         self.ui.lineEditScan.setText(self.scan_folder)
 
-#          Get the SPR file
-#         SPR_file_bmp = os.path.join(input,self.full_name+"_spr.bmp")
-#         SPR_file_tif = os.path.join(input,self.full_name+"_spr.tif")
-#         print SPR_file_bmp
-#         if os.path.isfile(SPR_file_bmp):
-#             self.ui.lineEditSPR.setText(SPR_file_bmp)
-#         elif os.path.isfile(SPR_file_bmp):
-#             self.ui.lineEditSPR.setText(SPR_file_tif)
-#         else:
-#             self.error = "Cannot find SPR file, proceed if this is not a problem"
-#             self.errorDialog = ErrorMessage(self.error)
+        # Get the SPR file. Sometimes fiels are saved with upper or lower case file extensions
+        # The following is bit of a stupid way of dealing with this problem but I think it works....
+        SPR_file_bmp = os.path.join(input,self.full_name+"_spr.bmp")
+        SPR_file_BMP = os.path.join(input,self.full_name+"_spr.BMP")
+        SPR_file_tif = os.path.join(input,self.full_name+"_spr.tif")
+        SPR_file_TIF = os.path.join(input,self.full_name+"_spr.TIF")
+        print SPR_file_bmp
+        if os.path.isfile(SPR_file_bmp):
+            self.ui.lineEditCTSPR.setText(SPR_file_bmp)
+        elif os.path.isfile(SPR_file_BMP):
+            self.ui.lineEditCTSPR.setText(SPR_file_BMP)
+        elif os.path.isfile(SPR_file_tif):
+            self.ui.lineEditCTSPR.setText(SPR_file_tif)
+        elif os.path.isfile(SPR_file_TIF):
+            self.ui.lineEditCTSPR.setText(SPR_file_TIF)
+        else:
+            self.error = "Cannot find SPR file, proceed if this is not a problem"
+            self.errorDialog = ErrorMessage(self.error)
 
 
         self.ui.lineEditScan.setText(self.scan_folder)
@@ -388,7 +396,28 @@ class MainWindow(QtGui.QMainWindow):
 
     def getReconMan(self):
         self.fileDialog = QtGui.QFileDialog(self)
-        self.ui.lineEditCTRecon.setText(self.fileDialog.getOpenFileName())
+        file = self.fileDialog.getOpenFileName()
+        if file == "":
+            print "User has pressed cancel"
+        else :
+            self.ui.lineEditCTRecon.setText(file)
+
+    def getScanMan(self):
+        self.fileDialog = QtGui.QFileDialog(self)
+        folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
+        if folder == "":
+            print "User has pressed cancel"
+        else :
+            self.ui.lineEditScan.setText(folder)#
+
+
+    def getSPRMan(self):
+        self.fileDialog = QtGui.QFileDialog(self)
+        file= self.fileDialog.getOpenFileName()
+        if file == "":
+            print "User has pressed cancel"
+        else :
+            self.ui.lineEditCTSPR.setText(file)
 
     def getReconLog(self):
         '''
