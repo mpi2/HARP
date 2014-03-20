@@ -67,9 +67,10 @@ class MainWidget(QtGui.QWidget):
         self.orig_width = self.image.width()
         self.orig_height = self.image.height()
         max_dimen = max([float(self.orig_width), float(self.orig_height)])
-        print "dim", max_dimen
+        print float(self.orig_width), float(self.orig_height)
+        print "crop: dim", max_dimen
         self.scaleFact = 950.00 / max_dimen
-        print "jhg ", self.scaleFact
+        #print "jhg ", self.scaleFact
         x = self.orig_width * self.scaleFact
         y = self.orig_height * self.scaleFact
 

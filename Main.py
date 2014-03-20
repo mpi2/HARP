@@ -716,7 +716,7 @@ class WorkThread(QtCore.QThread):
     def run(self):
         self.emit( QtCore.SIGNAL('update(QString)'), "Started Processing" )
         # Get the directory of the script
-        dir = os.path.dirname(os.path.abspath(__file__))
+        self.dir = os.path.dirname(os.path.abspath(__file__))
 
         # Get the session log file
         self.session_log_path = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_session.log")
@@ -759,16 +759,13 @@ class WorkThread(QtCore.QThread):
 
         # Perform scaling as subprocess with Popen (they should be done in the background)
         if self.configOb.SF2 == "yes" :
-            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling (SF2)" )
-            proSF2 = subprocess.Popen(["imagej", "-b", dir+"/siah_scale.txt", self.configOb.imageJ+":0.5"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            proSF2 = self.executeImagej(":0.5")
 
         if self.configOb.SF3 == "yes" :
-            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling (SF3)" )
-            proSF3 = subprocess.Popen(["imagej", "-b", dir+"/siah_scale.txt", self.configOb.imageJ+":0.3333"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            proSF3 = self.executeImagej(":0.3333")
 
         if self.configOb.SF4 == "yes" :
-            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling (SF4)" )
-            proSF4 = subprocess.Popen(["imagej", "-b", dir+"/siah_scale.txt", self.configOb.imageJ+":0.25"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            proSF4 = self.executeImagej(":0.25")
 
         if self.configOb.SF2 == "yes" :
             out2, err2 = proSF2.communicate()
@@ -787,6 +784,16 @@ class WorkThread(QtCore.QThread):
 
         session.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
+
+
+    def executeImagej(self, scaleFactor):
+        '''
+        @param: str, scaleFactor eg ":0.5"
+        '''
+        self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(scaleFactor) )
+        process = subprocess.Popen(["java", "-jar", "-batch", os.path.join(dir, "siah_scale.txt"),
+                                    self.configOb.imageJ + scaleFactor],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        return process
 
 
 def main():

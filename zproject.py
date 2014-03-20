@@ -31,12 +31,14 @@ class Zproject:
 
         im = Image.open(files[0])
         self.imdims = (im.size[1], im.size[0])
+
         #make a new list by removing every second image
         files = files[0::5]
 
         poolsize = cpu_count()
         p = Pool(poolsize)
         chunksize = int(len(files)/poolsize) +1
+        print "chunk {0}".format(chunksize)
         chunks = [files[i:i+chunksize]
                   for i in range(0, len(files), chunksize)]
 
@@ -46,6 +48,7 @@ class Zproject:
         maxi = np.amax(max_arrays, axis=0) #finds maximum along first axis
         img = Image.fromarray(np.uint8(maxi)) #should be of shape (4000, 4000)
         #img.save("max_intensity.tif")
+
         return img # Let the gui control where the image will be saved
 
 

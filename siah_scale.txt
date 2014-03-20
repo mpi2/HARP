@@ -54,13 +54,11 @@ zdepth = floor(image_list.length * scale);
 
 scale_string = replace(scale, '.', '-');
 run("Scale...", "x=" + scale + " y=" + scale +  " z="+scale + " depth=" + zdepth + " average process create title=scaled");
-selectWindow("scaled");
 
 
 //Create directory
 File.makeDirectory(out_path + scale_string);
 saveAs("Tiff", out_path + scale_string + "/"+ scale_string + ".tif");
-//run('Nrrd ... ', "nrrd=" + out_path + scale_string + "/"+ scale_string + ".nrrd");
 print("Scaling Finished");
 
 
