@@ -75,9 +75,7 @@ if __name__ == "__main__":
     zp_img = z.run()
     #assert zp_img.__class__ == "Image.Image"
     try:
-        os.mkdir(os.path.join(str(z.out_dir), "z_projection",))
         zp_img.save(os.path.join(str(z.out_dir), "z_projection", "max_intensity_z.tif"))
-        crop_success = True
 
     except IOError as e:
         print("cannot save the z-projection: {0}".format(e))

@@ -153,6 +153,7 @@ class MainWindow(QtGui.QMainWindow):
         output_folder = str(self.ui.lineEditOutput.text())
         print input_folder
         zproj_path = os.path.join(str(self.outputFolder), "z_projection")
+        self.stop = None
 
         if self.ui.checkBoxRF.isChecked():
             print "CheckBox has been checked so files will be replaced\n"
@@ -181,12 +182,22 @@ class MainWindow(QtGui.QMainWindow):
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print "Waiting"
             message = QtGui.QMessageBox.information(self, 'Message', 'Maximum intensity (z projection) of slices is being calculated, press OK and the Z projection image will pop up when ready.')
-            p.communicate()
+            out, err = p.communicate()
+            print out
+            print err
             self.ui.textEditStatusMessages.setText("Z-projection finished")
             #self.ui.label_zwait.setText("z project done")
             self.runCrop(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
             self.ui.textEditStatusMessages.setText("Dimensions selected")
 
+
+    def update(self,test):
+        # Updates the GUI to tell the user what the stage the processing is at
+        self.ui.label1_tracking.setText(test)
+        if test == "Crop finished" :
+            self.ui.progressBar_1.setValue(50)
+        if test == "Processing finished" :
+            self.ui.progressBar_1.setValue(100)
 
 
 
@@ -686,7 +697,7 @@ class Progress(QtGui.QDialog):
     def AddMore(self):
         dir = os.path.dirname(os.path.abspath(__file__))
         runPro_p = subprocess.Popen(["python", dir+"/Main.py"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print "test test test"
+
 
     def add(self,test):
         # Updates the GUI to tell the user what the stage the processing is at
