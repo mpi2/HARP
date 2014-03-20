@@ -56,6 +56,13 @@ class MainWindow(QtGui.QMainWindow):
        self.error = "None"
        self.stop = None
 
+       # initialise non essential information
+       self.scan_folder = ""
+       self.recon_log_path = ""
+       self.f_size_out_gb = ""
+       self.pixel_size = ""
+
+
        # get input folder
        self.ui.pushButtonInput.clicked.connect(self.selectFileIn)
 
@@ -191,7 +198,8 @@ class MainWindow(QtGui.QMainWindow):
             p = subprocess.Popen(["python", dir+"/zproject.py",input_folder,output_folder],stdin=subprocess.PIPE,
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print "Waiting"
-            message = QtGui.QMessageBox.information(self, 'Message', 'Maximum intensity (z projection) of slices is being calculated, press OK and the Z projection image will pop up when ready.')
+            QtCore.QCoreApplication.processEvents()
+            #message = QtGui.QMessageBox.information(self, 'Message', 'Maximum intensity (z projection) of slices is being calculated, press OK and the Z projection image will pop up when ready.')
             out, err = p.communicate()
             print out
             print err
@@ -401,6 +409,7 @@ class MainWindow(QtGui.QMainWindow):
             print "User has pressed cancel"
         else :
             self.ui.lineEditCTRecon.setText(file)
+            self.recon_log_path = os.path.abspath(file)
 
     def getScanMan(self):
         self.fileDialog = QtGui.QFileDialog(self)
@@ -729,12 +738,38 @@ class Progress(QtGui.QDialog):
 
 
     def add(self,test):
-        # Updates the GUI to tell the user what the stage the processing is at
         self.ui.label1_tracking.setText(test)
-        if test == "Crop finished" :
-            self.ui.progressBar_1.setValue(50)
+
         if test == "Processing finished" :
             self.ui.progressBar_1.setValue(100)
+
+
+        value = self.ui.progressBar_1.value() + 1
+
+        if test == "Crop finished" :
+            self.ui.progressBar_1.setValue(50)
+
+
+        self.ui.progressBar_1.setValue(value)
+
+        print value
+#
+#         while not test == "Processing finished":
+#             print "while loop started"
+#             time.sleep(0.1)
+#             QtCore.QCoreApplication.processEvents()
+#             value = self.ui.progressBar_1.value() + 1
+#             if test == "Processing finished" :
+#                  self.ui.progressBar_1.setValue(100)
+#                  break
+#             if (value == 100):
+#                  break
+#             self.ui.progressBar_1.setValue(value)
+
+
+
+
+
 
 
     def thread(self,configOb):
@@ -756,8 +791,7 @@ class WorkThread(QtCore.QThread):
     def run(self):
         self.emit( QtCore.SIGNAL('update(QString)'), "Started Processing" )
         # Get the directory of the script
-        self.dir = os.path.dirname(os.path.abspath(__file__))
-
+        self.dir = os.path.dirname(os.path.realpath(__file__))
         # Get the session log file
         self.session_log_path = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_session.log")
 
@@ -772,11 +806,14 @@ class WorkThread(QtCore.QThread):
         if not os.path.exists(cropped_path):
             os.makedirs(cropped_path)
 
+        crop_run = os.path.join(self.dir, "autocrop.py")
+        print crop_run
         # Perform the manual crop if required
         if self.configOb.crop_option == "Manual" :
             session.write("Performing manual crop\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing manual crop" )
-            manpro = subprocess.call(["python", dir+"/autocrop.py","-i",self.configOb.input_folder,"-o",
+
+            manpro = subprocess.call(["python", autocrop_run,"-i",self.configOb.input_folder,"-o",
                          cropped_path, "-t", "tif","-d",self.configOb.xcrop, self.configOb.ycrop, self.configOb.wcrop, self.configOb.hcrop],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
@@ -786,7 +823,8 @@ class WorkThread(QtCore.QThread):
         if self.configOb.crop_option == "Automatic" :
             session.write("Performing autocrop\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Autocrop started" )
-            aupro = subprocess.call(["python", dir+"/autocrop.py","-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
+
+            aupro = subprocess.call(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
             session.write("Crop finished\n")
@@ -831,7 +869,7 @@ class WorkThread(QtCore.QThread):
         @param: str, scaleFactor eg ":0.5"
         '''
         self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(scaleFactor) )
-        process = subprocess.Popen(["java", "-jar", "-batch", os.path.join(dir, "siah_scale.txt"),
+        process = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
                                     self.configOb.imageJ + scaleFactor],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         return process
 
