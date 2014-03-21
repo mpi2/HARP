@@ -889,6 +889,7 @@ class WorkThread(QtCore.QThread):
         session.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
 
+
     def executeImagej(self, scaleFactor):
         '''
         @param: str, scaleFactor eg ":0.5"

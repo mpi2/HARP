@@ -1058,4 +1058,3 @@ class Ui_MainWindow(object):
         self.actionChange_ID.setText(_translate("MainWindow", "Allow identification to be changed", None))
         self.actionManually_select_output_folder.setText(_translate("MainWindow", "Allow manually selection of output folder", None))
         self.actionAccurate_folder_size_calculation.setText(_translate("MainWindow", "Accurate folder size calculation", None))
-
