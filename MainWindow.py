@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Mar  7 10:57:49 2014
+# Created: Thu Mar 20 15:25:41 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,19 +26,19 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1203, 986)
+        MainWindow.resize(1274, 1009)
         font = QtGui.QFont()
         font.setPointSize(12)
         MainWindow.setFont(font)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.frame = QtGui.QFrame(self.centralwidget)
-        self.frame.setGeometry(QtCore.QRect(10, 20, 1181, 921))
+        self.frame.setGeometry(QtCore.QRect(20, 10, 1251, 941))
         self.frame.setFrameShape(QtGui.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtGui.QFrame.Raised)
         self.frame.setObjectName(_fromUtf8("frame"))
         self.gridLayoutWidget = QtGui.QWidget(self.frame)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(20, 20, 601, 66))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(20, 20, 711, 72))
         self.gridLayoutWidget.setObjectName(_fromUtf8("gridLayoutWidget"))
         self.gridLayoutFileSelect = QtGui.QGridLayout(self.gridLayoutWidget)
         self.gridLayoutFileSelect.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
@@ -69,7 +69,7 @@ class Ui_MainWindow(object):
         self.pushButtonOutput.setObjectName(_fromUtf8("pushButtonOutput"))
         self.gridLayoutFileSelect.addWidget(self.pushButtonOutput, 1, 0, 1, 1)
         self.groupBoxOPTOnly = QtGui.QGroupBox(self.frame)
-        self.groupBoxOPTOnly.setGeometry(QtCore.QRect(20, 580, 1131, 241))
+        self.groupBoxOPTOnly.setGeometry(QtCore.QRect(20, 580, 1221, 251))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxOPTOnly.setFont(font)
@@ -84,7 +84,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    background:url(:/assets/subWindowBackground);\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
@@ -93,13 +93,13 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxOPTOnly.setCheckable(True)
         self.groupBoxOPTOnly.setChecked(False)
         self.groupBoxOPTOnly.setObjectName(_fromUtf8("groupBoxOPTOnly"))
         self.formLayoutWidget_5 = QtGui.QWidget(self.groupBoxOPTOnly)
-        self.formLayoutWidget_5.setGeometry(QtCore.QRect(11, 32, 261, 206))
+        self.formLayoutWidget_5.setGeometry(QtCore.QRect(11, 32, 261, 224))
         self.formLayoutWidget_5.setObjectName(_fromUtf8("formLayoutWidget_5"))
         self.formLayoutCh1 = QtGui.QFormLayout(self.formLayoutWidget_5)
         self.formLayoutCh1.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -173,7 +173,7 @@ class Ui_MainWindow(object):
         self.comboBox_3.addItem(_fromUtf8(""))
         self.formLayoutCh1.setWidget(5, QtGui.QFormLayout.LabelRole, self.comboBox_3)
         self.formLayoutWidget_6 = QtGui.QWidget(self.groupBoxOPTOnly)
-        self.formLayoutWidget_6.setGeometry(QtCore.QRect(290, 32, 261, 206))
+        self.formLayoutWidget_6.setGeometry(QtCore.QRect(290, 32, 261, 224))
         self.formLayoutWidget_6.setObjectName(_fromUtf8("formLayoutWidget_6"))
         self.formLayout_4 = QtGui.QFormLayout(self.formLayoutWidget_6)
         self.formLayout_4.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -247,7 +247,7 @@ class Ui_MainWindow(object):
         self.comboBox_4.addItem(_fromUtf8(""))
         self.formLayout_4.setWidget(5, QtGui.QFormLayout.LabelRole, self.comboBox_4)
         self.formLayoutWidget_7 = QtGui.QWidget(self.groupBoxOPTOnly)
-        self.formLayoutWidget_7.setGeometry(QtCore.QRect(570, 32, 261, 206))
+        self.formLayoutWidget_7.setGeometry(QtCore.QRect(570, 32, 261, 224))
         self.formLayoutWidget_7.setObjectName(_fromUtf8("formLayoutWidget_7"))
         self.formLayout_5 = QtGui.QFormLayout(self.formLayoutWidget_7)
         self.formLayout_5.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -321,7 +321,7 @@ class Ui_MainWindow(object):
         self.comboBox_5.addItem(_fromUtf8(""))
         self.formLayout_5.setWidget(5, QtGui.QFormLayout.LabelRole, self.comboBox_5)
         self.formLayoutWidget_8 = QtGui.QWidget(self.groupBoxOPTOnly)
-        self.formLayoutWidget_8.setGeometry(QtCore.QRect(850, 32, 261, 206))
+        self.formLayoutWidget_8.setGeometry(QtCore.QRect(850, 32, 261, 224))
         self.formLayoutWidget_8.setObjectName(_fromUtf8("formLayoutWidget_8"))
         self.formLayout_6 = QtGui.QFormLayout(self.formLayoutWidget_8)
         self.formLayout_6.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -395,7 +395,7 @@ class Ui_MainWindow(object):
         self.comboBox_6.addItem(_fromUtf8(""))
         self.formLayout_6.setWidget(5, QtGui.QFormLayout.LabelRole, self.comboBox_6)
         self.groupBoxModality = QtGui.QGroupBox(self.frame)
-        self.groupBoxModality.setGeometry(QtCore.QRect(640, 20, 241, 61))
+        self.groupBoxModality.setGeometry(QtCore.QRect(740, 20, 501, 61))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxModality.setFont(font)
@@ -408,7 +408,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
 "    border: 1px solid #0b477b;\n"
@@ -416,7 +416,7 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxModality.setObjectName(_fromUtf8("groupBoxModality"))
         self.radioButtonuCT = QtGui.QRadioButton(self.groupBoxModality)
@@ -432,14 +432,8 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         self.radioButtonOPT.setFont(font)
         self.radioButtonOPT.setObjectName(_fromUtf8("radioButtonOPT"))
-        self.pushButtonAutopop = QtGui.QPushButton(self.frame)
-        self.pushButtonAutopop.setGeometry(QtCore.QRect(890, 21, 251, 61))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.pushButtonAutopop.setFont(font)
-        self.pushButtonAutopop.setObjectName(_fromUtf8("pushButtonAutopop"))
         self.groupBoxID = QtGui.QGroupBox(self.frame)
-        self.groupBoxID.setGeometry(QtCore.QRect(20, 200, 601, 131))
+        self.groupBoxID.setGeometry(QtCore.QRect(20, 200, 711, 141))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxID.setFont(font)
@@ -454,7 +448,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
 "    border: 1px solid #0b477b;\n"
@@ -462,11 +456,11 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxID.setObjectName(_fromUtf8("groupBoxID"))
         self.gridLayoutWidget_3 = QtGui.QWidget(self.groupBoxID)
-        self.gridLayoutWidget_3.setGeometry(QtCore.QRect(10, 32, 581, 31))
+        self.gridLayoutWidget_3.setGeometry(QtCore.QRect(11, 28, 691, 34))
         self.gridLayoutWidget_3.setObjectName(_fromUtf8("gridLayoutWidget_3"))
         self.gridLayoutIDs = QtGui.QGridLayout(self.gridLayoutWidget_3)
         self.gridLayoutIDs.setMargin(0)
@@ -477,39 +471,13 @@ class Ui_MainWindow(object):
         self.labelAge.setFont(font)
         self.labelAge.setObjectName(_fromUtf8("labelAge"))
         self.gridLayoutIDs.addWidget(self.labelAge, 0, 4, 1, 1)
-        self.labelGroup = QtGui.QLabel(self.gridLayoutWidget_3)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.labelGroup.setFont(font)
-        self.labelGroup.setObjectName(_fromUtf8("labelGroup"))
-        self.gridLayoutIDs.addWidget(self.labelGroup, 0, 2, 1, 1)
-        self.labelZygosity = QtGui.QLabel(self.gridLayoutWidget_3)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.labelZygosity.setFont(font)
-        self.labelZygosity.setObjectName(_fromUtf8("labelZygosity"))
-        self.gridLayoutIDs.addWidget(self.labelZygosity, 0, 8, 1, 1)
         self.lineEditGroup = QtGui.QLineEdit(self.gridLayoutWidget_3)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.lineEditGroup.setFont(font)
+        self.lineEditGroup.setReadOnly(True)
         self.lineEditGroup.setObjectName(_fromUtf8("lineEditGroup"))
         self.gridLayoutIDs.addWidget(self.lineEditGroup, 0, 3, 1, 1)
-        self.lineEditZygosity = QtGui.QLineEdit(self.gridLayoutWidget_3)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.lineEditZygosity.setFont(font)
-        self.lineEditZygosity.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.lineEditZygosity.setObjectName(_fromUtf8("lineEditZygosity"))
-        self.gridLayoutIDs.addWidget(self.lineEditZygosity, 0, 9, 1, 1)
-        self.lineEditLitter = QtGui.QLineEdit(self.gridLayoutWidget_3)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.lineEditLitter.setFont(font)
-        self.lineEditLitter.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.lineEditLitter.setText(_fromUtf8(""))
-        self.lineEditLitter.setObjectName(_fromUtf8("lineEditLitter"))
-        self.gridLayoutIDs.addWidget(self.lineEditLitter, 0, 7, 1, 1)
         self.lineEditDate = QtGui.QLineEdit(self.gridLayoutWidget_3)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -520,18 +488,14 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         self.lineEditDate.setFont(font)
         self.lineEditDate.setText(_fromUtf8(""))
+        self.lineEditDate.setReadOnly(True)
         self.lineEditDate.setObjectName(_fromUtf8("lineEditDate"))
         self.gridLayoutIDs.addWidget(self.lineEditDate, 0, 1, 1, 1)
-        self.labelLitter = QtGui.QLabel(self.gridLayoutWidget_3)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.labelLitter.setFont(font)
-        self.labelLitter.setObjectName(_fromUtf8("labelLitter"))
-        self.gridLayoutIDs.addWidget(self.labelLitter, 0, 6, 1, 1)
         self.lineEditAge = QtGui.QLineEdit(self.gridLayoutWidget_3)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.lineEditAge.setFont(font)
+        self.lineEditAge.setReadOnly(True)
         self.lineEditAge.setObjectName(_fromUtf8("lineEditAge"))
         self.gridLayoutIDs.addWidget(self.lineEditAge, 0, 5, 1, 1)
         self.labelDate = QtGui.QLabel(self.gridLayoutWidget_3)
@@ -540,8 +504,14 @@ class Ui_MainWindow(object):
         self.labelDate.setFont(font)
         self.labelDate.setObjectName(_fromUtf8("labelDate"))
         self.gridLayoutIDs.addWidget(self.labelDate, 0, 0, 1, 1)
+        self.labelGroup = QtGui.QLabel(self.gridLayoutWidget_3)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.labelGroup.setFont(font)
+        self.labelGroup.setObjectName(_fromUtf8("labelGroup"))
+        self.gridLayoutIDs.addWidget(self.labelGroup, 0, 2, 1, 1)
         self.gridLayoutWidget_2 = QtGui.QWidget(self.groupBoxID)
-        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 67, 581, 31))
+        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 100, 691, 34))
         self.gridLayoutWidget_2.setObjectName(_fromUtf8("gridLayoutWidget_2"))
         self.gridLayoutName = QtGui.QGridLayout(self.gridLayoutWidget_2)
         self.gridLayoutName.setMargin(0)
@@ -556,11 +526,60 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(12)
         self.lineEditName.setFont(font)
-        self.lineEditName.setReadOnly(False)
+        self.lineEditName.setReadOnly(True)
         self.lineEditName.setObjectName(_fromUtf8("lineEditName"))
         self.gridLayoutName.addWidget(self.lineEditName, 0, 1, 1, 1)
+        self.gridLayoutWidget_5 = QtGui.QWidget(self.groupBoxID)
+        self.gridLayoutWidget_5.setGeometry(QtCore.QRect(11, 64, 691, 34))
+        self.gridLayoutWidget_5.setObjectName(_fromUtf8("gridLayoutWidget_5"))
+        self.gridLayoutIDs_2 = QtGui.QGridLayout(self.gridLayoutWidget_5)
+        self.gridLayoutIDs_2.setMargin(0)
+        self.gridLayoutIDs_2.setObjectName(_fromUtf8("gridLayoutIDs_2"))
+        self.labelLitter = QtGui.QLabel(self.gridLayoutWidget_5)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.labelLitter.setFont(font)
+        self.labelLitter.setObjectName(_fromUtf8("labelLitter"))
+        self.gridLayoutIDs_2.addWidget(self.labelLitter, 0, 0, 1, 1)
+        self.lineEditLitter = QtGui.QLineEdit(self.gridLayoutWidget_5)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEditLitter.setFont(font)
+        self.lineEditLitter.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.lineEditLitter.setText(_fromUtf8(""))
+        self.lineEditLitter.setReadOnly(True)
+        self.lineEditLitter.setObjectName(_fromUtf8("lineEditLitter"))
+        self.gridLayoutIDs_2.addWidget(self.lineEditLitter, 0, 1, 1, 1)
+        self.labelSex = QtGui.QLabel(self.gridLayoutWidget_5)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.labelSex.setFont(font)
+        self.labelSex.setObjectName(_fromUtf8("labelSex"))
+        self.gridLayoutIDs_2.addWidget(self.labelSex, 0, 4, 1, 1)
+        self.lineEditSex = QtGui.QLineEdit(self.gridLayoutWidget_5)
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setPointSize(12)
+        self.lineEditSex.setFont(font)
+        self.lineEditSex.setReadOnly(True)
+        self.lineEditSex.setObjectName(_fromUtf8("lineEditSex"))
+        self.gridLayoutIDs_2.addWidget(self.lineEditSex, 0, 5, 1, 1)
+        self.lineEditZygosity = QtGui.QLineEdit(self.gridLayoutWidget_5)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEditZygosity.setFont(font)
+        self.lineEditZygosity.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.lineEditZygosity.setReadOnly(True)
+        self.lineEditZygosity.setObjectName(_fromUtf8("lineEditZygosity"))
+        self.gridLayoutIDs_2.addWidget(self.lineEditZygosity, 0, 3, 1, 1)
+        self.labelZygosity = QtGui.QLabel(self.gridLayoutWidget_5)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.labelZygosity.setFont(font)
+        self.labelZygosity.setObjectName(_fromUtf8("labelZygosity"))
+        self.gridLayoutIDs_2.addWidget(self.labelZygosity, 0, 2, 1, 1)
         self.groupBoxOptions = QtGui.QGroupBox(self.frame)
-        self.groupBoxOptions.setGeometry(QtCore.QRect(640, 110, 501, 221))
+        self.groupBoxOptions.setGeometry(QtCore.QRect(740, 110, 501, 231))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxOptions.setFont(font)
@@ -575,7 +594,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
 "    border: 1px solid #0b477b;\n"
@@ -583,7 +602,7 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxOptions.setObjectName(_fromUtf8("groupBoxOptions"))
         self.label_5 = QtGui.QLabel(self.groupBoxOptions)
@@ -599,6 +618,7 @@ class Ui_MainWindow(object):
         self.label_13.setFont(font)
         self.label_13.setObjectName(_fromUtf8("label_13"))
         self.checkBoxMovie_2 = QtGui.QCheckBox(self.groupBoxOptions)
+        self.checkBoxMovie_2.setEnabled(False)
         self.checkBoxMovie_2.setGeometry(QtCore.QRect(155, 139, 136, 23))
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -644,18 +664,21 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(12)
         self.checkBoxSF2.setFont(font)
+        self.checkBoxSF2.setChecked(True)
         self.checkBoxSF2.setObjectName(_fromUtf8("checkBoxSF2"))
         self.checkBoxSF3 = QtGui.QCheckBox(self.groupBoxOptions)
         self.checkBoxSF3.setGeometry(QtCore.QRect(203, 33, 41, 17))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.checkBoxSF3.setFont(font)
+        self.checkBoxSF3.setChecked(True)
         self.checkBoxSF3.setObjectName(_fromUtf8("checkBoxSF3"))
         self.checkBoxSF4 = QtGui.QCheckBox(self.groupBoxOptions)
         self.checkBoxSF4.setGeometry(QtCore.QRect(250, 33, 41, 17))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.checkBoxSF4.setFont(font)
+        self.checkBoxSF4.setChecked(True)
         self.checkBoxSF4.setObjectName(_fromUtf8("checkBoxSF4"))
         self.label = QtGui.QLabel(self.groupBoxOptions)
         self.label.setGeometry(QtCore.QRect(10, 172, 121, 16))
@@ -664,12 +687,14 @@ class Ui_MainWindow(object):
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.checkBox = QtGui.QCheckBox(self.groupBoxOptions)
+        self.checkBox.setEnabled(False)
         self.checkBox.setGeometry(QtCore.QRect(155, 171, 81, 17))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.checkBox.setFont(font)
         self.checkBox.setObjectName(_fromUtf8("checkBox"))
         self.checkBox_2 = QtGui.QCheckBox(self.groupBoxOptions)
+        self.checkBox_2.setEnabled(False)
         self.checkBox_2.setGeometry(QtCore.QRect(245, 169, 161, 21))
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -716,8 +741,12 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         self.radioButtonNo.setFont(font)
         self.radioButtonNo.setObjectName(_fromUtf8("radioButtonNo"))
+        self.label_zwait = QtGui.QLabel(self.groupBoxOptions)
+        self.label_zwait.setGeometry(QtCore.QRect(337, 120, 151, 21))
+        self.label_zwait.setText(_fromUtf8(""))
+        self.label_zwait.setObjectName(_fromUtf8("label_zwait"))
         self.groupBoxuCTOnly = QtGui.QGroupBox(self.frame)
-        self.groupBoxuCTOnly.setGeometry(QtCore.QRect(20, 360, 301, 191))
+        self.groupBoxuCTOnly.setGeometry(QtCore.QRect(20, 350, 301, 221))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxuCTOnly.setFont(font)
@@ -730,7 +759,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
 "    border: 1px solid #0b477b;\n"
@@ -738,14 +767,14 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxuCTOnly.setFlat(False)
         self.groupBoxuCTOnly.setCheckable(True)
         self.groupBoxuCTOnly.setChecked(True)
         self.groupBoxuCTOnly.setObjectName(_fromUtf8("groupBoxuCTOnly"))
         self.formLayoutWidget_9 = QtGui.QWidget(self.groupBoxuCTOnly)
-        self.formLayoutWidget_9.setGeometry(QtCore.QRect(10, 35, 261, 141))
+        self.formLayoutWidget_9.setGeometry(QtCore.QRect(10, 35, 261, 183))
         self.formLayoutWidget_9.setObjectName(_fromUtf8("formLayoutWidget_9"))
         self.formLayoutuCTOnly = QtGui.QFormLayout(self.formLayoutWidget_9)
         self.formLayoutuCTOnly.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -776,12 +805,14 @@ class Ui_MainWindow(object):
         self.lineEditCTSPR.setObjectName(_fromUtf8("lineEditCTSPR"))
         self.formLayoutuCTOnly.setWidget(1, QtGui.QFormLayout.FieldRole, self.lineEditCTSPR)
         self.pushButtonCTARC = QtGui.QPushButton(self.formLayoutWidget_9)
+        self.pushButtonCTARC.setEnabled(False)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.pushButtonCTARC.setFont(font)
         self.pushButtonCTARC.setObjectName(_fromUtf8("pushButtonCTARC"))
         self.formLayoutuCTOnly.setWidget(2, QtGui.QFormLayout.LabelRole, self.pushButtonCTARC)
         self.lineEditCTARC = QtGui.QLineEdit(self.formLayoutWidget_9)
+        self.lineEditCTARC.setEnabled(False)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.lineEditCTARC.setFont(font)
@@ -793,9 +824,23 @@ class Ui_MainWindow(object):
         self.comboBoxCh.setFont(font)
         self.comboBoxCh.setObjectName(_fromUtf8("comboBoxCh"))
         self.comboBoxCh.addItem(_fromUtf8(""))
-        self.formLayoutuCTOnly.setWidget(3, QtGui.QFormLayout.LabelRole, self.comboBoxCh)
+        self.formLayoutuCTOnly.setWidget(4, QtGui.QFormLayout.LabelRole, self.comboBoxCh)
+        self.pushButtonScan = QtGui.QPushButton(self.formLayoutWidget_9)
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setPointSize(12)
+        self.pushButtonScan.setFont(font)
+        self.pushButtonScan.setObjectName(_fromUtf8("pushButtonScan"))
+        self.formLayoutuCTOnly.setWidget(3, QtGui.QFormLayout.LabelRole, self.pushButtonScan)
+        self.lineEditScan = QtGui.QLineEdit(self.formLayoutWidget_9)
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setPointSize(12)
+        self.lineEditScan.setFont(font)
+        self.lineEditScan.setObjectName(_fromUtf8("lineEditScan"))
+        self.formLayoutuCTOnly.setWidget(3, QtGui.QFormLayout.FieldRole, self.lineEditScan)
         self.groupBoxReconInfo = QtGui.QGroupBox(self.frame)
-        self.groupBoxReconInfo.setGeometry(QtCore.QRect(20, 109, 601, 81))
+        self.groupBoxReconInfo.setGeometry(QtCore.QRect(20, 109, 711, 81))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxReconInfo.setFont(font)
@@ -811,7 +856,7 @@ class Ui_MainWindow(object):
 "\n"
 "QGroupBox::title\n"
 "{\n"
-"    subcontrol-origin: margin;    \n"
+"    subcontrol-origin: margin;\n"
 "    border-top-left-radius: 3px;\n"
 "    border-top-right-radius: 3px;\n"
 "    border: 1px solid #0b477b;\n"
@@ -819,13 +864,13 @@ class Ui_MainWindow(object):
 "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
 "        stop: 0 #005192, stop: 1 #002f60);\n"
 "    padding: 2 2px;\n"
-"    color: white;   \n"
+"    color: white;\n"
 "}"))
         self.groupBoxReconInfo.setFlat(False)
         self.groupBoxReconInfo.setCheckable(False)
         self.groupBoxReconInfo.setObjectName(_fromUtf8("groupBoxReconInfo"))
         self.gridLayoutWidget_4 = QtGui.QWidget(self.groupBoxReconInfo)
-        self.gridLayoutWidget_4.setGeometry(QtCore.QRect(10, 33, 581, 31))
+        self.gridLayoutWidget_4.setGeometry(QtCore.QRect(10, 33, 691, 31))
         self.gridLayoutWidget_4.setObjectName(_fromUtf8("gridLayoutWidget_4"))
         self.gridLayoutReconInfo = QtGui.QGridLayout(self.gridLayoutWidget_4)
         self.gridLayoutReconInfo.setMargin(0)
@@ -855,15 +900,67 @@ class Ui_MainWindow(object):
         self.labelPixel.setObjectName(_fromUtf8("labelPixel"))
         self.gridLayoutReconInfo.addWidget(self.labelPixel, 0, 2, 1, 1)
         self.pushButtonGo = QtGui.QPushButton(self.frame)
-        self.pushButtonGo.setGeometry(QtCore.QRect(460, 840, 291, 61))
+        self.pushButtonGo.setGeometry(QtCore.QRect(460, 860, 291, 61))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.pushButtonGo.setFont(font)
         self.pushButtonGo.setDefault(False)
         self.pushButtonGo.setObjectName(_fromUtf8("pushButtonGo"))
+        self.groupBoxModality_2 = QtGui.QGroupBox(self.frame)
+        self.groupBoxModality_2.setGeometry(QtCore.QRect(740, 350, 501, 121))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.groupBoxModality_2.setFont(font)
+        self.groupBoxModality_2.setStyleSheet(_fromUtf8("QGroupBox\n"
+"{\n"
+"    background-color:transparent;\n"
+"    border: 1px solid #acacac;\n"
+"    margin-top: 5px;\n"
+"}\n"
+"\n"
+"QGroupBox::title\n"
+"{\n"
+"    subcontrol-origin: margin;\n"
+"    border-top-left-radius: 3px;\n"
+"    border-top-right-radius: 3px;\n"
+"    border: 1px solid #0b477b;\n"
+"    border-bottom: none;\n"
+"    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
+"        stop: 0 #005192, stop: 1 #002f60);\n"
+"    padding: 2 2px;\n"
+"    color: white;\n"
+"}"))
+        self.groupBoxModality_2.setObjectName(_fromUtf8("groupBoxModality_2"))
+        self.textEditStatusMessages = QtGui.QTextEdit(self.groupBoxModality_2)
+        self.textEditStatusMessages.setGeometry(QtCore.QRect(30, 30, 461, 71))
+        palette = QtGui.QPalette()
+        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.WindowText, brush)
+        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.Text, brush)
+        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.WindowText, brush)
+        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.Text, brush)
+        brush = QtGui.QBrush(QtGui.QColor(123, 123, 123))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, brush)
+        brush = QtGui.QBrush(QtGui.QColor(123, 123, 123))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Text, brush)
+        self.textEditStatusMessages.setPalette(palette)
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setPointSize(14)
+        self.textEditStatusMessages.setFont(font)
+        self.textEditStatusMessages.setObjectName(_fromUtf8("textEditStatusMessages"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1203, 29))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1274, 29))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuOptions = QtGui.QMenu(self.menubar)
         self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
@@ -917,14 +1014,14 @@ class Ui_MainWindow(object):
         self.groupBoxModality.setTitle(_translate("MainWindow", "Imaging modality", None))
         self.radioButtonuCT.setText(_translate("MainWindow", "µCT", None))
         self.radioButtonOPT.setText(_translate("MainWindow", "OPT", None))
-        self.pushButtonAutopop.setText(_translate("MainWindow", "Autopopulate", None))
         self.groupBoxID.setTitle(_translate("MainWindow", "Identification", None))
         self.labelAge.setText(_translate("MainWindow", "Stage", None))
-        self.labelGroup.setText(_translate("MainWindow", "Gene", None))
-        self.labelZygosity.setText(_translate("MainWindow", "Zygosity", None))
-        self.labelLitter.setText(_translate("MainWindow", "Litter", None))
         self.labelDate.setText(_translate("MainWindow", "Date", None))
+        self.labelGroup.setText(_translate("MainWindow", "Gene", None))
         self.labelName.setText(_translate("MainWindow", "Full name", None))
+        self.labelLitter.setText(_translate("MainWindow", "Litter", None))
+        self.labelSex.setText(_translate("MainWindow", "Sex", None))
+        self.labelZygosity.setText(_translate("MainWindow", "Zygosity", None))
         self.groupBoxOptions.setTitle(_translate("MainWindow", "Options", None))
         self.label_5.setText(_translate("MainWindow", "Downsize", None))
         self.label_13.setText(_translate("MainWindow", "Create movie", None))
@@ -940,7 +1037,7 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Compress files", None))
         self.checkBox.setText(_translate("MainWindow", "Scans", None))
         self.checkBox_2.setText(_translate("MainWindow", "Original recons", None))
-        self.label_2.setText(_translate("MainWindow", "Replace folders", None))
+        self.label_2.setText(_translate("MainWindow", "Replace files", None))
         self.checkBoxRF.setText(_translate("MainWindow", "Yes", None))
         self.pushButtonGetDimensions.setText(_translate("MainWindow", "Get dimensions", None))
         self.radioButtonAuto.setText(_translate("MainWindow", "Automatic", None))
@@ -951,10 +1048,12 @@ class Ui_MainWindow(object):
         self.pushButtonCTSPR.setText(_translate("MainWindow", "Pick SPR", None))
         self.pushButtonCTARC.setText(_translate("MainWindow", "Pick ARC", None))
         self.comboBoxCh.setItemText(0, _translate("MainWindow", "Ch-X", None))
+        self.pushButtonScan.setText(_translate("MainWindow", "Scan folder", None))
         self.groupBoxReconInfo.setTitle(_translate("MainWindow", "Recon File Info", None))
         self.labelFile.setText(_translate("MainWindow", "Folder size (Mb)", None))
         self.labelPixel.setText(_translate("MainWindow", "Pixel size (µm)", None))
         self.pushButtonGo.setText(_translate("MainWindow", "Go!", None))
+        self.groupBoxModality_2.setTitle(_translate("MainWindow", "Status", None))
         self.menuOptions.setTitle(_translate("MainWindow", "Adv. Options", None))
         self.actionChange_ID.setText(_translate("MainWindow", "Allow identification to be changed", None))
         self.actionManually_select_output_folder.setText(_translate("MainWindow", "Allow manually selection of output folder", None))

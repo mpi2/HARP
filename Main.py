@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # Import PyQT module
-from PyQt4 import QtGui
-from PyQt4.QtCore import pyqtSlot,SIGNAL,SLOT
+from PyQt4 import QtGui,QtCore
 # Import MainWindow class from QT Designer
-from MainWindow import *
-from Progress import *
-from ErrorMessage import *
+from MainWindow import Ui_MainWindow
+from Progress import Ui_Progress
+#from Run_processing_threaded import Progress
+from ErrorMessage import Ui_DialogErrMessage
+
 import zproject
 import crop
 
@@ -20,6 +21,12 @@ import pprint
 import time
 import shutil
 import uuid
+from multiprocessing import Process
+from PyQt4.uic.Compiler.qtproxies import QtCore
+try:
+    import Image
+except ImportError:
+    from PIL import Image
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -42,15 +49,19 @@ class MainWindow(QtGui.QMainWindow):
        # Make unique ID if this is the first time mainwindow has been called
        self.unique_ID = uuid.uuid1()
        print "ID for session:"+str(self.unique_ID)
-       self.ID_folder = os.path.join("/tmp","siah",str(self.unique_ID))
-       # Make a unique folder in the tmp directory which will store tracking information
-       os.makedirs(self.ID_folder)
 
        # Initialise modality variable
        self.modality = "Not_selected"
        self.selected = "Not_selected"
        self.error = "None"
        self.stop = None
+
+       # initialise non essential information
+       self.scan_folder = ""
+       self.recon_log_path = ""
+       self.f_size_out_gb = ""
+       self.pixel_size = ""
+
 
        # get input folder
        self.ui.pushButtonInput.clicked.connect(self.selectFileIn)
@@ -64,9 +75,6 @@ class MainWindow(QtGui.QMainWindow):
        # uCT selection
        self.ui.radioButtonuCT.clicked.connect(self.getuCTonly)
 
-       # auto-populate based on input folder and modality selection
-       self.ui.pushButtonAutopop.clicked.connect(self.autopop)
-
        # If Go button is pressed move onto track progress dialog box
        self.ui.pushButtonGo.clicked.connect(self.processGo)
 
@@ -77,25 +85,134 @@ class MainWindow(QtGui.QMainWindow):
        self.ui.radioButtonNo.clicked.connect(self.manCropOff)
        # Man crop (enable buttons).
        self.ui.radioButtonMan.clicked.connect(self.manCropOn)
-       # If the get dimensions button is pressed the
+       # If the get dimensions button is pressed
        self.ui.pushButtonGetDimensions.clicked.connect(self.getDimensions)
+
+       #Get the output folder name when input updated
+       self.ui.lineEditOutput.textChanged.connect(self.outputFolderChanged)
+       self.ui.lineEditInput.textChanged.connect(self.inputFolderChanged)
+
+       # Get recon file manually
+       self.ui.pushButtonCTRecon.clicked.connect(self.getReconMan)
+
+       # Get scan file manually
+       self.ui.pushButtonScan.clicked.connect(self.getScanMan)
+
+       # Get SPR file manually
+       self.ui.pushButtonCTSPR.clicked.connect(self.getSPRMan)
+
 
        # to make the window visible
        self.show()
 
-    def callback(box):
-        print box
+
+
+    def check(self):
+        print "asdsada"
+
+    def selectFileIn(self):
+        ''' Get the info for the selected file'''
+        self.fileDialog = QtGui.QFileDialog(self)
+        folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
+
+        if folder == "":
+            print "User has pressed cancel"
+        else :
+            self.ui.lineEditInput.setText(folder)
+            self.getName()
+
+            if self.error == "None" :
+                self.autoFileOut()
+
+            if self.error == "None" :
+                self.getReconLog()
+
+            if self.error == "None" :
+                self.autouCTOnly()
+
+            if self.error == "None" :
+                self.folderSizeApprox()
+
+            self.error = "None"
+
+
+    def selectFileOut(self):
+        ''' Select output folder (this should be blocked as standard'''
+        self.fileDialog = QtGui.QFileDialog(self)
+        folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
+        if folder == "":
+            print "User has pressed cancel"
+        else:
+            self.ui.lineEditOutput.setText(folder)
+
+
+    def inputFolderChanged(self, text):
+        self.inputFolder = text
+
+    def outputFolderChanged(self, text):
+        self.outputFolder = text
+
+    def cropCallback(self, box):
+        print "callback test:", box
+        self.ui.lineEditX.setText(str(box[0]))
+        self.ui.lineEditY.setText(str(box[1]))
+        self.ui.lineEditW.setText(str(box[2]))
+        self.ui.lineEditH.setText(str(box[3]))
 
     def getDimensions(self):
         ''' Perform a z projection and then allows user to crop based on z projection'''
-        #zp = zproject.Zproject(img_dir)
-        #self.getDimensions = crop()
-        #app = QtGui.QApplication(sys.argv)
+        #
 
-        window = MyMainWindow(self.callback, "/home/tom/Desktop/HyperStack0000.bmp")
-        window.show()
+        dir = os.path.dirname(os.path.abspath(__file__))
 
-        #crop.run(self.callback, "/home/tom/Desktop/HyperStack0000.bmp")
+        # Opens MyMainWindow from crop.py
+        input_folder = str(self.ui.lineEditInput.text())
+        output_folder = str(self.ui.lineEditOutput.text())
+        print input_folder
+        zproj_path = os.path.join(str(self.outputFolder), "z_projection")
+        self.stop = None
+
+        if self.ui.checkBoxRF.isChecked():
+            print "CheckBox has been checked so files will be replaced\n"
+            self.stop = None
+        elif os.path.exists(zproj_path):
+            print "Output folder for z project already exists and user has not approved overwrite"
+            # Running dialog box to inform user of options
+            message = QtGui.QMessageBox.question(self, 'Message', 'Folder already exists for Z projection. Can this file be overwritten?', QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            if message == QtGui.QMessageBox.Yes:
+                self.stop = None
+            if message == QtGui.QMessageBox.No:
+                self.stop = True
+        else :
+            try:
+                print "Creating output folder"
+                os.makedirs(zproj_path)
+                self.stop = None
+            except IOError as e:
+                print("cannot make directory for saving the z-projection: {0}".format(e))
+                self.errorDialog = ErrorMessage("cannot make directory for saving the z-projection: {0}".format(e))
+
+        if self.stop == None :
+
+            self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
+            p = subprocess.Popen(["python", dir+"/zproject.py",input_folder,output_folder],stdin=subprocess.PIPE,
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print "Waiting"
+            QtCore.QCoreApplication.processEvents()
+            #message = QtGui.QMessageBox.information(self, 'Message', 'Maximum intensity (z projection) of slices is being calculated, press OK and the Z projection image will pop up when ready.')
+            out, err = p.communicate()
+            print out
+            print err
+            self.ui.textEditStatusMessages.setText("Z-projection finished")
+            #self.ui.label_zwait.setText("z project done")
+            self.runCrop(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
+            self.ui.textEditStatusMessages.setText("Dimensions selected")
+
+
+    def runCrop(self, img_path):
+        cropper = crop.Crop(self.cropCallback, img_path, self)
+        cropper.show()
+
 
 
     def manCropOff(self):
@@ -142,15 +259,15 @@ class MainWindow(QtGui.QMainWindow):
         input = str(self.ui.lineEditInput.text())
 
         # create a regex get example recon file
-        prog = re.compile("(.*)_rec\d+\.bmp")
+        prog = re.compile("(.*)_rec\d+\.(bmp|tif)",re.IGNORECASE)
 
         try:
             filename = ""
             # for loop to go through the directory
             for line in os.listdir(input) :
                 line =str(line)
-                print line+"\n"
-                # if the line matches the regex print
+                #print line+"\n"
+                # if the line matches the regex break
                 if prog.match(line) :
                     filename = line
                     break
@@ -158,8 +275,10 @@ class MainWindow(QtGui.QMainWindow):
             filename = input+"/"+filename
             file1_size = os.stat(filename).st_size
 
-            num_files = len([f for f in os.listdir(input) if ((f[-4:] == ".bmp") or (f[-4:] == ".tif")) and
-                          ((f[-7:] != "spr.bmp") or (f[-7:] != "spr.tif"))])
+            num_files = len([f for f in os.listdir(input) if ((f[-4:] == ".bmp") or (f[-4:] == ".tif") or
+                          (f[-7:] != "spr.bmp") or (f[-7:] != "spr.tif") or (f[-4:] == ".BMP") or (f[-4:] == ".TIF") or
+                          (f[-7:] != "spr.BMP") or (f[-7:] != "spr.TIF"))])
+
 
             approx_size = num_files*file1_size
 
@@ -223,6 +342,8 @@ class MainWindow(QtGui.QMainWindow):
             age = name_list[2]
             litter = name_list[3]
             zygosity = name_list[4]
+            sex = name_list[5]
+
 
             #print date,group,age,litter,zygosity
             self.ui.lineEditDate.setText(date)
@@ -230,6 +351,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEditAge.setText(age)
             self.ui.lineEditLitter.setText(litter)
             self.ui.lineEditZygosity.setText(zygosity)
+            self.ui.lineEditSex.setText(sex)
             self.ui.lineEditName.setText(folder_name)
 
             # The full name should be made changable at some point..
@@ -241,7 +363,6 @@ class MainWindow(QtGui.QMainWindow):
             print "Name incorrect", sys.exc_info()[0]
             self.errorDialog = ErrorMessage(self.error)
             self.full_name = ""
-
         except:
             self.error = "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
             print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
@@ -250,7 +371,62 @@ class MainWindow(QtGui.QMainWindow):
 
     def autouCTOnly(self):
         ''' Automatically fills out the uCT only section    '''
+        input = str(self.ui.lineEditInput.text())
+        # Set recon log path
         self.ui.lineEditCTRecon.setText(str(self.recon_log_path))
+
+        # Set the scan folder
+        self.scan_folder  = input.replace("recons", "scan")
+        self.ui.lineEditScan.setText(self.scan_folder)
+
+        # Get the SPR file. Sometimes fiels are saved with upper or lower case file extensions
+        # The following is bit of a stupid way of dealing with this problem but I think it works....
+        SPR_file_bmp = os.path.join(input,self.full_name+"_spr.bmp")
+        SPR_file_BMP = os.path.join(input,self.full_name+"_spr.BMP")
+        SPR_file_tif = os.path.join(input,self.full_name+"_spr.tif")
+        SPR_file_TIF = os.path.join(input,self.full_name+"_spr.TIF")
+        print SPR_file_bmp
+        if os.path.isfile(SPR_file_bmp):
+            self.ui.lineEditCTSPR.setText(SPR_file_bmp)
+        elif os.path.isfile(SPR_file_BMP):
+            self.ui.lineEditCTSPR.setText(SPR_file_BMP)
+        elif os.path.isfile(SPR_file_tif):
+            self.ui.lineEditCTSPR.setText(SPR_file_tif)
+        elif os.path.isfile(SPR_file_TIF):
+            self.ui.lineEditCTSPR.setText(SPR_file_TIF)
+        else:
+            self.error = "Cannot find SPR file, proceed if this is not a problem"
+            self.errorDialog = ErrorMessage(self.error)
+
+
+        self.ui.lineEditScan.setText(self.scan_folder)
+
+
+    def getReconMan(self):
+        self.fileDialog = QtGui.QFileDialog(self)
+        file = self.fileDialog.getOpenFileName()
+        if file == "":
+            print "User has pressed cancel"
+        else :
+            self.ui.lineEditCTRecon.setText(file)
+            self.recon_log_path = os.path.abspath(file)
+
+    def getScanMan(self):
+        self.fileDialog = QtGui.QFileDialog(self)
+        folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
+        if folder == "":
+            print "User has pressed cancel"
+        else :
+            self.ui.lineEditScan.setText(folder)#
+
+
+    def getSPRMan(self):
+        self.fileDialog = QtGui.QFileDialog(self)
+        file= self.fileDialog.getOpenFileName()
+        if file == "":
+            print "User has pressed cancel"
+        else :
+            self.ui.lineEditCTSPR.setText(file)
 
     def getReconLog(self):
         '''
@@ -277,7 +453,7 @@ class MainWindow(QtGui.QMainWindow):
             recon_log_file = open(self.recon_log_path, 'r')
 
             # create a regex to pixel size
-            prog = re.compile("Pixel Size \(um\)\=(\w+.\w+)")
+            prog = re.compile("^Pixel Size \(um\)\=(\w+.\w+)")
 
             # for loop to go through the recon log file
             for line in recon_log_file:
@@ -318,34 +494,7 @@ class MainWindow(QtGui.QMainWindow):
             print "Unexpected error in getting new folder output name:", sys.exc_info()[0]
             self.errorDialog = ErrorMessage(self.error)
 
-    def autopop(self):
-        ''' Runs methods for autopopulation button '''
-        input = str(self.ui.lineEditInput.text())
 
-        self.getName()
-
-        if self.error == "None" :
-            self.getReconLog()
-
-        if self.error == "None" :
-            self.autouCTOnly()
-
-        if self.error == "None" :
-            self.autoFileOut()
-
-        if self.error == "None" :
-            self.folderSizeApprox()
-
-
-    def selectFileIn(self):
-        ''' Get the info for the selected file'''
-        self.fileDialog = QtGui.QFileDialog(self)
-        self.ui.lineEditInput.setText(self.fileDialog.getExistingDirectory(self, "Select Directory"))
-
-    def selectFileOut(self):
-        ''' Select output folder (this should be blocked as standard'''
-        self.fileDialog = QtGui.QFileDialog(self)
-        self.ui.lineEditOutput.setText(self.fileDialog.getExistingDirectory(self, "Select Directory"))
 
 
     def processGo(self):
@@ -360,20 +509,19 @@ class MainWindow(QtGui.QMainWindow):
         # Perform some checks before any processing is carried out
         self.errorCheck()
 
-        if self.stop != True :
+        if self.stop == None :
 
             self.close()
 
             self.getParamaters()
 
             # Perform analysis
-            subprocess.Popen(["python", dir+"/RunProcessing.py", "-i",self.config_path])
+            #runPro_p = subprocess.Popen(["python", dir+"/RunProcessing.py", "-i",self.config_path],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             # Show progress dialog window to keep track of what is being processed
             self.pro = Progress(self.configOb)
 
             # Run the programs. A script needs to be written to run on linux to run the back end processing
-
 
 
     def errorCheck(self):
@@ -388,16 +536,20 @@ class MainWindow(QtGui.QMainWindow):
         # Input folder contains image files
 
         if self.ui.checkBoxRF.isChecked():
-            print "CheckBox has been checked so file will be replaced\nCreating Output folder"
-            shutil.rmtree(outputFolder)
-            os.makedirs(outputFolder)
+            print "CheckBox has been checked so files will be replaced\n"
+            # Too dangerous to delete everything in a folder
+            # shutil.rmtree(outputFolder)
+            # os.makedirs(outputFolder)
             self.stop = None
         # Check if output folder already exists. Ask if it is ok to overwrite
         elif os.path.exists(outputFolder):
             print "Output folder already exists and user has not approved overwrite"
             # Running dialog box to inform user of options
-            self.errorDialog = ErrorMessage("Output folder already exists\n Tick the 'Replace folder button' in the options sections if files are to be replaced")
-            self.stop = True
+            message = QtGui.QMessageBox.question(self, 'Message', 'Folder already exists for the location:\n{0}\nCan this folder be overwritten?'.format(outputFolder) , QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            if message == QtGui.QMessageBox.Yes:
+                self.stop = None
+            if message == QtGui.QMessageBox.No:
+                self.stop = True
         else :
             print "Creating output folder"
             os.makedirs(outputFolder)
@@ -418,13 +570,22 @@ class MainWindow(QtGui.QMainWindow):
         inputFolder = str(self.ui.lineEditInput.text())
         outputFolder = str(self.ui.lineEditOutput.text())
 
+        #### Write to config file ####
+        self.configOb = ConfigClass()
+
+        # Create a folder for the metadata
+        self.meta_path = os.path.join(outputFolder,"Metadata")
+        if not os.path.exists(self.meta_path):
+            os.makedirs(self.meta_path)
+
         # OS path used for compatibility issues between Linux and windows directory spacing
-        self.config_path = os.path.join(outputFolder,"configObject.txt")
-        self.log_path = os.path.join(outputFolder,"config4user.log")
+        self.config_path = os.path.join(self.meta_path,"configObject.txt")
+        self.log_path = os.path.join(self.meta_path,"config4user.log")
 
         # Create config file and log file
         config = open(self.config_path, 'w')
         log = open(self.log_path, 'w')
+
 
         ##### Get cropping option #####
         if self.ui.radioButtonMan.isChecked() :
@@ -458,16 +619,20 @@ class MainWindow(QtGui.QMainWindow):
         # Combining scaling and SF into input for imageJ macro
         imageJconfig = outputFolder+'/cropped/:'+outputFolder+'/'
 
-        #### Write to config file ####
-        self.configOb = ConfigClass()
-
         # ID for session
         self.configOb.unique_ID = str(self.unique_ID)
+        self.configOb.config_path = self.config_path
         self.configOb.full_name = self.full_name
         self.configOb.input_folder = inputFolder
         self.configOb.output_folder = outputFolder
+        self.configOb.scan_folder = self.scan_folder
+        self.configOb.meta_path = self.meta_path
         self.configOb.crop_option = str(crop)
         if crop =="Manual" :
+            self.configOb.xcrop = xcrop
+            self.configOb.ycrop = ycrop
+            self.configOb.wcrop = wcrop
+            self.configOb.hcrop = hcrop
             self.configOb.crop_manual = xcrop+" "+ycrop+" "+wcrop+" "+hcrop
         else :
             self.configOb.crop_manual = "Not_applicable"
@@ -484,6 +649,7 @@ class MainWindow(QtGui.QMainWindow):
         log.write("full_name    "+self.configOb.full_name+"\n");
         log.write("Input_folder    "+self.configOb.input_folder+"\n");
         log.write("Output_folder    "+self.configOb.output_folder+"\n");
+        log.write("Scan_folder    "+self.configOb.scan_folder+"\n");
         log.write("Crop_option    "+self.configOb.crop_option+"\n");
         log.write("Crop_manual    "+self.configOb.crop_manual+"\n");
         log.write("Downsize_by_factor_2?    "+self.configOb.SF2+"\n");
@@ -494,39 +660,13 @@ class MainWindow(QtGui.QMainWindow):
         log.write("Recon_folder_size   "+self.configOb.recon_folder_size+"\n");
         log.write("Recon_pixel_size  "+self.configOb.recon_pixel_size+"\n");
 
+
+
         # Pickle the class to a file
         pickle.dump(self.configOb, config)
 
         config.close()
         log.close()
-
-class Progress(QtGui.QDialog):
-    '''
-    Class to provide the dialog box to monitor current Image processing jobs.
-    Basically extend the QDialog class (from Progress.py) generated by QT Designer
-    '''
-
-    # Create a constructor
-    def __init__(self,param):
-       super(Progress, self).__init__()
-       self.ui=Ui_Progress()
-       self.ui.setupUi(self)
-       self.show()
-
-       self.ID_folder = os.path.join("/tmp","siah",str(param.unique_ID))
-       print "Check folders"+str(os.listdir(self.ID_folder))
-       self.ui.label_1.setText(param.full_name)
-
-
-       while True:
-            time.sleep(0.05)
-            value = self.ui.progressBar_1.value() + 1
-            self.ui.progressBar_1.setValue(value)
-            QtGui.qApp.processEvents()
-            if (value >= 30):
-                break
-
-
 
 
 class ErrorMessage(QtGui.QDialog):
@@ -565,6 +705,173 @@ class ConfigClass :
 
         print "ConfigClass init"
 
+
+
+# For some reason need to re-import PyQt4...... Not the best solution but seems to work
+from PyQt4 import QtCore, QtGui
+
+class Progress(QtGui.QDialog):
+    '''
+    Class to provide the dialog box to monitor current Image processing jobs.
+    Basically extend the QDialog class (from Progress.py) generated by QT Designer
+    '''
+
+    # Create a constructor
+    def __init__(self,configOb):
+        print "Progress has started"
+        self.threadPool = []
+        super(Progress, self).__init__()
+        self.ui=Ui_Progress()
+        self.ui.setupUi(self)
+        self.show()
+        self.configOb = configOb
+
+        self.ui.label_1.setText(configOb.full_name)
+
+        self.thread(configOb)
+
+        self.ui.pushButtonAddMore.clicked.connect(self.AddMore)
+
+    def AddMore(self):
+        dir = os.path.dirname(os.path.abspath(__file__))
+        runPro_p = subprocess.Popen(["python", dir+"/Main.py"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+
+    def add(self,test):
+        self.ui.label1_tracking.setText(test)
+
+        if test == "Processing finished" :
+            self.ui.progressBar_1.setValue(100)
+
+
+        value = self.ui.progressBar_1.value() + 1
+
+        if test == "Crop finished" :
+            self.ui.progressBar_1.setValue(50)
+
+
+        self.ui.progressBar_1.setValue(value)
+
+        print value
+#
+#         while not test == "Processing finished":
+#             print "while loop started"
+#             time.sleep(0.1)
+#             QtCore.QCoreApplication.processEvents()
+#             value = self.ui.progressBar_1.value() + 1
+#             if test == "Processing finished" :
+#                  self.ui.progressBar_1.setValue(100)
+#                  break
+#             if (value == 100):
+#                  break
+#             self.ui.progressBar_1.setValue(value)
+
+
+
+
+
+
+
+    def thread(self,configOb):
+        self.threadPool = []
+        self.threadPool.append( WorkThread(configOb) )
+        self.connect( self.threadPool[len(self.threadPool)-1], QtCore.SIGNAL("update(QString)"), self.add )
+        self.threadPool[len(self.threadPool)-1].start()
+
+
+
+class WorkThread(QtCore.QThread):
+    def __init__(self,configOb):
+        QtCore.QThread.__init__(self)
+        self.configOb = configOb
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        self.emit( QtCore.SIGNAL('update(QString)'), "Started Processing" )
+        # Get the directory of the script
+        self.dir = os.path.dirname(os.path.realpath(__file__))
+        # Get the session log file
+        self.session_log_path = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_session.log")
+
+        # Save as object to print to
+        session = open(self.session_log_path, 'w+')
+        session.write("Name of recon:"+self.configOb.full_name+"\n")
+
+        # Make crop folder
+        cropped_path = os.path.join(self.configOb.output_folder,"cropped")
+
+
+        if not os.path.exists(cropped_path):
+            os.makedirs(cropped_path)
+
+        crop_run = os.path.join(self.dir, "autocrop.py")
+        print crop_run
+        # Perform the manual crop if required
+        if self.configOb.crop_option == "Manual" :
+            session.write("Performing manual crop\n")
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing manual crop" )
+
+            manpro = subprocess.call(["python", autocrop_run,"-i",self.configOb.input_folder,"-o",
+                         cropped_path, "-t", "tif","-d",self.configOb.xcrop, self.configOb.ycrop, self.configOb.wcrop, self.configOb.hcrop],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
+            session.write("Crop finished\n")
+
+        # Perform the automatic crop if required
+        if self.configOb.crop_option == "Automatic" :
+            session.write("Performing autocrop\n")
+            self.emit( QtCore.SIGNAL('update(QString)'), "Autocrop started" )
+
+            aupro = subprocess.call(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
+            session.write("Crop finished\n")
+
+        # Do not perform any crop as user specified
+        if self.configOb.crop_option == "None" :
+            self.emit( QtCore.SIGNAL('update(QString)'), "No Crop carried out" )
+            print "No crop carried out"
+            session.write("No crop carried out\n")
+
+        # Perform scaling as subprocess with Popen (they should be done in the background)
+        if self.configOb.SF2 == "yes" :
+            proSF2 = self.executeImagej(":0.5")
+
+        if self.configOb.SF3 == "yes" :
+            proSF3 = self.executeImagej(":0.3333")
+
+        if self.configOb.SF4 == "yes" :
+            proSF4 = self.executeImagej(":0.25")
+
+        if self.configOb.SF2 == "yes" :
+            out2, err2 = proSF2.communicate()
+            session.write(out2)
+            session.write(err2)
+
+        if self.configOb.SF3 == "yes" :
+            out3, err3 = proSF3.communicate()
+            session.write(out3)
+            session.write(err3)
+
+        if self.configOb.SF4 == "yes" :
+            out4, err4 = proSF4.communicate()
+            session.write(out4)
+            session.write(err4)
+
+        session.close()
+        self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
+
+
+    def executeImagej(self, scaleFactor):
+        '''
+        @param: str, scaleFactor eg ":0.5"
+        '''
+        self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(scaleFactor) )
+        process = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
+                                    self.configOb.imageJ + scaleFactor],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        return process
 
 
 def main():

@@ -1,6 +1,11 @@
 #!/usr/bin/python
 
-import Image
+try:
+    import Image
+except ImportError:
+    from PIL import Image
+import crop
+
 import sys
 import os
 import numpy as np
@@ -8,9 +13,9 @@ from multiprocessing import Pool, cpu_count
 
 class Zproject:
 
-    def __init__(self, img_dir):
+    def __init__(self, img_dir, out_dir):
         self.img_dir = img_dir
-
+        self.out_dir = out_dir
 
     def run(self):
 
@@ -25,13 +30,15 @@ class Zproject:
             sys.exit("no image files found in" + self.img_dir)
 
         im = Image.open(files[0])
-        self.imdims = im.size
+        self.imdims = (im.size[1], im.size[0])
+
         #make a new list by removing every second image
         files = files[0::5]
 
         poolsize = cpu_count()
         p = Pool(poolsize)
         chunksize = int(len(files)/poolsize) +1
+        print "chunk {0}".format(chunksize)
         chunks = [files[i:i+chunksize]
                   for i in range(0, len(files), chunksize)]
 
@@ -40,7 +47,9 @@ class Zproject:
         max_arrays = np.array(p.map(proc, chunks))
         maxi = np.amax(max_arrays, axis=0) #finds maximum along first axis
         img = Image.fromarray(np.uint8(maxi)) #should be of shape (4000, 4000)
-        img.save("max_intensity.tif")
+        #img.save("max_intensity.tif")
+
+        return img # Let the gui control where the image will be saved
 
 
 class Process:
@@ -50,16 +59,27 @@ class Process:
 
     def __call__(self, chunk):
         max_ = np.zeros(self.imdims)
+        print "imdims: ", self.imdims
+
         for im in chunk:
+            #Numpy is flipping the coordinates around. WTF!. So T is for transpose
             im_array = np.asarray(Image.open(im))
+            print "im: ", im_array.shape
             max_ = np.maximum(max_, im_array)
         print "chunk done"
         return max_
 
 
 if __name__ == "__main__":
-    z = Zproject(sys.argv[1])
-    z.run()
+    z = Zproject(sys.argv[1],sys.argv[2])
+    zp_img = z.run()
+    #assert zp_img.__class__ == "Image.Image"
+    try:
+        zp_img.save(os.path.join(str(z.out_dir), "z_projection", "max_intensity_z.tif"))
+
+    except IOError as e:
+        print("cannot save the z-projection: {0}".format(e))
+
 
 
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1203</width>
-    <height>986</height>
+    <width>1274</width>
+    <height>1009</height>
    </rect>
   </property>
   <property name="font">
@@ -22,10 +22,10 @@
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>1181</width>
-      <height>921</height>
+      <x>20</x>
+      <y>10</y>
+      <width>1251</width>
+      <height>941</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -39,8 +39,8 @@
       <rect>
        <x>20</x>
        <y>20</y>
-       <width>601</width>
-       <height>66</height>
+       <width>711</width>
+       <height>72</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayoutFileSelect">
@@ -96,8 +96,8 @@
       <rect>
        <x>20</x>
        <y>580</y>
-       <width>1131</width>
-       <height>241</height>
+       <width>1221</width>
+       <height>251</height>
       </rect>
      </property>
      <property name="font">
@@ -117,7 +117,7 @@
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     background:url(:/assets/subWindowBackground);
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
@@ -126,7 +126,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -144,7 +144,7 @@ QGroupBox::title
         <x>11</x>
         <y>32</y>
         <width>261</width>
-        <height>206</height>
+        <height>224</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayoutCh1">
@@ -278,7 +278,7 @@ QGroupBox::title
         <x>290</x>
         <y>32</y>
         <width>261</width>
-        <height>206</height>
+        <height>224</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_4">
@@ -412,7 +412,7 @@ QGroupBox::title
         <x>570</x>
         <y>32</y>
         <width>261</width>
-        <height>206</height>
+        <height>224</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_5">
@@ -546,7 +546,7 @@ QGroupBox::title
         <x>850</x>
         <y>32</y>
         <width>261</width>
-        <height>206</height>
+        <height>224</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_6">
@@ -678,9 +678,9 @@ QGroupBox::title
     <widget class="QGroupBox" name="groupBoxModality">
      <property name="geometry">
       <rect>
-       <x>640</x>
+       <x>740</x>
        <y>20</y>
-       <width>241</width>
+       <width>501</width>
        <height>61</height>
       </rect>
      </property>
@@ -699,7 +699,7 @@ QGroupBox::title
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border: 1px solid #0b477b;
@@ -707,7 +707,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -753,31 +753,13 @@ QGroupBox::title
       </property>
      </widget>
     </widget>
-    <widget class="QPushButton" name="pushButtonAutopop">
-     <property name="geometry">
-      <rect>
-       <x>890</x>
-       <y>21</y>
-       <width>251</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Autopopulate</string>
-     </property>
-    </widget>
     <widget class="QGroupBox" name="groupBoxID">
      <property name="geometry">
       <rect>
        <x>20</x>
        <y>200</y>
-       <width>601</width>
-       <height>131</height>
+       <width>711</width>
+       <height>141</height>
       </rect>
      </property>
      <property name="font">
@@ -797,7 +779,7 @@ QGroupBox::title
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border: 1px solid #0b477b;
@@ -805,7 +787,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -814,10 +796,10 @@ QGroupBox::title
      <widget class="QWidget" name="gridLayoutWidget_3">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>32</y>
-        <width>581</width>
-        <height>31</height>
+        <x>11</x>
+        <y>28</y>
+        <width>691</width>
+        <height>34</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayoutIDs">
@@ -833,30 +815,6 @@ QGroupBox::title
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="labelGroup">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Gene</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="8">
-        <widget class="QLabel" name="labelZygosity">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Zygosity</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="3">
         <widget class="QLineEdit" name="lineEditGroup">
          <property name="font">
@@ -864,32 +822,8 @@ QGroupBox::title
            <pointsize>12</pointsize>
           </font>
          </property>
-        </widget>
-       </item>
-       <item row="0" column="9">
-        <widget class="QLineEdit" name="lineEditZygosity">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="layoutDirection">
-          <enum>Qt::LeftToRight</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="7">
-        <widget class="QLineEdit" name="lineEditLitter">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="layoutDirection">
-          <enum>Qt::LeftToRight</enum>
-         </property>
-         <property name="text">
-          <string/>
+         <property name="readOnly">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -909,17 +843,8 @@ QGroupBox::title
          <property name="text">
           <string/>
          </property>
-        </widget>
-       </item>
-       <item row="0" column="6">
-        <widget class="QLabel" name="labelLitter">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Litter</string>
+         <property name="readOnly">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -929,6 +854,9 @@ QGroupBox::title
           <font>
            <pointsize>12</pointsize>
           </font>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -944,15 +872,27 @@ QGroupBox::title
          </property>
         </widget>
        </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="labelGroup">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Gene</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="gridLayoutWidget_2">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>67</y>
-        <width>581</width>
-        <height>31</height>
+        <y>100</y>
+        <width>691</width>
+        <height>34</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayoutName">
@@ -976,7 +916,101 @@ QGroupBox::title
           </font>
          </property>
          <property name="readOnly">
-          <bool>false</bool>
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="gridLayoutWidget_5">
+      <property name="geometry">
+       <rect>
+        <x>11</x>
+        <y>64</y>
+        <width>691</width>
+        <height>34</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayoutIDs_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="labelLitter">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Litter</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEditLitter">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="QLabel" name="labelSex">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Sex</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5">
+        <widget class="QLineEdit" name="lineEditSex">
+         <property name="font">
+          <font>
+           <family>Sans Serif</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLineEdit" name="lineEditZygosity">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="labelZygosity">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Zygosity</string>
          </property>
         </widget>
        </item>
@@ -986,10 +1020,10 @@ QGroupBox::title
     <widget class="QGroupBox" name="groupBoxOptions">
      <property name="geometry">
       <rect>
-       <x>640</x>
+       <x>740</x>
        <y>110</y>
        <width>501</width>
-       <height>221</height>
+       <height>231</height>
       </rect>
      </property>
      <property name="font">
@@ -1009,7 +1043,7 @@ QGroupBox::title
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border: 1px solid #0b477b;
@@ -1017,7 +1051,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -1060,6 +1094,9 @@ QGroupBox::title
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBoxMovie_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>155</x>
@@ -1199,6 +1236,9 @@ QGroupBox::title
       <property name="text">
        <string>2</string>
       </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QCheckBox" name="checkBoxSF3">
       <property name="geometry">
@@ -1217,6 +1257,9 @@ QGroupBox::title
       <property name="text">
        <string>3</string>
       </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QCheckBox" name="checkBoxSF4">
       <property name="geometry">
@@ -1234,6 +1277,9 @@ QGroupBox::title
       </property>
       <property name="text">
        <string>4</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QLabel" name="label">
@@ -1255,6 +1301,9 @@ QGroupBox::title
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBox">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>155</x>
@@ -1273,6 +1322,9 @@ QGroupBox::title
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBox_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>245</x>
@@ -1305,7 +1357,7 @@ QGroupBox::title
        </font>
       </property>
       <property name="text">
-       <string>Replace folders</string>
+       <string>Replace files</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="checkBoxRF">
@@ -1407,14 +1459,27 @@ QGroupBox::title
        <string>No crop</string>
       </property>
      </widget>
+     <widget class="QLabel" name="label_zwait">
+      <property name="geometry">
+       <rect>
+        <x>337</x>
+        <y>120</y>
+        <width>151</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
     </widget>
     <widget class="QGroupBox" name="groupBoxuCTOnly">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>360</y>
+       <y>350</y>
        <width>301</width>
-       <height>191</height>
+       <height>221</height>
       </rect>
      </property>
      <property name="font">
@@ -1432,7 +1497,7 @@ QGroupBox::title
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border: 1px solid #0b477b;
@@ -1440,7 +1505,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -1461,7 +1526,7 @@ QGroupBox::title
         <x>10</x>
         <y>35</y>
         <width>261</width>
-        <height>141</height>
+        <height>183</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayoutuCTOnly">
@@ -1512,6 +1577,9 @@ QGroupBox::title
        </item>
        <item row="2" column="0">
         <widget class="QPushButton" name="pushButtonCTARC">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -1524,6 +1592,9 @@ QGroupBox::title
        </item>
        <item row="2" column="1">
         <widget class="QLineEdit" name="lineEditCTARC">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -1531,7 +1602,7 @@ QGroupBox::title
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="4" column="0">
         <widget class="QComboBox" name="comboBoxCh">
          <property name="font">
           <font>
@@ -1545,6 +1616,29 @@ QGroupBox::title
          </item>
         </widget>
        </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="pushButtonScan">
+         <property name="font">
+          <font>
+           <family>Sans Serif</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Scan folder</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="lineEditScan">
+         <property name="font">
+          <font>
+           <family>Sans Serif</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </widget>
@@ -1553,7 +1647,7 @@ QGroupBox::title
       <rect>
        <x>20</x>
        <y>109</y>
-       <width>601</width>
+       <width>711</width>
        <height>81</height>
       </rect>
      </property>
@@ -1577,7 +1671,7 @@ QGroupBox::title
 
 QGroupBox::title
 {
-    subcontrol-origin: margin;	
+    subcontrol-origin: margin;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border: 1px solid #0b477b;
@@ -1585,7 +1679,7 @@ QGroupBox::title
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         stop: 0 #005192, stop: 1 #002f60);
     padding: 2 2px;
-    color: white;   
+    color: white;
 }</string>
      </property>
      <property name="title">
@@ -1602,7 +1696,7 @@ QGroupBox::title
        <rect>
         <x>10</x>
         <y>33</y>
-        <width>581</width>
+        <width>691</width>
         <height>31</height>
        </rect>
       </property>
@@ -1664,7 +1758,7 @@ QGroupBox::title
      <property name="geometry">
       <rect>
        <x>460</x>
-       <y>840</y>
+       <y>860</y>
        <width>291</width>
        <height>61</height>
       </rect>
@@ -1681,6 +1775,125 @@ QGroupBox::title
       <bool>false</bool>
      </property>
     </widget>
+    <widget class="QGroupBox" name="groupBoxModality_2">
+     <property name="geometry">
+      <rect>
+       <x>740</x>
+       <y>350</y>
+       <width>501</width>
+       <height>121</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox
+{
+    background-color:transparent;
+    border: 1px solid #acacac;
+    margin-top: 5px;
+}
+
+QGroupBox::title
+{
+    subcontrol-origin: margin;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border: 1px solid #0b477b;
+    border-bottom: none;
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+        stop: 0 #005192, stop: 1 #002f60);
+    padding: 2 2px;
+    color: white;
+}</string>
+     </property>
+     <property name="title">
+      <string>Status</string>
+     </property>
+     <widget class="QTextEdit" name="textEditStatusMessages">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>30</y>
+        <width>461</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <property name="palette">
+       <palette>
+        <active>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </active>
+        <inactive>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </inactive>
+        <disabled>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>123</red>
+            <green>123</green>
+            <blue>123</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>123</red>
+            <green>123</green>
+            <blue>123</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </disabled>
+       </palette>
+      </property>
+      <property name="font">
+       <font>
+        <family>Sans Serif</family>
+        <pointsize>14</pointsize>
+       </font>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -1688,7 +1901,7 @@ QGroupBox::title
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1203</width>
+     <width>1274</width>
      <height>29</height>
     </rect>
    </property>

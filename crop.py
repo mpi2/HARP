@@ -4,39 +4,57 @@ import sys
 from PyQt4 import QtCore, QtGui
 import math
 import operator
+import sys
 
 '''
 Crop.py open an image (probably a max intensity z-projection)
 User draws a cropping box. returns the coordinates
 '''
 
-class MyMainWindow(QtGui.QMainWindow):
+class Crop(QtGui.QMainWindow):
 
     def __init__(self, callback, image, parent=None):
 
-        super(MyMainWindow, self).__init__(parent)
+        super(Crop, self).__init__(parent)
+        self.setWindowTitle("Manual cropping")
         self.widget = MainWidget(self, callback, image)
-        self.widget.resize(1000, 1000)
+        self.widget.resize(950, 950)
         self.setCentralWidget(self.widget)
         self.widget.show()
 
         #Do not allow resizing for now as the rubber band does not move in proportion with the image
         self.setFixedSize(QtCore.QSize(1050, 1050))
-        self.action = QtGui.QAction(self.tr("&crop"), self)
-        self.action.triggered.connect(self.cropMenuAction)
+
+        #Menu bar
         self.menubar = self.menuBar()
-        fileMenu = self.menubar.addMenu('&crop')
-        fileMenu.addAction(self.action)
+        self.closeAction = QtGui.QAction(self.tr("&close"), self)
+        self.closeAction.triggered.connect(self.closeMenuAction)
+        fileMenu = self.menubar.addMenu('&file')
+        fileMenu.addAction(self.closeAction)
+
+
+        self.action = QtGui.QAction(self.tr("&crop (right click)"), self)
+        self.action.triggered.connect(self.cropMenuAction)
+        cropMenu = self.menubar.addMenu('&crop')
+        cropMenu.addAction(self.action)
+
+
+
 
     def cropMenuAction(self):
         self.widget.doTheCrop()
+
+    def closeMenuAction(self):
+        self.close()
 
 
 
 class MainWidget(QtGui.QWidget):
     def __init__(self, parent, callback, image):
+        self.parent = parent
         super(MainWidget, self).__init__()
         self.scene = QtGui.QGraphicsScene()
+        self.scene.setSceneRect(0, 0, 950, 950)
         self.callback = callback
         self.view = QtGui.QGraphicsView(self.scene)
         layout = QtGui.QVBoxLayout()
@@ -45,57 +63,102 @@ class MainWidget(QtGui.QWidget):
 
 
         self.image = QtGui.QPixmap(image)
-        #Scale y to 1000 pixs. Use same scaling for x in case of differring dimensions
+        #Scale the largest dimension to 950 pixs. Use same scaling for the other dimensions
         self.orig_width = self.image.width()
         self.orig_height = self.image.height()
-        self.y_scale = 950.00 / self.orig_height
-        x_width = self.orig_width * self.y_scale
-        self.pixmap_item = QtGui.QGraphicsPixmapItem(self.image.scaled(x_width, 950), None, self.scene)
+        max_dimen = max([float(self.orig_width), float(self.orig_height)])
+        print float(self.orig_width), float(self.orig_height)
+        print "crop: dim", max_dimen
+        self.scaleFact = 950.00 / max_dimen
+        #print "jhg ", self.scaleFact
+        x = self.orig_width * self.scaleFact
+        y = self.orig_height * self.scaleFact
 
+        self.pixmap_item = QtGui.QGraphicsPixmapItem(self.image.scaled(x, y), None, self.scene)
         self.pixmap_item.mousePressEvent = self.mousePress
         self.pixmap_item.mouseMoveEvent = self.mouseMove
         self.pixmap_item.mouseReleaseEvent = self.mouseRelease
 
         self.click_positions = []
-        self.x = None
-        self.y = None
-        self.width = 40
-        self.height = 40
+        self.x = 2
+        self.y = 2
+        self.width = 1
+        self.height = 1
         self.drawing = True
         self.cropBox = None
-        self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
-        self.rubberBand.setGeometry(QtCore.QRect(10, 100, 20, 20))
-        self.rubberBand.updatesEnabled()
-        self.rubberBand.show()
+        self.cornerSet = False
+
+        #Hack. Mouse events give me position of mouse relative to image
+        #TODO: set this dynamically
+        self.img_dist_top = 35 #
+        self.img_dist_left = 50
+        self.pixmap_item.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
+        self.pixmap_item.rubberBand.setGeometry(QtCore.QRect(1, 1, 1, 1))
+        self.pixmap_item.rubberBand.updatesEnabled()
+        self.pixmap_item.rubberBand.show()
 
 
     def doTheCrop(self):
-        self.callback(self.cropBox)
-        ##print self.cropBox
+        #Get the coords of the rubber band
+        small_box = self.pixmap_item.rubberBand.geometry().getCoords()
+        #Convert this to the dimensions of the unscaled image
+        large_box = [(1/self.scaleFact)* x for x in small_box]
+
+        #To get the ruuber band to fit on the pixmap I added self.distance from x + y
+        # So need to remove that * the scaling factor of the image (yscale = xscale)
+        x1 = int(large_box[0] - (self.img_dist_left / self.scaleFact ))
+        y1 = int(large_box[1] - (self.img_dist_top / self.scaleFact))
+        width = int(large_box[2] - large_box[0])
+        height = int(large_box[3] - large_box[1])
+        #x2 = self.orig_width - (int(large_box[2] - (self.img_dist_left / self.scaleFact )))
+        #y2 = self.orig_height - (int(large_box[3] - (self.img_dist_top / self.scaleFact)))
+
+        ijCropBox = (x1, y1, width, height )
+        print "ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox))
+        cropBox = (x1, y1, width, height)
+        self.callback(cropBox)
+        print self.cropBox
+        self.parent.close()
+
 
     def mouseMove(self, event):
         '''
         Called when mouse is moved with button pressed
         '''
+        #print "frame ", self.parent.geometry().width()
+        #print "widget ", self.geometry().width()
+        pos = (event.pos().x() + self.img_dist_left, event.pos().y() + self.img_dist_top)
+        if not self.cornerSet:
+            self.x = pos[0]
+            self.y = pos[1]
+            self.cornerSet = True
+            print "corner: ",self.x, " ", self.y
+            return
+
+        print "event: ", pos
+        #print pos
         if self.drawing:
-            self.height = event.pos().y() - self.y
-            self.width = event.pos().x() - self.x
-            self.rubberBand.setGeometry(self.x, self.y, self.width, self.height)
-        else:
+            #print self.x, ":", self.y
+            self.height = pos[1] - self.y
+            self.width = pos[0] - self.x
+            self.pixmap_item.rubberBand.setGeometry(self.x, self.y, self.width, self.height)
+        else:#Band has been drawn, bow resize it
             self.resizeRect(event)
 
 
     def mousePress(self, event):
         button = event.button()
         if button == 1:
-            self.setCorner(event)
+            #self.pixmap_item.rubberBand.setGeometry(1, 1, 200, 200)
+            #self.setCorner(event) #
+            pass
         if button == 2:
             self.doTheCrop() #self.drawing = True #maybe clear the box and start over
 
 
-    def setCorner(self, event):
-        self.x = event.pos().x()
-        self.y = event.pos().y()
+#     def setCorner(self, event):
+#         #if self.drawing:
+#         pass
 
 
     def resizeRect(self, event):
@@ -105,10 +168,10 @@ class MainWidget(QtGui.QWidget):
         '''
 
         #Fet the current mouse pos
-        pos = (event.pos().x(), event.pos().y())
-
+        pos = (event.pos().x() + self.img_dist_left, event.pos().y() + self.img_dist_top)
+        #print pos
         #Get ccords of current rubber band
-        rect = self.rubberBand.geometry().getCoords()
+        rect = self.pixmap_item.rubberBand.geometry().getCoords()
 
         topLx = rect[0]
         topLy = rect[1]
@@ -145,37 +208,32 @@ class MainWidget(QtGui.QWidget):
                3: abs(pos[1] - botRy)}
             side = min(k.iteritems(), key=operator.itemgetter(1))[0]
 
-        r = self.rubberBand.geometry()
+        r = self.pixmap_item.rubberBand.geometry()
 
         #Get the nearest side. Sides numbered 1-4 clockwise from top
-        print "corner:" , corner, " side:", side
+        #print "corner:" , corner, " side:", side
         if side == 1:
             r.setTop(pos[1])
-            self.rubberBand.setGeometry(r)
+            self.pixmap_item.rubberBand.setGeometry(r)
             #print r.getRect()
         if side == 2:
             r.setRight(pos[0])
-            self.rubberBand.setGeometry(r)
+            self.pixmap_item.rubberBand.setGeometry(r)
         if side == 3:
             r.setBottom(pos[1])
-            self.rubberBand.setGeometry(r)
+            self.pixmap_item.rubberBand.setGeometry(r)
             #print r.getRect()
         if side == 4:
             r.setLeft(pos[0])
-            self.rubberBand.setGeometry(r)
+            self.pixmap_item.rubberBand.setGeometry(r)
 
-        #Get the coords of the original image
-        small_box = r.getCoords()
-        large_box = [(1/self.y_scale)* x for x in small_box]
-        #print small_box, large_box
-        width = str(int(large_box[2] - large_box[0]))
-        height = str(int(large_box[3] - large_box[1]))
-        self.cropBox =  "makeRectangle("+str(int(large_box[0])) + "," + str(int(large_box[1])) + "," + width + "," + height + ");"
+
+
 
 
     def mouseRelease(self, event):
         '''
-        On first mouse release, prevent futher drawing of rubberbands
+        On first mouse release, prevent further drawing of rubberbands
         So that box can be resized
         '''
         if self.drawing:
@@ -184,9 +242,19 @@ class MainWidget(QtGui.QWidget):
 
 
 
+def run_from_cli(callback, image):
+    app = QtGui.QApplication(sys.argv)
+    window = Crop(callback, image)
+    window.show()
+    sys.exit(app.exec_())
+
 def run(callback, image):
-    window = MyMainWindow(callback, image)
+    window = Crop(callback, image)
     window.show()
 
+def dummyCallback(output):
+    print output
+
 if __name__ == "__main__":
-    run() #create def for printing box
+    image = sys.argv[1]
+    run_from_cli(dummyCallback, image) #create def for printing box
