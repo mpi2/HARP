@@ -7,7 +7,6 @@ from MainWindow import *
 from Progress import *
 from ErrorMessage import *
 import zproject
-from crop import *
 import crop
 
 #from RunProcessing import *
@@ -167,7 +166,7 @@ class MainWindow(QtGui.QMainWindow):
             # convert to gb
             f_size_out =  (approx_size/(1024*1024*1024.0))
 
-            # Save file size as an object to be used later
+            # Save file size as an variable to be used later
             self.f_size_out_gb = "%0.4f" % (f_size_out)
 
             #Clean up the formatting of gb mb

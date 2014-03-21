@@ -19,7 +19,7 @@ class MyMainWindow(QtGui.QMainWindow):
         self.widget.resize(1000, 1000)
         self.setCentralWidget(self.widget)
         self.widget.show()
-        print "main window started"
+
         #Do not allow resizing for now as the rubber band does not move in proportion with the image
         self.setFixedSize(QtCore.QSize(1050, 1050))
         self.action = QtGui.QAction(self.tr("&crop"), self)
@@ -43,7 +43,7 @@ class MainWidget(QtGui.QWidget):
         layout.addWidget(self.view)
         self.setLayout(layout)
 
-        print "main widget started"
+
         self.image = QtGui.QPixmap(image)
         #Scale y to 1000 pixs. Use same scaling for x in case of differring dimensions
         self.orig_width = self.image.width()
