@@ -3,7 +3,7 @@
 //Run it like this:
 //java -jar /usr/share/java/ij.jar -batch /home/neil/.imagej/macros/siah_scale.txt '/home/neil/test_stack/:/home/neil/test_stack/test_stack:0.5,0.25,0.14'
 //or
-//Fiji --headless -batch /home/neil/harwell-ct-pipleine/siah_scale.txt '/home/neil/test_stack/:/home/neil/test_stack/test_stack:0.5'
+//Fiji --headless -batch /home/neil/harwell-ct-pipleine/siah_scale.txt '/home/neil/test_stack/:/home/neil/test_stack/test_stack:name:0.5:x1'
 
 //Might have to specify path to macro
 //args are in one string seperated by :
@@ -32,7 +32,11 @@ run("Close All");
 setBatchMode(true);
 
 out_path = arg_array[1];
-scale = arg_array[2];
+recon_name = arg_array[2];
+scale = arg_array[3];
+// 1 divided by scale gives the scaling factor which the user sees, e.g 2,3,4 etc
+divide_scale = arg_array[4];
+
 
 print("output folder:");
 print(out_path);
@@ -52,13 +56,14 @@ zdepth = floor(image_list.length * scale);
 
 //run the scaling
 
-scale_string = replace(scale, '.', '-');
+//scale_string = replace(scale, '.', '-');
 run("Scale...", "x=" + scale + " y=" + scale +  " z="+scale + " depth=" + zdepth + " average process create title=scaled");
 
 
-//Create directory
-File.makeDirectory(out_path + scale_string);
-saveAs("Tiff", out_path + scale_string + "/"+ scale_string + ".tif");
+//Create directory (this is now done in python
+//File.makeDirectory(out_path + divide_scale);
+
+saveAs("Tiff", out_path + recon_name + "_scaled_"+ divide_scale + ".tif");
 print("Scaling Finished");
 
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Progress.ui'
 #
-# Created: Tue Mar 18 10:56:54 2014
+# Created: Fri Mar 21 09:29:39 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -44,6 +44,7 @@ class Ui_Progress(object):
         font.setPointSize(12)
         self.progressBar_1.setFont(font)
         self.progressBar_1.setProperty("value", 0)
+        self.progressBar_1.setFormat(_fromUtf8(""))
         self.progressBar_1.setObjectName(_fromUtf8("progressBar_1"))
         self.gridLayout.addWidget(self.progressBar_1, 0, 1, 1, 1)
         self.label_1 = QtGui.QLabel(self.gridLayoutWidget)

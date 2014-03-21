@@ -56,6 +56,7 @@ class MainWindow(QtGui.QMainWindow):
        self.error = "None"
        self.stop = None
 
+
        # initialise non essential information
        self.scan_folder = ""
        self.recon_log_path = ""
@@ -444,7 +445,7 @@ class MainWindow(QtGui.QMainWindow):
 
         try:
             # This will change depending on the location of the program (e.g linux/windows and what drive the MicroCT folder is set to)
-            recon_log_path = os.path.join(path,folder_name,folder_name+".log")
+            recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
 
             # To make sure the path is in the correct format (not sure if necessary
             self.recon_log_path = os.path.abspath(recon_log_path)
@@ -486,7 +487,6 @@ class MainWindow(QtGui.QMainWindow):
 
             output_path  = path.replace("recons", "processed recons")
             output_full = os.path.join(output_path,self.full_name)
-            print "TESTT"+output_full
             self.ui.lineEditOutput.setText(output_full)
 
         except:
@@ -615,9 +615,6 @@ class MainWindow(QtGui.QMainWindow):
         else :
             SF4 = "no"
 
-        # If using windows it is important to put \ at the end of folder name
-        # Combining scaling and SF into input for imageJ macro
-        imageJconfig = outputFolder+'/cropped/:'+outputFolder+'/'
 
         # ID for session
         self.configOb.unique_ID = str(self.unique_ID)
@@ -636,13 +633,19 @@ class MainWindow(QtGui.QMainWindow):
             self.configOb.crop_manual = xcrop+" "+ycrop+" "+wcrop+" "+hcrop
         else :
             self.configOb.crop_manual = "Not_applicable"
-        self.configOb.imageJ = imageJconfig
+
         self.configOb.SF2 = SF2
         self.configOb.SF3 = SF3
         self.configOb.SF4 = SF4
         self.configOb.recon_log_file = self.recon_log_path
         self.configOb.recon_folder_size = self.f_size_out_gb
         self.configOb.recon_pixel_size = self.pixel_size
+
+        # If using windows it is important to put \ at the end of folder name
+        # Combining scaling and SF into input for imageJ macro
+        self.configOb.cropped_path = os.path.join(self.configOb.output_folder,"cropped")
+        self.configOb.scale_path = os.path.join(self.configOb.output_folder,"scaled_stacks")
+        self.configOb.imageJ = self.configOb.cropped_path+os.sep+':'+self.configOb.scale_path+os.sep+":"+self.configOb.full_name
 
         # write the config information into an easily readable log file
         log.write("Session_ID    "+self.configOb.unique_ID+"\n");
@@ -725,6 +728,7 @@ class Progress(QtGui.QDialog):
         self.ui.setupUi(self)
         self.show()
         self.configOb = configOb
+        self.value = 0
 
         self.ui.label_1.setText(configOb.full_name)
 
@@ -743,28 +747,28 @@ class Progress(QtGui.QDialog):
         if test == "Processing finished" :
             self.ui.progressBar_1.setValue(100)
 
-
-        value = self.ui.progressBar_1.value() + 1
-
         if test == "Crop finished" :
             self.ui.progressBar_1.setValue(50)
 
+        print test
+        value = 0
 
-        self.ui.progressBar_1.setValue(value)
-
-        print value
-#
+#         print self.value
 #         while not test == "Processing finished":
 #             print "while loop started"
+#             print "loop",value
 #             time.sleep(0.1)
 #             QtCore.QCoreApplication.processEvents()
 #             value = self.ui.progressBar_1.value() + 1
+#
 #             if test == "Processing finished" :
 #                  self.ui.progressBar_1.setValue(100)
 #                  break
-#             if (value == 100):
+#             if (self.value == 100):
 #                  break
 #             self.ui.progressBar_1.setValue(value)
+#             QtGui.qApp.processEvents()
+
 
 
 
@@ -799,9 +803,12 @@ class WorkThread(QtCore.QThread):
         session = open(self.session_log_path, 'w+')
         session.write("Name of recon:"+self.configOb.full_name+"\n")
 
+        ###############################################
+        # Cropping
+        ###############################################
         # Make crop folder
-        cropped_path = os.path.join(self.configOb.output_folder,"cropped")
-
+        # get cropped path from config object (shorten it so it is easier to read)
+        cropped_path = self.configOb.cropped_path
 
         if not os.path.exists(cropped_path):
             os.makedirs(cropped_path)
@@ -822,7 +829,7 @@ class WorkThread(QtCore.QThread):
         # Perform the automatic crop if required
         if self.configOb.crop_option == "Automatic" :
             session.write("Performing autocrop\n")
-            self.emit( QtCore.SIGNAL('update(QString)'), "Autocrop started" )
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
 
             aupro = subprocess.call(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -835,15 +842,34 @@ class WorkThread(QtCore.QThread):
             print "No crop carried out"
             session.write("No crop carried out\n")
 
+        ###############################################
+        # Copying of other files from recon directory
+        ###############################################
+        session.write("Copying other files from recon\n")
+        for file in os.listdir(self.configOb.input_folder):
+            suffix_txt, suffix_spr, suffix_log, suffix_crv = ".txt","spr",".log",".crv"
+            if file.endswith((".txt",".log",".crv")) or re.search('spr', file, re.IGNORECASE):
+                session.write("File"+file+"\n")
+                file = os.path.join(self.configOb.input_folder,file)
+                shutil.copy(file,cropped_path)
+
+
+        ###############################################
+        # Scaling
+        ###############################################
+        # First make subfolder for scaled stacks
+        if not os.path.exists(self.configOb.scale_path):
+            os.makedirs(self.configOb.scale_path)
+
         # Perform scaling as subprocess with Popen (they should be done in the background)
         if self.configOb.SF2 == "yes" :
-            proSF2 = self.executeImagej(":0.5")
+            proSF2 = self.executeImagej(":0.5:x2")
 
         if self.configOb.SF3 == "yes" :
-            proSF3 = self.executeImagej(":0.3333")
+            proSF3 = self.executeImagej(":0.3333:x3")
 
         if self.configOb.SF4 == "yes" :
-            proSF4 = self.executeImagej(":0.25")
+            proSF4 = self.executeImagej(":0.25:x4")
 
         if self.configOb.SF2 == "yes" :
             out2, err2 = proSF2.communicate()
@@ -862,7 +888,6 @@ class WorkThread(QtCore.QThread):
 
         session.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
-
 
     def executeImagej(self, scaleFactor):
         '''
