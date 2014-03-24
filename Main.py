@@ -4,9 +4,6 @@ from PyQt4 import QtGui,QtCore
 # Import MainWindow class from QT Designer
 from MainWindow import Ui_MainWindow
 from Progress import Ui_Progress
-#from Run_processing_threaded import Progress
-from ErrorMessage import Ui_DialogErrMessage
-
 import zproject
 import crop
 
@@ -700,8 +697,6 @@ class MainWindow(QtGui.QMainWindow):
         log.write("Recon_folder_size   "+self.configOb.recon_folder_size+"\n");
         log.write("Recon_pixel_size  "+self.configOb.recon_pixel_size+"\n");
 
-
-
         # Pickle the class to a file
         pickle.dump(self.configOb, config)
 
@@ -779,12 +774,6 @@ class Progress(QtGui.QDialog):
 #             QtGui.qApp.processEvents()
 
 
-
-
-
-
-
-
     def thread(self,configOb):
         self.threadPool = []
         self.threadPool.append( WorkThread(configOb) )
@@ -860,6 +849,13 @@ class WorkThread(QtCore.QThread):
                 session.write("File"+file+"\n")
                 file = os.path.join(self.configOb.input_folder,file)
                 shutil.copy(file,cropped_path)
+
+        ###############################################
+        # Compression
+        ###############################################
+        #subprocess.call(["tar", "-cjf" check.tar.bz2 test
+         #                   stdout=session, stderr=session)
+        #self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
 
 
         ###############################################

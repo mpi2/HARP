@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Mon Mar 24 11:23:07 2014
+# Created: Mon Mar 24 13:24:03 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -693,20 +693,6 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
-        self.checkBox = QtGui.QCheckBox(self.groupBoxOptions)
-        self.checkBox.setEnabled(True)
-        self.checkBox.setGeometry(QtCore.QRect(155, 171, 81, 17))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.checkBox.setFont(font)
-        self.checkBox.setObjectName(_fromUtf8("checkBox"))
-        self.checkBox_2 = QtGui.QCheckBox(self.groupBoxOptions)
-        self.checkBox_2.setEnabled(True)
-        self.checkBox_2.setGeometry(QtCore.QRect(245, 169, 161, 21))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.checkBox_2.setFont(font)
-        self.checkBox_2.setObjectName(_fromUtf8("checkBox_2"))
         self.label_2 = QtGui.QLabel(self.groupBoxOptions)
         self.label_2.setGeometry(QtCore.QRect(10, 200, 131, 16))
         font = QtGui.QFont()
@@ -752,6 +738,13 @@ class Ui_MainWindow(object):
         self.label_zwait.setGeometry(QtCore.QRect(337, 120, 151, 21))
         self.label_zwait.setText(_fromUtf8(""))
         self.label_zwait.setObjectName(_fromUtf8("label_zwait"))
+        self.checkBox_3 = QtGui.QCheckBox(self.groupBoxOptions)
+        self.checkBox_3.setEnabled(True)
+        self.checkBox_3.setGeometry(QtCore.QRect(156, 171, 121, 17))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.checkBox_3.setFont(font)
+        self.checkBox_3.setObjectName(_fromUtf8("checkBox_3"))
         self.groupBoxuCTOnly = QtGui.QGroupBox(self.frame)
         self.groupBoxuCTOnly.setGeometry(QtCore.QRect(20, 350, 301, 221))
         font = QtGui.QFont()
@@ -1043,14 +1036,13 @@ class Ui_MainWindow(object):
         self.checkBoxSF3.setText(_translate("MainWindow", "3", None))
         self.checkBoxSF4.setText(_translate("MainWindow", "4", None))
         self.label.setText(_translate("MainWindow", "Compress files", None))
-        self.checkBox.setText(_translate("MainWindow", "Scans", None))
-        self.checkBox_2.setText(_translate("MainWindow", "Original recons", None))
         self.label_2.setText(_translate("MainWindow", "Replace files", None))
         self.checkBoxRF.setText(_translate("MainWindow", "Yes", None))
         self.pushButtonGetDimensions.setText(_translate("MainWindow", "Get dimensions", None))
         self.radioButtonAuto.setText(_translate("MainWindow", "Automatic", None))
         self.radioButtonMan.setText(_translate("MainWindow", "Manual", None))
         self.radioButtonNo.setText(_translate("MainWindow", "No crop", None))
+        self.checkBox_3.setText(_translate("MainWindow", "Yes", None))
         self.groupBoxuCTOnly.setTitle(_translate("MainWindow", "µCT only", None))
         self.pushButtonCTRecon.setText(_translate("MainWindow", "Pick recon log", None))
         self.pushButtonCTSPR.setText(_translate("MainWindow", "Pick SPR", None))
