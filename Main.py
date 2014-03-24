@@ -110,38 +110,6 @@ class MainWindow(QtGui.QMainWindow):
        self.show()
 
 
-    def updateName(self):
-        ''' Function to update the name of the file and folder'''
-        self.full_name = str(self.ui.lineEditName.text())
-
-        try :
-            name_list = self.full_name.split("_")
-            self.ui.lineEditDate.setText(name_list[0])
-            self.ui.lineEditGroup.setText(name_list[1])
-            self.ui.lineEditAge.setText(name_list[2])
-            self.ui.lineEditLitter.setText(name_list[3])
-            self.ui.lineEditZygosity.setText(name_list[4])
-            self.ui.lineEditSex.setText(name_list[5])
-
-        except IndexError as e:
-            print "Name incorrect", sys.exc_info()[0]
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format.\n')
-            self.ui.lineEditDate.setText("")
-            self.ui.lineEditGroup.setText("")
-            self.ui.lineEditAge.setText("")
-            self.ui.lineEditLitter.setText("")
-            self.ui.lineEditZygosity.setText("")
-            self.ui.lineEditSex.setText("")
-        except:
-            print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error when updating name',sys.exc_info()[0])
-
-        # Get output folder
-        output = str(self.ui.lineEditOutput.text())
-        path,output_folder_name = os.path.split(output)
-        self.ui.lineEditOutput.setText(os.path.join(path,self.full_name))
-
-
 
     def check(self):
         print "asdsada"
@@ -400,14 +368,44 @@ class MainWindow(QtGui.QMainWindow):
 
         except IndexError as e:
             pass
-            self.error = "Warning: Name ID is not in the correct format.\nAutocomplete of name is not possible."
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format.\nAutocomplete of name is not possible.\n')
             print "Name incorrect", sys.exc_info()[0]
-            self.errorDialog = ErrorMessage(self.error)
             self.full_name = ""
         except:
-            self.error = "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
             print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
-            self.errorDialog = ErrorMessage(self.error)
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Auto-populate not possible. Unexpected error:',sys.exc_info()[0])
+
+    def updateName(self):
+        ''' Function to update the name of the file and folder'''
+        self.full_name = str(self.ui.lineEditName.text())
+
+        try :
+            name_list = self.full_name.split("_")
+            self.ui.lineEditDate.setText(name_list[0])
+            self.ui.lineEditGroup.setText(name_list[1])
+            self.ui.lineEditAge.setText(name_list[2])
+            self.ui.lineEditLitter.setText(name_list[3])
+            self.ui.lineEditZygosity.setText(name_list[4])
+            self.ui.lineEditSex.setText(name_list[5])
+
+        except IndexError as e:
+            print "Name incorrect", sys.exc_info()[0]
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format.\n')
+            self.ui.lineEditDate.setText("")
+            self.ui.lineEditGroup.setText("")
+            self.ui.lineEditAge.setText("")
+            self.ui.lineEditLitter.setText("")
+            self.ui.lineEditZygosity.setText("")
+            self.ui.lineEditSex.setText("")
+        except:
+            print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error when updating name',sys.exc_info()[0])
+
+        # Get output folder
+        output = str(self.ui.lineEditOutput.text())
+        path,output_folder_name = os.path.split(output)
+        self.ui.lineEditOutput.setText(os.path.join(path,self.full_name))
+
 
 
     def autouCTOnly(self):
@@ -510,11 +508,10 @@ class MainWindow(QtGui.QMainWindow):
         except IOError as e:
             self.error = "Error finding recon file. Error:",sys.exc_info()[0]
             print "Error finding recon file",sys.exc_info()[0]
-            self.errorDialog = ErrorMessage(self.error)
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Could not find recon log file')
         except:
-            self.error = "Unexpected error:", sys.exc_info()[0]
             print "Unexpected error:", sys.exc_info()[0]
-            self.errorDialog = ErrorMessage(self.error)
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error getting recon log file',sys.exc_info()[0])
 
 
     def autoFileOut(self):
@@ -710,34 +707,6 @@ class MainWindow(QtGui.QMainWindow):
 
         config.close()
         log.close()
-
-
-class ErrorMessage(QtGui.QDialog):
-    '''
-    Class to provide the dialog box to show error messages
-    '''
-
-    # Create a constructor
-    def __init__(self,error):
-       super(ErrorMessage, self).__init__()
-       self.ui=Ui_DialogErrMessage()
-       self.ui.setupUi(self)
-       self.show()
-       self.replace_folder = None
-       # Stop further processing
-       self.stop = True
-
-       self.ui.objectNameErrMessage.setText(str(error))
-
-       self.ui.pushButtonOK.clicked.connect(self.errorOK)
-
-
-    def errorOK(self):
-        ''' Action to take place after OK button has been pressed for error message '''
-        print "errorOK button has been pressed"
-
-        self.hide()
-
 
 
 class ConfigClass :
