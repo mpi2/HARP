@@ -102,9 +102,44 @@ class MainWindow(QtGui.QMainWindow):
        # Get SPR file manually
        self.ui.pushButtonCTSPR.clicked.connect(self.getSPRMan)
 
+       # Update name
+       self.ui.pushButtonUpdate.clicked.connect(self.updateName)
+
 
        # to make the window visible
        self.show()
+
+
+    def updateName(self):
+        ''' Function to update the name of the file and folder'''
+        self.full_name = str(self.ui.lineEditName.text())
+
+        try :
+            name_list = self.full_name.split("_")
+            self.ui.lineEditDate.setText(name_list[0])
+            self.ui.lineEditGroup.setText(name_list[1])
+            self.ui.lineEditAge.setText(name_list[2])
+            self.ui.lineEditLitter.setText(name_list[3])
+            self.ui.lineEditZygosity.setText(name_list[4])
+            self.ui.lineEditSex.setText(name_list[5])
+
+        except IndexError as e:
+            print "Name incorrect", sys.exc_info()[0]
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format.\n')
+            self.ui.lineEditDate.setText("")
+            self.ui.lineEditGroup.setText("")
+            self.ui.lineEditAge.setText("")
+            self.ui.lineEditLitter.setText("")
+            self.ui.lineEditZygosity.setText("")
+            self.ui.lineEditSex.setText("")
+        except:
+            print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error when updating name',sys.exc_info()[0])
+
+        # Get output folder
+        output = str(self.ui.lineEditOutput.text())
+        path,output_folder_name = os.path.split(output)
+        self.ui.lineEditOutput.setText(os.path.join(path,self.full_name))
 
 
 
@@ -175,6 +210,10 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.ui.checkBoxRF.isChecked():
             print "CheckBox has been checked so files will be replaced\n"
+            if os.path.exists(zproj_path):
+                print "zproj exists"
+            else :
+                os.makedirs(zproj_path)
             self.stop = None
         elif os.path.exists(zproj_path):
             print "Output folder for z project already exists and user has not approved overwrite"
@@ -191,6 +230,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.stop = None
             except IOError as e:
                 print("cannot make directory for saving the z-projection: {0}".format(e))
+
                 self.errorDialog = ErrorMessage("cannot make directory for saving the z-projection: {0}".format(e))
 
         if self.stop == None :
@@ -323,7 +363,7 @@ class MainWindow(QtGui.QMainWindow):
         '''
         Gets the id from the folder name. Then fills out the text boxes on the main window with the relevant information
 
-        Updates the following qt objects: lineEditDate, ...   ...
+        Updates the followi        input = str(self.ui.lineEditInput.text())ng qt objects: lineEditDate, ...   ...
 
         Creates ...
         '''
@@ -815,26 +855,25 @@ class WorkThread(QtCore.QThread):
 
         crop_run = os.path.join(self.dir, "autocrop.py")
         print crop_run
-        # Perform the manual crop if required
         if self.configOb.crop_option == "Manual" :
-            session.write("Performing manual crop\n")
+            session.write("########################Performing manual crop########################\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing manual crop" )
 
-            manpro = subprocess.call(["python", autocrop_run,"-i",self.configOb.input_folder,"-o",
+            manpro = subprocess.call(["python", crop_run,"-i",self.configOb.input_folder,"-o",
                          cropped_path, "-t", "tif","-d",self.configOb.xcrop, self.configOb.ycrop, self.configOb.wcrop, self.configOb.hcrop],
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                            stdout=session, stderr=session)
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
-            session.write("Crop finished\n")
+            session.write("########################Crop finished########################\n")
 
         # Perform the automatic crop if required
         if self.configOb.crop_option == "Automatic" :
-            session.write("Performing autocrop\n")
+            session.write("########################Performing autocrop########################\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
 
             aupro = subprocess.call(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                            stdout=session, stderr=session)
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
-            session.write("Crop finished\n")
+            session.write("########################Crop finished########################\n")
 
         # Do not perform any crop as user specified
         if self.configOb.crop_option == "None" :

@@ -916,7 +916,20 @@ QGroupBox::title
           </font>
          </property>
          <property name="readOnly">
-          <bool>true</bool>
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="pushButtonUpdate">
+         <property name="font">
+          <font>
+           <family>Sans Serif</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Update</string>
          </property>
         </widget>
        </item>
@@ -1302,7 +1315,7 @@ QGroupBox::title
      </widget>
      <widget class="QCheckBox" name="checkBox">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
@@ -1323,7 +1336,7 @@ QGroupBox::title
      </widget>
      <widget class="QCheckBox" name="checkBox_2">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>

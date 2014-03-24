@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Thu Mar 20 15:25:41 2014
+# Created: Mon Mar 24 11:23:07 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -526,9 +526,16 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(12)
         self.lineEditName.setFont(font)
-        self.lineEditName.setReadOnly(True)
+        self.lineEditName.setReadOnly(False)
         self.lineEditName.setObjectName(_fromUtf8("lineEditName"))
         self.gridLayoutName.addWidget(self.lineEditName, 0, 1, 1, 1)
+        self.pushButtonUpdate = QtGui.QPushButton(self.gridLayoutWidget_2)
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setPointSize(12)
+        self.pushButtonUpdate.setFont(font)
+        self.pushButtonUpdate.setObjectName(_fromUtf8("pushButtonUpdate"))
+        self.gridLayoutName.addWidget(self.pushButtonUpdate, 0, 2, 1, 1)
         self.gridLayoutWidget_5 = QtGui.QWidget(self.groupBoxID)
         self.gridLayoutWidget_5.setGeometry(QtCore.QRect(11, 64, 691, 34))
         self.gridLayoutWidget_5.setObjectName(_fromUtf8("gridLayoutWidget_5"))
@@ -687,14 +694,14 @@ class Ui_MainWindow(object):
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.checkBox = QtGui.QCheckBox(self.groupBoxOptions)
-        self.checkBox.setEnabled(False)
+        self.checkBox.setEnabled(True)
         self.checkBox.setGeometry(QtCore.QRect(155, 171, 81, 17))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.checkBox.setFont(font)
         self.checkBox.setObjectName(_fromUtf8("checkBox"))
         self.checkBox_2 = QtGui.QCheckBox(self.groupBoxOptions)
-        self.checkBox_2.setEnabled(False)
+        self.checkBox_2.setEnabled(True)
         self.checkBox_2.setGeometry(QtCore.QRect(245, 169, 161, 21))
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -1019,6 +1026,7 @@ class Ui_MainWindow(object):
         self.labelDate.setText(_translate("MainWindow", "Date", None))
         self.labelGroup.setText(_translate("MainWindow", "Gene", None))
         self.labelName.setText(_translate("MainWindow", "Full name", None))
+        self.pushButtonUpdate.setText(_translate("MainWindow", "Update", None))
         self.labelLitter.setText(_translate("MainWindow", "Litter", None))
         self.labelSex.setText(_translate("MainWindow", "Sex", None))
         self.labelZygosity.setText(_translate("MainWindow", "Zygosity", None))
@@ -1058,3 +1066,4 @@ class Ui_MainWindow(object):
         self.actionChange_ID.setText(_translate("MainWindow", "Allow identification to be changed", None))
         self.actionManually_select_output_folder.setText(_translate("MainWindow", "Allow manually selection of output folder", None))
         self.actionAccurate_folder_size_calculation.setText(_translate("MainWindow", "Accurate folder size calculation", None))
+
