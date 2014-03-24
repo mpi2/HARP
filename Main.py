@@ -25,7 +25,6 @@ try:
 except ImportError:
     from PIL import Image
 
-
 class MainWindow(QtGui.QMainWindow):
     '''
     Class to provide the main window for the Image processing GUI.
