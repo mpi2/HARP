@@ -59,13 +59,15 @@ class Cropper:
         self.out_dir = out_dir
 
     def __call__(self, img):
-        im = Image.open(img)
-
-        imcrop = im.crop((self.crop_box[0], self.crop_box[1], self.crop_box[2], self.crop_box[3] ))
-
-        filename = os.path.basename(img)
-        crop_out = os.path.join(self.out_dir,filename)
-        imcrop.save(crop_out)
+	try:
+		im = Image.open(img)
+		imcrop = im.crop((self.crop_box[0], self.crop_box[1], self.crop_box[2], self.crop_box[3] ))
+		filename = os.path.basename(img)
+		crop_out = os.path.join(self.out_dir,filename)
+		imcrop.save(crop_out)
+	except:
+		#Catches corrupt files
+		print "Error cropping file. The last file was {0}".format(img)
 
 
 def do_the_crop(images, crop_vals, out_dir,  padding=0):
@@ -166,7 +168,7 @@ def run(args):
         proc = Processor(threshold)
         pool_num = 0
         if args.num_proc:
-            pool_num = args.num_proc
+            pool_num = int(args.num_proc)
         else:
             pool_num = cpu_count() -1
         pool = Pool(pool_num)
