@@ -14,7 +14,9 @@ User draws a cropping box. returns the coordinates
 class Crop(QtGui.QMainWindow):
 
     def __init__(self, callback, image, parent=None):
-
+	'''
+	@param: image, str, image file
+	'''
         super(Crop, self).__init__(parent)
         self.setWindowTitle("Manual cropping")
         self.widget = MainWidget(self, callback, image)
@@ -45,7 +47,10 @@ class Crop(QtGui.QMainWindow):
         self.widget.doTheCrop()
 
     def closeMenuAction(self):
+    #sys.exit(app.exec_())
+    #self.widget.close()
         self.close()
+
 
 
 
@@ -243,6 +248,7 @@ class MainWidget(QtGui.QWidget):
 
 
 def run_from_cli(callback, image):
+    #Need access to app to be able to exit gracefully from cli
     app = QtGui.QApplication(sys.argv)
     window = Crop(callback, image)
     window.show()
