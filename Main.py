@@ -10,7 +10,7 @@ import crop
 #from RunProcessing import *
 import sys
 import subprocess
-import os
+import os, signal
 import re
 # cPickle is faster than pickel and is pretty much the same
 import pickle
@@ -431,7 +431,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEditCTSPR.setText(SPR_file_TIF)
         else:
             self.error = "Cannot find SPR file, proceed if this is not a problem"
-            self.errorDialog = ErrorMessage(self.error)
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning:Cannot find SPR file"',sys.exc_info()[0])
 
 
         self.ui.lineEditScan.setText(self.scan_folder)
@@ -480,6 +480,8 @@ class MainWindow(QtGui.QMainWindow):
         try:
             # This will change depending on the location of the program (e.g linux/windows and what drive the MicroCT folder is set to)
             recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
+
+            # Check if .txt file or .log file
 
             # To make sure the path is in the correct format (not sure if necessary
             self.recon_log_path = os.path.abspath(recon_log_path)
@@ -779,6 +781,26 @@ class Progress(QtGui.QDialog):
         self.connect( self.threadPool[len(self.threadPool)-1], QtCore.SIGNAL("update(QString)"), self.add )
         self.threadPool[len(self.threadPool)-1].start()
 
+    def closeEvent(self, event):
+        """ Function doc """
+        reply = QtGui.QMessageBox.question(self,  'Message',  'Are you sure to quit?',  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+
+        if reply == QtGui.QMessageBox.Yes:
+            event.accept()
+            self.threadPool[len(self.threadPool)-1].exit()
+            #self.threadPool[len(self.threadPool)-1].terminate()
+            self.pid_log_path = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_pid.log")
+            ins = open( self.pid_log_path, "r" )
+            for line in ins:
+                print int(line)
+                try :
+                    os.kill(int(line),signal.SIGKILL)
+                except OSError as e:
+                    print("os.kill could not kill process, reason: {0}".format(e))
+
+
+        else:
+            event.ignore()
 
 
 class WorkThread(QtCore.QThread):
@@ -795,9 +817,12 @@ class WorkThread(QtCore.QThread):
         self.dir = os.path.dirname(os.path.realpath(__file__))
         # Get the session log file
         self.session_log_path = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_session.log")
+        self.pid_log_path = os.path.join(self.configOb.meta_path,self.configOb.full_name+"_pid.log")
 
         # Save as object to print to
         session = open(self.session_log_path, 'w+')
+        session_pid = open(self.pid_log_path, 'w+')
+
         session.write("Name of recon:"+self.configOb.full_name+"\n")
 
         ###############################################
@@ -816,9 +841,12 @@ class WorkThread(QtCore.QThread):
             session.write("########################Performing manual crop########################\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing manual crop" )
 
-            manpro = subprocess.call(["python", crop_run,"-i",self.configOb.input_folder,"-o",
+            manpro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o",
                          cropped_path, "-t", "tif","-d",self.configOb.xcrop, self.configOb.ycrop, self.configOb.wcrop, self.configOb.hcrop],
                             stdout=session, stderr=session)
+            session_pid.write(str(manpro.pid)+"\n")
+            session_pid.close()
+            manpro.communicate()
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
             session.write("########################Crop finished########################\n")
 
@@ -827,8 +855,11 @@ class WorkThread(QtCore.QThread):
             session.write("########################Performing autocrop########################\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
 
-            aupro = subprocess.call(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
+            aupro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
                             stdout=session, stderr=session)
+            session_pid.write(str(aupro.pid)+"\n")
+            session_pid.close()
+            aupro.communicate()
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
             session.write("########################Crop finished########################\n")
 
@@ -837,6 +868,7 @@ class WorkThread(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "No Crop carried out" )
             print "No crop carried out"
             session.write("No crop carried out\n")
+            session_pid.close()
 
         ###############################################
         # Copying of other files from recon directory
@@ -860,47 +892,41 @@ class WorkThread(QtCore.QThread):
         ###############################################
         # Scaling
         ###############################################
+
         # First make subfolder for scaled stacks
         if not os.path.exists(self.configOb.scale_path):
             os.makedirs(self.configOb.scale_path)
 
         # Perform scaling as subprocess with Popen (they should be done in the background)
         if self.configOb.SF2 == "yes" :
-            proSF2 = self.executeImagej(":0.5:x2")
-
-        if self.configOb.SF3 == "yes" :
-            proSF3 = self.executeImagej(":0.3333:x3")
-
-        if self.configOb.SF4 == "yes" :
-            proSF4 = self.executeImagej(":0.25:x4")
-
-        if self.configOb.SF2 == "yes" :
+            proSF2 = self.executeImagej(":0.5:x2",session_pid)
             out2, err2 = proSF2.communicate()
-            session.write(out2)
-            session.write(err2)
 
         if self.configOb.SF3 == "yes" :
+            proSF3 = self.executeImagej(":0.3333:x3",session_pid)
             out3, err3 = proSF3.communicate()
-            session.write(out3)
-            session.write(err3)
 
         if self.configOb.SF4 == "yes" :
+            proSF4 = self.executeImagej(":0.25:x4",session_pid)
             out4, err4 = proSF4.communicate()
-            session.write(out4)
-            session.write(err4)
 
         session.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
 
 
-    def executeImagej(self, scaleFactor):
+    def executeImagej(self, scaleFactor,session_pid):
         '''
         @param: str, scaleFactor eg ":0.5"
         '''
+        # for saving pid again
+        session_pid = open(self.pid_log_path, 'a+')
         self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(scaleFactor) )
         process = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
-                                    self.configOb.imageJ + scaleFactor],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                                    self.configOb.imageJ + scaleFactor],stdout=session,stderr=session)
+        session_pid.write(str(process.pid)+"\n")
+        session_pid.close()
         return process
+
 
 
 def main():
