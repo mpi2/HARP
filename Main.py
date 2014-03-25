@@ -34,13 +34,14 @@ class MainWindow(QtGui.QMainWindow):
     image processing (not yet developed).
     '''
 
-    def __init__(self):
+    def __init__(self, app):
        '''  Constructor: Checks for buttons which have been pressed and responds accordingly. '''
 
        # Standard setup of class from qt designer Ui class
        super(MainWindow, self).__init__()
        self.ui=Ui_MainWindow()
        self.ui.setupUi(self)
+       self.app = app
 
        # Make unique ID if this is the first time mainwindow has been called
        self.unique_ID = uuid.uuid1()
@@ -161,9 +162,6 @@ class MainWindow(QtGui.QMainWindow):
 
     def getDimensions(self):
         ''' Perform a z projection and then allows user to crop based on z projection'''
-        #
-
-        dir = os.path.dirname(os.path.abspath(__file__))
 
         # Opens MyMainWindow from crop.py
         input_folder = str(self.ui.lineEditInput.text())
@@ -198,16 +196,17 @@ class MainWindow(QtGui.QMainWindow):
         if self.stop == None :
 
             self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
-            p = subprocess.Popen(["python", dir+"/zproject.py",input_folder,output_folder],stdin=subprocess.PIPE,
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            #Needed to update the gui
+            self.app.processEvents()
+
             print "Waiting"
-            QtCore.QCoreApplication.processEvents()
-            #message = QtGui.QMessageBox.information(self, 'Message', 'Maximum intensity (z projection) of slices is being calculated, press OK and the Z projection image will pop up when ready.')
-            out, err = p.communicate()
-            print out
-            print err
+            zp = zproject.Zproject(input_folder, output_folder)
+            zp_result = zp.run()
+
+            if zp_result != 0:
+                self.ui.textEditStatusMessages.setText("Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(zp_result))
+                return
             self.ui.textEditStatusMessages.setText("Z-projection finished")
-            #self.ui.label_zwait.setText("z project done")
             self.runCrop(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
             self.ui.textEditStatusMessages.setText("Dimensions selected")
 
@@ -714,7 +713,7 @@ class ConfigClass :
 
 def main():
     app = QtGui.QApplication(sys.argv)
-    ex = MainWindow()
+    ex = MainWindow(app)
     sys.exit(app.exec_())
 
 

@@ -18,7 +18,11 @@ class Zproject:
         self.out_dir = out_dir
 
     def run(self):
-
+        '''
+        Run the Zprojection
+        @return img, PIL Image on success
+        @return string with error message
+        '''
         files = []
 
         for fn in os.listdir(self.img_dir):
@@ -27,7 +31,7 @@ class Zproject:
             if fn.endswith(('.bmp', '.BMP', '.tif', '.TIF')):
                 files.append(os.path.join(self.img_dir, fn))
         if len(files) < 1:
-            sys.exit("no image files found in" + self.img_dir)
+            return("no image files found in" + self.img_dir)
 
         im = Image.open(files[0])
         self.imdims = (im.size[1], im.size[0])
@@ -38,7 +42,7 @@ class Zproject:
         poolsize = cpu_count()
         p = Pool(poolsize)
         chunksize = int(len(files)/poolsize) +1
-        print "chunk {0}".format(chunksize)
+        #print "chunk {0}".format(chunksize)
         chunks = [files[i:i+chunksize]
                   for i in range(0, len(files), chunksize)]
 
@@ -46,10 +50,15 @@ class Zproject:
         proc = Process(self.imdims)
         max_arrays = np.array(p.map(proc, chunks))
         maxi = np.amax(max_arrays, axis=0) #finds maximum along first axis
-        img = Image.fromarray(np.uint8(maxi)) #should be of shape (4000, 4000)
-        #img.save("max_intensity.tif")
+        img = Image.fromarray(np.uint8(maxi))
 
-        return img # Let the gui control where the image will be saved
+        #something wrong with image creation
+        if img.size == (0.0,0.0):
+
+            return("something went wrong creating the Z-projection from {}".format(self.img_dir))
+        else:
+            img.save(os.path.join(str(self.out_dir), "z_projection", "max_intensity_z.tif"))
+            return(0)
 
 
 class Process:
@@ -59,14 +68,14 @@ class Process:
 
     def __call__(self, chunk):
         max_ = np.zeros(self.imdims)
-        print "imdims: ", self.imdims
+        #print "imdims: ", self.imdims
 
         for im in chunk:
             #Numpy is flipping the coordinates around. WTF!. So T is for transpose
             im_array = np.asarray(Image.open(im))
-            print "im: ", im_array.shape
+            #print "im: ", im_array.shape
             max_ = np.maximum(max_, im_array)
-        print "chunk done"
+        #print "chunk done"
         return max_
 
 
