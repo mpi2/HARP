@@ -408,8 +408,15 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditCTRecon.setText(str(self.recon_log_path))
 
         # Set the scan folder
-        self.scan_folder  = input.replace("recons", "scan")
-        self.ui.lineEditScan.setText(self.scan_folder)
+        pattern = re.compile("recons", re.IGNORECASE)
+        self.scan_folder = pattern.sub("scan", input)
+
+        if os.path.exists(self.scan_folder):
+            self.ui.lineEditScan.setText(self.scan_folder)
+        else :
+            print "could not find scan folder"
+            self.scan_folder = ""
+            #message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Could not locate scan folder')
 
         # Get the SPR file. Sometimes fiels are saved with upper or lower case file extensions
         # The following is bit of a stupid way of dealing with this problem but I think it works....
@@ -427,11 +434,11 @@ class MainWindow(QtGui.QMainWindow):
         elif os.path.isfile(SPR_file_TIF):
             self.ui.lineEditCTSPR.setText(SPR_file_TIF)
         else:
-            self.error = "Cannot find SPR file, proceed if this is not a problem"
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning:Cannot find SPR file"',sys.exc_info()[0])
+            print "Cannot find SPR file, proceed if this is not a problem"
+            #message = QtGui.QMessageBox.warning(self, 'Message', 'Warning:Cannot find SPR file')
 
 
-        self.ui.lineEditScan.setText(self.scan_folder)
+
 
 
     def getReconMan(self):
@@ -477,7 +484,12 @@ class MainWindow(QtGui.QMainWindow):
         try:
             # This will change depending on the location of the program (e.g linux/windows and what drive the MicroCT folder is set to)
             recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
-
+            if os.path.exists(os.path.join(path,folder_name,folder_name+".txt")):
+                recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
+            elif os.path.exists(os.path.join(path,folder_name,folder_name+".log")):
+                recon_log_path = os.path.join(path,folder_name,folder_name+".log")
+            else :
+                raise Exception('No log file')
             # Check if .txt file or .log file
 
             # To make sure the path is in the correct format (not sure if necessary
@@ -503,6 +515,8 @@ class MainWindow(QtGui.QMainWindow):
         except IOError as e:
             self.error = "Error finding recon file. Error:",sys.exc_info()[0]
             print "Error finding recon file",sys.exc_info()[0]
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Problem reading recon log file ')
+        except Exception as inst:
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Could not find recon log file')
         except:
             print "Unexpected error:", sys.exc_info()[0]
@@ -516,8 +530,9 @@ class MainWindow(QtGui.QMainWindow):
             input = str(self.ui.lineEditInput.text())
             # Get the folder name
             path,folder_name = os.path.split(input)
+            pattern = re.compile("recons", re.IGNORECASE)
+            output_path = pattern.sub("processed recons", path)
 
-            output_path  = path.replace("recons", "processed recons")
             output_full = os.path.join(output_path,self.full_name)
             self.ui.lineEditOutput.setText(output_full)
 
