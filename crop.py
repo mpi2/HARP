@@ -137,10 +137,10 @@ class MainWidget(QtGui.QWidget):
             self.x = pos[0]
             self.y = pos[1]
             self.cornerSet = True
-            print "corner: ",self.x, " ", self.y
+            #print "corner: ",self.x, " ", self.y
             return
 
-        print "event: ", pos
+        #print "event: ", pos
         #print pos
         if self.drawing:
             #print self.x, ":", self.y
