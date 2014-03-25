@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Import PyQT module
-from PyQt4 import QtGui
+from PyQt4 import QtGui,QtCore
 # Import MainWindow class from QT Designer
 from MainWindow import Ui_MainWindow
 from Progress import Ui_Progress
@@ -20,7 +20,6 @@ import time
 import shutil
 import uuid
 from multiprocessing import Process
-from PyQt4.uic.Compiler.qtproxies import QtCore
 try:
     import Image
 except ImportError:
@@ -47,12 +46,12 @@ class MainWindow(QtGui.QMainWindow):
        self.unique_ID = uuid.uuid1()
        print "ID for session:"+str(self.unique_ID)
 
-       # Initialise modality variable
+       # Initialise various switches
        self.modality = "Not_selected"
        self.selected = "Not_selected"
        self.error = "None"
        self.stop = None
-
+       self.processGoSwitch = "no"
 
        # initialise non essential information
        self.scan_folder = ""
@@ -538,7 +537,7 @@ class MainWindow(QtGui.QMainWindow):
         This will set off all the processing scripts and shows the dialog box to keep track of progress
         '''
         print "\nOpen progress report for user"
-
+        self.processGoSwitch = "yes"
         # Get the directory of the script
         dir = os.path.dirname(os.path.abspath(__file__))
 
