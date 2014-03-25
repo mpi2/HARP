@@ -195,8 +195,6 @@ class MainWindow(QtGui.QMainWindow):
             except IOError as e:
                 print("cannot make directory for saving the z-projection: {0}".format(e))
 
-                self.errorDialog = ErrorMessage("cannot make directory for saving the z-projection: {0}".format(e))
-
         if self.stop == None :
 
             self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
@@ -298,7 +296,7 @@ class MainWindow(QtGui.QMainWindow):
         except:
             self.error = "Unexpected error in folder size calc:", sys.exc_info()[0]
             print "Unexpected error in folder size calc:", sys.exc_info()[0]
-            self.errorDialog = ErrorMessage(self.error)
+
 
 
     def sizeCleanup(self,f_size_out,approx_size):
