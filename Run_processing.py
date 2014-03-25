@@ -122,12 +122,17 @@ class WorkThread(QtCore.QThread):
         self.scale_log_path = os.path.join(self.configOb.meta_path,"scale.log")
 
         # Save as object to print to
+        if os.path.exists(self.session_log_path):
+            os.remove(self.session_log_path)
+
         logging.basicConfig(filename=self.session_log_path,level=logging.DEBUG,format='%(asctime)s %(message)s')
 
         #session = open(self.session_log_path, 'w+')
         session_pid = open(self.pid_log_path, 'w+')
         session_crop = open(self.crop_log_path, 'w+')
         session_scale = open(self.scale_log_path, 'w+')
+
+        # Special log path to be used
 
         logging.info("Name of recon:"+self.configOb.full_name)
 
@@ -146,7 +151,6 @@ class WorkThread(QtCore.QThread):
         if self.configOb.crop_option == "Manual" :
             logging.info("Performing manual crop")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing manual crop" )
-
             manpro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o",
                          cropped_path, "-t", "tif","-d",self.configOb.xcrop, self.configOb.ycrop, self.configOb.wcrop, self.configOb.hcrop],
                             stdout=session_crop, stderr=session_crop)
@@ -205,20 +209,26 @@ class WorkThread(QtCore.QThread):
 
         # Perform scaling as subprocess with Popen (they should be done in the background)
         if self.configOb.SF2 == "yes" :
+            logging.info("Performing scaling by factor 2")
             proSF2 = self.executeImagej(":0.5:x2",session_pid,session_scale)
             out2, err2 = proSF2.communicate()
+            logging.info("Finished scaling by factor 2")
 
         if self.configOb.SF3 == "yes" :
+            logging.info("Performing scaling by factor 3")
             proSF3 = self.executeImagej(":0.3333:x3",session_pid,session_scale)
             out3, err3 = proSF3.communicate()
+            logging.info("Finished scaling by factor 3")
 
         if self.configOb.SF4 == "yes" :
+            logging.info("Performing scaling by factor 4")
             proSF4 = self.executeImagej(":0.25:x4",session_pid,session_scale)
             out4, err4 = proSF4.communicate()
+            logging.info("Performing scaling by factor 4")
 
         session_scale.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
-
+        logging.info("Processing finished")
 
     def executeImagej(self, scaleFactor,session_pid,session_scale):
         '''
