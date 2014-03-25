@@ -36,9 +36,12 @@ class Progress(QtGui.QDialog):
 
         self.thread(configOb)
 
-        self.ui.pushButtonAddMore.clicked.connect(self.AddMore)
+        self.ui.pushButtonCancel_1.clicked.connect(self.cancel)
 
-    def AddMore(self):
+    def cancel(self):
+        self.close()
+
+    def addMore(self):
         dir = os.path.dirname(os.path.abspath(__file__))
         runPro_p = subprocess.Popen(["python", dir+"/Main.py"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
