@@ -11,6 +11,7 @@ import shutil
 import uuid
 from multiprocessing import Process
 import logging
+from sys import platform as _platform
 
 from Progress import Ui_Progress
 
@@ -37,6 +38,7 @@ class Progress(QtGui.QDialog):
         self.thread(configOb)
 
         self.ui.pushButtonCancel_1.clicked.connect(self.cancel)
+        self.ui.pushButtonAddMore.clicked.connect(self.addMore)
 
     def cancel(self):
         self.close()
@@ -54,6 +56,9 @@ class Progress(QtGui.QDialog):
 
         if test == "Crop finished" :
             self.ui.progressBar_1.setValue(50)
+
+        if test == "Error" :
+            self.threadPool[len(self.threadPool)-1].terminate()
 
         print test
         value = 0
@@ -88,12 +93,17 @@ class Progress(QtGui.QDialog):
         if reply == QtGui.QMessageBox.Yes:
             event.accept()
             self.threadPool[len(self.threadPool)-1].terminate()
+
             self.pid_log_path = os.path.join(self.configOb.meta_path,"pid.log")
             ins = open( self.pid_log_path, "r" )
             for line in ins:
-                print int(line)
+
                 try :
-                    os.kill(int(line),signal.SIGKILL)
+                    if _platform == "linux" or _platform == "linux2":
+                        os.kill(int(line),signal.SIGKILL)
+                        print "killed:", int(line)
+                    elif _platform == "win32" or _platform == "win64":
+                        os.system('taskkill /f /t /im '+str(line))
                 except OSError as e:
                     print("os.kill could not kill process, reason: {0}".format(e))
 
@@ -106,6 +116,7 @@ class WorkThread(QtCore.QThread):
     def __init__(self,configOb):
         QtCore.QThread.__init__(self)
         self.configOb = configOb
+
 
     def __del__(self):
         self.wait()
@@ -164,12 +175,22 @@ class WorkThread(QtCore.QThread):
         if self.configOb.crop_option == "Automatic" :
             logging.info("Performing autocrop")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
+            try:
+                aupro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
+                            stdout=session_crop,stderr=session_crop)
+                session_pid.write(str(aupro.pid)+"\n")
+                session_pid.close()
+                auout, auerr = aupro.communicate()
+                logging.info(auerr)
+                if auerr:
+                    #print cstderr
+                    raise Exception("Error check")
+                    #logging.info("err")
+                    self.emit( QtCore.SIGNAL('update(QString)'), "Error" )
+            except Exception as inst:
+                logging.info(inst)
 
-            aupro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
-                            stdout=session_crop, stderr=session_crop)
-            session_pid.write(str(aupro.pid)+"\n")
-            session_pid.close()
-            aupro.communicate()
+
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
             logging.info("Crop finished")
 
@@ -229,6 +250,10 @@ class WorkThread(QtCore.QThread):
         session_scale.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
         logging.info("Processing finished")
+        session_pid.close()
+        session_crop.close()
+        session_scale.close()
+
 
     def executeImagej(self, scaleFactor,session_pid,session_scale):
         '''
