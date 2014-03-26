@@ -87,7 +87,7 @@ class Progress(QtGui.QDialog):
 
         if reply == QtGui.QMessageBox.Yes:
             event.accept()
-            self.threadPool[len(self.threadPool)-1].exit()
+            self.threadPool[len(self.threadPool)-1].terminate()
             self.pid_log_path = os.path.join(self.configOb.meta_path,"pid.log")
             ins = open( self.pid_log_path, "r" )
             for line in ins:
