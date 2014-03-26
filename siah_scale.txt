@@ -21,7 +21,7 @@ print("###############################");
 args = getArgument;
 if (args=="") exit ("No argument!");
 
-arg_array = split(args,":");
+arg_array = split(args,"^");
 print("input folder:");
 print(arg_array[0]);
 

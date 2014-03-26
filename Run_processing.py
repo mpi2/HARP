@@ -9,7 +9,6 @@ import pprint
 import time
 import shutil
 import uuid
-from multiprocessing import Process
 import logging
 from sys import platform as _platform
 
@@ -146,6 +145,7 @@ class WorkThread(QtCore.QThread):
         # Special log path to be used
 
         logging.info("Name of recon:"+self.configOb.full_name)
+        logging.info("ImageJ:"+self.configOb.imageJ)
 
         ###############################################
         # Cropping
@@ -175,22 +175,12 @@ class WorkThread(QtCore.QThread):
         if self.configOb.crop_option == "Automatic" :
             logging.info("Performing autocrop")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
-            try:
-                aupro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
+
+            aupro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
                             stdout=session_crop,stderr=session_crop)
-                session_pid.write(str(aupro.pid)+"\n")
-                session_pid.close()
-                auout, auerr = aupro.communicate()
-                logging.info(auerr)
-                if auerr:
-                    #print cstderr
-                    raise Exception("Error check")
-                    #logging.info("err")
-                    self.emit( QtCore.SIGNAL('update(QString)'), "Error" )
-            except Exception as inst:
-                logging.info(inst)
-
-
+            session_pid.write(str(aupro.pid)+"\n")
+            session_pid.close()
+            aupro.communicate()
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
             logging.info("Crop finished")
 
@@ -228,22 +218,24 @@ class WorkThread(QtCore.QThread):
         if not os.path.exists(self.configOb.scale_path):
             os.makedirs(self.configOb.scale_path)
 
+        logging.info("imageJ:")
+        logging.info(self.configOb.imageJ)
         # Perform scaling as subprocess with Popen (they should be done in the background)
         if self.configOb.SF2 == "yes" :
             logging.info("Performing scaling by factor 2")
-            proSF2 = self.executeImagej(":0.5:x2",session_pid,session_scale)
+            proSF2 = self.executeImagej("^0.5^x2",session_pid,session_scale)
             out2, err2 = proSF2.communicate()
             logging.info("Finished scaling by factor 2")
 
         if self.configOb.SF3 == "yes" :
             logging.info("Performing scaling by factor 3")
-            proSF3 = self.executeImagej(":0.3333:x3",session_pid,session_scale)
+            proSF3 = self.executeImagej("^0.3333^x3",session_pid,session_scale)
             out3, err3 = proSF3.communicate()
             logging.info("Finished scaling by factor 3")
 
         if self.configOb.SF4 == "yes" :
             logging.info("Performing scaling by factor 4")
-            proSF4 = self.executeImagej(":0.25:x4",session_pid,session_scale)
+            proSF4 = self.executeImagej("^0.25^x4",session_pid,session_scale)
             out4, err4 = proSF4.communicate()
             logging.info("Performing scaling by factor 4")
 
@@ -261,12 +253,30 @@ class WorkThread(QtCore.QThread):
         '''
         # for saving pid again
         session_pid = open(self.pid_log_path, 'a+')
-        self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(scaleFactor) )
-        process = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
+
+        if _platform == "linux" or _platform == "linux2":
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(scaleFactor) )
+            process = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
                                     self.configOb.imageJ + scaleFactor],stdout=session_scale,stderr=session_scale)
-        session_pid.write(str(process.pid)+"\n")
-        session_pid.close()
-        return process
+            session_pid.write(str(process.pid)+"\n")
+            session_pid.close()
+            return process
+
+        elif _platform == "win32" or _platform == "win64":
+            ijpath = os.path.join('c:', os.sep, 'Program Files', 'ImageJ', 'ij.jar')
+
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(scaleFactor) )
+            process = subprocess.Popen(["java", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
+                                    self.configOb.imageJ + scaleFactor],stdout=session_scale,stderr=session_scale)
+            session_pid.write(str(process.pid)+"\n")
+            session_pid.close()
+            return process
+
+
+
+
+
+
 
 def main():
     app = QtGui.QApplication(sys.argv)

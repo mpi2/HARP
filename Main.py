@@ -692,7 +692,7 @@ class MainWindow(QtGui.QMainWindow):
         # Combining scaling and SF into input for imageJ macro
         self.configOb.cropped_path = os.path.join(self.configOb.output_folder,"cropped")
         self.configOb.scale_path = os.path.join(self.configOb.output_folder,"scaled_stacks")
-        self.configOb.imageJ = self.configOb.cropped_path+os.sep+':'+self.configOb.scale_path+os.sep+":"+self.configOb.full_name
+        self.configOb.imageJ = self.configOb.cropped_path+os.sep+'^'+self.configOb.scale_path+os.sep+"^"+self.configOb.full_name
 
         # write the config information into an easily readable log file
         log.write("Session_ID    "+self.configOb.unique_ID+"\n");
