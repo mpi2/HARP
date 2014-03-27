@@ -19,6 +19,7 @@ import pprint
 import time
 import shutil
 import uuid
+import logging
 from multiprocessing import Process
 try:
     import Image
@@ -45,7 +46,6 @@ class MainWindow(QtGui.QMainWindow):
 
        # Make unique ID if this is the first time mainwindow has been called
        self.unique_ID = uuid.uuid1()
-       print "ID for session:"+str(self.unique_ID)
 
        # Initialise various switches
        self.modality = "Not_selected"
@@ -62,7 +62,19 @@ class MainWindow(QtGui.QMainWindow):
 
        # Temp folder for pre-processing log and z-project
        self.tmp_dir = tempfile.mkdtemp()
-       print "Temp folder", self.tmp_dir
+
+       # First log file
+       tmp_log = os.path.join(self.tmp_dir,"session.log")
+       logging.basicConfig(filename=tmp_log,level=logging.DEBUG,format='%(asctime)s %(message)s')
+       logging.info("########################################")
+       logging.info("### HARP Session Log                 ###")
+       logging.info("########################################")
+
+       print "ID for session:"+str(self.unique_ID)
+       logging.info("ID for session:"+str(self.unique_ID))
+       print "Temp directory:"+self.tmp_dir
+       logging.info("Temp directory:"+self.tmp_dir)
+
 
        # get input folder
        self.ui.pushButtonInput.clicked.connect(self.selectFileIn)
@@ -110,16 +122,13 @@ class MainWindow(QtGui.QMainWindow):
        self.show()
 
 
-
-    def check(self):
-        print "asdsada"
-
     def selectFileIn(self):
         ''' Get the info for the selected file'''
         self.fileDialog = QtGui.QFileDialog(self)
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
 
         if folder == "":
+            logging.info("User has pressed cancel")
             print "User has pressed cancel"
         else :
             self.ui.lineEditInput.setText(folder)
@@ -146,6 +155,7 @@ class MainWindow(QtGui.QMainWindow):
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
         if folder == "":
             print "User has pressed cancel"
+            logging.info("User has pressed cancel")
         else:
             self.ui.lineEditOutput.setText(folder)
 
@@ -165,7 +175,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def getDimensions(self):
         ''' Perform a z projection and then allows user to crop based on z projection'''
-
+        logging.info("########################################")
+        logging.info("### Getting crop dimensions          ###")
+        logging.info("########################################")
         # Opens MyMainWindow from crop.py
         input_folder = str(self.ui.lineEditInput.text())
         output_folder = str(self.ui.lineEditOutput.text())
@@ -173,11 +185,11 @@ class MainWindow(QtGui.QMainWindow):
         zproj_path = os.path.join(str(self.outputFolder), "z_projection")
         self.stop = None
 
+        logging.info("Z projection is being performed")
         self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
         #Needed to update the gui
         self.app.processEvents()
 
-        print "Waiting"
         zp = zproject.Zproject(input_folder, output_folder)
 
         zp_result = zp.run(self.tmp_dir)
@@ -185,17 +197,17 @@ class MainWindow(QtGui.QMainWindow):
         if zp_result != 0:
             self.ui.textEditStatusMessages.setText("Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(zp_result))
             return
+        logging.info("Z projection has finished")
 
         self.ui.textEditStatusMessages.setText("Z-projection finished")
+        logging.info("Getting crop dimensions")
         self.runCrop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
         self.ui.textEditStatusMessages.setText("Dimensions selected")
-
+        logging.info("Dimensions selected")
 
     def runCrop(self, img_path):
         cropper = crop.Crop(self.cropCallback, img_path, self)
         cropper.show()
-
-
 
     def manCropOff(self):
         ''' disables boxes for cropping manually '''
@@ -273,8 +285,9 @@ class MainWindow(QtGui.QMainWindow):
             #Clean up the formatting of gb mb
             self.sizeCleanup(f_size_out,approx_size)
         except:
-            self.error = "Unexpected error in folder size calc:", sys.exc_info()[0]
+            message = QtGui.QMessageBox.warning(self, "Message", "Unexpected error in folder size calc")
             print "Unexpected error in folder size calc:", sys.exc_info()[0]
+            logging.info("Unexpected error in folder size calc:", sys.exc_info()[0])
 
 
 
@@ -544,7 +557,9 @@ class MainWindow(QtGui.QMainWindow):
 
             # Perform analysis
             # This will run the analysi and show progress dialog window to keep track of what is being processed
+            logging.basicConfig(filename=os.path.join(self.meta_path,"session.log"),level=logging.DEBUG,format='%(asctime)s %(message)s')
             self.pro = Progress(self.configOb)
+
 
             # Run the programs. A script needs to be written to run on linux to run the back end processing
 

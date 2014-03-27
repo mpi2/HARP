@@ -10,6 +10,8 @@ import time
 import shutil
 import uuid
 import logging
+import logging.handlers
+
 from sys import platform as _platform
 
 from Progress import Ui_Progress
@@ -88,6 +90,8 @@ class Progress(QtGui.QDialog):
     def closeEvent(self, event):
         """ Function doc """
         reply = QtGui.QMessageBox.question(self,  'Message',  'Are you sure to quit?',  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+        logging.info("****Shutting down program****")
+
 
         if reply == QtGui.QMessageBox.Yes:
             event.accept()
@@ -100,12 +104,25 @@ class Progress(QtGui.QDialog):
                 try :
                     if _platform == "linux" or _platform == "linux2":
                         os.kill(int(line),signal.SIGKILL)
-                        print "killed:", int(line)
+                        print "killed:", line
+                        logging.info("killed:", line)
                     elif _platform == "win32" or _platform == "win64":
-                        os.system('taskkill /f /t /im '+str(line))
+                        proc = subprocess.Popen(["taskkill", "/f", "/t", "/im",str(line)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        (out, err) = proc.communicate()
+                        if out:
+                            logging.info(out)
+                            print "program output:", out
+                        if err:
+                            logging.info(err)
+                            print "program error output:", err
+
                 except OSError as e:
                     print("os.kill could not kill process, reason: {0}".format(e))
+                    logging.info("os.kill could not kill process, reason: {0}".format(e))
+                    message = QtGui.QMessageBox.warning(self, "Message", "os.kill could not kill process, reason: {0}".format(e))
 
+            logging.info("****HARP has shutdown ****")
+            logging.shutdown()
 
         else:
             event.ignore()
@@ -121,6 +138,10 @@ class WorkThread(QtCore.QThread):
         self.wait()
 
     def run(self):
+        logging.info("########################################")
+        logging.info("### Main processing                  ###")
+        logging.info("########################################")
+
         self.emit( QtCore.SIGNAL('update(QString)'), "Started Processing" )
         # Get the directory of the script
         self.dir = os.path.dirname(os.path.realpath(__file__))
@@ -135,25 +156,35 @@ class WorkThread(QtCore.QThread):
         if os.path.exists(self.session_log_path):
             os.remove(self.session_log_path)
 
-        logging.basicConfig(filename=self.session_log_path,level=logging.DEBUG,format='%(asctime)s %(message)s')
-
+        logging.info("Creating files")
         #session = open(self.session_log_path, 'w+')
         session_pid = open(self.pid_log_path, 'w+')
         session_crop = open(self.crop_log_path, 'w+')
         session_scale = open(self.scale_log_path, 'w+')
 
-        # Special log path to be used
-
-        logging.info("Name of recon:"+self.configOb.full_name)
-        logging.info("ImageJ:"+self.configOb.imageJ)
-
-
         ###############################################
         # Copy temp files (pre-processing log and zprojection image)
         ###############################################
+        logging.info("Copy temp files")
         if self.configOb.crop_option == "Manual" :
             print os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif")
             shutil.copyfile(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif"), os.path.join(self.configOb.meta_path,"max_intensity_z.tif"))
+
+        shutil.copyfile(os.path.join(self.configOb.tmp_dir,"session.log"), os.path.join(self.configOb.meta_path,"session.log"))
+
+        ###############################################
+        # Update logging settings, to save too processed recon diretory
+        ###############################################
+        logging.info("update logger location")
+        f = logging.Formatter(fmt='%(asctime)s %(message)s')
+        handlers = logging.handlers.RotatingFileHandler(self.session_log_path,
+                                                         maxBytes=100000, backupCount=1)
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.DEBUG)
+        handlers.setFormatter(f)
+        handlers.setLevel(logging.DEBUG)
+        root_logger.addHandler(handlers)
+
 
 
         ###############################################
@@ -161,6 +192,7 @@ class WorkThread(QtCore.QThread):
         ###############################################
         # Make crop folder
         # get cropped path from config object (shorten it so it is easier to read)
+        logging.info("*****Performing cropping******")
         cropped_path = self.configOb.cropped_path
 
         if not os.path.exists(cropped_path):
@@ -169,7 +201,7 @@ class WorkThread(QtCore.QThread):
         crop_run = os.path.join(self.dir, "autocrop.py")
         print crop_run
         if self.configOb.crop_option == "Manual" :
-            logging.info("Performing manual crop")
+            logging.info("manual crop")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing manual crop" )
             manpro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o",
                          cropped_path, "-t", "tif","-d",self.configOb.xcrop, self.configOb.ycrop, self.configOb.wcrop, self.configOb.hcrop],
@@ -182,7 +214,7 @@ class WorkThread(QtCore.QThread):
 
         # Perform the automatic crop if required
         if self.configOb.crop_option == "Automatic" :
-            logging.info("Performing autocrop")
+            logging.info("autocrop")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
 
             aupro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
@@ -222,42 +254,45 @@ class WorkThread(QtCore.QThread):
         ###############################################
         # Scaling
         ###############################################
-
+        logging.info("*****Performing scaling******")
         # First make subfolder for scaled stacks
         if not os.path.exists(self.configOb.scale_path):
             os.makedirs(self.configOb.scale_path)
 
-        logging.info("imageJ:")
-        logging.info(self.configOb.imageJ)
         # Perform scaling as subprocess with Popen (they should be done in the background)
         if self.configOb.SF2 == "yes" :
             logging.info("Performing scaling by factor 2")
-            proSF2 = self.executeImagej("^0.5^x2",session_pid,session_scale)
+            proSF2 = self.executeImagej("^0.5^x2",session_pid,session_scale,2)
             out2, err2 = proSF2.communicate()
             logging.info("Finished scaling by factor 2")
 
         if self.configOb.SF3 == "yes" :
             logging.info("Performing scaling by factor 3")
-            proSF3 = self.executeImagej("^0.3333^x3",session_pid,session_scale)
+            proSF3 = self.executeImagej("^0.3333^x3",session_pid,session_scale,3)
             out3, err3 = proSF3.communicate()
             logging.info("Finished scaling by factor 3")
 
         if self.configOb.SF4 == "yes" :
             logging.info("Performing scaling by factor 4")
-            proSF4 = self.executeImagej("^0.25^x4",session_pid,session_scale)
+            proSF4 = self.executeImagej("^0.25^x4",session_pid,session_scale,4)
             out4, err4 = proSF4.communicate()
-            logging.info("Performing scaling by factor 4")
+            logging.info("Finished scaling by factor 4")
 
         session_scale.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
-        logging.info("Processing finished")
-        logging.shutdown()
         session_pid.close()
+        # Presume processes finished so clear PID file
+        open(self.pid_log_path, 'w').close()
+
         session_crop.close()
         session_scale.close()
+        logging.info("Processing finished")
+        logging.info("########################################")
 
 
-    def executeImagej(self, scaleFactor,session_pid,session_scale):
+
+
+    def executeImagej(self, scaleFactor,session_pid,session_scale,num):
         '''
         @param: str, scaleFactor eg ":0.5"
         '''
@@ -265,7 +300,7 @@ class WorkThread(QtCore.QThread):
         session_pid = open(self.pid_log_path, 'a+')
 
         if _platform == "linux" or _platform == "linux2":
-            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(scaleFactor) )
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(num)) )
             process = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
                                     self.configOb.imageJ + scaleFactor],stdout=session_scale,stderr=session_scale)
             session_pid.write(str(process.pid)+"\n")

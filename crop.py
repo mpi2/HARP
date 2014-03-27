@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-
+import logging
 from PyQt4 import QtCore, QtGui
 import math
 import operator
@@ -120,6 +120,7 @@ class MainWidget(QtGui.QWidget):
 
         ijCropBox = (x1, y1, width, height )
         print "ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox))
+        logging.info("ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox)))
         cropBox = (x1, y1, width, height)
         self.callback(cropBox)
         print self.cropBox
