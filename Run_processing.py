@@ -262,22 +262,25 @@ class WorkThread(QtCore.QThread):
 
         # Perform scaling as subprocess with Popen (they should be done in the background)
         if self.configOb.SF2 == "yes" :
-            logging.info("Performing scaling by factor 2")
-            proSF2 = self.executeImagej("^0.5^x2",session_pid,session_scale,2)
-            out2, err2 = proSF2.communicate()
-            logging.info("Finished scaling by factor 2")
+            proSF2 = self.executeImagej("^0.5^x2",session_pid,session_scale,"2")
 
         if self.configOb.SF3 == "yes" :
-            logging.info("Performing scaling by factor 3")
-            proSF3 = self.executeImagej("^0.3333^x3",session_pid,session_scale,3)
-            out3, err3 = proSF3.communicate()
-            logging.info("Finished scaling by factor 3")
+            proSF3 = self.executeImagej("^0.3333^x3",session_pid,session_scale,"3")
 
         if self.configOb.SF4 == "yes" :
-            logging.info("Performing scaling by factor 4")
-            proSF4 = self.executeImagej("^0.25^x4",session_pid,session_scale,4)
-            out4, err4 = proSF4.communicate()
-            logging.info("Finished scaling by factor 4")
+            proSF4 = self.executeImagej("^0.25^x4",session_pid,session_scale,"4")
+
+        if self.configOb.SF5 == "yes" :
+            proSF5 = self.executeImagej("^0.2^x5",session_pid,session_scale,"5")
+
+        if self.configOb.SF6 == "yes" :
+            proSF6 = self.executeImagej("^0.1667^x6",session_pid,session_scale,"6")
+
+        if self.configOb.pixel_option == "yes" :
+            propixel = self.executeImagej("^"+str(self.configOb.SF_pixel)+"^xPixel",session_pid,session_scale,"Pixel")
+
+
+
 
         session_scale.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
@@ -293,7 +296,7 @@ class WorkThread(QtCore.QThread):
 
 
 
-    def executeImagej(self, scaleFactor,session_pid,session_scale,num):
+    def executeImagej(self, scaleFactor,session_pid,session_scale,sf):
         '''
         @param: str, scaleFactor eg ":0.5"
         '''
@@ -301,22 +304,32 @@ class WorkThread(QtCore.QThread):
         session_pid = open(self.pid_log_path, 'a+')
 
         if _platform == "linux" or _platform == "linux2":
-            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(num)) )
+
+            logging.info("Scale by factor:")
+            logging.info(str(sf))
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
             process = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
                                     self.configOb.imageJ + scaleFactor],stdout=session_scale,stderr=session_scale)
             session_pid.write(str(process.pid)+"\n")
             session_pid.close()
+            logging.info("Finished scaling")
             return process
 
         elif _platform == "win32" or _platform == "win64":
-            ijpath = os.path.join('c:', os.sep, 'Program Files', 'ImageJ', 'ij.jar')
 
+            logging.info("Scale by factor:")
+            logging.info(str(sf))
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
+
+            ijpath = os.path.join('c:', os.sep, 'Program Files', 'ImageJ', 'ij.jar')
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(scaleFactor) )
             process = subprocess.Popen(["java", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
                                     self.configOb.imageJ + scaleFactor],stdout=session_scale,stderr=session_scale)
             session_pid.write(str(process.pid)+"\n")
             session_pid.close()
-            return process
+            out, err = process.communicate()
+            logging.info("Finished scaling")
+
 
 
 

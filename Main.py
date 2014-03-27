@@ -117,6 +117,8 @@ class MainWindow(QtGui.QMainWindow):
        # Update name
        self.ui.pushButtonUpdate.clicked.connect(self.updateName)
 
+       # Get scan file manually
+       self.ui.checkBoxPixel.clicked.connect(self.scaleByPixelOn)
 
        # to make the window visible
        self.show()
@@ -421,6 +423,15 @@ class MainWindow(QtGui.QMainWindow):
     def outputFolderChanged(self, text):
         self.outputFolder = text
 
+    def scaleByPixelOn(self):
+        ''' enables boxes for scaling by pixel'''
+        if self.ui.checkBoxPixel.isChecked() :
+            self.ui.lineEditPixel.setEnabled(True)
+        else :
+            self.ui.lineEditPixel.setEnabled(False)
+
+
+
     def manCropOff(self):
         ''' disables boxes for cropping manually '''
         self.ui.lineEditX.setEnabled(False)
@@ -635,35 +646,56 @@ class MainWindow(QtGui.QMainWindow):
         config = open(self.config_path, 'w')
         log = open(self.log_path, 'w')
 
-
-        ##### Get cropping option #####
+        #######################################
+        # Create config object                #
+        #######################################
+        # Get cropping options
         if self.ui.radioButtonMan.isChecked() :
-            xcrop = str(self.ui.lineEditX.text())
-            ycrop = str(self.ui.lineEditY.text())
-            wcrop = str(self.ui.lineEditW.text())
-            hcrop = str(self.ui.lineEditH.text())
-            crop = "Manual"
+            self.configOb.xcrop = str(self.ui.lineEditX.text())
+            self.configOb.ycrop = str(self.ui.lineEditY.text())
+            self.configOb.wcrop = str(self.ui.lineEditW.text())
+            self.configOb.hcrop = str(self.ui.lineEditH.text())
+            self.configOb.crop_option = "Manual"
+            self.configOb.crop_manual = self.configOb.xcrop+" "+self.configOb.ycrop+" "+self.configOb.wcrop+" "+self.configOb.hcrop
         elif self.ui.radioButtonAuto.isChecked() :
-            crop = "Automatic"
+            self.configOb.crop_manual = "Not_applicable"
+            self.configOb.crop_option = "Automatic"
         elif self.ui.radioButtonNo.isChecked() :
-            crop = "No_crop"
+            self.configOb.crop_manual = "Not_applicable"
+            self.configOb.crop_option = "No_crop"
 
         ##### Get Scaling factors ####
         if self.ui.checkBoxSF2.isChecked() :
-            SF2 = "yes"
+            self.configOb.SF2 = "yes"
         else :
-            SF2 = "no"
+            self.configOb.SF2 = "no"
 
         if self.ui.checkBoxSF3.isChecked() :
-            SF3 = "yes"
+            self.configOb.SF3 = "yes"
         else :
-            SF3 = "no"
+            self.configOb.SF3 = "no"
 
         if self.ui.checkBoxSF4.isChecked() :
-            SF4 = "yes"
+            self.configOb.SF4 = "yes"
         else :
-            SF4 = "no"
+            self.configOb.SF4 = "no"
 
+        if self.ui.checkBoxSF5.isChecked() :
+            self.configOb.SF5 = "yes"
+        else :
+            self.configOb.SF5 = "no"
+
+        if self.ui.checkBoxSF6.isChecked() :
+            self.configOb.SF6 = "yes"
+        else :
+            self.configOb.SF6 = "no"
+
+        if self.ui.checkBoxPixel.isChecked() :
+            self.configOb.pixel_option = "yes"
+            self.configOb.SF_pixel = float(self.pixel_size) / float(self.ui.lineEditPixel.text())
+        else :
+            self.configOb.pixel_option = "no"
+            self.configOb.SF_pixel = "Not applicable"
 
         # ID for session
         self.configOb.unique_ID = str(self.unique_ID)
@@ -674,19 +706,7 @@ class MainWindow(QtGui.QMainWindow):
         self.configOb.output_folder = outputFolder
         self.configOb.scan_folder = self.scan_folder
         self.configOb.meta_path = self.meta_path
-        self.configOb.crop_option = str(crop)
-        if crop =="Manual" :
-            self.configOb.xcrop = xcrop
-            self.configOb.ycrop = ycrop
-            self.configOb.wcrop = wcrop
-            self.configOb.hcrop = hcrop
-            self.configOb.crop_manual = xcrop+" "+ycrop+" "+wcrop+" "+hcrop
-        else :
-            self.configOb.crop_manual = "Not_applicable"
 
-        self.configOb.SF2 = SF2
-        self.configOb.SF3 = SF3
-        self.configOb.SF4 = SF4
         self.configOb.recon_log_file = self.recon_log_path
         self.configOb.recon_folder_size = self.f_size_out_gb
         self.configOb.recon_pixel_size = self.pixel_size
@@ -708,6 +728,11 @@ class MainWindow(QtGui.QMainWindow):
         log.write("Downsize_by_factor_2?    "+self.configOb.SF2+"\n");
         log.write("Downsize_by_factor_3?    "+self.configOb.SF3+"\n");
         log.write("Downsize_by_factor_4?    "+self.configOb.SF4+"\n");
+        log.write("Downsize_by_factor_5?    "+self.configOb.SF4+"\n");
+        log.write("Downsize_by_factor_6?    "+self.configOb.SF4+"\n");
+        log.write("Downsize_by_pixel?    "+self.configOb.pixel_option+"\n");
+        log.write("Downsize_value_for_pixel    "+str(self.configOb.SF_pixel)+"\n");
+
         log.write("ImageJconfig    "+self.configOb.imageJ+"\n");
         log.write("Recon_log_file    "+self.configOb.recon_log_file+"\n");
         log.write("Recon_folder_size   "+self.configOb.recon_folder_size+"\n");
