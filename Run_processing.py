@@ -107,6 +107,7 @@ class Progress(QtGui.QDialog):
                         print "killed:", line
                         logging.info("killed:", line)
                     elif _platform == "win32" or _platform == "win64":
+                        line = line.rstrip()
                         proc = subprocess.Popen(["taskkill", "/f", "/t", "/im",str(line)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         (out, err) = proc.communicate()
                         if out:
