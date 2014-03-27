@@ -147,6 +147,15 @@ class WorkThread(QtCore.QThread):
         logging.info("Name of recon:"+self.configOb.full_name)
         logging.info("ImageJ:"+self.configOb.imageJ)
 
+
+        ###############################################
+        # Copy temp files (pre-processing log and zprojection image)
+        ###############################################
+        if self.configOb.crop_option == "Manual" :
+            print os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif")
+            shutil.copyfile(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif"), os.path.join(self.configOb.meta_path,"max_intensity_z.tif"))
+
+
         ###############################################
         # Cropping
         ###############################################
@@ -242,6 +251,7 @@ class WorkThread(QtCore.QThread):
         session_scale.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
         logging.info("Processing finished")
+        logging.shutdown()
         session_pid.close()
         session_crop.close()
         session_scale.close()

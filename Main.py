@@ -7,7 +7,7 @@ from Progress import Ui_Progress
 from Run_processing import Progress
 import zproject
 import crop
-
+import tempfile
 #from RunProcessing import *
 import sys
 import subprocess
@@ -60,6 +60,9 @@ class MainWindow(QtGui.QMainWindow):
        self.f_size_out_gb = ""
        self.pixel_size = ""
 
+       # Temp folder for pre-processing log and z-project
+       self.tmp_dir = tempfile.mkdtemp()
+       print "Temp folder", self.tmp_dir
 
        # get input folder
        self.ui.pushButtonInput.clicked.connect(self.selectFileIn)
@@ -170,45 +173,22 @@ class MainWindow(QtGui.QMainWindow):
         zproj_path = os.path.join(str(self.outputFolder), "z_projection")
         self.stop = None
 
-        if self.ui.checkBoxRF.isChecked():
-            print "CheckBox has been checked so files will be replaced\n"
-            if os.path.exists(zproj_path):
-                print "zproj exists"
-            else :
-                os.makedirs(zproj_path)
-            self.stop = None
-        elif os.path.exists(zproj_path):
-            print "Output folder for z project already exists and user has not approved overwrite"
-            # Running dialog box to inform user of options
-            message = QtGui.QMessageBox.question(self, 'Message', 'Folder already exists for Z projection. Can this file be overwritten?', QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-            if message == QtGui.QMessageBox.Yes:
-                self.stop = None
-            if message == QtGui.QMessageBox.No:
-                self.stop = True
-        else :
-            try:
-                print "Creating output folder"
-                os.makedirs(zproj_path)
-                self.stop = None
-            except IOError as e:
-                print("cannot make directory for saving the z-projection: {0}".format(e))
+        self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
+        #Needed to update the gui
+        self.app.processEvents()
 
-        if self.stop == None :
+        print "Waiting"
+        zp = zproject.Zproject(input_folder, output_folder)
 
-            self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
-            #Needed to update the gui
-            self.app.processEvents()
+        zp_result = zp.run(self.tmp_dir)
 
-            print "Waiting"
-            zp = zproject.Zproject(input_folder, output_folder)
-            zp_result = zp.run()
+        if zp_result != 0:
+            self.ui.textEditStatusMessages.setText("Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(zp_result))
+            return
 
-            if zp_result != 0:
-                self.ui.textEditStatusMessages.setText("Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(zp_result))
-                return
-            self.ui.textEditStatusMessages.setText("Z-projection finished")
-            self.runCrop(os.path.join(str(self.outputFolder), "z_projection", "max_intensity_z.tif"))
-            self.ui.textEditStatusMessages.setText("Dimensions selected")
+        self.ui.textEditStatusMessages.setText("Z-projection finished")
+        self.runCrop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
+        self.ui.textEditStatusMessages.setText("Dimensions selected")
 
 
     def runCrop(self, img_path):
@@ -563,9 +543,7 @@ class MainWindow(QtGui.QMainWindow):
             self.getParamaters()
 
             # Perform analysis
-            #runPro_p = subprocess.Popen(["python", dir+"/RunProcessing.py", "-i",self.config_path],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-            # Show progress dialog window to keep track of what is being processed
+            # This will run the analysi and show progress dialog window to keep track of what is being processed
             self.pro = Progress(self.configOb)
 
             # Run the programs. A script needs to be written to run on linux to run the back end processing
@@ -666,6 +644,7 @@ class MainWindow(QtGui.QMainWindow):
         # ID for session
         self.configOb.unique_ID = str(self.unique_ID)
         self.configOb.config_path = self.config_path
+        self.configOb.tmp_dir = self.tmp_dir
         self.configOb.full_name = self.full_name
         self.configOb.input_folder = inputFolder
         self.configOb.output_folder = outputFolder
@@ -692,7 +671,7 @@ class MainWindow(QtGui.QMainWindow):
         # Combining scaling and SF into input for imageJ macro
         self.configOb.cropped_path = os.path.join(self.configOb.output_folder,"cropped")
         self.configOb.scale_path = os.path.join(self.configOb.output_folder,"scaled_stacks")
-        self.configOb.imageJ = self.configOb.cropped_path+os.sep+'^'+self.configOb.scale_path+os.sep+"^"+self.configOb.full_name
+        self.configOb.imageJ = self.configOb.cropped_path+os.sep+'^'+self.configOb.scale_path+os.sep+'^'+self.configOb.full_name
 
         # write the config information into an easily readable log file
         log.write("Session_ID    "+self.configOb.unique_ID+"\n");

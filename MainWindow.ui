@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>SIaH: Image Processor</string>
+   <string>HARP</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QFrame" name="frame">
@@ -1888,26 +1888,17 @@ QGroupBox::title
     </widget>
    </widget>
   </widget>
+  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
      <width>1274</width>
-     <height>29</height>
+     <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuOptions">
-    <property name="title">
-     <string>Adv. Options</string>
-    </property>
-    <addaction name="actionChange_ID"/>
-    <addaction name="actionManually_select_output_folder"/>
-    <addaction name="actionAccurate_folder_size_calculation"/>
-   </widget>
-   <addaction name="menuOptions"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionChange_ID">
    <property name="text">
     <string>Allow identification to be changed</string>

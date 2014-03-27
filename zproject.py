@@ -5,7 +5,7 @@ try:
 except ImportError:
     from PIL import Image
 import crop
-
+import tempfile
 import sys
 import os
 import numpy as np
@@ -17,7 +17,7 @@ class Zproject:
         self.img_dir = img_dir
         self.out_dir = out_dir
 
-    def run(self):
+    def run(self,tmp_dir):
         '''
         Run the Zprojection
         @return img, PIL Image on success
@@ -57,7 +57,12 @@ class Zproject:
 
             return("something went wrong creating the Z-projection from {}".format(self.img_dir))
         else:
-            img.save(os.path.join(str(self.out_dir), "z_projection", "max_intensity_z.tif"))
+            #img.save(os.path.join(str(self.out_dir), "z_projection", "max_intensity_z.tif"))
+
+            # Save th file to the temp directors tmp_dir
+            img.save(os.path.join(tmp_dir, "max_intensity_z.tif"))
+
+
             return(0)
 
 
