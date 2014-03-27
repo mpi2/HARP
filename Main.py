@@ -121,34 +121,6 @@ class MainWindow(QtGui.QMainWindow):
        # to make the window visible
        self.show()
 
-
-    def selectFileIn(self):
-        ''' Get the info for the selected file'''
-        self.fileDialog = QtGui.QFileDialog(self)
-        folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
-
-        if folder == "":
-            logging.info("User has pressed cancel")
-            print "User has pressed cancel"
-        else :
-            self.ui.lineEditInput.setText(folder)
-            self.getName()
-
-            if self.error == "None" :
-                self.autoFileOut()
-
-            if self.error == "None" :
-                self.getReconLog()
-
-            if self.error == "None" :
-                self.autouCTOnly()
-
-            if self.error == "None" :
-                self.folderSizeApprox()
-
-            self.error = "None"
-
-
     def selectFileOut(self):
         ''' Select output folder (this should be blocked as standard'''
         self.fileDialog = QtGui.QFileDialog(self)
@@ -159,84 +131,213 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.ui.lineEditOutput.setText(folder)
 
+    def selectFileIn(self):
+        ''' Get the info for the selected file'''
+        self.fileDialog = QtGui.QFileDialog(self)
+        folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
 
-    def inputFolderChanged(self, text):
-        self.inputFolder = text
+        if folder == "":
+            logging.info("User has pressed cancel")
+            print "User has pressed cancel"
+        else :
+            # Reset the inputs incase this is not the first time someone has selected a file
+            self.resetInputs()
 
-    def outputFolderChanged(self, text):
-        self.outputFolder = text
+            # Set the input folder
+            self.ui.lineEditInput.setText(folder)
 
-    def cropCallback(self, box):
-        print "callback test:", box
-        self.ui.lineEditX.setText(str(box[0]))
-        self.ui.lineEditY.setText(str(box[1]))
-        self.ui.lineEditW.setText(str(box[2]))
-        self.ui.lineEditH.setText(str(box[3]))
+            # Autocomplete the name
+            self.getName()
 
-    def getDimensions(self):
-        ''' Perform a z projection and then allows user to crop based on z projection'''
-        logging.info("########################################")
-        logging.info("### Getting crop dimensions          ###")
-        logging.info("########################################")
-        # Opens MyMainWindow from crop.py
-        input_folder = str(self.ui.lineEditInput.text())
-        output_folder = str(self.ui.lineEditOutput.text())
-        print input_folder
-        zproj_path = os.path.join(str(self.outputFolder), "z_projection")
-        self.stop = None
+            # Get the reconLog and associated pixel size
+            self.getReconLog()
 
-        logging.info("Z projection is being performed")
-        self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
-        #Needed to update the gui
-        self.app.processEvents()
+            # Get the output folder location
+            self.autoFileOut()
 
-        zp = zproject.Zproject(input_folder, output_folder)
+            # Automatically identify scan folder
+            self.autoGetScan()
 
-        zp_result = zp.run(self.tmp_dir)
+            # Automatically get SPR file
+            self.autoGetSPR()
 
-        if zp_result != 0:
-            self.ui.textEditStatusMessages.setText("Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(zp_result))
-            return
-        logging.info("Z projection has finished")
+            # Determine size of input folder
+            self.folderSizeApprox()
 
-        self.ui.textEditStatusMessages.setText("Z-projection finished")
-        logging.info("Getting crop dimensions")
-        self.runCrop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
-        self.ui.textEditStatusMessages.setText("Dimensions selected")
-        logging.info("Dimensions selected")
+    def resetInputs(self):
+        self.ui.lineEditDate.setText("")
+        self.ui.lineEditGroup.setText("")
+        self.ui.lineEditAge.setText("")
+        self.ui.lineEditLitter.setText("")
+        self.ui.lineEditZygosity.setText("")
+        self.ui.lineEditSex.setText("")
+        self.ui.lineEditName.setText("")
+        self.ui.lineEditCTRecon.setText("")
+        self.ui.lineEditCTSPR.setText("")
+        self.ui.lineEditScan.setText("")
+        self.ui.lineEditOutput.setText("")
+        self.ui.lcdNumberFile.display(0.0)
+        self.ui.lcdNumberPixel.display(0.0)
 
-    def runCrop(self, img_path):
-        cropper = crop.Crop(self.cropCallback, img_path, self)
-        cropper.show()
+    def getName(self):
+        '''
+        Gets the id from the folder name. Then fills out the text boxes on the main window with the relevant information
+        '''
+        # Get input folder
+        input = str(self.ui.lineEditInput.text())
 
-    def manCropOff(self):
-        ''' disables boxes for cropping manually '''
-        self.ui.lineEditX.setEnabled(False)
-        self.ui.lineEditY.setEnabled(False)
-        self.ui.lineEditW.setEnabled(False)
-        self.ui.lineEditH.setEnabled(False)
-        self.ui.pushButtonGetDimensions.setEnabled(False)
+        # Get the folder name
+        path,folder_name = os.path.split(input)
 
-    def manCropOn(self):
-        ''' enables boxes for cropping manually '''
-        self.ui.lineEditX.setEnabled(True)
-        self.ui.lineEditY.setEnabled(True)
-        self.ui.lineEditW.setEnabled(True)
-        self.ui.lineEditH.setEnabled(True)
-        self.ui.pushButtonGetDimensions.setEnabled(True)
+        try:
+            # Need to have exception to catch if the name is not in correct format.
+            # If the name is not in the correc format it should flag to the user that this needs to be sorted
+            print folder_name.split("_")
+            name_list = folder_name.split("_")
+            date = name_list[0]
+            group = name_list[1]
+            age = name_list[2]
+            litter = name_list[3]
+            zygosity = name_list[4]
+            sex = name_list[5]
 
 
-    def getOPTonly(self):
-        ''' unchecks uCT box (if checked) and checks OPT group box and creates or edits self.modality '''
-        self.ui.groupBoxOPTOnly.setChecked(True)
-        self.ui.groupBoxuCTOnly.setChecked(False)
-        self.modality = "OPT"
+            #print date,group,age,litter,zygosity
+            self.ui.lineEditDate.setText(date)
+            self.ui.lineEditGroup.setText(group)
+            self.ui.lineEditAge.setText(age)
+            self.ui.lineEditLitter.setText(litter)
+            self.ui.lineEditZygosity.setText(zygosity)
+            self.ui.lineEditSex.setText(sex)
+            self.ui.lineEditName.setText(folder_name)
 
-    def getuCTonly(self):
-        ''' Simply unchecks OPTT box (if checked) and checks group uCT box and creates or edits self.modality '''
-        self.ui.groupBoxOPTOnly.setChecked(False)
-        self.ui.groupBoxuCTOnly.setChecked(True)
-        self.modality = "MicroCT"
+            # The full name should be made changable at some point..
+            self.full_name = folder_name
+
+        except IndexError as e:
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format\n')
+            print "Name incorrect", sys.exc_info()[0]
+            self.full_name = ""
+        except:
+            print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Auto-populate not possible. Unexpected error:',sys.exc_info()[0])
+
+
+    def getReconLog(self):
+        '''
+        Gets the recon log from the original recon folder and gets the pixel size information
+
+        Updates the following qt objects: ... ...   ...
+
+        Creates ...
+        '''
+
+        input = str(self.ui.lineEditInput.text())
+
+        # Get the folder name
+        path,folder_name = os.path.split(input)
+
+        try:
+            # This will change depending on the location of the program (e.g linux/windows and what drive the MicroCT folder is set to)
+            recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
+            if os.path.exists(os.path.join(path,folder_name,folder_name+".txt")):
+                recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
+            elif os.path.exists(os.path.join(path,folder_name,folder_name+".log")):
+                recon_log_path = os.path.join(path,folder_name,folder_name+".log")
+            else :
+                print "TEST TEST TEST"
+                raise Exception('No log file')
+
+            # Check if .txt file or .log file
+
+            # To make sure the path is in the correct format (not sure if necessary
+            self.recon_log_path = os.path.abspath(recon_log_path)
+
+            # Open the log file as read only
+            recon_log_file = open(self.recon_log_path, 'r')
+
+            # create a regex to pixel size
+            prog = re.compile("^Pixel Size \(um\)\=(\w+.\w+)")
+
+            # for loop to go through the recon log file
+            for line in recon_log_file:
+                # "chomp" the line endings off
+                line = line.rstrip()
+                # if the line matches the regex print the (\w+.\w+) part of regex
+                if prog.match(line) :
+                    self.pixel_size = prog.match(line).group(1)
+                    break
+            # Display the number on the lcd display
+            self.ui.lcdNumberPixel.display(self.pixel_size)
+
+            # Set recon log text
+            self.ui.lineEditCTRecon.setText(str(self.recon_log_path))
+
+        except IOError as e:
+            print "Error finding recon file",sys.exc_info()[0]
+            self.ui.lineEditCTRecon.setText("Problem reading recon log file")
+        except Exception as inst:
+            print "Error finding recon file",sys.exc_info()[0]
+            self.ui.lineEditCTRecon.setText("Cannot find recon log file")
+        except:
+            print "Unexpected error:", sys.exc_info()[0]
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error getting recon log file',sys.exc_info()[0])
+            self.ui.lineEditCTRecon.setText("Cannot find recon log file")
+
+    def autoFileOut(self):
+        ''' Get info for the output file and create a new folder NEED TO ADD CREATE FOLDER FUNCTION
+        '''
+        try :
+            input = str(self.ui.lineEditInput.text())
+            # Get the folder name
+            path,folder_name = os.path.split(input)
+            pattern = re.compile("recons", re.IGNORECASE)
+            if re.search(pattern, input):
+                output_path = pattern.sub("processed recons", path)
+                output_full = os.path.join(output_path,self.full_name)
+                self.ui.lineEditOutput.setText(output_full)
+
+        except:
+            print "Unexpected error in getting new folder output name:", sys.exc_info()[0]
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error getting recon log file',sys.exc_info()[0])
+
+
+    def autoGetScan(self):
+        input = str(self.ui.lineEditInput.text())
+
+        # Set the scan folder
+        pattern = re.compile("recons", re.IGNORECASE)
+        if re.search(pattern, input):
+            self.scan_folder = pattern.sub("scan", input)
+            if os.path.exists(self.scan_folder):
+                self.ui.lineEditScan.setText(self.scan_folder)
+            else :
+                self.ui.lineEditScan.setText("Cannot find scan folder")
+                self.scan_folder = ""
+        else :
+            self.ui.lineEditScan.setText("Cannot find scan folder")
+            self.scan_folder = ""
+
+    def autoGetSPR(self):
+        input = str(self.ui.lineEditInput.text())
+        # Get the SPR file. Sometimes fiels are saved with upper or lower case file extensions
+        # The following is bit of a stupid way of dealing with this problem but I think it works....
+        SPR_file_bmp = os.path.join(input,self.full_name+"_spr.bmp")
+        SPR_file_BMP = os.path.join(input,self.full_name+"_spr.BMP")
+        SPR_file_tif = os.path.join(input,self.full_name+"_spr.tif")
+        SPR_file_TIF = os.path.join(input,self.full_name+"_spr.TIF")
+        print SPR_file_bmp
+        if os.path.isfile(SPR_file_bmp):
+            self.ui.lineEditCTSPR.setText(SPR_file_bmp)
+        elif os.path.isfile(SPR_file_BMP):
+            self.ui.lineEditCTSPR.setText(SPR_file_BMP)
+        elif os.path.isfile(SPR_file_tif):
+            self.ui.lineEditCTSPR.setText(SPR_file_tif)
+        elif os.path.isfile(SPR_file_TIF):
+            self.ui.lineEditCTSPR.setText(SPR_file_TIF)
+        else:
+            print "Cannot find SPR file, proceed if this is not a problem"
+            self.ui.lineEditCTSPR.setText("Cannot find SPR file")
 
     def folderSizeApprox(self):
         '''
@@ -313,53 +414,41 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lcdNumberFile.display(f_size_out)
 
 
-    def getName(self):
-        '''
-        Gets the id from the folder name. Then fills out the text boxes on the main window with the relevant information
 
-        Updates the followi        input = str(self.ui.lineEditInput.text())ng qt objects: lineEditDate, ...   ...
+    def inputFolderChanged(self, text):
+        self.inputFolder = text
 
-        Creates ...
-        '''
-        # Get input folder
-        input = str(self.ui.lineEditInput.text())
+    def outputFolderChanged(self, text):
+        self.outputFolder = text
 
-        # Get the folder name
-        path,folder_name = os.path.split(input)
+    def manCropOff(self):
+        ''' disables boxes for cropping manually '''
+        self.ui.lineEditX.setEnabled(False)
+        self.ui.lineEditY.setEnabled(False)
+        self.ui.lineEditW.setEnabled(False)
+        self.ui.lineEditH.setEnabled(False)
+        self.ui.pushButtonGetDimensions.setEnabled(False)
 
-        try:
-            # Need to have exception to catch if the name is not in correct format.
-            # If the name is not in the correc format it should flag to the user that this needs to be sorted
-            print folder_name.split("_")
-            name_list = folder_name.split("_")
-            date = name_list[0]
-            group = name_list[1]
-            age = name_list[2]
-            litter = name_list[3]
-            zygosity = name_list[4]
-            sex = name_list[5]
+    def manCropOn(self):
+        ''' enables boxes for cropping manually '''
+        self.ui.lineEditX.setEnabled(True)
+        self.ui.lineEditY.setEnabled(True)
+        self.ui.lineEditW.setEnabled(True)
+        self.ui.lineEditH.setEnabled(True)
+        self.ui.pushButtonGetDimensions.setEnabled(True)
 
 
-            #print date,group,age,litter,zygosity
-            self.ui.lineEditDate.setText(date)
-            self.ui.lineEditGroup.setText(group)
-            self.ui.lineEditAge.setText(age)
-            self.ui.lineEditLitter.setText(litter)
-            self.ui.lineEditZygosity.setText(zygosity)
-            self.ui.lineEditSex.setText(sex)
-            self.ui.lineEditName.setText(folder_name)
+    def getOPTonly(self):
+        ''' unchecks uCT box (if checked) and checks OPT group box and creates or edits self.modality '''
+        self.ui.groupBoxOPTOnly.setChecked(True)
+        self.ui.groupBoxuCTOnly.setChecked(False)
+        self.modality = "OPT"
 
-            # The full name should be made changable at some point..
-            self.full_name = folder_name
-
-        except IndexError as e:
-            pass
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format.\nAutocomplete of name is not possible.\n')
-            print "Name incorrect", sys.exc_info()[0]
-            self.full_name = ""
-        except:
-            print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Auto-populate not possible. Unexpected error:',sys.exc_info()[0])
+    def getuCTonly(self):
+        ''' Simply unchecks OPTT box (if checked) and checks group uCT box and creates or edits self.modality '''
+        self.ui.groupBoxOPTOnly.setChecked(False)
+        self.ui.groupBoxuCTOnly.setChecked(True)
+        self.modality = "MicroCT"
 
     def updateName(self):
         ''' Function to update the name of the file and folder'''
@@ -392,48 +481,6 @@ class MainWindow(QtGui.QMainWindow):
         path,output_folder_name = os.path.split(output)
         self.ui.lineEditOutput.setText(os.path.join(path,self.full_name))
 
-
-
-    def autouCTOnly(self):
-        ''' Automatically fills out the uCT only section    '''
-        input = str(self.ui.lineEditInput.text())
-        # Set recon log path
-        self.ui.lineEditCTRecon.setText(str(self.recon_log_path))
-
-        # Set the scan folder
-        pattern = re.compile("recons", re.IGNORECASE)
-        self.scan_folder = pattern.sub("scan", input)
-
-        if os.path.exists(self.scan_folder):
-            self.ui.lineEditScan.setText(self.scan_folder)
-        else :
-            print "could not find scan folder"
-            self.scan_folder = ""
-            #message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Could not locate scan folder')
-
-        # Get the SPR file. Sometimes fiels are saved with upper or lower case file extensions
-        # The following is bit of a stupid way of dealing with this problem but I think it works....
-        SPR_file_bmp = os.path.join(input,self.full_name+"_spr.bmp")
-        SPR_file_BMP = os.path.join(input,self.full_name+"_spr.BMP")
-        SPR_file_tif = os.path.join(input,self.full_name+"_spr.tif")
-        SPR_file_TIF = os.path.join(input,self.full_name+"_spr.TIF")
-        print SPR_file_bmp
-        if os.path.isfile(SPR_file_bmp):
-            self.ui.lineEditCTSPR.setText(SPR_file_bmp)
-        elif os.path.isfile(SPR_file_BMP):
-            self.ui.lineEditCTSPR.setText(SPR_file_BMP)
-        elif os.path.isfile(SPR_file_tif):
-            self.ui.lineEditCTSPR.setText(SPR_file_tif)
-        elif os.path.isfile(SPR_file_TIF):
-            self.ui.lineEditCTSPR.setText(SPR_file_TIF)
-        else:
-            print "Cannot find SPR file, proceed if this is not a problem"
-            #message = QtGui.QMessageBox.warning(self, 'Message', 'Warning:Cannot find SPR file')
-
-
-
-
-
     def getReconMan(self):
         self.fileDialog = QtGui.QFileDialog(self)
         file = self.fileDialog.getOpenFileName()
@@ -451,7 +498,6 @@ class MainWindow(QtGui.QMainWindow):
         else :
             self.ui.lineEditScan.setText(folder)#
 
-
     def getSPRMan(self):
         self.fileDialog = QtGui.QFileDialog(self)
         file= self.fileDialog.getOpenFileName()
@@ -460,81 +506,49 @@ class MainWindow(QtGui.QMainWindow):
         else :
             self.ui.lineEditCTSPR.setText(file)
 
-    def getReconLog(self):
-        '''
-        Gets the recon log from the original recon folder and gets the pixel size information
 
-        Updates the following qt objects: ... ...   ...
+    def getDimensions(self):
+        ''' Perform a z projection and then allows user to crop based on z projection'''
+        logging.info("########################################")
+        logging.info("### Getting crop dimensions          ###")
+        logging.info("########################################")
+        # Opens MyMainWindow from crop.py
+        input_folder = str(self.ui.lineEditInput.text())
+        output_folder = str(self.ui.lineEditOutput.text())
+        print input_folder
+        zproj_path = os.path.join(str(self.outputFolder), "z_projection")
+        self.stop = None
 
-        Creates ...
-        '''
+        logging.info("Z projection is being performed")
+        self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
+        #Needed to update the gui
+        self.app.processEvents()
 
-        input = str(self.ui.lineEditInput.text())
+        zp = zproject.Zproject(input_folder, output_folder)
 
-        # Get the folder name
-        path,folder_name = os.path.split(input)
+        zp_result = zp.run(self.tmp_dir)
 
-        try:
-            # This will change depending on the location of the program (e.g linux/windows and what drive the MicroCT folder is set to)
-            recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
-            if os.path.exists(os.path.join(path,folder_name,folder_name+".txt")):
-                recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
-            elif os.path.exists(os.path.join(path,folder_name,folder_name+".log")):
-                recon_log_path = os.path.join(path,folder_name,folder_name+".log")
-            else :
-                raise Exception('No log file')
-            # Check if .txt file or .log file
+        if zp_result != 0:
+            self.ui.textEditStatusMessages.setText("Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(zp_result))
+            return
+        logging.info("Z projection has finished")
 
-            # To make sure the path is in the correct format (not sure if necessary
-            self.recon_log_path = os.path.abspath(recon_log_path)
+        self.ui.textEditStatusMessages.setText("Z-projection finished")
+        logging.info("Getting crop dimensions")
+        self.runCrop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
+        self.ui.textEditStatusMessages.setText("Dimensions selected")
+        logging.info("Dimensions selected")
 
-            # Open the log file as read only
-            recon_log_file = open(self.recon_log_path, 'r')
+    def cropCallback(self, box):
+        print "callback test:", box
+        self.ui.lineEditX.setText(str(box[0]))
+        self.ui.lineEditY.setText(str(box[1]))
+        self.ui.lineEditW.setText(str(box[2]))
+        self.ui.lineEditH.setText(str(box[3]))
 
-            # create a regex to pixel size
-            prog = re.compile("^Pixel Size \(um\)\=(\w+.\w+)")
-
-            # for loop to go through the recon log file
-            for line in recon_log_file:
-                # "chomp" the line endings off
-                line = line.rstrip()
-                # if the line matches the regex print the (\w+.\w+) part of regex
-                if prog.match(line) :
-                    self.pixel_size = prog.match(line).group(1)
-                    break
-            # Display the number on the lcd display
-            self.ui.lcdNumberPixel.display(self.pixel_size)
-
-        except IOError as e:
-            self.error = "Error finding recon file. Error:",sys.exc_info()[0]
-            print "Error finding recon file",sys.exc_info()[0]
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Problem reading recon log file ')
-        except Exception as inst:
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Could not find recon log file')
-        except:
-            print "Unexpected error:", sys.exc_info()[0]
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error getting recon log file',sys.exc_info()[0])
-
-
-    def autoFileOut(self):
-        ''' Get info for the output file and create a new folder NEED TO ADD CREATE FOLDER FUNCTION
-        '''
-        try :
-            input = str(self.ui.lineEditInput.text())
-            # Get the folder name
-            path,folder_name = os.path.split(input)
-            pattern = re.compile("recons", re.IGNORECASE)
-            output_path = pattern.sub("processed recons", path)
-
-            output_full = os.path.join(output_path,self.full_name)
-            self.ui.lineEditOutput.setText(output_full)
-
-        except:
-            self.error = "Unexpected error in getting new folder output name", sys.exc_info()[0]
-            print "Unexpected error in getting new folder output name:", sys.exc_info()[0]
-            self.errorDialog = ErrorMessage(self.error)
-
-
+    def runCrop(self, img_path):
+        cropper = crop.Crop(self.cropCallback, img_path, self)
+        cropper.show()
 
 
     def processGo(self):
@@ -559,8 +573,6 @@ class MainWindow(QtGui.QMainWindow):
             # This will run the analysi and show progress dialog window to keep track of what is being processed
             logging.basicConfig(filename=os.path.join(self.meta_path,"session.log"),level=logging.DEBUG,format='%(asctime)s %(message)s')
             self.pro = Progress(self.configOb)
-
-
             # Run the programs. A script needs to be written to run on linux to run the back end processing
 
 
@@ -597,9 +609,6 @@ class MainWindow(QtGui.QMainWindow):
 
 
         # Check if name has been completed
-
-
-
 
     def getParamaters(self):
         '''
