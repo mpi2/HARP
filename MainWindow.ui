@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1295</width>
+    <width>1338</width>
     <height>1009</height>
    </rect>
   </property>
@@ -24,7 +24,7 @@
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>1251</width>
+      <width>1301</width>
       <height>941</height>
      </rect>
     </property>
@@ -680,7 +680,7 @@ QGroupBox::title
       <rect>
        <x>740</x>
        <y>20</y>
-       <width>501</width>
+       <width>531</width>
        <height>61</height>
       </rect>
      </property>
@@ -1038,7 +1038,7 @@ QGroupBox::title
       <rect>
        <x>740</x>
        <y>110</y>
-       <width>511</width>
+       <width>531</width>
        <height>231</height>
       </rect>
      </property>
@@ -1521,7 +1521,7 @@ QGroupBox::title
       </property>
       <property name="geometry">
        <rect>
-        <x>435</x>
+        <x>467</x>
         <y>32</y>
         <width>61</width>
         <height>20</height>
@@ -1539,9 +1539,9 @@ QGroupBox::title
      <widget class="QCheckBox" name="checkBoxPixel">
       <property name="geometry">
        <rect>
-        <x>360</x>
+        <x>350</x>
         <y>33</y>
-        <width>81</width>
+        <width>131</width>
         <height>17</height>
        </rect>
       </property>
@@ -1554,7 +1554,7 @@ QGroupBox::title
        <string>You can downsize by pixel. Just put the desired pixel size in the text box.</string>
       </property>
       <property name="text">
-       <string>By Pixel</string>
+       <string>By Pixel (µm)</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -1874,7 +1874,7 @@ QGroupBox::title
       <rect>
        <x>740</x>
        <y>350</y>
-       <width>511</width>
+       <width>531</width>
        <height>121</height>
       </rect>
      </property>
@@ -1996,7 +1996,7 @@ QGroupBox::title
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1295</width>
+     <width>1338</width>
      <height>21</height>
     </rect>
    </property>

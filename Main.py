@@ -247,7 +247,6 @@ class MainWindow(QtGui.QMainWindow):
             elif os.path.exists(os.path.join(path,folder_name,folder_name+".log")):
                 recon_log_path = os.path.join(path,folder_name,folder_name+".log")
             else :
-                print "TEST TEST TEST"
                 raise Exception('No log file')
 
             # Check if .txt file or .log file
@@ -603,8 +602,45 @@ class MainWindow(QtGui.QMainWindow):
         inputFolder = str(self.ui.lineEditInput.text())
         outputFolder = str(self.ui.lineEditOutput.text())
 
-        # Input folder contains image files
+        # Check input and output folders assigned
+        if not inputFolder :
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input directory not defined')
+            self.stop = True
+            return
 
+        elif not outputFolder :
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: output directory not defined')
+            self.stop = True
+            return
+
+        # Check pixel size is a number
+        if self.ui.checkBoxPixel.isChecked() :
+
+            try:
+                testing = float(self.ui.lineEditPixel.text())
+            except ValueError:
+                if not self.ui.lineEditPixel.text():
+                    message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: User has not specified a new pixel size value')
+                else :
+                    message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: User defined pixel is not a numerical value')
+                self.stop = True
+                return
+
+        # Check cropping parameters ok
+        if self.ui.radioButtonMan.isChecked() :
+            try:
+                testing = float(self.ui.lineEditX.text())
+                testing = float(self.ui.lineEditY.text())
+                testing = float(self.ui.lineEditW.text())
+                testing = float(self.ui.lineEditH.text())
+            except ValueError:
+                print 'not numeric'
+                message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Cropping dimensions have not been defined')
+                self.stop = True
+                return
+
+
+        # Input folder contains image files
         if self.ui.checkBoxRF.isChecked():
             print "CheckBox has been checked so files will be replaced\n"
             # Too dangerous to delete everything in a folder
@@ -620,12 +656,16 @@ class MainWindow(QtGui.QMainWindow):
                 self.stop = None
             if message == QtGui.QMessageBox.No:
                 self.stop = True
+            return
         else :
             print "Creating output folder"
             os.makedirs(outputFolder)
             self.stop = None
 
-
+        #if self.ui.checkBoxRF.isChecked():
+            print "CheckBox has been checked so files will be replaced\n"
+            # Too dangerous to delete everything in a folder
+            # shutil.rmtree(outputFolder)
         # Check if name has been completed
 
     def getParamaters(self):
@@ -705,8 +745,10 @@ class MainWindow(QtGui.QMainWindow):
             self.configOb.SFX_pixel = float(self.ui.lineEditPixel.text())/float(self.pixel_size)
             self.configOb.SFX_pixel = round(self.configOb.SFX_pixel,4)
         else :
+            self.configOb.user_specified_pixel = "Not applicable"
             self.configOb.pixel_option = "no"
             self.configOb.SF_pixel = "Not applicable"
+            self.configOb.SFX_pixel = "Not applicable"
 
         if self.ui.checkBoxCompression.isChecked():
             self.configOb.compression = "yes"
@@ -722,7 +764,6 @@ class MainWindow(QtGui.QMainWindow):
         self.configOb.output_folder = outputFolder
         self.configOb.scan_folder = self.scan_folder
         self.configOb.meta_path = self.meta_path
-
         self.configOb.recon_log_file = self.recon_log_path
         self.configOb.recon_folder_size = self.f_size_out_gb
         self.configOb.recon_pixel_size = self.pixel_size

@@ -36,7 +36,11 @@ recon_name = arg_array[2];
 scale = arg_array[3];
 // 1 divided by scale gives the scaling factor which the user sees, e.g 2,3,4 etc
 divide_scale = arg_array[4];
-
+new_pixel = arg_array[5];
+print("divide_scale:");
+print(divide_scale);
+print("new_pixel:");
+print(new_pixel);
 
 print("output folder:");
 print(out_path);
@@ -58,11 +62,16 @@ zdepth = floor(image_list.length * scale);
 
 run("Scale...", "x=" + scale + " y=" + scale +  " z=" + zdepth + " depth=" + zdepth + " average process create title=scaled");
 
+tring1 = "This ";
+string2 = "is a ";
+string3 = "sentence made up of";
+full_file_name = out_path+recon_name+"_scaled_"+divide_scale+"_pixel_"+new_pixel+".tif";
+
 
 //Create directory (this is now done in python
 //File.makeDirectory(out_path + divide_scale);
 
-saveAs("Tiff", out_path + recon_name + "_scaled_"+ divide_scale + ".tif");
+saveAs("Tiff", full_file_name);
 print("Scaling Finished");
 
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Mar 28 11:28:42 2014
+# Created: Fri Mar 28 17:21:44 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,14 +26,14 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1295, 1009)
+        MainWindow.resize(1338, 1009)
         font = QtGui.QFont()
         font.setPointSize(12)
         MainWindow.setFont(font)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.frame = QtGui.QFrame(self.centralwidget)
-        self.frame.setGeometry(QtCore.QRect(20, 10, 1251, 941))
+        self.frame.setGeometry(QtCore.QRect(20, 10, 1301, 941))
         self.frame.setFrameShape(QtGui.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtGui.QFrame.Raised)
         self.frame.setObjectName(_fromUtf8("frame"))
@@ -395,7 +395,7 @@ class Ui_MainWindow(object):
         self.comboBox_6.addItem(_fromUtf8(""))
         self.formLayout_6.setWidget(5, QtGui.QFormLayout.LabelRole, self.comboBox_6)
         self.groupBoxModality = QtGui.QGroupBox(self.frame)
-        self.groupBoxModality.setGeometry(QtCore.QRect(740, 20, 501, 61))
+        self.groupBoxModality.setGeometry(QtCore.QRect(740, 20, 531, 61))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxModality.setFont(font)
@@ -586,7 +586,7 @@ class Ui_MainWindow(object):
         self.labelZygosity.setObjectName(_fromUtf8("labelZygosity"))
         self.gridLayoutIDs_2.addWidget(self.labelZygosity, 0, 2, 1, 1)
         self.groupBoxOptions = QtGui.QGroupBox(self.frame)
-        self.groupBoxOptions.setGeometry(QtCore.QRect(740, 110, 511, 231))
+        self.groupBoxOptions.setGeometry(QtCore.QRect(740, 110, 531, 231))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxOptions.setFont(font)
@@ -763,13 +763,13 @@ class Ui_MainWindow(object):
         self.checkBoxSF6.setObjectName(_fromUtf8("checkBoxSF6"))
         self.lineEditPixel = QtGui.QLineEdit(self.groupBoxOptions)
         self.lineEditPixel.setEnabled(False)
-        self.lineEditPixel.setGeometry(QtCore.QRect(435, 32, 61, 20))
+        self.lineEditPixel.setGeometry(QtCore.QRect(467, 32, 61, 20))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.lineEditPixel.setFont(font)
         self.lineEditPixel.setObjectName(_fromUtf8("lineEditPixel"))
         self.checkBoxPixel = QtGui.QCheckBox(self.groupBoxOptions)
-        self.checkBoxPixel.setGeometry(QtCore.QRect(360, 33, 81, 17))
+        self.checkBoxPixel.setGeometry(QtCore.QRect(350, 33, 131, 17))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.checkBoxPixel.setFont(font)
@@ -937,7 +937,7 @@ class Ui_MainWindow(object):
         self.pushButtonGo.setDefault(False)
         self.pushButtonGo.setObjectName(_fromUtf8("pushButtonGo"))
         self.groupBoxModality_2 = QtGui.QGroupBox(self.frame)
-        self.groupBoxModality_2.setGeometry(QtCore.QRect(740, 350, 511, 121))
+        self.groupBoxModality_2.setGeometry(QtCore.QRect(740, 350, 531, 121))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.groupBoxModality_2.setFont(font)
@@ -993,7 +993,7 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         MainWindow.setStatusBar(self.statusbar)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1295, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1338, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         MainWindow.setMenuBar(self.menubar)
         self.actionChange_ID = QtGui.QAction(MainWindow)
@@ -1072,7 +1072,7 @@ class Ui_MainWindow(object):
         self.checkBoxSF6.setText(_translate("MainWindow", "6", None))
         self.lineEditPixel.setToolTip(_translate("MainWindow", "You can downsize by pixel. Just put the desired pixel size in the text box.", None))
         self.checkBoxPixel.setToolTip(_translate("MainWindow", "You can downsize by pixel. Just put the desired pixel size in the text box.", None))
-        self.checkBoxPixel.setText(_translate("MainWindow", "By Pixel", None))
+        self.checkBoxPixel.setText(_translate("MainWindow", "By Pixel (µm)", None))
         self.groupBoxuCTOnly.setTitle(_translate("MainWindow", "µCT only", None))
         self.pushButtonCTRecon.setText(_translate("MainWindow", "Pick recon log", None))
         self.pushButtonCTSPR.setText(_translate("MainWindow", "Pick SPR", None))

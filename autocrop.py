@@ -155,8 +155,10 @@ def run(args):
 			fnmatch.fnmatch(fn, '*.TIF') or fnmatch.fnmatch(fn, '*.jpg') or fnmatch.fnmatch(fn, '*.JPG') or
 			fnmatch.fnmatch(fn, '*.jpeg') or fnmatch.fnmatch(fn, '*.JPEG')):
 				files.append(os.path.join(args.in_dir, fn))
+
 	if len(files) < 1:
 		sys.exit("no image files found in" + args.in_dir)
+
 
 	#get image dimensions from first file
 	img = Image.open(files[0])

@@ -218,12 +218,12 @@ class WorkThread(QtCore.QThread):
         if self.configOb.crop_option == "Automatic" :
             logging.info("autocrop")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
-
             aupro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
-                            stdout=session_crop,stderr=session_crop)
+                            stdout=session_crop)
             session_pid.write(str(aupro.pid)+"\n")
             session_pid.close()
             aupro.communicate()
+
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
             logging.info("Crop finished")
 
