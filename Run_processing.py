@@ -11,6 +11,7 @@ import shutil
 import uuid
 import logging
 import logging.handlers
+import tarfile
 
 from sys import platform as _platform
 
@@ -247,10 +248,26 @@ class WorkThread(QtCore.QThread):
         ###############################################
         # Compression
         ###############################################
-        #subprocess.call(["tar", "-cjf" check.tar.bz2 test
-         #                   stdout=session, stderr=session)
-        #self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
+        if self.configOb.compression == "yes" :
+            logging.info("***Performing Compression***")
+            if self.configOb.scan_folder:
+                self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of scan folder" )
+                logging.info("Compression of scan folder")
+                path_scan,folder_name_scan = os.path.split(self.configOb.scan_folder)
 
+                out = tarfile.open(str(self.configOb.scan_folder)+".tar.bz2", mode='w:bz2')
+                out.add(path_scan, arcname="TarName")
+                out.close()
+                self.emit( QtCore.SIGNAL('update(QString)'), "Compression of scan folder finished" )
+
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of original recon folder" )
+            logging.info("Compression of original recon folder")
+            path_scan,folder_name_scan = os.path.split(self.configOb.input_folder)
+
+            out = tarfile.open(str(self.configOb.input_folder)+".tar.bz2", mode='w:bz2')
+            out.add(path_scan, arcname="TarName")
+            out.close()
+            self.emit( QtCore.SIGNAL('update(QString)'), "Compression of recon folder finished" )
 
         ###############################################
         # Scaling
@@ -262,22 +279,22 @@ class WorkThread(QtCore.QThread):
 
         # Perform scaling as subprocess with Popen (they should be done in the background)
         if self.configOb.SF2 == "yes" :
-            proSF2 = self.executeImagej("^0.5^x2",session_pid,session_scale,"2")
+            proSF2 = self.executeImagej("^0.5^x2^",session_pid,session_scale,"2")
 
         if self.configOb.SF3 == "yes" :
-            proSF3 = self.executeImagej("^0.3333^x3",session_pid,session_scale,"3")
+            proSF3 = self.executeImagej("^0.3333^x3^",session_pid,session_scale,"3")
 
         if self.configOb.SF4 == "yes" :
-            proSF4 = self.executeImagej("^0.25^x4",session_pid,session_scale,"4")
+            proSF4 = self.executeImagej("^0.25^x4^",session_pid,session_scale,"4")
 
         if self.configOb.SF5 == "yes" :
-            proSF5 = self.executeImagej("^0.2^x5",session_pid,session_scale,"5")
+            proSF5 = self.executeImagej("^0.2^x5^",session_pid,session_scale,"5")
 
         if self.configOb.SF6 == "yes" :
-            proSF6 = self.executeImagej("^0.1667^x6",session_pid,session_scale,"6")
+            proSF6 = self.executeImagej("^0.1667^x6^",session_pid,session_scale,"6")
 
         if self.configOb.pixel_option == "yes" :
-            propixel = self.executeImagej("^"+str(self.configOb.SF_pixel)+"^xPixel",session_pid,session_scale,"Pixel")
+            propixel = self.executeImagej("^"+str(self.configOb.SF_pixel)+"^x"+str(self.configOb.SFX_pixel)+"^",session_pid,session_scale,"Pixel")
 
 
 
@@ -302,6 +319,13 @@ class WorkThread(QtCore.QThread):
         '''
         # for saving pid again
         session_pid = open(self.pid_log_path, 'a+')
+        if (self.configOb.recon_pixel_size) and sf != "Pixel":
+            new_pixel = float(self.configOb.recon_pixel_size)*float(sf)
+            new_pixel = str(round(new_pixel,4))
+        elif self.configOb.pixel_option == "yes" :
+            new_pixel = self.configOb.user_specified_pixel
+        else :
+            new_pixel = "NA"
 
         if _platform == "linux" or _platform == "linux2":
 
@@ -310,7 +334,7 @@ class WorkThread(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
 
             process = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
-                                    self.configOb.imageJ + scaleFactor],stdout=session_scale,stderr=session_scale)
+                                    self.configOb.imageJ],stdout=session_scale,stderr=session_scale)
             session_pid.write(str(process.pid)+"\n")
             session_pid.close()
             out, err = process.communicate()
@@ -324,7 +348,7 @@ class WorkThread(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
             ijpath = os.path.join('c:', os.sep, 'Program Files', 'ImageJ', 'ij.jar')
             process = subprocess.Popen(["java", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
-                                    self.configOb.imageJ + scaleFactor],stdout=session_scale,stderr=session_scale)
+                                    self.configOb.imageJ + scaleFactor + "^" +new_pixel],stdout=session_scale,stderr=session_scale)
             session_pid.write(str(process.pid)+"\n")
             session_pid.close()
             out, err = process.communicate()

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Thu Mar 27 18:17:07 2014
+# Created: Fri Mar 28 11:28:42 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -689,14 +689,14 @@ class Ui_MainWindow(object):
         self.checkBoxSF4.setChecked(True)
         self.checkBoxSF4.setObjectName(_fromUtf8("checkBoxSF4"))
         self.label = QtGui.QLabel(self.groupBoxOptions)
-        self.label.setEnabled(False)
+        self.label.setEnabled(True)
         self.label.setGeometry(QtCore.QRect(10, 172, 121, 16))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.checkBoxCompression = QtGui.QCheckBox(self.groupBoxOptions)
-        self.checkBoxCompression.setEnabled(False)
+        self.checkBoxCompression.setEnabled(True)
         self.checkBoxCompression.setGeometry(QtCore.QRect(155, 171, 81, 17))
         font = QtGui.QFont()
         font.setPointSize(12)

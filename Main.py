@@ -699,10 +699,19 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.ui.checkBoxPixel.isChecked() :
             self.configOb.pixel_option = "yes"
+            self.configOb.user_specified_pixel = str(self.ui.lineEditPixel.text())
             self.configOb.SF_pixel = float(self.pixel_size) / float(self.ui.lineEditPixel.text())
+            self.configOb.SF_pixel = round(self.configOb.SF_pixel,4)
+            self.configOb.SFX_pixel = float(self.ui.lineEditPixel.text())/float(self.pixel_size)
+            self.configOb.SFX_pixel = round(self.configOb.SFX_pixel,4)
         else :
             self.configOb.pixel_option = "no"
             self.configOb.SF_pixel = "Not applicable"
+
+        if self.ui.checkBoxCompression.isChecked():
+            self.configOb.compression = "yes"
+        else :
+            self.configOb.compression = "No"
 
         # ID for session
         self.configOb.unique_ID = str(self.unique_ID)
@@ -738,8 +747,9 @@ class MainWindow(QtGui.QMainWindow):
         log.write("Downsize_by_factor_5?    "+self.configOb.SF4+"\n");
         log.write("Downsize_by_factor_6?    "+self.configOb.SF4+"\n");
         log.write("Downsize_by_pixel?    "+self.configOb.pixel_option+"\n");
+        log.write("User_specified_pixel_size?    "+self.configOb.user_specified_pixel+"\n");
         log.write("Downsize_value_for_pixel    "+str(self.configOb.SF_pixel)+"\n");
-
+        log.write("Compression of files?    "+self.configOb.compression+"\n");
         log.write("ImageJconfig    "+self.configOb.imageJ+"\n");
         log.write("Recon_log_file    "+self.configOb.recon_log_file+"\n");
         log.write("Recon_folder_size   "+self.configOb.recon_folder_size+"\n");

@@ -1303,7 +1303,7 @@ QGroupBox::title
      </widget>
      <widget class="QLabel" name="label">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
@@ -1324,7 +1324,7 @@ QGroupBox::title
      </widget>
      <widget class="QCheckBox" name="checkBoxCompression">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
