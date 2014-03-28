@@ -26,9 +26,9 @@ class Zproject:
         files = []
 
         for fn in os.listdir(self.img_dir):
-            if fn.endswith(('spr.bmp', 'spr.BMP')):
+            if fn.endswith(('spr.bmp', 'spr.BMP','spr.tif','spr.TIF','spr.jpg','spr.JPG','spr.jpeg','spr.JPEG')):
                 continue
-            if fn.endswith(('.bmp', '.BMP', '.tif', '.TIF')):
+            if fn.endswith(('.bmp', '.BMP', '.tif', '.TIF','.jpg','.JPG','jpeg','JPEG')):
                 files.append(os.path.join(self.img_dir, fn))
         if len(files) < 1:
             return("no image files found in" + self.img_dir)

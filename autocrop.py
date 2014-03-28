@@ -147,10 +147,14 @@ def run(args):
 
 
 	for fn in os.listdir(args.in_dir):
-		if fnmatch.fnmatch(fn, '*spr.bmp'):
+		if (fnmatch.fnmatch(fn, '*spr.bmp') or fnmatch.fnmatch(fn, '*spr.BMP') or fnmatch.fnmatch(fn, '*spr.tif') or
+			fnmatch.fnmatch(fn, '*spr.TIF') or fnmatch.fnmatch(fn, '*spr.jpg') or fnmatch.fnmatch(fn, '*spr.JPG') or
+			fnmatch.fnmatch(fn, '*spr.jpeg') or fnmatch.fnmatch(fn, '*spr.JPEG')):
 			continue
-		if fnmatch.fnmatch(fn, '*.bmp') or fnmatch.fnmatch(fn, '*.BMP'):
-			files.append(os.path.join(args.in_dir, fn))
+		if (fnmatch.fnmatch(fn, '*.bmp') or fnmatch.fnmatch(fn, '*.BMP') or fnmatch.fnmatch(fn, '*.tif') or
+			fnmatch.fnmatch(fn, '*.TIF') or fnmatch.fnmatch(fn, '*.jpg') or fnmatch.fnmatch(fn, '*.JPG') or
+			fnmatch.fnmatch(fn, '*.jpeg') or fnmatch.fnmatch(fn, '*.JPEG')):
+				files.append(os.path.join(args.in_dir, fn))
 	if len(files) < 1:
 		sys.exit("no image files found in" + args.in_dir)
 

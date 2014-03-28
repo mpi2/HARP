@@ -308,21 +308,21 @@ class WorkThread(QtCore.QThread):
             logging.info("Scale by factor:")
             logging.info(str(sf))
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
+
             process = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
                                     self.configOb.imageJ + scaleFactor],stdout=session_scale,stderr=session_scale)
             session_pid.write(str(process.pid)+"\n")
             session_pid.close()
+            out, err = process.communicate()
+
             logging.info("Finished scaling")
-            return process
 
         elif _platform == "win32" or _platform == "win64":
 
             logging.info("Scale by factor:")
             logging.info(str(sf))
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
-
             ijpath = os.path.join('c:', os.sep, 'Program Files', 'ImageJ', 'ij.jar')
-            self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(scaleFactor) )
             process = subprocess.Popen(["java", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
                                     self.configOb.imageJ + scaleFactor],stdout=session_scale,stderr=session_scale)
             session_pid.write(str(process.pid)+"\n")

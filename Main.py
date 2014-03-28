@@ -328,7 +328,9 @@ class MainWindow(QtGui.QMainWindow):
         SPR_file_BMP = os.path.join(input,self.full_name+"_spr.BMP")
         SPR_file_tif = os.path.join(input,self.full_name+"_spr.tif")
         SPR_file_TIF = os.path.join(input,self.full_name+"_spr.TIF")
-        print SPR_file_bmp
+        SPR_file_jpg = os.path.join(input,self.full_name+"_spr.jpg")
+        SPR_file_JPG = os.path.join(input,self.full_name+"_spr.JPG")
+
         if os.path.isfile(SPR_file_bmp):
             self.ui.lineEditCTSPR.setText(SPR_file_bmp)
         elif os.path.isfile(SPR_file_BMP):
@@ -337,6 +339,10 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEditCTSPR.setText(SPR_file_tif)
         elif os.path.isfile(SPR_file_TIF):
             self.ui.lineEditCTSPR.setText(SPR_file_TIF)
+        elif os.path.isfile(SPR_file_jpg):
+            self.ui.lineEditCTSPR.setText(SPR_file_jpg)
+        elif os.path.isfile(SPR_file_JPG):
+            self.ui.lineEditCTSPR.setText(SPR_file_JPG)
         else:
             print "Cannot find SPR file, proceed if this is not a problem"
             self.ui.lineEditCTSPR.setText("Cannot find SPR file")
@@ -356,7 +362,7 @@ class MainWindow(QtGui.QMainWindow):
         input = str(self.ui.lineEditInput.text())
 
         # create a regex get example recon file
-        prog = re.compile("(.*)_rec\d+\.(bmp|tif)",re.IGNORECASE)
+        prog = re.compile("(.*)_rec\d+\.(bmp|tif|jpg|jpeg)",re.IGNORECASE)
 
         try:
             filename = ""
@@ -372,9 +378,10 @@ class MainWindow(QtGui.QMainWindow):
             filename = input+"/"+filename
             file1_size = os.stat(filename).st_size
 
-            num_files = len([f for f in os.listdir(input) if ((f[-4:] == ".bmp") or (f[-4:] == ".tif") or
-                          (f[-7:] != "spr.bmp") or (f[-7:] != "spr.tif") or (f[-4:] == ".BMP") or (f[-4:] == ".TIF") or
-                          (f[-7:] != "spr.BMP") or (f[-7:] != "spr.TIF"))])
+            num_files = len([f for f in os.listdir(input) if ((f[-4:] == ".bmp") or (f[-4:] == ".tif") or (f[-4:] == ".jpg") or (f[-4:] == ".jpeg") or
+                          (f[-4:] == ".BMP") or (f[-4:] == ".TIF") or (f[-4:] == ".JPG") or (f[-4:] == ".JPEG") or
+                          (f[-7:] != "spr.bmp") or (f[-7:] != "spr.tif") or (f[-7:] != "spr.jpg") or (f[-7:] != "spr.jpeg") or
+                          (f[-7:] != "spr.BMP") or (f[-7:] != "spr.TIF") or (f[-7:] != "spr.JPG") or (f[-7:] != "spr.JPEG"))])
 
 
             approx_size = num_files*file1_size
