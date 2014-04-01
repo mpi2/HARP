@@ -140,13 +140,13 @@ def lowvals(array, value=20):
 
 
 
-def run(args):
+def run(in_dir, out_dir, file_type="bmp", def_crop=None, num_proc=2):
 	'''
 	'''
 	files = []
 
 
-	for fn in os.listdir(args.in_dir):
+	for fn in os.listdir(in_dir):
 		if (fnmatch.fnmatch(fn, '*spr.bmp') or fnmatch.fnmatch(fn, '*spr.BMP') or fnmatch.fnmatch(fn, '*spr.tif') or
 			fnmatch.fnmatch(fn, '*spr.TIF') or fnmatch.fnmatch(fn, '*spr.jpg') or fnmatch.fnmatch(fn, '*spr.JPG') or
 			fnmatch.fnmatch(fn, '*spr.jpeg') or fnmatch.fnmatch(fn, '*spr.JPEG')):
@@ -154,10 +154,10 @@ def run(args):
 		if (fnmatch.fnmatch(fn, '*.bmp') or fnmatch.fnmatch(fn, '*.BMP') or fnmatch.fnmatch(fn, '*.tif') or
 			fnmatch.fnmatch(fn, '*.TIF') or fnmatch.fnmatch(fn, '*.jpg') or fnmatch.fnmatch(fn, '*.JPG') or
 			fnmatch.fnmatch(fn, '*.jpeg') or fnmatch.fnmatch(fn, '*.JPEG')):
-				files.append(os.path.join(args.in_dir, fn))
+				files.append(os.path.join(in_dir, fn))
 
 	if len(files) < 1:
-		sys.exit("no image files found in" + args.in_dir)
+		sys.exit("no image files found in" + in_dir)
 
 
 	#get image dimensions from first file
@@ -165,16 +165,16 @@ def run(args):
 	global imdims
 	imdims = img.size
 
-	if args.def_crop:
-		do_the_crop(files, concertXYWH_ToCoords(args.def_crop), args.out_dir)
+	if def_crop:
+		do_the_crop(files, concertXYWH_ToCoords(def_crop), out_dir)
 		#sys.exit()
 	else:
 		print("Doing autocrop")
 		threshold = 0.01
 		proc = Processor(threshold)
 		pool_num = 0
-		if args.num_proc:
-			pool_num = int(args.num_proc)
+		if num_proc:
+			pool_num = int(num_proc)
 		else:
 			pool_num = cpu_count() / 2
 		pool = Pool(pool_num)
@@ -191,7 +191,7 @@ def run(args):
 		cropBox = convertDistFromEdgesToCoords((ldist, tdist, rdist, bdist))
 
 		padding = int(np.mean(imdims)*0.01)
-		do_the_crop(files, cropBox, args.out_dir, padding)
+		do_the_crop(files, cropBox, out_dir, padding)
 		sys.exit(0)
 
 
@@ -216,13 +216,10 @@ def concertXYWH_ToCoords(xywh):
 	return((xywh[0], xywh[1], x1, x2))
 
 
-def main():
+def cli_run():
 	'''
 	Parse the arguments
 	'''
-	global start
-	start = time.time()
-
 	parser = argparse.ArgumentParser(description='crop a stack of bitmaps')
 	parser.add_argument('-i', dest='in_dir', help='dir with bmps to crop', required=True)
 	parser.add_argument('-o', dest='out_dir', help='destination for cropped images', required=True)
@@ -230,9 +227,9 @@ def main():
 	parser.add_argument('-d', nargs=4, type=int, dest='def_crop', help='set defined boundaries for crop x,y,w,h')
 	parser.add_argument('-p', dest="num_proc", help='number of processors to use')
 	args = parser.parse_args()
-	run(args)
+	run(args.in_dir, args.out_dir, args.file_type, args,def_crop, args.num_proc)
 	#sys.exit()
 
 
 if __name__ == '__main__':
-	main()
+	cli_run()
