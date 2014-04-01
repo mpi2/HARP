@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Mar 28 17:21:44 2014
+# Created: Tue Apr 01 16:17:49 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -695,13 +695,13 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
-        self.checkBoxCompression = QtGui.QCheckBox(self.groupBoxOptions)
-        self.checkBoxCompression.setEnabled(True)
-        self.checkBoxCompression.setGeometry(QtCore.QRect(155, 171, 81, 17))
+        self.checkBoxScansReconComp = QtGui.QCheckBox(self.groupBoxOptions)
+        self.checkBoxScansReconComp.setEnabled(True)
+        self.checkBoxScansReconComp.setGeometry(QtCore.QRect(156, 172, 201, 21))
         font = QtGui.QFont()
         font.setPointSize(12)
-        self.checkBoxCompression.setFont(font)
-        self.checkBoxCompression.setObjectName(_fromUtf8("checkBoxCompression"))
+        self.checkBoxScansReconComp.setFont(font)
+        self.checkBoxScansReconComp.setObjectName(_fromUtf8("checkBoxScansReconComp"))
         self.label_2 = QtGui.QLabel(self.groupBoxOptions)
         self.label_2.setGeometry(QtCore.QRect(10, 200, 131, 16))
         font = QtGui.QFont()
@@ -775,6 +775,13 @@ class Ui_MainWindow(object):
         self.checkBoxPixel.setFont(font)
         self.checkBoxPixel.setChecked(False)
         self.checkBoxPixel.setObjectName(_fromUtf8("checkBoxPixel"))
+        self.checkBoxCropComp = QtGui.QCheckBox(self.groupBoxOptions)
+        self.checkBoxCropComp.setEnabled(True)
+        self.checkBoxCropComp.setGeometry(QtCore.QRect(360, 172, 201, 21))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.checkBoxCropComp.setFont(font)
+        self.checkBoxCropComp.setObjectName(_fromUtf8("checkBoxCropComp"))
         self.groupBoxuCTOnly = QtGui.QGroupBox(self.frame)
         self.groupBoxuCTOnly.setGeometry(QtCore.QRect(20, 350, 301, 221))
         font = QtGui.QFont()
@@ -1060,8 +1067,8 @@ class Ui_MainWindow(object):
         self.checkBoxSF2.setText(_translate("MainWindow", "2", None))
         self.checkBoxSF3.setText(_translate("MainWindow", "3", None))
         self.checkBoxSF4.setText(_translate("MainWindow", "4", None))
-        self.label.setText(_translate("MainWindow", "Compress files", None))
-        self.checkBoxCompression.setText(_translate("MainWindow", "Yes", None))
+        self.label.setText(_translate("MainWindow", "Compression", None))
+        self.checkBoxScansReconComp.setText(_translate("MainWindow", "Scans and original recon", None))
         self.label_2.setText(_translate("MainWindow", "Replace files", None))
         self.checkBoxRF.setText(_translate("MainWindow", "Yes", None))
         self.pushButtonGetDimensions.setText(_translate("MainWindow", "Get dimensions", None))
@@ -1073,6 +1080,7 @@ class Ui_MainWindow(object):
         self.lineEditPixel.setToolTip(_translate("MainWindow", "You can downsize by pixel. Just put the desired pixel size in the text box.", None))
         self.checkBoxPixel.setToolTip(_translate("MainWindow", "You can downsize by pixel. Just put the desired pixel size in the text box.", None))
         self.checkBoxPixel.setText(_translate("MainWindow", "By Pixel (µm)", None))
+        self.checkBoxCropComp.setText(_translate("MainWindow", "Cropped recon", None))
         self.groupBoxuCTOnly.setTitle(_translate("MainWindow", "µCT only", None))
         self.pushButtonCTRecon.setText(_translate("MainWindow", "Pick recon log", None))
         self.pushButtonCTSPR.setText(_translate("MainWindow", "Pick SPR", None))

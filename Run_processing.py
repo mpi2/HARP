@@ -1,4 +1,3 @@
-# For some reason need to re-import PyQt4...... Not the best solution but seems to work
 from PyQt4 import QtGui, QtCore
 import sys
 import subprocess
@@ -12,6 +11,8 @@ import uuid
 import logging
 import logging.handlers
 import tarfile
+import autocrop
+from multiprocessing import freeze_support
 
 from sys import platform as _platform
 
@@ -205,12 +206,22 @@ class WorkThread(QtCore.QThread):
         if self.configOb.crop_option == "Manual" :
             logging.info("manual crop")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing manual crop" )
-            manpro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o",
-                         cropped_path, "-t", "tif","-d",self.configOb.xcrop, self.configOb.ycrop, self.configOb.wcrop, self.configOb.hcrop],
-                            stdout=session_crop, stderr=session_crop)
-            session_pid.write(str(manpro.pid)+"\n")
-            session_pid.close()
-            manpro.communicate()
+            dimensions_tuple = (int(self.configOb.xcrop), int(self.configOb.ycrop), int(self.configOb.wcrop), int(self.configOb.hcrop))
+            print dimensions_tuple
+            crop_result = autocrop.run(self.configOb.input_folder,cropped_path,def_crop=dimensions_tuple)
+            if crop_result :
+                logging.info("Error in cropping see below:")
+                logging.info(crop_result)
+                self.emit( QtCore.SIGNAL('update(QString)'), "Cropping Error, see session log file")
+                return
+
+
+#             manpro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o",
+#                          cropped_path, "-t", "tif","-d",self.configOb.xcrop, self.configOb.ycrop, self.configOb.wcrop, self.configOb.hcrop],
+#                             stdout=session_crop, stderr=session_crop)
+#             session_pid.write(str(manpro.pid)+"\n")
+#             session_pid.close()
+#             manpro.communicate()
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
             logging.info("Crop finished")
 
@@ -218,11 +229,14 @@ class WorkThread(QtCore.QThread):
         if self.configOb.crop_option == "Automatic" :
             logging.info("autocrop")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
-            aupro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o", cropped_path, "-t", "tif"],
-                            stdout=session_crop)
-            session_pid.write(str(aupro.pid)+"\n")
-            session_pid.close()
-            aupro.communicate()
+
+            crop_result = autocrop.run(self.configOb.input_folder,cropped_path)
+
+            if crop_result :
+                logging.info("Error in cropping see below:")
+                logging.info(crop_result)
+                self.emit( QtCore.SIGNAL('update(QString)'), "Cropping Error, see session log file")
+                return
 
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
             logging.info("Crop finished")
@@ -248,8 +262,10 @@ class WorkThread(QtCore.QThread):
         ###############################################
         # Compression
         ###############################################
-        if self.configOb.compression == "yes" :
+        if self.configOb.scans_recon_comp == "yes" or self.configOb.crop_comp == "yes" :
             logging.info("***Performing Compression***")
+
+        if self.configOb.scans_recon_comp == "yes" :
             if self.configOb.scan_folder:
                 self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of scan folder" )
                 logging.info("Compression of scan folder")
@@ -268,6 +284,13 @@ class WorkThread(QtCore.QThread):
             out.add(path_scan, arcname="TarName")
             out.close()
             self.emit( QtCore.SIGNAL('update(QString)'), "Compression of recon folder finished" )
+
+        if  self.configOb.crop_comp == "yes":
+            if self.configOb.crop_option != "No_crop":
+                self.emit( QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started" )
+                out = tarfile.open(cropped_path+".tar.bz2", mode='w:bz2')
+                out.add(self.configOb.output_folder, arcname="TarName")
+                out.close()
 
         ###############################################
         # Scaling
@@ -368,4 +391,5 @@ def main():
 
 
 if __name__ == "__main__":
+    freeze_support()
     main()

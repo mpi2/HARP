@@ -1319,19 +1319,19 @@ QGroupBox::title
        </font>
       </property>
       <property name="text">
-       <string>Compress files</string>
+       <string>Compression</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="checkBoxCompression">
+     <widget class="QCheckBox" name="checkBoxScansReconComp">
       <property name="enabled">
        <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
-        <x>155</x>
-        <y>171</y>
-        <width>81</width>
-        <height>17</height>
+        <x>156</x>
+        <y>172</y>
+        <width>201</width>
+        <height>21</height>
        </rect>
       </property>
       <property name="font">
@@ -1340,7 +1340,7 @@ QGroupBox::title
        </font>
       </property>
       <property name="text">
-       <string>Yes</string>
+       <string>Scans and original recon</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_2">
@@ -1558,6 +1558,27 @@ QGroupBox::title
       </property>
       <property name="checked">
        <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBoxCropComp">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>172</y>
+        <width>201</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Cropped recon</string>
       </property>
      </widget>
     </widget>

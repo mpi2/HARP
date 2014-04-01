@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Progress.ui'
 #
-# Created: Fri Mar 21 09:29:39 2014
+# Created: Tue Apr  1 17:29:05 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,15 +26,15 @@ except AttributeError:
 class Ui_Progress(object):
     def setupUi(self, Progress):
         Progress.setObjectName(_fromUtf8("Progress"))
-        Progress.resize(842, 245)
+        Progress.resize(842, 192)
         self.pushButtonAddMore = QtGui.QPushButton(Progress)
-        self.pushButtonAddMore.setGeometry(QtCore.QRect(30, 10, 761, 31))
+        self.pushButtonAddMore.setGeometry(QtCore.QRect(40, 16, 731, 31))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.pushButtonAddMore.setFont(font)
         self.pushButtonAddMore.setObjectName(_fromUtf8("pushButtonAddMore"))
         self.gridLayoutWidget = QtGui.QWidget(Progress)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(40, 90, 751, 80))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(40, 66, 731, 91))
         self.gridLayoutWidget.setObjectName(_fromUtf8("gridLayoutWidget"))
         self.gridLayout = QtGui.QGridLayout(self.gridLayoutWidget)
         self.gridLayout.setMargin(0)
