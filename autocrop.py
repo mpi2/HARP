@@ -9,7 +9,7 @@ import argparse
 import os
 import fnmatch
 import numpy as np
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, freeze_support
 import sys
 import time
 import math
@@ -96,7 +96,7 @@ def do_the_crop(images, crop_vals, out_dir,  padding=0):
 	cropper = Cropper((lcrop, tcrop, rcrop, bcrop), out_dir)
 	pool = Pool()
 	pool.map(cropper, images)
-	return
+	return 
 
 
 def get_cropping_box(slices, side, threshold, rev = False):
@@ -157,7 +157,10 @@ def run(in_dir, out_dir, file_type="bmp", def_crop=None, num_proc=2):
 				files.append(os.path.join(in_dir, fn))
 
 	if len(files) < 1:
-		sys.exit("no image files found in" + in_dir)
+		out_message = "no image files found in ", in_dir
+		print out_message
+		return out_message
+		#sys.exit("no image files found in" + in_dir)
 
 
 	#get image dimensions from first file
@@ -192,7 +195,8 @@ def run(in_dir, out_dir, file_type="bmp", def_crop=None, num_proc=2):
 
 		padding = int(np.mean(imdims)*0.01)
 		do_the_crop(files, cropBox, out_dir, padding)
-		sys.exit(0)
+		return 
+		#sys.exit(0)
 
 
 def convertDistFromEdgesToCoords(distances):
@@ -232,4 +236,5 @@ def cli_run():
 
 
 if __name__ == '__main__':
+	freeze_support()
 	cli_run()

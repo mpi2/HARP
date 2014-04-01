@@ -1,9 +1,8 @@
 #!/usr/bin/python
 # Import PyQT module
-from PyQt4 import QtGui,QtCore
+from PyQt4 import QtCore, QtGui
 # Import MainWindow class from QT Designer
 from MainWindow import Ui_MainWindow
-from Progress import Ui_Progress
 from Run_processing import Progress
 import zproject
 import crop
@@ -20,7 +19,7 @@ import time
 import shutil
 import uuid
 import logging
-from multiprocessing import Process
+from multiprocessing import freeze_support
 try:
     import Image
 except ImportError:
@@ -219,7 +218,7 @@ class MainWindow(QtGui.QMainWindow):
         except IndexError as e:
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format\n')
             print "Name incorrect", sys.exc_info()[0]
-            self.full_name = ""
+            self.full_name = folder_name
         except:
             print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
             message = QtGui.QMessageBox.warning(self, 'Message', 'Auto-populate not possible. Unexpected error:',sys.exc_info()[0])
@@ -529,10 +528,17 @@ class MainWindow(QtGui.QMainWindow):
         logging.info("########################################")
         logging.info("### Getting crop dimensions          ###")
         logging.info("########################################")
+
         # Opens MyMainWindow from crop.py
         input_folder = str(self.ui.lineEditInput.text())
         output_folder = str(self.ui.lineEditOutput.text())
         print input_folder
+
+        # Check input folder
+        if not input_folder :
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input directory not defined')
+            return
+
         zproj_path = os.path.join(str(self.outputFolder), "z_projection")
         self.stop = None
 
@@ -639,6 +645,11 @@ class MainWindow(QtGui.QMainWindow):
                 self.stop = True
                 return
 
+        # Check input directory contains something
+        if os.listdir(inputFolder) == []:
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty, please check')
+            self.stop = True
+            return
 
         # Input folder contains image files
         if self.ui.checkBoxRF.isChecked():
@@ -662,11 +673,8 @@ class MainWindow(QtGui.QMainWindow):
             os.makedirs(outputFolder)
             self.stop = None
 
-        #if self.ui.checkBoxRF.isChecked():
-            print "CheckBox has been checked so files will be replaced\n"
-            # Too dangerous to delete everything in a folder
-            # shutil.rmtree(outputFolder)
-        # Check if name has been completed
+
+
 
     def getParamaters(self):
         '''
@@ -750,10 +758,15 @@ class MainWindow(QtGui.QMainWindow):
             self.configOb.SF_pixel = "Not applicable"
             self.configOb.SFX_pixel = "Not applicable"
 
-        if self.ui.checkBoxCompression.isChecked():
-            self.configOb.compression = "yes"
+        if self.ui.checkBoxScansReconComp.isChecked():
+            self.configOb.scans_recon_comp = "yes"
         else :
-            self.configOb.compression = "No"
+            self.configOb.scans_recon_comp = "No"
+
+        if self.ui.checkBoxCropComp.isChecked():
+            self.configOb.crop_comp = "yes"
+        else :
+            self.configOb.crop_comp  = "No"
 
         # ID for session
         self.configOb.unique_ID = str(self.unique_ID)
@@ -772,7 +785,10 @@ class MainWindow(QtGui.QMainWindow):
         # Combining scaling and SF into input for imageJ macro
         self.configOb.cropped_path = os.path.join(self.configOb.output_folder,"cropped")
         self.configOb.scale_path = os.path.join(self.configOb.output_folder,"scaled_stacks")
-        self.configOb.imageJ = self.configOb.cropped_path+os.sep+'^'+self.configOb.scale_path+os.sep+'^'+self.configOb.full_name
+        if self.configOb.crop_option == "No_crop":
+            self.configOb.imageJ = self.configOb.input_folder+os.sep+'^'+self.configOb.scale_path+os.sep+'^'+self.configOb.full_name
+        else :
+            self.configOb.imageJ = self.configOb.cropped_path+os.sep+'^'+self.configOb.scale_path+os.sep+'^'+self.configOb.full_name
 
         # write the config information into an easily readable log file
         log.write("Session_ID    "+self.configOb.unique_ID+"\n");
@@ -790,7 +806,8 @@ class MainWindow(QtGui.QMainWindow):
         log.write("Downsize_by_pixel?    "+self.configOb.pixel_option+"\n");
         log.write("User_specified_pixel_size?    "+self.configOb.user_specified_pixel+"\n");
         log.write("Downsize_value_for_pixel    "+str(self.configOb.SF_pixel)+"\n");
-        log.write("Compression of files?    "+self.configOb.compression+"\n");
+        log.write("Compression_of_scans_and_original_recon?    "+self.configOb.scans_recon_comp+"\n");
+        log.write("Compression_of_cropped_recon?    "+self.configOb.crop_comp+"\n");
         log.write("ImageJconfig    "+self.configOb.imageJ+"\n");
         log.write("Recon_log_file    "+self.configOb.recon_log_file+"\n");
         log.write("Recon_folder_size   "+self.configOb.recon_folder_size+"\n");
@@ -819,4 +836,5 @@ def main():
 
 
 if __name__ == "__main__":
+    freeze_support()
     main()
