@@ -362,7 +362,7 @@ class WorkThread(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
 
             process = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
-                                    self.configOb.imageJ],stdout=session_scale,stderr=session_scale)
+                                    self.configOb.imageJ+ scaleFactor + "^" +new_pixel],stdout=session_scale,stderr=session_scale)
             session_pid.write(str(process.pid)+"\n")
             session_pid.close()
             out, err = process.communicate()
