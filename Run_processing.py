@@ -176,8 +176,8 @@ class WorkThread(QtCore.QThread):
         ###############################################
         logging.info("Copy temp files")
         if self.configOb.crop_option == "Manual" :
-            print os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif")
-            shutil.copyfile(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif"), os.path.join(self.configOb.meta_path,"max_intensity_z.tif"))
+            if os.path.exists(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif")):
+                shutil.copyfile(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif"), os.path.join(self.configOb.meta_path,"max_intensity_z.tif"))
 
         shutil.copyfile(os.path.join(self.configOb.tmp_dir,"session.log"), os.path.join(self.configOb.meta_path,"session.log"))
 
