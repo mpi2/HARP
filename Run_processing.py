@@ -47,9 +47,17 @@ class Progress(QtGui.QDialog):
         self.close()
 
     def addMore(self):
+        # Just starts up HARP again.
         dir = os.path.dirname(os.path.abspath(__file__))
-        runPro_p = subprocess.Popen(["python", dir+"/Main.py"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
+        #The following regex distinguishes between running from a executable and a from a script
+        regex = re.compile("dist")
+        print dir
+        if regex.search(dir):
+            runPro_p = subprocess.Popen([os.path.join(dir,"Main.exe")],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print "started new HARP exe program"
+        else :
+            runPro_p = subprocess.Popen(["python", os.path.join(dir,"Main.py")],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print "started new HARP python program"
 
     def add(self,test):
         self.ui.label1_tracking.setText(test)
@@ -152,7 +160,6 @@ class WorkThread(QtCore.QThread):
         # Get the session log files
         self.session_log_path = os.path.join(self.configOb.meta_path,"session.log")
         self.pid_log_path = os.path.join(self.configOb.meta_path,"pid.log")
-        self.crop_log_path = os.path.join(self.configOb.meta_path,"crop.log")
         self.scale_log_path = os.path.join(self.configOb.meta_path,"scale.log")
 
         # Save as object to print to
@@ -162,7 +169,6 @@ class WorkThread(QtCore.QThread):
         logging.info("Creating files")
         #session = open(self.session_log_path, 'w+')
         session_pid = open(self.pid_log_path, 'w+')
-        session_crop = open(self.crop_log_path, 'w+')
         session_scale = open(self.scale_log_path, 'w+')
 
         ###############################################
@@ -328,7 +334,6 @@ class WorkThread(QtCore.QThread):
         # Presume processes finished so clear PID file
         open(self.pid_log_path, 'w').close()
 
-        session_crop.close()
         session_scale.close()
         logging.info("Processing finished")
         logging.info("########################################")
