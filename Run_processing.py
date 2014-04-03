@@ -51,7 +51,6 @@ class Progress(QtGui.QDialog):
         dir = os.path.dirname(os.path.abspath(__file__))
         #The following regex distinguishes between running from a executable and a from a script
         regex = re.compile("dist")
-        print dir
         if regex.search(dir):
             runPro_p = subprocess.Popen([os.path.join(dir,"Main.exe")],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print "started new HARP exe program"
@@ -278,7 +277,7 @@ class WorkThread(QtCore.QThread):
                 path_scan,folder_name_scan = os.path.split(self.configOb.scan_folder)
 
                 out = tarfile.open(str(self.configOb.scan_folder)+".tar.bz2", mode='w:bz2')
-                out.add(path_scan, arcname="TarName")
+                out.add(path_scan, arcname="Scan_folder")
                 out.close()
                 self.emit( QtCore.SIGNAL('update(QString)'), "Compression of scan folder finished" )
 
@@ -287,7 +286,7 @@ class WorkThread(QtCore.QThread):
             path_scan,folder_name_scan = os.path.split(self.configOb.input_folder)
 
             out = tarfile.open(str(self.configOb.input_folder)+".tar.bz2", mode='w:bz2')
-            out.add(path_scan, arcname="TarName")
+            out.add(path_scan, arcname="Input_folder")
             out.close()
             self.emit( QtCore.SIGNAL('update(QString)'), "Compression of recon folder finished" )
 
@@ -295,7 +294,7 @@ class WorkThread(QtCore.QThread):
             if self.configOb.crop_option != "No_crop":
                 self.emit( QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started" )
                 out = tarfile.open(cropped_path+".tar.bz2", mode='w:bz2')
-                out.add(self.configOb.output_folder, arcname="TarName")
+                out.add(cropped_path, arcname="Cropped")
                 out.close()
 
         ###############################################
@@ -374,8 +373,15 @@ class WorkThread(QtCore.QThread):
             logging.info("Scale by factor:")
             logging.info(str(sf))
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
-            ijpath = os.path.join('c:', os.sep, 'Program Files', 'ImageJ', 'ij.jar')
-            #ij_macro_path = os.path.join('c:', os.sep, 'Program Files', 'ImageJ', 'macros',"siah_scale.txt")
+
+            # For the exec version imagej is included in the dist
+            regex = re.compile("dist")
+            if regex.search(self.dir):
+                ijpath = os.path.join(self.dir, 'ImageJ', 'ij.jar')
+            else:
+                ijpath = os.path.join('c:', os.sep, 'Program Files', 'ImageJ', 'ij.jar')
+
+            ij_macro_path = os.path.join(self.dir, 'ImageJ', 'macros',"siah_scale.txt")
             process = subprocess.Popen(["java", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
                                     self.configOb.imageJ + scaleFactor + "^" +new_pixel],stdout=session_scale,stderr=session_scale)
             session_pid.write(str(process.pid)+"\n")

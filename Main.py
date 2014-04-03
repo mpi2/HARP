@@ -195,6 +195,7 @@ class MainWindow(QtGui.QMainWindow):
             # If the name is not in the correc format it should flag to the user that this needs to be sorted
             print folder_name.split("_")
             name_list = folder_name.split("_")
+
             date = name_list[0]
             group = name_list[1]
             age = name_list[2]
