@@ -1,9 +1,0 @@
-('C:\\Users\\t.lawson\\Documents\\LiClipse Workspace\\ImageProcessor\\harwell-ct-pipleine\\build\\Main\\Main.exe',
- True,
- False,
- None,
- None,
- [],
- None,
- False,
- 1396451079L)
