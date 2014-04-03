@@ -503,7 +503,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Opens MyMainWindow from crop.py
         input_folder = str(self.ui.lineEditInput.text())
-        output_folder = str(self.ui.lineEditOutput.text())
 
         # Check input folder
         if not input_folder :
@@ -518,7 +517,7 @@ class MainWindow(QtGui.QMainWindow):
         #Needed to update the gui
         self.app.processEvents()
 
-        zp = zproject.Zproject(input_folder, output_folder)
+        zp = zproject.Zproject(input_folder,self.tmp_dir)
 
         zp_result = zp.run(self.tmp_dir)
 

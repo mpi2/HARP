@@ -9,6 +9,7 @@ import tempfile
 import sys
 import os
 import numpy as np
+import re
 from multiprocessing import Pool, cpu_count
 
 class Zproject:
@@ -29,7 +30,9 @@ class Zproject:
             if fn.endswith(('spr.bmp', 'spr.BMP','spr.tif','spr.TIF','spr.jpg','spr.JPG','spr.jpeg','spr.JPEG')):
                 continue
             if fn.endswith(('.bmp', '.BMP', '.tif', '.TIF','.jpg','.JPG','jpeg','JPEG')):
-                files.append(os.path.join(self.img_dir, fn))
+                prog = re.compile("rec")
+                if prog.search(fn):
+                    files.append(os.path.join(self.img_dir, fn))
         if len(files) < 1:
             return("no image files found in" + self.img_dir)
 

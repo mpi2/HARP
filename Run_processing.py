@@ -50,15 +50,15 @@ class Progress(QtGui.QDialog):
         # Just starts up HARP again.
         dir = os.path.dirname(os.path.abspath(__file__))
         #The following regex distinguishes between running from a executable and a from a script
-        regex = re.compile("dist")
-        if regex.search(dir):
-            runPro_p = subprocess.Popen([os.path.join(dir,"Main.exe")],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            logging.info("started new HARP exe program")
-            #print "started new HARP exe program"
-        else :
-            runPro_p = subprocess.Popen(["python", os.path.join(dir,"Main.py")],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            logging.info("started new HARP python program")
-            #print "started new HARP python program"
+        # determine if application is a script file or frozen exe
+        if getattr(sys, 'frozen', False):
+            dir = os.path.dirname(sys.executable)
+        elif __file__:
+            dir = os.path.dirname(__file__)
+
+        runPro_p = subprocess.Popen([os.path.join(dir,"Main.exe")],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        logging.info("started new HARP program")
+
 
     def add(self,test):
         self.ui.label1_tracking.setText(test)
@@ -155,7 +155,10 @@ class WorkThread(QtCore.QThread):
 
         self.emit( QtCore.SIGNAL('update(QString)'), "Started Processing" )
         # Get the directory of the script
-        self.dir = os.path.dirname(os.path.abspath(__file__))
+        if getattr(sys, 'frozen', False):
+            self.dir = os.path.dirname(sys.executable)
+        elif __file__:
+            self.dir = os.path.dirname(__file__)
 
         # Get the session log files
         self.session_log_path = os.path.join(self.configOb.meta_path,"session.log")
