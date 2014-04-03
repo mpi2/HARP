@@ -117,8 +117,23 @@ class MainWindow(QtGui.QMainWindow):
        # Get scan file manually
        self.ui.checkBoxPixel.clicked.connect(self.scaleByPixelOn)
 
+       # Resize for smaller monitors
+       self.ui.actionResize.triggered.connect(self.resizeScreen)
+
+       # Reset screen size to standard
+       self.ui.actionReset_screen_size.triggered.connect(self.resetScreen)
+
        # to make the window visible
        self.show()
+
+    def resizeScreen(self):
+        self.resize(1300,700)
+        self.ui.scrollArea.setFixedSize(1241,600)
+
+    def resetScreen(self):
+        self.resize(1300, 1007)
+        self.ui.scrollArea.setFixedSize(1241,951)
+
 
     def selectFileOut(self):
         ''' Select output folder (this should be blocked as standard'''
