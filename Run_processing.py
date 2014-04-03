@@ -27,7 +27,7 @@ class Progress(QtGui.QDialog):
 
     # Create a constructor
     def __init__(self,configOb):
-        print "Progress has started"
+        #print "Progress has started"
         self.threadPool = []
         super(Progress, self).__init__()
         self.ui=Ui_Progress()
@@ -53,10 +53,12 @@ class Progress(QtGui.QDialog):
         regex = re.compile("dist")
         if regex.search(dir):
             runPro_p = subprocess.Popen([os.path.join(dir,"Main.exe")],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            print "started new HARP exe program"
+            logging.info("started new HARP exe program")
+            #print "started new HARP exe program"
         else :
             runPro_p = subprocess.Popen(["python", os.path.join(dir,"Main.py")],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            print "started new HARP python program"
+            logging.info("started new HARP python program")
+            #print "started new HARP python program"
 
     def add(self,test):
         self.ui.label1_tracking.setText(test)
@@ -70,7 +72,6 @@ class Progress(QtGui.QDialog):
         if test == "Error" :
             self.threadPool[len(self.threadPool)-1].terminate()
 
-        print test
         value = 0
 
 #         print self.value
@@ -113,7 +114,7 @@ class Progress(QtGui.QDialog):
                 try :
                     if _platform == "linux" or _platform == "linux2":
                         os.kill(int(line),signal.SIGKILL)
-                        print "killed:", line
+                        #print "killed:", line
                         logging.info("killed:", line)
                     elif _platform == "win32" or _platform == "win64":
                         line = line.rstrip()
@@ -121,13 +122,13 @@ class Progress(QtGui.QDialog):
                         (out, err) = proc.communicate()
                         if out:
                             logging.info(out)
-                            print "program output:", out
+                            #print "program output:", out
                         if err:
                             logging.info(err)
-                            print "program error output:", err
+                            #print "program error output:", err
 
                 except OSError as e:
-                    print("os.kill could not kill process, reason: {0}".format(e))
+                    #print("os.kill could not kill process, reason: {0}".format(e))
                     logging.info("os.kill could not kill process, reason: {0}".format(e))
                     message = QtGui.QMessageBox.warning(self, "Message", "os.kill could not kill process, reason: {0}".format(e))
 
@@ -207,12 +208,12 @@ class WorkThread(QtCore.QThread):
             os.makedirs(cropped_path)
 
         crop_run = os.path.join(self.dir, "autocrop.py")
-        print crop_run
+        #print crop_run
         if self.configOb.crop_option == "Manual" :
             logging.info("manual crop")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing manual crop" )
             dimensions_tuple = (int(self.configOb.xcrop), int(self.configOb.ycrop), int(self.configOb.wcrop), int(self.configOb.hcrop))
-            print dimensions_tuple
+            #print dimensions_tuple
             crop_result = autocrop.run(self.configOb.input_folder,cropped_path,def_crop=dimensions_tuple)
             if crop_result :
                 logging.info("Error in cropping see below:")
@@ -249,7 +250,7 @@ class WorkThread(QtCore.QThread):
         # Do not perform any crop as user specified
         if self.configOb.crop_option == "None" :
             self.emit( QtCore.SIGNAL('update(QString)'), "No Crop carried out" )
-            print "No crop carried out"
+            #print "No crop carried out"
             logging.info("No crop carried out")
             session_pid.close()
 
@@ -293,7 +294,7 @@ class WorkThread(QtCore.QThread):
         if  self.configOb.crop_comp == "yes":
             if self.configOb.crop_option != "No_crop":
                 self.emit( QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started" )
-                out = tarfile.open(cropped_path+".tar.bz2", mode='w:bz2')
+                out = tarfile.open(cropped_path+"_"+self.configOb.full_name+".tar.bz2", mode='w:bz2')
                 out.add(cropped_path, arcname="Cropped")
                 out.close()
 

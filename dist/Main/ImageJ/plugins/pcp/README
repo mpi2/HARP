@@ -1,0 +1,142 @@
+ImageJ Plugins Control Panel
+
+Author: Cezar M. Tigaret <c.tigaret@ucl.ac.uk>
+
+Version 0.4b
+
+INTRODUCTION
+============
+
+This plugin allows access to classes installed in a hierarchical subdirectory tree of
+the main "plugins" root directory of your ImageJ installation.
+
+Depending on the version of your Java platform, ImageJ user plugins will be accessed from 
+one of the two GUI versions (they are automatically selected at runtime):
+a) a tabbed control panel (Java 1)
+b) a tree control panel (Java 2 SE, version 1.3)
+
+NB! The tree control panel will NOT run on Java 1 platform, even if Swing components 
+(Java Foundation Classes) are installed on your system.
+
+Most ImageJ plugins can be installed in subdirectories according to a simple
+clasification criterion (for an example, look at ImageJ plugins web page 
+(http://rsb.info.nih.gov/ij/plugins/index.html) respecting the naming conventions set
+by Wayne Rasband.
+
+VolumeJ (by Michael Abramoff) is an exception in that it brings its own package and must be
+installed in the "plugins" directory. 
+
+
+The tabbed control panel - for users of Java 1.1.x
+--------------------------------------------------
+The tabbed control panel is a multi-page dialog with each plugins subdirectory on each page;
+plugins are launched using buttons contained in the page corresponding to their directory,
+selectable using one of the tabs in the top row of the panel. 
+A pop-up menu is available by pressing the left mouse button on the narrow space under
+the row of tabs (just above the button panels).
+
+The panel supports more than one level of directory branching. However, the control panel 
+will display one row of tabs, regardless of the directory tree depth. Subdirectories are 
+shown as pages immediately following the page of the parent directory.
+
+The code has been written according to Java 1 specifications, without Swing components, 
+so it should be possible to launch it on any platform capable to run ImageJ 1.1.9
+
+The tree control panel - for users of Java 1.3.x
+-------------------------------------------------
+- The tree control panel shows the "plugins" directory hierarchical structure as a tree; 
+plugins are launched by double-clicking on the corresponding tree "leaves". 
+
+- Users can install pre-compiled plugin classes or rename plugin subdirectories and use 
+the plugins immediately after pressing the "Reload" button.
+
+- A short help on panel usage is available from within the panel ("Help" button).
+
+
+
+NOTES FOR IMAGEJ PLUGIN DEVELOPERS
+==================================
+
+The Plugins_Control_Panel employs the same mechanism by which ImageJ custom class loader 
+calls plugin main classes: it relies on the presence of underscores in their classnames. 
+This mechanism also makes the distinction between these classes (which may appear in the 
+ImageJ Plugins menu) from their their dependencies, inner classes (which should not appear
+in the ImageJ Plugins menu). 
+
+Please note that this plugin now supports classes bundled in packages.
+
+
+
+CONTENTS OF THE ARCHIVE
+=======================
+.
+|-- Changes				- Version history
+|-- INSTALL				- installation instructions
+|-- PClassLoader2.class
+|-- PClassLoader2.java
+|-- PanelClassLoader.class
+|-- PanelClassLoader.java
+|-- PluginsExecuter.class
+|-- PluginsExecuter.java
+|-- Plugins_Control_Panel.class
+|-- Plugins_Control_Panel.java
+|-- README				- this file
+|-- TabbedControlPanel.class
+|-- TabbedControlPanel.java
+|-- TreeControlPanel$1.class
+|-- TreeControlPanel$2.class
+|-- TreeControlPanel$3.class
+|-- TreeControlPanel.class
+|-- TreeControlPanel.java
+|-- cw					- sources and binaries for the tabbed panel widgets
+|   `-- notebook
+|       |-- NBButton$1.class
+|       |-- NBButton.class
+|       |-- NBButton.java
+|       |-- NoteBook$1.class
+|       |-- NoteBook.class
+|       |-- NoteBook.java
+|       |-- PagePanel.class
+|       |-- PagePanel.java
+|       |-- Tab.class
+|       |-- Tab.java
+|       |-- TabPanel$1.class
+|       |-- TabPanel.class
+|       |-- TabPanel.java
+|       |-- TabScroller.class
+|       `-- TabScroller.java
+|-- pcp_help1.txt			- help file (ASCII) for the Tabbed Control Panel (Java 1.1.x)
+`-- pcp_help2.html			- help file (HTML format) for the Tree Control Panel (Java 1.3.x)
+
+*.class and cw/notebook/*.class		- binaries compiled on a Java 2 SE v. 1.3 platform
+
+
+Please see the "INSTALL" file for installation instructions.
+
+After installation, a "pcp-0.4a" submenu with "Plugins Control Panel" menu item should appear
+in the Plugins menu of the main ImageJ window.
+
+
+Code was originally inspired from ij.plugin.frame.ControlPanel by Wayne Rasband,
+the author of ImageJ (http://rsb.info.nih.gov/ij).
+
+BUGS and LIMITATIONS:
+=====================
+The subdirectory names should not contain ".class" string.
+The "Reload" function does not refresh the ImageJ's "Plugins" menu; therefore, newly installed plugins
+will only be available through the panel, unless ImageJ is restarted.
+Please see also the "Changes" file for bugs and limitations related to the current version.
+
+VERSION NOTES AND NEW FEATURES
+==============================
+Please see the file "Changes"
+
+
+
+
+
+
+
+
+
+

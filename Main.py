@@ -69,9 +69,7 @@ class MainWindow(QtGui.QMainWindow):
        logging.info("### HARP Session Log                 ###")
        logging.info("########################################")
 
-       print "ID for session:"+str(self.unique_ID)
        logging.info("ID for session:"+str(self.unique_ID))
-       print "Temp directory:"+self.tmp_dir
        logging.info("Temp directory:"+self.tmp_dir)
 
 
@@ -126,10 +124,7 @@ class MainWindow(QtGui.QMainWindow):
         ''' Select output folder (this should be blocked as standard'''
         self.fileDialog = QtGui.QFileDialog(self)
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
-        if folder == "":
-            print "User has pressed cancel"
-            logging.info("User has pressed cancel")
-        else:
+        if not folder == "":
             self.ui.lineEditOutput.setText(folder)
 
     def selectFileIn(self):
@@ -137,10 +132,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fileDialog = QtGui.QFileDialog(self)
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
 
-        if folder == "":
-            logging.info("User has pressed cancel")
-            print "User has pressed cancel"
-        else :
+        if not folder == "":
             # Reset the inputs incase this is not the first time someone has selected a file
             self.resetInputs()
 
@@ -190,38 +182,27 @@ class MainWindow(QtGui.QMainWindow):
         # Get the folder name
         path,folder_name = os.path.split(input)
 
+
+        # Need to have exception to catch if the name is not in correct format.
+        # If the name is not in the correc format it should flag to the user that this needs to be sorted
+        name_list = folder_name.split("_")
+
+        self.ui.lineEditName.setText(folder_name)
+        self.full_name = folder_name
+        # Could put additional regexes to check format is correct but could be a little bit annoying for the user
         try:
-            # Need to have exception to catch if the name is not in correct format.
-            # If the name is not in the correc format it should flag to the user that this needs to be sorted
-            print folder_name.split("_")
-            name_list = folder_name.split("_")
-
-            date = name_list[0]
-            group = name_list[1]
-            age = name_list[2]
-            litter = name_list[3]
-            zygosity = name_list[4]
-            sex = name_list[5]
-
-
-            #print date,group,age,litter,zygosity
-            self.ui.lineEditDate.setText(date)
-            self.ui.lineEditGroup.setText(group)
-            self.ui.lineEditAge.setText(age)
-            self.ui.lineEditLitter.setText(litter)
-            self.ui.lineEditZygosity.setText(zygosity)
-            self.ui.lineEditSex.setText(sex)
-            self.ui.lineEditName.setText(folder_name)
-
-            # The full name should be made changable at some point..
-            self.full_name = folder_name
+            self.ui.lineEditDate.setText(name_list[0])
+            self.ui.lineEditGroup.setText(name_list[1])
+            self.ui.lineEditAge.setText(name_list[2])
+            self.ui.lineEditLitter.setText(name_list[3])
+            self.ui.lineEditZygosity.setText(name_list[4])
+            self.ui.lineEditSex.setText(name_list[5])
 
         except IndexError as e:
+            pass
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format\n')
-            print "Name incorrect", sys.exc_info()[0]
             self.full_name = folder_name
         except:
-            print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
             message = QtGui.QMessageBox.warning(self, 'Message', 'Auto-populate not possible. Unexpected error:',sys.exc_info()[0])
 
 
@@ -275,13 +256,10 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEditCTRecon.setText(str(self.recon_log_path))
 
         except IOError as e:
-            print "Error finding recon file",sys.exc_info()[0]
             self.ui.lineEditCTRecon.setText("Problem reading recon log file")
         except Exception as inst:
-            print "Error finding recon file",sys.exc_info()[0]
             self.ui.lineEditCTRecon.setText("Cannot find recon log file")
         except:
-            print "Unexpected error:", sys.exc_info()[0]
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error getting recon log file',sys.exc_info()[0])
             self.ui.lineEditCTRecon.setText("Cannot find recon log file")
 
@@ -299,7 +277,6 @@ class MainWindow(QtGui.QMainWindow):
                 self.ui.lineEditOutput.setText(output_full)
 
         except:
-            print "Unexpected error in getting new folder output name:", sys.exc_info()[0]
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error getting recon log file',sys.exc_info()[0])
 
 
@@ -343,7 +320,6 @@ class MainWindow(QtGui.QMainWindow):
         elif os.path.isfile(SPR_file_JPG):
             self.ui.lineEditCTSPR.setText(SPR_file_JPG)
         else:
-            print "Cannot find SPR file, proceed if this is not a problem"
             self.ui.lineEditCTSPR.setText("Cannot find SPR file")
 
     def folderSizeApprox(self):
@@ -395,7 +371,6 @@ class MainWindow(QtGui.QMainWindow):
             self.sizeCleanup(f_size_out,approx_size)
         except:
             message = QtGui.QMessageBox.warning(self, "Message", "Unexpected error in folder size calc")
-            print "Unexpected error in folder size calc:", sys.exc_info()[0]
             logging.info("Unexpected error in folder size calc:", sys.exc_info()[0])
 
 
@@ -473,6 +448,15 @@ class MainWindow(QtGui.QMainWindow):
 
         try :
             name_list = self.full_name.split("_")
+            # Remove previous data
+            self.ui.lineEditDate.setText("")
+            self.ui.lineEditGroup.setText("")
+            self.ui.lineEditAge.setText("")
+            self.ui.lineEditLitter.setText("")
+            self.ui.lineEditZygosity.setText("")
+            self.ui.lineEditSex.setText("")
+
+            # Add new data
             self.ui.lineEditDate.setText(name_list[0])
             self.ui.lineEditGroup.setText(name_list[1])
             self.ui.lineEditAge.setText(name_list[2])
@@ -481,16 +465,9 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEditSex.setText(name_list[5])
 
         except IndexError as e:
-            print "Name incorrect", sys.exc_info()[0]
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format.\n')
-            self.ui.lineEditDate.setText("")
-            self.ui.lineEditGroup.setText("")
-            self.ui.lineEditAge.setText("")
-            self.ui.lineEditLitter.setText("")
-            self.ui.lineEditZygosity.setText("")
-            self.ui.lineEditSex.setText("")
+
         except:
-            print "Auto-populate not possible. Unexpected error:", sys.exc_info()[0]
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error when updating name',sys.exc_info()[0])
 
         # Get output folder
@@ -501,26 +478,20 @@ class MainWindow(QtGui.QMainWindow):
     def getReconMan(self):
         self.fileDialog = QtGui.QFileDialog(self)
         file = self.fileDialog.getOpenFileName()
-        if file == "":
-            print "User has pressed cancel"
-        else :
+        if not file == "":
             self.ui.lineEditCTRecon.setText(file)
             self.recon_log_path = os.path.abspath(file)
 
     def getScanMan(self):
         self.fileDialog = QtGui.QFileDialog(self)
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
-        if folder == "":
-            print "User has pressed cancel"
-        else :
+        if not folder == "":
             self.ui.lineEditScan.setText(folder)#
 
     def getSPRMan(self):
         self.fileDialog = QtGui.QFileDialog(self)
         file= self.fileDialog.getOpenFileName()
-        if file == "":
-            print "User has pressed cancel"
-        else :
+        if not file == "":
             self.ui.lineEditCTSPR.setText(file)
 
 
@@ -533,7 +504,6 @@ class MainWindow(QtGui.QMainWindow):
         # Opens MyMainWindow from crop.py
         input_folder = str(self.ui.lineEditInput.text())
         output_folder = str(self.ui.lineEditOutput.text())
-        print input_folder
 
         # Check input folder
         if not input_folder :
@@ -564,7 +534,6 @@ class MainWindow(QtGui.QMainWindow):
         logging.info("Dimensions selected")
 
     def cropCallback(self, box):
-        print "callback test:", box
         self.ui.lineEditX.setText(str(box[0]))
         self.ui.lineEditY.setText(str(box[1]))
         self.ui.lineEditW.setText(str(box[2]))
@@ -579,7 +548,6 @@ class MainWindow(QtGui.QMainWindow):
         '''
         This will set off all the processing scripts and shows the dialog box to keep track of progress
         '''
-        print "\nOpen progress report for user"
         self.processGoSwitch = "yes"
         # Get the directory of the script
         dir = os.path.dirname(os.path.abspath(__file__))
@@ -633,6 +601,11 @@ class MainWindow(QtGui.QMainWindow):
                 self.stop = True
                 return
 
+        # Check user has not selected to scale by pixel without having a recon folder
+        if self.ui.checkBoxPixel.isChecked() and self.pixel_size == "" :
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Pixel size could not be obtained from original recon log. Scaling "By Pixel (um) is not possible')
+            return
+
         # Check cropping parameters ok
         if self.ui.radioButtonMan.isChecked() :
             try:
@@ -641,7 +614,6 @@ class MainWindow(QtGui.QMainWindow):
                 testing = float(self.ui.lineEditW.text())
                 testing = float(self.ui.lineEditH.text())
             except ValueError:
-                print 'not numeric'
                 message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Cropping dimensions have not been defined')
                 self.stop = True
                 return
@@ -652,16 +624,15 @@ class MainWindow(QtGui.QMainWindow):
             self.stop = True
             return
 
+
         # Input folder contains image files
         if self.ui.checkBoxRF.isChecked():
-            print "CheckBox has been checked so files will be replaced\n"
             # Too dangerous to delete everything in a folder
             # shutil.rmtree(outputFolder)
             # os.makedirs(outputFolder)
             self.stop = None
         # Check if output folder already exists. Ask if it is ok to overwrite
         elif os.path.exists(outputFolder):
-            print "Output folder already exists and user has not approved overwrite"
             # Running dialog box to inform user of options
             message = QtGui.QMessageBox.question(self, 'Message', 'Folder already exists for the location:\n{0}\nCan this folder be overwritten?'.format(outputFolder) , QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
             if message == QtGui.QMessageBox.Yes:
@@ -670,7 +641,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.stop = True
             return
         else :
-            print "Creating output folder"
+            logging.info("Creating output folder")
             os.makedirs(outputFolder)
             self.stop = None
 
@@ -827,7 +798,7 @@ class ConfigClass :
     '''
     def __init__(self):
 
-        print "ConfigClass init"
+        logging.info("ConfigClass init")
 
 
 def main():
