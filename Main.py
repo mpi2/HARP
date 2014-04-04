@@ -271,12 +271,12 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEditCTRecon.setText(str(self.recon_log_path))
 
         except IOError as e:
-            self.ui.lineEditCTRecon.setText("Problem reading recon log file")
+            self.ui.lineEditCTRecon.setText("Not found")
         except Exception as inst:
-            self.ui.lineEditCTRecon.setText("Cannot find recon log file")
+            self.ui.lineEditCTRecon.setText("Not found")
         except:
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error getting recon log file',sys.exc_info()[0])
-            self.ui.lineEditCTRecon.setText("Cannot find recon log file")
+            self.ui.lineEditCTRecon.setText("Not found")
 
     def autoFileOut(self):
         ''' Get info for the output file and create a new folder NEED TO ADD CREATE FOLDER FUNCTION
@@ -305,10 +305,10 @@ class MainWindow(QtGui.QMainWindow):
             if os.path.exists(self.scan_folder):
                 self.ui.lineEditScan.setText(self.scan_folder)
             else :
-                self.ui.lineEditScan.setText("Cannot find scan folder")
+                self.ui.lineEditScan.setText("No found")
                 self.scan_folder = ""
         else :
-            self.ui.lineEditScan.setText("Cannot find scan folder")
+            self.ui.lineEditScan.setText("Not found")
             self.scan_folder = ""
 
     def autoGetSPR(self):
@@ -335,7 +335,7 @@ class MainWindow(QtGui.QMainWindow):
         elif os.path.isfile(SPR_file_JPG):
             self.ui.lineEditCTSPR.setText(SPR_file_JPG)
         else:
-            self.ui.lineEditCTSPR.setText("Cannot find SPR file")
+            self.ui.lineEditCTSPR.setText("Not found")
 
     def folderSizeApprox(self):
         '''
@@ -524,7 +524,16 @@ class MainWindow(QtGui.QMainWindow):
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input directory not defined')
             return
 
-        zproj_path = os.path.join(str(self.outputFolder), "z_projection")
+        if not os.path.exists(input_folder):
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not exist')
+            return
+        #Check if folder is empty
+        elif os.listdir(input_folder) == []:
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty')
+            return
+
+
+        zproj_path = os.path.join(str(self.tmp_dir), "z_projection")
         self.stop = None
 
         logging.info("Z projection is being performed")
@@ -597,10 +606,33 @@ class MainWindow(QtGui.QMainWindow):
             self.stop = True
             return
 
+        if not os.path.exists(inputFolder):
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not exist')
+            self.stop = True
+            return
+        #Check if folder is empty
+        elif os.listdir(inputFolder) == []:
+            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty')
+            self.stop = True
+            return
+
         elif not outputFolder :
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: output directory not defined')
             self.stop = True
             return
+
+        # Check if scan folder available if compression is required
+        if self.ui.checkBoxScansReconComp.isChecked():
+            if self.scan_folder == "":
+                message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Scan folder not defined')
+                self.stop = True
+                return
+            elif not os.path.exists(self.scan_folder):
+                message = QtGui.QMessageBox.warning(self, 'Message', "Warning: Scan folder does not exist")
+                self.stop = True
+                return
+
+
 
         # Check pixel size is a number
         if self.ui.checkBoxPixel.isChecked() :

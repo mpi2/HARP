@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Progress.ui'
 #
-# Created: Tue Apr  1 17:29:05 2014
+# Created: Fri Apr  4 16:00:22 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,19 +27,17 @@ class Ui_Progress(object):
     def setupUi(self, Progress):
         Progress.setObjectName(_fromUtf8("Progress"))
         Progress.resize(842, 192)
+        self.gridLayout_2 = QtGui.QGridLayout(Progress)
+        self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
         self.pushButtonAddMore = QtGui.QPushButton(Progress)
-        self.pushButtonAddMore.setGeometry(QtCore.QRect(40, 16, 731, 31))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.pushButtonAddMore.setFont(font)
         self.pushButtonAddMore.setObjectName(_fromUtf8("pushButtonAddMore"))
-        self.gridLayoutWidget = QtGui.QWidget(Progress)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(40, 66, 731, 91))
-        self.gridLayoutWidget.setObjectName(_fromUtf8("gridLayoutWidget"))
-        self.gridLayout = QtGui.QGridLayout(self.gridLayoutWidget)
-        self.gridLayout.setMargin(0)
+        self.gridLayout_2.addWidget(self.pushButtonAddMore, 0, 0, 1, 1)
+        self.gridLayout = QtGui.QGridLayout()
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.progressBar_1 = QtGui.QProgressBar(self.gridLayoutWidget)
+        self.progressBar_1 = QtGui.QProgressBar(Progress)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.progressBar_1.setFont(font)
@@ -47,19 +45,19 @@ class Ui_Progress(object):
         self.progressBar_1.setFormat(_fromUtf8(""))
         self.progressBar_1.setObjectName(_fromUtf8("progressBar_1"))
         self.gridLayout.addWidget(self.progressBar_1, 0, 1, 1, 1)
-        self.label_1 = QtGui.QLabel(self.gridLayoutWidget)
+        self.label_1 = QtGui.QLabel(Progress)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label_1.setFont(font)
         self.label_1.setObjectName(_fromUtf8("label_1"))
         self.gridLayout.addWidget(self.label_1, 0, 0, 1, 1)
-        self.pushButtonCancel_1 = QtGui.QPushButton(self.gridLayoutWidget)
+        self.pushButtonCancel_1 = QtGui.QPushButton(Progress)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.pushButtonCancel_1.setFont(font)
         self.pushButtonCancel_1.setObjectName(_fromUtf8("pushButtonCancel_1"))
         self.gridLayout.addWidget(self.pushButtonCancel_1, 0, 2, 1, 1)
-        self.label1_tracking = QtGui.QLabel(self.gridLayoutWidget)
+        self.label1_tracking = QtGui.QLabel(Progress)
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Sans Serif"))
         font.setPointSize(12)
@@ -67,6 +65,13 @@ class Ui_Progress(object):
         self.label1_tracking.setAlignment(QtCore.Qt.AlignCenter)
         self.label1_tracking.setObjectName(_fromUtf8("label1_tracking"))
         self.gridLayout.addWidget(self.label1_tracking, 1, 1, 1, 1)
+        self.pushButtonQuit = QtGui.QPushButton(Progress)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.pushButtonQuit.setFont(font)
+        self.pushButtonQuit.setObjectName(_fromUtf8("pushButtonQuit"))
+        self.gridLayout.addWidget(self.pushButtonQuit, 1, 2, 1, 1)
+        self.gridLayout_2.addLayout(self.gridLayout, 1, 0, 1, 1)
 
         self.retranslateUi(Progress)
         QtCore.QMetaObject.connectSlotsByName(Progress)
@@ -77,4 +82,5 @@ class Ui_Progress(object):
         self.label_1.setText(_translate("Progress", "...", None))
         self.pushButtonCancel_1.setText(_translate("Progress", "Cancel", None))
         self.label1_tracking.setText(_translate("Progress", "...", None))
+        self.pushButtonQuit.setText(_translate("Progress", "Quit", None))
 

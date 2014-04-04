@@ -42,8 +42,14 @@ class Progress(QtGui.QDialog):
 
         self.ui.pushButtonCancel_1.clicked.connect(self.cancel)
         self.ui.pushButtonAddMore.clicked.connect(self.addMore)
+        self.ui.pushButtonQuit.clicked.connect(self.quit)
 
     def cancel(self):
+        self.ui.label1_tracking.setText("Processing Cancelled!")
+        self.ui.progressBar_1.setValue(100)
+        self.kill_em_all()
+
+    def quit(self):
         self.close()
 
     def addMore(self):
@@ -101,42 +107,47 @@ class Progress(QtGui.QDialog):
         """ Function doc """
         reply = QtGui.QMessageBox.question(self,  'Message',  'Are you sure to quit?',  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
         logging.info("****Shutting down program****")
-
+        event.accept()
 
         if reply == QtGui.QMessageBox.Yes:
-            event.accept()
-            self.threadPool[len(self.threadPool)-1].terminate()
-
-            self.pid_log_path = os.path.join(self.configOb.meta_path,"pid.log")
-            ins = open( self.pid_log_path, "r" )
-            for line in ins:
-
-                try :
-                    if _platform == "linux" or _platform == "linux2":
-                        os.kill(int(line),signal.SIGKILL)
-                        #print "killed:", line
-                        logging.info("killed:", line)
-                    elif _platform == "win32" or _platform == "win64":
-                        line = line.rstrip()
-                        proc = subprocess.Popen(["taskkill", "/f", "/t", "/im",str(line)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                        (out, err) = proc.communicate()
-                        if out:
-                            logging.info(out)
-                            #print "program output:", out
-                        if err:
-                            logging.info(err)
-                            #print "program error output:", err
-
-                except OSError as e:
-                    #print("os.kill could not kill process, reason: {0}".format(e))
-                    logging.info("os.kill could not kill process, reason: {0}".format(e))
-                    message = QtGui.QMessageBox.warning(self, "Message", "os.kill could not kill process, reason: {0}".format(e))
-
+            self.kill_em_all
             logging.info("****HARP has shutdown ****")
             logging.shutdown()
 
         else:
             event.ignore()
+
+
+    def kill_em_all(self):
+
+        self.threadPool[len(self.threadPool)-1].terminate()
+
+        self.pid_log_path = os.path.join(self.configOb.meta_path,"pid.log")
+        ins = open( self.pid_log_path, "r" )
+        for line in ins:
+
+            try :
+                if _platform == "linux" or _platform == "linux2":
+                    os.kill(int(line),signal.SIGKILL)
+                    #print "killed:", line
+                    logging.info("killed:", line)
+                elif _platform == "win32" or _platform == "win64":
+                    line = line.rstrip()
+                    proc = subprocess.Popen(["taskkill", "/f", "/t", "/im",str(line)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    (out, err) = proc.communicate()
+                if out:
+                    logging.info(out)
+                    #print "program output:", out
+                if err:
+                    logging.info(err)
+                    #print "program error output:", err
+
+            except OSError as e:
+                #print("os.kill could not kill process, reason: {0}".format(e))
+                logging.info("os.kill could not kill process, reason: {0}".format(e))
+                message = QtGui.QMessageBox.warning(self, "Message", "os.kill could not kill process, reason: {0}".format(e))
+
+
 
 
 class WorkThread(QtCore.QThread):
@@ -258,17 +269,6 @@ class WorkThread(QtCore.QThread):
             session_pid.close()
 
         ###############################################
-        # Copying of other files from recon directory
-        ###############################################
-        logging.info("Copying other files from recon")
-        for file in os.listdir(self.configOb.input_folder):
-            suffix_txt, suffix_spr, suffix_log, suffix_crv = ".txt","spr",".log",".crv"
-            if file.endswith((".txt",".log",".crv")) or re.search('spr', file, re.IGNORECASE):
-                logging.info("File copied:"+file)
-                file = os.path.join(self.configOb.input_folder,file)
-                shutil.copy(file,cropped_path)
-
-        ###############################################
         # Compression
         ###############################################
         if self.configOb.scans_recon_comp == "yes" or self.configOb.crop_comp == "yes" :
@@ -329,6 +329,17 @@ class WorkThread(QtCore.QThread):
             propixel = self.executeImagej("^"+str(self.configOb.SF_pixel)+"^x"+str(self.configOb.SFX_pixel)+"^",session_pid,session_scale,"Pixel")
 
 
+        ###############################################
+        # Copying of other files from recon directory
+        ###############################################
+        logging.info("Copying other files from recon")
+        for file in os.listdir(self.configOb.input_folder):
+            suffix_txt, suffix_spr, suffix_log, suffix_crv = ".txt","spr",".log",".crv"
+            if file.endswith((".txt",".log",".crv")) or re.search('spr', file, re.IGNORECASE):
+                logging.info("File copied:"+file)
+                file = os.path.join(self.configOb.input_folder,file)
+                shutil.copy(file,cropped_path)
+
 
 
         session_scale.close()
@@ -378,12 +389,7 @@ class WorkThread(QtCore.QThread):
             logging.info(str(sf))
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
 
-            # For the exec version imagej is included in the dist
-            regex = re.compile("dist")
-            if regex.search(self.dir):
-                ijpath = os.path.join(self.dir, 'ImageJ', 'ij.jar')
-            else:
-                ijpath = os.path.join('c:', os.sep, 'Program Files', 'ImageJ', 'ij.jar')
+            ijpath = os.path.join(self.dir, 'ImageJ', 'ij.jar')
 
             ij_macro_path = os.path.join(self.dir, 'ImageJ', 'macros',"siah_scale.txt")
             process = subprocess.Popen(["java", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
