@@ -18,7 +18,7 @@ class Zproject:
         self.img_dir = img_dir
         self.out_dir = out_dir
 
-    def run(self,tmp_dir):
+    def run(self):
         '''
         Run the Zprojection
         @return img, PIL Image on success
@@ -63,7 +63,7 @@ class Zproject:
             #img.save(os.path.join(str(self.out_dir), "z_projection", "max_intensity_z.tif"))
 
             # Save th file to the temp directors tmp_dir
-            img.save(os.path.join(tmp_dir, "max_intensity_z.tif"))
+            img.save(os.path.join(self.out_dir, "max_intensity_z.tif"))
 
 
             return(0)

@@ -305,7 +305,7 @@ class MainWindow(QtGui.QMainWindow):
             if os.path.exists(self.scan_folder):
                 self.ui.lineEditScan.setText(self.scan_folder)
             else :
-                self.ui.lineEditScan.setText("No found")
+                self.ui.lineEditScan.setText("Not found")
                 self.scan_folder = ""
         else :
             self.ui.lineEditScan.setText("Not found")
@@ -543,7 +543,7 @@ class MainWindow(QtGui.QMainWindow):
 
         zp = zproject.Zproject(input_folder,self.tmp_dir)
 
-        zp_result = zp.run(self.tmp_dir)
+        zp_result = zp.run()
 
         if zp_result != 0:
             self.ui.textEditStatusMessages.setText("Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(zp_result))
