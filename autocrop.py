@@ -96,7 +96,7 @@ def do_the_crop(images, crop_vals, out_dir,  padding=0):
 	cropper = Cropper((lcrop, tcrop, rcrop, bcrop), out_dir)
 	pool = Pool()
 	pool.map(cropper, images)
-	return 
+	return
 
 
 def get_cropping_box(slices, side, threshold, rev = False):
@@ -151,9 +151,9 @@ def run(in_dir, out_dir, file_type="bmp", def_crop=None, num_proc=2):
 			fnmatch.fnmatch(fn, '*spr.TIF') or fnmatch.fnmatch(fn, '*spr.jpg') or fnmatch.fnmatch(fn, '*spr.JPG') or
 			fnmatch.fnmatch(fn, '*spr.jpeg') or fnmatch.fnmatch(fn, '*spr.JPEG')):
 			continue
-		if (fnmatch.fnmatch(fn, '*.bmp') or fnmatch.fnmatch(fn, '*.BMP') or fnmatch.fnmatch(fn, '*.tif') or
-			fnmatch.fnmatch(fn, '*.TIF') or fnmatch.fnmatch(fn, '*.jpg') or fnmatch.fnmatch(fn, '*.JPG') or
-			fnmatch.fnmatch(fn, '*.jpeg') or fnmatch.fnmatch(fn, '*.JPEG')):
+		if (fnmatch.fnmatch(fn, '*rec*.bmp') or fnmatch.fnmatch(fn, '*rec*.BMP') or fnmatch.fnmatch(fn, '*rec*.tif') or
+			fnmatch.fnmatch(fn, '*rec*.TIF') or fnmatch.fnmatch(fn, '*rec*.jpg') or fnmatch.fnmatch(fn, '*rec*.JPG') or
+			fnmatch.fnmatch(fn, '*rec*.jpeg') or fnmatch.fnmatch(fn, '*rec*.JPEG')):
 				files.append(os.path.join(in_dir, fn))
 
 	if len(files) < 1:
@@ -195,7 +195,7 @@ def run(in_dir, out_dir, file_type="bmp", def_crop=None, num_proc=2):
 
 		padding = int(np.mean(imdims)*0.01)
 		do_the_crop(files, cropBox, out_dir, padding)
-		return 
+		return
 		#sys.exit(0)
 
 

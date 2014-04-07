@@ -12,6 +12,7 @@ import logging
 import logging.handlers
 import tarfile
 import autocrop
+import wmi
 from multiprocessing import freeze_support
 
 from sys import platform as _platform
@@ -98,8 +99,14 @@ class Progress(QtGui.QDialog):
 
 
     def thread(self,configOb):
+        # Get memory of the computer (can't seem to do this in the thread)
+        comp = wmi.WMI()
+        for i in comp.Win32_ComputerSystem():
+            self.memory = i.TotalPhysicalMemory
+
+
         self.threadPool = []
-        self.threadPool.append( WorkThread(configOb) )
+        self.threadPool.append( WorkThread(configOb,self.memory) )
         self.connect( self.threadPool[len(self.threadPool)-1], QtCore.SIGNAL("update(QString)"), self.add )
         self.threadPool[len(self.threadPool)-1].start()
 
@@ -151,10 +158,10 @@ class Progress(QtGui.QDialog):
 
 
 class WorkThread(QtCore.QThread):
-    def __init__(self,configOb):
+    def __init__(self,configOb,memory):
         QtCore.QThread.__init__(self)
         self.configOb = configOb
-
+        self.memory = memory
 
     def __del__(self):
         self.wait()
@@ -235,13 +242,6 @@ class WorkThread(QtCore.QThread):
                 self.emit( QtCore.SIGNAL('update(QString)'), "Cropping Error, see session log file")
                 return
 
-
-#             manpro = subprocess.Popen(["python", crop_run,"-i",self.configOb.input_folder,"-o",
-#                          cropped_path, "-t", "tif","-d",self.configOb.xcrop, self.configOb.ycrop, self.configOb.wcrop, self.configOb.hcrop],
-#                             stdout=session_crop, stderr=session_crop)
-#             session_pid.write(str(manpro.pid)+"\n")
-#             session_pid.close()
-#             manpro.communicate()
             self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
             logging.info("Crop finished")
 
@@ -309,9 +309,17 @@ class WorkThread(QtCore.QThread):
         if not os.path.exists(self.configOb.scale_path):
             os.makedirs(self.configOb.scale_path)
 
+        # Memory of computer being used will depend on how much memory will be used in imageJ
+        # e.g half of available memory will be used
+        self.memory_4_imageJ = (int(self.memory)/2)*0.00000095367
+        self.memory_4_imageJ = int(self.memory_4_imageJ)
+        logging.info("Memory of computer:"+str(self.memory))
+        logging.info("Memory for ImageJ:"+str(self.memory_4_imageJ))
+
         # Perform scaling as subprocess with Popen (they should be done in the background)
+
         if self.configOb.SF2 == "yes" :
-            proSF2 = self.executeImagej("^0.5^x2^",session_pid,session_scale,"2")
+            proSF2 = self.executeImagej("^0.5^x2^",session_pid,session_scale,"2",)
 
         if self.configOb.SF3 == "yes" :
             proSF3 = self.executeImagej("^0.3333^x3^",session_pid,session_scale,"3")
@@ -334,13 +342,11 @@ class WorkThread(QtCore.QThread):
         ###############################################
         logging.info("Copying other files from recon")
         for file in os.listdir(self.configOb.input_folder):
-            suffix_txt, suffix_spr, suffix_log, suffix_crv = ".txt","spr",".log",".crv"
-            if file.endswith((".txt",".log",".crv")) or re.search('spr', file, re.IGNORECASE):
+            path,file = os.path.split(file)
+            if not os.path.exists(os.path.join(cropped_path,file)):
                 logging.info("File copied:"+file)
                 file = os.path.join(self.configOb.input_folder,file)
                 shutil.copy(file,cropped_path)
-
-
 
         session_scale.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
@@ -359,15 +365,20 @@ class WorkThread(QtCore.QThread):
         '''
         @param: str, scaleFactor eg ":0.5"
         '''
-        # for saving pid again
-        session_pid = open(self.pid_log_path, 'a+')
         if (self.configOb.recon_pixel_size) and sf != "Pixel":
             new_pixel = float(self.configOb.recon_pixel_size)*float(sf)
             new_pixel = str(round(new_pixel,4))
+            interpolation = "default"
         elif self.configOb.pixel_option == "yes" :
             new_pixel = self.configOb.user_specified_pixel
+            interpolation = "yes"
         else :
             new_pixel = "NA"
+            interpolation = "default"
+
+
+        # for saving pid again (used to kill processes)
+        session_pid = open(self.pid_log_path, 'a+')
 
         if _platform == "linux" or _platform == "linux2":
 
@@ -375,8 +386,8 @@ class WorkThread(QtCore.QThread):
             logging.info(str(sf))
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
 
-            process = subprocess.Popen(["java", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
-                                    self.configOb.imageJ+ scaleFactor + "^" +new_pixel],stdout=session_scale,stderr=session_scale)
+            process = subprocess.Popen(["java", "-Xmx"+self.memory_4_imageJ+"m", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
+                                    self.configOb.imageJ+ scaleFactor + "^" +new_pixel+"^"+interpolation],stdout=session_scale,stderr=session_scale)
             session_pid.write(str(process.pid)+"\n")
             session_pid.close()
             out, err = process.communicate()
@@ -393,7 +404,7 @@ class WorkThread(QtCore.QThread):
 
             ij_macro_path = os.path.join(self.dir, 'ImageJ', 'macros',"siah_scale.txt")
             process = subprocess.Popen(["java", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
-                                    self.configOb.imageJ + scaleFactor + "^" +new_pixel],stdout=session_scale,stderr=session_scale)
+                                    self.configOb.imageJ + scaleFactor + "^" +new_pixel+"^"+interpolation],stdout=session_scale,stderr=session_scale)
             session_pid.write(str(process.pid)+"\n")
             session_pid.close()
             out, err = process.communicate()

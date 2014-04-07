@@ -37,15 +37,17 @@ scale = arg_array[3];
 // 1 divided by scale gives the scaling factor which the user sees, e.g 2,3,4 etc
 divide_scale = arg_array[4];
 new_pixel = arg_array[5];
+interpolation = arg_array[6];
+
 print("divide_scale:");
 print(divide_scale);
 print("new_pixel:");
 print(new_pixel);
-
 print("output folder:");
 print(out_path);
 print("scale factor:");
 print(scale);
+
 
 //open the image sequence as a stack
 run("Image Sequence...", "open=[" + arg_array[0] + image_list[0] + "] file=[] or=[] sort use");
@@ -58,13 +60,17 @@ zdepth = floor(image_list.length * scale);
 
 
 
-//run the scaling in the x and y dimensions
-
-run("Scale...", "x=" + scale + " y=" + scale +  " z=" + zdepth + " depth=" + zdepth + " average process create title=scaled");
-
-tring1 = "This ";
-string2 = "is a ";
-string3 = "sentence made up of";
+//run the scaling in the x, y and z dimensions
+// interpolation is bicubic if requested
+if (interpolation=="yes") {
+	print("Interpolation:");
+	print("Bicubic");
+	run("Scale...", "x=" + scale + " y=" + scale +  " z=" + zdepth + " depth=" + zdepth + "interpolation=Bicubic average process create title=scaled");
+} else {
+	print("Interpolation:");
+	print("default");
+	run("Scale...", "x=" + scale + " y=" + scale +  " z=" + zdepth + " depth=" + zdepth + " average process create title=scaled");
+}
 full_file_name = out_path+recon_name+"_scaled_"+divide_scale+"_pixel_"+new_pixel+".tif";
 
 
