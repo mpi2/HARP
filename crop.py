@@ -14,18 +14,17 @@ User draws a cropping box. returns the coordinates
 class Crop(QtGui.QMainWindow):
 
     def __init__(self, callback, image, parent=None):
-	'''
-	@param: image, str, image file
-	'''
+
         super(Crop, self).__init__(parent)
         self.setWindowTitle("Manual cropping")
         self.widget = MainWidget(self, callback, image)
         self.widget.resize(950, 950)
         self.setCentralWidget(self.widget)
+        self.widget.setContentsMargins(0,0,0,0)
         self.widget.show()
 
         #Do not allow resizing for now as the rubber band does not move in proportion with the image
-        self.setFixedSize(QtCore.QSize(1050, 1050))
+        self.widget.setFixedSize(QtCore.QSize(1000, 1000))
 
         #Menu bar
         self.menubar = self.menuBar()
@@ -39,6 +38,7 @@ class Crop(QtGui.QMainWindow):
         self.action.triggered.connect(self.cropMenuAction)
         cropMenu = self.menubar.addMenu('&crop')
         cropMenu.addAction(self.action)
+
 
 
 
@@ -60,9 +60,12 @@ class MainWidget(QtGui.QWidget):
         super(MainWidget, self).__init__()
         self.scene = QtGui.QGraphicsScene()
         self.scene.setSceneRect(0, 0, 950, 950)
+
         self.callback = callback
         self.view = QtGui.QGraphicsView(self.scene)
+        self.view.setSceneRect(0, 0, 950, 950)
         layout = QtGui.QVBoxLayout()
+
         layout.addWidget(self.view)
         self.setLayout(layout)
 
@@ -95,9 +98,9 @@ class MainWidget(QtGui.QWidget):
 
         #Hack. Mouse events give me position of mouse relative to image
         #TODO: set this dynamically
-        self.img_dist_top = 35 #
-        self.img_dist_left = 50
-        self.pixmap_item.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self);
+        self.img_dist_top = 15 #
+        self.img_dist_left = 15
+        self.pixmap_item.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self.view);
         self.pixmap_item.rubberBand.setGeometry(QtCore.QRect(1, 1, 1, 1))
         self.pixmap_item.rubberBand.updatesEnabled()
         self.pixmap_item.rubberBand.show()
@@ -134,6 +137,7 @@ class MainWidget(QtGui.QWidget):
         #print "frame ", self.parent.geometry().width()
         #print "widget ", self.geometry().width()
         pos = (event.pos().x() + self.img_dist_left, event.pos().y() + self.img_dist_top)
+        print(pos)
         if not self.cornerSet:
             self.x = pos[0]
             self.y = pos[1]
@@ -234,7 +238,7 @@ class MainWidget(QtGui.QWidget):
             self.pixmap_item.rubberBand.setGeometry(r)
 
 
-
+        print(r)
 
 
     def mouseRelease(self, event):
