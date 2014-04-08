@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Tue Apr  8 15:38:42 2014
+# Created: Tue Apr  8 17:18:01 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -1063,6 +1063,7 @@ class Ui_MainWindow(object):
         self.pushButtonStart.setObjectName(_fromUtf8("pushButtonStart"))
         self.gridLayout_9.addWidget(self.pushButtonStart, 6, 0, 1, 1)
         self.pushButtonStop = QtGui.QPushButton(self.tab_2)
+        self.pushButtonStop.setEnabled(True)
         self.pushButtonStop.setObjectName(_fromUtf8("pushButtonStop"))
         self.gridLayout_9.addWidget(self.pushButtonStop, 6, 1, 1, 1)
         self.pushButtonAdd = QtGui.QPushButton(self.tab_2)

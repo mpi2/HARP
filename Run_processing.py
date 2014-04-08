@@ -258,12 +258,6 @@ class WorkThread(QtCore.QThread):
             logging.info("Finished scaling")
 
 
-
-
-
-
-
-
 def main():
     app = QtGui.QApplication(sys.argv)
     ex = Progress(configOb)
