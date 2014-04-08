@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Tue Apr  8 14:54:08 2014
+# Created: Tue Apr  8 15:38:42 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1260, 1040)
+        MainWindow.resize(1260, 1039)
         font = QtGui.QFont()
         font.setPointSize(12)
         MainWindow.setFont(font)
@@ -1033,7 +1033,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1216, 896))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1216, 895))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.scrollAreaWidgetContents)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))

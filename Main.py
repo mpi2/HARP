@@ -931,7 +931,7 @@ class MainWindow(QtGui.QMainWindow):
                 break
             count = count +1
 
-        self.configOb_path_from_list = os.path.join(self.folder_from_list,"Metadata","ConfigObject.txt")
+        self.configOb_path_from_list = os.path.join(self.folder_from_list,"Metadata","configobject.txt")
         self.threadPool.append( WorkThread(self.configOb_path_from_list,self.memory) )
         self.connect( self.threadPool[len(self.threadPool)-1], QtCore.SIGNAL("update(QString)"), self.add )
         self.threadPool[len(self.threadPool)-1].start()
