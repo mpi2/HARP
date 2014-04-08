@@ -15,11 +15,7 @@ import autocrop
 import cPickle as pickle
 import ConfigClass
 from multiprocessing import freeze_support
-
 from sys import platform as _platform
-
-from Progress import Ui_Progress
-
 
 
 class WorkThread(QtCore.QThread):
