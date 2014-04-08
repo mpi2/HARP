@@ -713,7 +713,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
         # OS path used for compatibility issues between Linux and windows directory spacing
-        self.config_path = os.path.join(self.meta_path,"configObject.txt")
+        self.config_path = os.path.join(self.meta_path,"configobject.txt")
         self.log_path = os.path.join(self.meta_path,"config4user.log")
 
         # Create config file and log file
