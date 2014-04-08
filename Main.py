@@ -3,7 +3,9 @@
 from PyQt4 import QtCore, QtGui
 # Import MainWindow class from QT Designer
 from MainWindow import Ui_MainWindow
-from Run_processing import Progress
+from Run_processing import WorkThread
+from ConfigClass import ConfigClass
+
 import zproject
 import crop
 import tempfile
@@ -19,7 +21,12 @@ import time
 import shutil
 import uuid
 import logging
+import psutil
+
+import datetime
 from multiprocessing import freeze_support
+from Run_processing import WorkThread
+from sys import platform as _platform
 try:
     import Image
 except ImportError:
@@ -51,7 +58,10 @@ class MainWindow(QtGui.QMainWindow):
        self.selected = "Not_selected"
        self.error = "None"
        self.stop = None
+       self.count_in = 0
+       self.current_row = 0
        self.processGoSwitch = "no"
+       self.list_for_processing = []
 
        # initialise non essential information
        self.scan_folder = ""
@@ -59,19 +69,9 @@ class MainWindow(QtGui.QMainWindow):
        self.f_size_out_gb = ""
        self.pixel_size = ""
 
+
        # Temp folder for pre-processing log and z-project
        self.tmp_dir = tempfile.mkdtemp()
-
-       # First log file
-       tmp_log = os.path.join(self.tmp_dir,"session.log")
-       logging.basicConfig(filename=tmp_log,level=logging.DEBUG,format='%(asctime)s %(message)s')
-       logging.info("########################################")
-       logging.info("### HARP Session Log                 ###")
-       logging.info("########################################")
-
-       logging.info("ID for session:"+str(self.unique_ID))
-       logging.info("Temp directory:"+self.tmp_dir)
-
 
        # get input folder
        self.ui.pushButtonInput.clicked.connect(self.selectFileIn)
@@ -86,7 +86,7 @@ class MainWindow(QtGui.QMainWindow):
        self.ui.radioButtonuCT.clicked.connect(self.getuCTonly)
 
        # If Go button is pressed move onto track progress dialog box
-       self.ui.pushButtonGo.clicked.connect(self.processGo)
+       self.ui.pushButtonGo.clicked.connect(self.addToList)
 
        # Set cropping options
        # Auto crop (disable buttons)
@@ -123,8 +123,19 @@ class MainWindow(QtGui.QMainWindow):
        # Reset screen size to standard
        self.ui.actionReset_screen_size.triggered.connect(self.resetScreen)
 
+       self.ui.pushButtonStart.clicked.connect(self.startProcessing)
+
+       self.ui.pushButtonStop.clicked.connect(self.stopProcessing)
+
+       self.ui.pushButtonAdd.clicked.connect(self.addMore)
+
+       self.ui.tableWidget.__class__.keyPressEvent = self.deleteRows
+
        # to make the window visible
        self.show()
+
+    def addMore(self):
+        self.ui.tabWidget.setCurrentIndex(0)
 
     def resizeScreen(self):
         self.resize(1300,700)
@@ -386,7 +397,7 @@ class MainWindow(QtGui.QMainWindow):
             self.sizeCleanup(f_size_out,approx_size)
         except:
             message = QtGui.QMessageBox.warning(self, "Message", "Unexpected error in folder size calc")
-            logging.info("Unexpected error in folder size calc:", sys.exc_info()[0])
+#            logging.info("Unexpected error in folder size calc:", sys.exc_info()[0])
 
 
 
@@ -512,9 +523,6 @@ class MainWindow(QtGui.QMainWindow):
 
     def getDimensions(self):
         ''' Perform a z projection and then allows user to crop based on z projection'''
-        logging.info("########################################")
-        logging.info("### Getting crop dimensions          ###")
-        logging.info("########################################")
 
         # Opens MyMainWindow from crop.py
         input_folder = str(self.ui.lineEditInput.text())
@@ -536,7 +544,7 @@ class MainWindow(QtGui.QMainWindow):
         zproj_path = os.path.join(str(self.tmp_dir), "z_projection")
         self.stop = None
 
-        logging.info("Z projection is being performed")
+#        logging.info("Z projection is being performed")
         self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
         #Needed to update the gui
         self.app.processEvents()
@@ -548,13 +556,13 @@ class MainWindow(QtGui.QMainWindow):
         if zp_result != 0:
             self.ui.textEditStatusMessages.setText("Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(zp_result))
             return
-        logging.info("Z projection has finished")
+#         logging.info("Z projection has finished")
 
         self.ui.textEditStatusMessages.setText("Z-projection finished")
-        logging.info("Getting crop dimensions")
+#         logging.info("Getting crop dimensions")
         self.runCrop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
         self.ui.textEditStatusMessages.setText("Dimensions selected")
-        logging.info("Dimensions selected")
+#         logging.info("Dimensions selected")
 
     def cropCallback(self, box):
         self.ui.lineEditX.setText(str(box[0]))
@@ -566,30 +574,8 @@ class MainWindow(QtGui.QMainWindow):
         cropper = crop.Crop(self.cropCallback, img_path, self)
         cropper.show()
 
-
-    def processGo(self):
-        '''
-        This will set off all the processing scripts and shows the dialog box to keep track of progress
-        '''
-        self.processGoSwitch = "yes"
-        # Get the directory of the script
-        dir = os.path.dirname(os.path.abspath(__file__))
-
-        # Perform some checks before any processing is carried out
-        self.errorCheck()
-
-        if self.stop == None :
-
-            self.close()
-
-            self.getParamaters()
-
-            # Perform analysis
-            # This will run the analysi and show progress dialog window to keep track of what is being processed
-            logging.basicConfig(filename=os.path.join(self.meta_path,"session.log"),level=logging.DEBUG,format='%(asctime)s %(message)s')
-            self.pro = Progress(self.configOb)
-            # Run the programs. A script needs to be written to run on linux to run the back end processing
-
+    def startProcessing(self):
+        self.thread()
 
     def errorCheck(self):
         '''
@@ -670,8 +656,22 @@ class MainWindow(QtGui.QMainWindow):
             self.stop = True
             return
 
+        # Check if item is already on the list
+        count = 0
+        while True:
+            twi0 = self.ui.tableWidget.item(count,1)
+            if not twi0:
+                self.stop = None
+                break
+            if twi0.text() == outputFolder:
+                message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Output folder is already on the processing list')
+                self.stop = True
+                return
+            count = count+1
 
-        # Input folder contains image files
+
+
+        # seeing if outpu folder exists
         if self.ui.checkBoxRF.isChecked():
             # Too dangerous to delete everything in a folder
             # shutil.rmtree(outputFolder)
@@ -687,7 +687,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.stop = True
             return
         else :
-            logging.info("Creating output folder")
+#             logging.info("Creating output folder")
             os.makedirs(outputFolder)
             self.stop = None
 
@@ -710,6 +710,7 @@ class MainWindow(QtGui.QMainWindow):
         self.meta_path = os.path.join(outputFolder,"Metadata")
         if not os.path.exists(self.meta_path):
             os.makedirs(self.meta_path)
+
 
         # OS path used for compatibility issues between Linux and windows directory spacing
         self.config_path = os.path.join(self.meta_path,"configObject.txt")
@@ -834,18 +835,168 @@ class MainWindow(QtGui.QMainWindow):
         # Pickle the class to a file
         pickle.dump(self.configOb, config)
 
+        # Copy temp files
+        if self.configOb.crop_option == "Manual" :
+            if os.path.exists(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif")):
+                shutil.copyfile(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif"), os.path.join(self.configOb.meta_path,"max_intensity_z.tif"))
+
+
         config.close()
         log.close()
 
 
-class ConfigClass :
-    '''
-    A simple Class is used to transfer config information
-    '''
-    def __init__(self):
+    def addToList(self):
+        '''
+        This will set off all the processing scripts and shows the dialog box to keep track of progress
+        '''
+        self.processGoSwitch = "yes"
+        # Get the directory of the script
+        dir = os.path.dirname(os.path.abspath(__file__))
 
-        logging.info("ConfigClass init")
+        # Perform some checks before any processing is carried out
+        self.errorCheck()
 
+        if self.stop == None :
+            self.getParamaters()
+            self.ui.tableWidget.setRowCount(200)
+            item = QtGui.QTableWidgetItem()
+            self.ui.tableWidget.setItem(self.count_in, 0, item)
+            item = self.ui.tableWidget.item(self.count_in, 0)
+            item.setText(self.configOb.full_name)
+
+            item = QtGui.QTableWidgetItem()
+            self.ui.tableWidget.setItem(self.count_in, 1, item)
+            item = self.ui.tableWidget.item(self.count_in, 1)
+            item.setText(self.configOb.output_folder)
+
+            item = QtGui.QTableWidgetItem()
+            self.ui.tableWidget.setItem(self.count_in, 2, item)
+            item = self.ui.tableWidget.item(self.count_in, 2)
+            item.setText("Pending")
+
+            self.count_in = self.count_in+1
+
+            self.ui.tableWidget.resizeColumnsToContents()
+
+            self.ui.tabWidget.setCurrentIndex(1)
+
+
+    def add(self,message):
+
+        item = QtGui.QTableWidgetItem()
+        self.ui.tableWidget.setItem(self.current_row, 2, item)
+        item = self.ui.tableWidget.item(self.current_row, 2)
+        item.setText(message)
+
+        if message == "Started Processing" :
+            item = QtGui.QTableWidgetItem()
+            self.ui.tableWidget.setItem(self.current_row, 3, item)
+            item = self.ui.tableWidget.item(self.current_row, 3)
+            item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        if message == "Processing finished" :
+            item = QtGui.QTableWidgetItem()
+            self.ui.tableWidget.setItem(self.current_row, 4, item)
+            item = self.ui.tableWidget.item(self.current_row, 4)
+            item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            self.thread()
+        if message == "Error" :
+            item = QtGui.QTableWidgetItem()
+            self.ui.tableWidget.setItem(self.current_row, 4, item)
+            item = self.ui.tableWidget.item(self.current_row, 4)
+            item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            self.threadPool[len(self.threadPool)-1].terminate()
+
+        self.ui.tableWidget.resizeColumnsToContents()
+
+    def thread(self):
+        # Get memory of the computer (can't seem to do this in the thread)
+        mem_summary = psutil.virtual_memory()
+        prog = re.compile("total=(\d+)")
+        self.memory =  re.search(prog, str(mem_summary)).group(1)
+        self.threadPool = []
+
+        count = 0
+        while True:
+            twi0 = self.ui.tableWidget.item(count,2)
+            if not twi0:
+                return
+            if twi0.text() == "Processing finished":
+                count = count +1
+                continue
+            if twi0.text() == "Pending":
+                folder = self.ui.tableWidget.item(count,1)
+                self.folder_from_list = str(folder.text())
+                self.current_row = count
+                print self.current_row
+                break
+            count = count +1
+
+        self.configOb_path_from_list = os.path.join(self.folder_from_list,"Metadata","ConfigObject.txt")
+        self.threadPool.append( WorkThread(self.configOb_path_from_list,self.memory) )
+        self.connect( self.threadPool[len(self.threadPool)-1], QtCore.SIGNAL("update(QString)"), self.add )
+        self.threadPool[len(self.threadPool)-1].start()
+
+    def closeEvent(self, event):
+        """ Function doc """
+        reply = QtGui.QMessageBox.question(self,  'Message',  'Are you sure to quit?',  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+#         logging.info("****Shutting down program****")
+        event.accept()
+
+        if reply == QtGui.QMessageBox.Yes:
+            self.kill_em_all
+#             logging.info("****HARP has shutdown ****")
+            logging.shutdown()
+
+        else:
+            event.ignore()
+
+    def kill_em_all(self):
+
+        if self.threadPool:
+            self.threadPool[len(self.threadPool)-1].terminate()
+
+        self.pid_path_from_list = os.path.join(self.folder_from_list,"Metadata","pid.log")
+        ins = open( self.pid_path_from_list, "r" )
+        for line in ins:
+
+            try :
+                if _platform == "linux" or _platform == "linux2":
+                    os.kill(int(line),signal.SIGKILL)
+                    #print "killed:", line
+#                     logging.info("killed:", line)
+                elif _platform == "win32" or _platform == "win64":
+                    line = line.rstrip()
+                    proc = subprocess.Popen(["taskkill", "/f", "/t", "/im",str(line)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    (out, err) = proc.communicate()
+                    if out:
+#                         logging.info(out)
+                        print "program output:", out
+                    if err:
+#                        logging.info(err)
+                         print "program error output:", err
+
+            except OSError as e:
+                print("os.kill could not kill process, reason: {0}".format(e))
+#                logging.info("os.kill could not kill process, reason: {0}".format(e))
+                #message = QtGui.QMessageBox.warning(self, "Message", "os.kill could not kill process, reason: {0}".format(e))
+
+        logging.shutdown()
+
+
+    def stopProcessing(self):
+        item = QtGui.QTableWidgetItem()
+        self.ui.tableWidget.setItem(self.current_row, 2, item)
+        item = self.ui.tableWidget.item(self.current_row, 2)
+        item.setText("Processing Cancelled!")
+        self.kill_em_all()
+        logging.shutdown()
+
+    def deleteRows(self,event):
+        if event.key() == QtCore.Qt.Key_Delete:
+            selected = self.ui.tableWidget.currentRow()
+            self.ui.tableWidget.removeRow(selected)
+
+        self.count_in = self.count_in-1
 
 def main():
     app = QtGui.QApplication(sys.argv)
