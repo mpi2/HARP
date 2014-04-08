@@ -23,7 +23,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -2001,7 +2001,7 @@ QGroupBox::title
         <item row="6" column="1">
          <widget class="QPushButton" name="pushButtonStop">
           <property name="enabled">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="text">
            <string>Stop</string>

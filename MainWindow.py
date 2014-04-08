@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Tue Apr  8 17:18:01 2014
+# Created: Tue Apr  8 17:51:58 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -1063,7 +1063,7 @@ class Ui_MainWindow(object):
         self.pushButtonStart.setObjectName(_fromUtf8("pushButtonStart"))
         self.gridLayout_9.addWidget(self.pushButtonStart, 6, 0, 1, 1)
         self.pushButtonStop = QtGui.QPushButton(self.tab_2)
-        self.pushButtonStop.setEnabled(True)
+        self.pushButtonStop.setEnabled(False)
         self.pushButtonStop.setObjectName(_fromUtf8("pushButtonStop"))
         self.gridLayout_9.addWidget(self.pushButtonStop, 6, 1, 1, 1)
         self.pushButtonAdd = QtGui.QPushButton(self.tab_2)
@@ -1197,8 +1197,8 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "Start Time", None))
         item = self.tableWidget.horizontalHeaderItem(4)
         item.setText(_translate("MainWindow", "Finish Time", None))
-        self.pushButtonStart.setText(_translate("MainWindow", "Start!", None))
-        self.pushButtonStop.setText(_translate("MainWindow", "Stop!", None))
+        self.pushButtonStart.setText(_translate("MainWindow", "Start", None))
+        self.pushButtonStop.setText(_translate("MainWindow", "Stop", None))
         self.pushButtonAdd.setText(_translate("MainWindow", "Add More", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Processing", None))
         self.menuMore_Options.setTitle(_translate("MainWindow", "More Options", None))

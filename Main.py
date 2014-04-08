@@ -923,6 +923,8 @@ class MainWindow(QtGui.QMainWindow):
 
     def startProcessing(self):
         ''' Starts a thread for processing after the user has pressed the 'start button'  '''
+        self.ui.pushButtonStart.setEnabled(False)
+        self.ui.pushButtonStop.setEnabled(True)
         self.thread()
 
     def thread(self):
@@ -941,6 +943,8 @@ class MainWindow(QtGui.QMainWindow):
             status = self.ui.tableWidget.item(count,2)
             if not status:
                 # if not defined it means there are no recons left to process
+                self.ui.pushButtonStart.setEnabled(True)
+                self.ui.pushButtonStop.setEnabled(False)
                 return
             if status.text() == "Processing finished":
                 # this row has finished, move on
@@ -1009,6 +1013,8 @@ class MainWindow(QtGui.QMainWindow):
         item = QtGui.QTableWidgetItem()
         self.ui.tableWidget.setItem(self.current_row, 2, item)
         item = self.ui.tableWidget.item(self.current_row, 2)
+        self.ui.pushButtonStart.setEnabled(True)
+        self.ui.pushButtonStop.setEnabled(False)
         item.setText("Processing Cancelled!")
         self.kill_em_all()
         logging.shutdown()
