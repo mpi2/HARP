@@ -207,7 +207,6 @@ class WorkThread(QtCore.QThread):
         logging.shutdown()
 
 
-
     def executeImagej(self, scaleFactor,session_pid,session_scale,sf):
         '''
         @param: str, scaleFactor eg ":0.5"

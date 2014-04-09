@@ -33,6 +33,7 @@ import logging
 import psutil
 import datetime
 from multiprocessing import freeze_support
+from work_thread_for_get_dimensions import WorkThreadGetDimensions
 from Run_processing import WorkThread
 from sys import platform as _platform
 try:
@@ -148,6 +149,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # to make the window visible
         self.show()
+
     def aboutMessage(self):
         ''' Short description about what HARP is and its version'''
         message = QtGui.QMessageBox.information(self, 'Message',
@@ -157,7 +159,6 @@ class MainWindow(QtGui.QMainWindow):
         ''' Location of documentation'''
         message = QtGui.QMessageBox.information(self, 'Message',
                                                 'HARP v0.1: Documentation can be found at /path/to/documentation/HARP_manual.pdf')
-
 
     def resizeScreen(self):
         ''' Resize screen for smaller monitors'''
@@ -556,6 +557,7 @@ class MainWindow(QtGui.QMainWindow):
         zproject peforms the zprojection and displays the image. crop.py then gets the dimensions to perform the crop
         NOTE: The cropping is not actually done here
         '''
+        self.zcheck = 0
         # Opens MyMainWindow from crop.py
         input_folder = str(self.ui.lineEditInput.text())
 
@@ -572,31 +574,33 @@ class MainWindow(QtGui.QMainWindow):
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty')
             return
 
-        # Get folde to store the zprojection. Stored in a temp folder untill processing is fully completed
+        # Get folder to store the zprojection. Stored in a temp folder untill processing is fully completed
         zproj_path = os.path.join(str(self.tmp_dir), "z_projection")
         self.stop = None
 
         # Let the user know what is going on
         self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
-        #Need to update the gui
-        self.app.processEvents()
+        #Run the zprojection on a seperate thread
+        self.threadz()
 
-        # Set up a zproject object
-        zp = zproject.Zproject(input_folder,self.tmp_dir)
-        # run the object
-        zp_result = zp.run()
+    def threadz(self):
+        ''' starts a thread to perform all the processing in the background. The add function then listens to any messages the thread makes'''
+        input_folder = str(self.ui.lineEditInput.text())
+        self.threadPoolz = []
+        self.threadPoolz.append( WorkThreadGetDimensions(input_folder,self.tmp_dir) )
+        self.connect( self.threadPoolz[len(self.threadPoolz)-1], QtCore.SIGNAL("update(QString)"), self.addz )
+        self.threadPoolz[len(self.threadPoolz)-1].start()
 
-        # An error has happened. The error message will be shown on the status section
-        if zp_result != 0:
-            self.ui.textEditStatusMessages.setText("Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(zp_result))
-            return
-        # let the user know what's happened
-        self.ui.textEditStatusMessages.setText("Z-projection finished")
-        # Need to update the gui
-        self.app.processEvents()
-        # Get the crop dimensions and save the file
-        self.runCrop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
-        self.ui.textEditStatusMessages.setText("Dimensions selected")
+    def addz(self,message):
+        '''
+        This listens to the child process and displays any messages. It has records the start and stop time of the processing and starts a new
+        thread after the processing has finished
+        '''
+        self.ui.textEditStatusMessages.setText(message)
+        if message == "Z-projection finished":
+            # Get the crop dimensions and save the file
+            self.runCrop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
+            self.ui.textEditStatusMessages.setText("Dimensions selected")
 
     def cropCallback(self, box):
         ''' Method to get crop dimension text (used in getDimensions)'''
@@ -839,11 +843,12 @@ class MainWindow(QtGui.QMainWindow):
         log.write("Scan_folder    "+self.configOb.scan_folder+"\n");
         log.write("Crop_option    "+self.configOb.crop_option+"\n");
         log.write("Crop_manual    "+self.configOb.crop_manual+"\n");
+        log.write("Crop_folder    "+self.configOb.cropped_path+"\n");
         log.write("Downsize_by_factor_2?    "+self.configOb.SF2+"\n");
         log.write("Downsize_by_factor_3?    "+self.configOb.SF3+"\n");
         log.write("Downsize_by_factor_4?    "+self.configOb.SF4+"\n");
-        log.write("Downsize_by_factor_5?    "+self.configOb.SF4+"\n");
-        log.write("Downsize_by_factor_6?    "+self.configOb.SF4+"\n");
+        log.write("Downsize_by_factor_5?    "+self.configOb.SF5+"\n");
+        log.write("Downsize_by_factor_6?    "+self.configOb.SF6+"\n");
         log.write("Downsize_by_pixel?    "+self.configOb.pixel_option+"\n");
         log.write("User_specified_pixel_size?    "+self.configOb.user_specified_pixel+"\n");
         log.write("Downsize_value_for_pixel    "+str(self.configOb.SF_pixel)+"\n");

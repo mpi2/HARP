@@ -1938,8 +1938,8 @@ QGroupBox::title
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>98</width>
-             <height>89</height>
+             <width>1216</width>
+             <height>895</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout">
