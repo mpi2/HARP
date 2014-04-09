@@ -26,7 +26,7 @@ class WorkThread(QtCore.QThread):
         self.memory = memory
 
     def __del__(self):
-        self.wait()
+        print "Processing stopped"
 
     def run(self):
 

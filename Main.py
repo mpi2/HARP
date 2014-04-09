@@ -580,7 +580,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Let the user know what is going on
         self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
-        #Run the zprojection on a seperate thread
+        #Run the zprojection
         self.threadz()
 
     def threadz(self):
@@ -669,6 +669,7 @@ class MainWindow(QtGui.QMainWindow):
         # Check user has not selected to scale by pixel without having a recon folder
         if self.ui.checkBoxPixel.isChecked() and self.pixel_size == "" :
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Pixel size could not be obtained from original recon log. Scaling "By Pixel (um) is not possible')
+            self.stop = True
             return
 
         # Check cropping parameters ok
