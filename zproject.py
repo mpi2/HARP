@@ -39,8 +39,8 @@ class Zproject:
         im = Image.open(files[0])
         self.imdims = (im.size[1], im.size[0])
 
-        #make a new list by removing every second image
-        files = files[0::5]
+        #make a new list by removing every nth image
+        files = files[0::10]
 
         poolsize = cpu_count()
         p = Pool(poolsize)
