@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+# test for git
 try:
 	import Image
 except ImportError:
