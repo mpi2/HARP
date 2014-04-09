@@ -193,7 +193,7 @@ def run(in_dir, out_dir, file_type="bmp", def_crop=None, num_proc=2):
 		bdist = get_cropping_box(slices, "y", threshold, True)
 		cropBox = convertDistFromEdgesToCoords((ldist, tdist, rdist, bdist))
 
-		padding = int(np.mean(imdims)*0.01)
+		padding = int(np.mean(imdims)*0.025)
 		do_the_crop(files, cropBox, out_dir, padding)
 		return
 		#sys.exit(0)
