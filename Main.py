@@ -1,4 +1,13 @@
 #!/usr/bin/python
+#title           :Main.py
+#description     :Runs the HARP GUI
+#author          :SIG
+#date            :2014-04-09
+#version         :0.1
+#usage           :python mMin.py or if using executable in windows .\Main.exe or clicking on the Main.exe icon.
+#python_version  :2.7
+#=============================================================================
+
 # Import PyQT module
 from PyQt4 import QtCore, QtGui
 # Import MainWindow class from QT Designer
@@ -41,99 +50,114 @@ class MainWindow(QtGui.QMainWindow):
     '''
 
     def __init__(self, app):
-       '''  Constructor: Checks for buttons which have been pressed and responds accordingly. '''
+        '''  Constructor: Checks for buttons which have been pressed and responds accordingly. '''
+        # Standard setup of class from qt designer Ui class
+        super(MainWindow, self).__init__()
+        self.ui=Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.app = app
 
-       # Standard setup of class from qt designer Ui class
-       super(MainWindow, self).__init__()
-       self.ui=Ui_MainWindow()
-       self.ui.setupUi(self)
-       self.app = app
+        # Make unique ID if this is the first time mainwindow has been called
+        self.unique_ID = uuid.uuid1()
 
-       # Make unique ID if this is the first time mainwindow has been called
-       self.unique_ID = uuid.uuid1()
+        # Initialise various switches
+        self.modality = "Not_selected"
+        self.selected = "Not_selected"
+        self.error = "None"
+        self.stop = None
+        self.count_in = 0
+        self.current_row = 0
+        self.list_for_processing = []
 
-       # Initialise various switches
-       self.modality = "Not_selected"
-       self.selected = "Not_selected"
-       self.error = "None"
-       self.stop = None
-       self.count_in = 0
-       self.current_row = 0
-       self.list_for_processing = []
+        # initialise some non essential information
+        self.scan_folder = ""
+        self.recon_log_path = ""
+        self.f_size_out_gb = ""
+        self.pixel_size = ""
 
-       # initialise some non essential information
-       self.scan_folder = ""
-       self.recon_log_path = ""
-       self.f_size_out_gb = ""
-       self.pixel_size = ""
+        # Temp folder for pre-processing log (if in use) and z-project
+        self.tmp_dir = tempfile.mkdtemp()
 
-       # Temp folder for pre-processing log (if in use) and z-project
-       self.tmp_dir = tempfile.mkdtemp()
+        # get input folder
+        self.ui.pushButtonInput.clicked.connect(self.selectFileIn)
 
-       # get input folder
-       self.ui.pushButtonInput.clicked.connect(self.selectFileIn)
+        # Get output folder
+        self.ui.pushButtonOutput.clicked.connect(self.selectFileOut)
 
-       # Get output folder
-       self.ui.pushButtonOutput.clicked.connect(self.selectFileOut)
+        # OPT selection
+        self.ui.radioButtonOPT.clicked.connect(self.getOPTonly)
 
-       # OPT selection
-       self.ui.radioButtonOPT.clicked.connect(self.getOPTonly)
+        # uCT selection
+        self.ui.radioButtonuCT.clicked.connect(self.getuCTonly)
 
-       # uCT selection
-       self.ui.radioButtonuCT.clicked.connect(self.getuCTonly)
+        # If Go button is pressed move onto track progress dialog box
+        self.ui.pushButtonGo.clicked.connect(self.addToList)
 
-       # If Go button is pressed move onto track progress dialog box
-       self.ui.pushButtonGo.clicked.connect(self.addToList)
+        # Set cropping options
+        # Auto crop (disable buttons)
+        self.ui.radioButtonAuto.clicked.connect(self.manCropOff)
+        # No crop (disable buttons)
+        self.ui.radioButtonNo.clicked.connect(self.manCropOff)
+        # Man crop (enable buttons).
+        self.ui.radioButtonMan.clicked.connect(self.manCropOn)
+        # If the get dimensions button is pressed
+        self.ui.pushButtonGetDimensions.clicked.connect(self.getDimensions)
 
-       # Set cropping options
-       # Auto crop (disable buttons)
-       self.ui.radioButtonAuto.clicked.connect(self.manCropOff)
-       # No crop (disable buttons)
-       self.ui.radioButtonNo.clicked.connect(self.manCropOff)
-       # Man crop (enable buttons).
-       self.ui.radioButtonMan.clicked.connect(self.manCropOn)
-       # If the get dimensions button is pressed
-       self.ui.pushButtonGetDimensions.clicked.connect(self.getDimensions)
+        #Get the output folder name when input updated
+        self.ui.lineEditOutput.textChanged.connect(self.outputFolderChanged)
+        self.ui.lineEditInput.textChanged.connect(self.inputFolderChanged)
 
-       #Get the output folder name when input updated
-       self.ui.lineEditOutput.textChanged.connect(self.outputFolderChanged)
-       self.ui.lineEditInput.textChanged.connect(self.inputFolderChanged)
+        # Get recon file manually
+        self.ui.pushButtonCTRecon.clicked.connect(self.getReconMan)
 
-       # Get recon file manually
-       self.ui.pushButtonCTRecon.clicked.connect(self.getReconMan)
+        # Get scan file manually
+        self.ui.pushButtonScan.clicked.connect(self.getScanMan)
 
-       # Get scan file manually
-       self.ui.pushButtonScan.clicked.connect(self.getScanMan)
+        # Get SPR file manually
+        self.ui.pushButtonCTSPR.clicked.connect(self.getSPRMan)
 
-       # Get SPR file manually
-       self.ui.pushButtonCTSPR.clicked.connect(self.getSPRMan)
+        # Update name
+        self.ui.pushButtonUpdate.clicked.connect(self.updateName)
 
-       # Update name
-       self.ui.pushButtonUpdate.clicked.connect(self.updateName)
+        # Get scan file manually
+        self.ui.checkBoxPixel.clicked.connect(self.scaleByPixelOn)
 
-       # Get scan file manually
-       self.ui.checkBoxPixel.clicked.connect(self.scaleByPixelOn)
+        # Resize for smaller monitors
+        self.ui.actionResize.triggered.connect(self.resizeScreen)
 
-       # Resize for smaller monitors
-       self.ui.actionResize.triggered.connect(self.resizeScreen)
+        # Reset screen size to standard
+        self.ui.actionReset_screen_size.triggered.connect(self.resetScreen)
 
-       # Reset screen size to standard
-       self.ui.actionReset_screen_size.triggered.connect(self.resetScreen)
+        # Start processing recons
+        self.ui.pushButtonStart.clicked.connect(self.startProcessing)
 
-       # Start processing recons
-       self.ui.pushButtonStart.clicked.connect(self.startProcessing)
+        # Stop processing recons
+        self.ui.pushButtonStop.clicked.connect(self.stopProcessing)
 
-       # Stop processing recons
-       self.ui.pushButtonStop.clicked.connect(self.stopProcessing)
+        # Add more recons to the list
+        self.ui.pushButtonAdd.clicked.connect(self.addMore)
 
-       # Add more recons to the list
-       self.ui.pushButtonAdd.clicked.connect(self.addMore)
+        # delete some recons
+        self.ui.tableWidget.__class__.keyPressEvent = self.deleteRows
 
-       # delete some recons
-       self.ui.tableWidget.__class__.keyPressEvent = self.deleteRows
+        # About HARP message
+        self.ui.actionAbout.triggered.connect(self.aboutMessage)
 
-       # to make the window visible
-       self.show()
+        # Documentation message
+        self.ui.actionManual.triggered.connect(self.documentation)
+
+        # to make the window visible
+        self.show()
+    def aboutMessage(self):
+        ''' Short description about what HARP is and its version'''
+        message = QtGui.QMessageBox.information(self, 'Message',
+                                                'HARP v0.1: Harwell Automated Recon Processor\n\nCrop, scale and compress reconstructed images from microCT data.\nFunctionality for OPT data to be added in future versions')
+
+    def documentation(self):
+        ''' Location of documentation'''
+        message = QtGui.QMessageBox.information(self, 'Message',
+                                                'HARP v0.1: Documentation can be found at /path/to/documentation/HARP_manual.pdf')
+
 
     def resizeScreen(self):
         ''' Resize screen for smaller monitors'''
@@ -905,19 +929,13 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.tableWidget.setItem(self.current_row, 3, item)
             item = self.ui.tableWidget.item(self.current_row, 3)
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        if message == "Processing finished" :
+        if message == "Processing finished" or message == "Cropping Error, see session log file":
             item = QtGui.QTableWidgetItem()
             self.ui.tableWidget.setItem(self.current_row, 4, item)
             item = self.ui.tableWidget.item(self.current_row, 4)
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             # Processing has finished, lets do another one!
             self.thread()
-        if message == "Error" :
-            item = QtGui.QTableWidgetItem()
-            self.ui.tableWidget.setItem(self.current_row, 4, item)
-            item = self.ui.tableWidget.item(self.current_row, 4)
-            item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-            self.threadPool[len(self.threadPool)-1].terminate()
 
         self.ui.tableWidget.resizeColumnsToContents()
 

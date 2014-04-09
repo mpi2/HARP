@@ -1938,8 +1938,8 @@ QGroupBox::title
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1216</width>
-             <height>895</height>
+             <width>98</width>
+             <height>89</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout">
@@ -2038,7 +2038,15 @@ QGroupBox::title
     <addaction name="actionResize"/>
     <addaction name="actionReset_screen_size"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionManual"/>
+   </widget>
    <addaction name="menuMore_Options"/>
+   <addaction name="menuHelp"/>
   </widget>
   <action name="actionChange_ID">
    <property name="text">
@@ -2063,6 +2071,16 @@ QGroupBox::title
   <action name="actionReset_screen_size">
    <property name="text">
     <string>Reset screen size</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionManual">
+   <property name="text">
+    <string>Documentation</string>
    </property>
   </action>
  </widget>

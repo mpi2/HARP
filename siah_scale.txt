@@ -65,7 +65,7 @@ zdepth = floor(image_list.length * scale);
 if (interpolation=="yes") {
 	print("Interpolation:");
 	print("Bicubic");
-	run("Scale...", "x=" + scale + " y=" + scale +  " z=" + zdepth + " depth=" + zdepth + "interpolation=Bicubic average process create title=scaled");
+	run("Scale...", "x=" + scale + " y=" + scale +  " z=" + zdepth + " depth=" + zdepth + " interpolation=Bicubic average process create title=scaled");
 } else {
 	print("Interpolation:");
 	print("default");

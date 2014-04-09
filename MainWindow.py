@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Tue Apr  8 17:51:58 2014
+# Created: Wed Apr  9 09:24:47 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -1033,7 +1033,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1216, 895))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 98, 89))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.scrollAreaWidgetContents)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
@@ -1080,6 +1080,8 @@ class Ui_MainWindow(object):
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuMore_Options = QtGui.QMenu(self.menubar)
         self.menuMore_Options.setObjectName(_fromUtf8("menuMore_Options"))
+        self.menuHelp = QtGui.QMenu(self.menubar)
+        self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
         MainWindow.setMenuBar(self.menubar)
         self.actionChange_ID = QtGui.QAction(MainWindow)
         self.actionChange_ID.setObjectName(_fromUtf8("actionChange_ID"))
@@ -1091,9 +1093,16 @@ class Ui_MainWindow(object):
         self.actionResize.setObjectName(_fromUtf8("actionResize"))
         self.actionReset_screen_size = QtGui.QAction(MainWindow)
         self.actionReset_screen_size.setObjectName(_fromUtf8("actionReset_screen_size"))
+        self.actionAbout = QtGui.QAction(MainWindow)
+        self.actionAbout.setObjectName(_fromUtf8("actionAbout"))
+        self.actionManual = QtGui.QAction(MainWindow)
+        self.actionManual.setObjectName(_fromUtf8("actionManual"))
         self.menuMore_Options.addAction(self.actionResize)
         self.menuMore_Options.addAction(self.actionReset_screen_size)
+        self.menuHelp.addAction(self.actionAbout)
+        self.menuHelp.addAction(self.actionManual)
         self.menubar.addAction(self.menuMore_Options.menuAction())
+        self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
@@ -1202,9 +1211,12 @@ class Ui_MainWindow(object):
         self.pushButtonAdd.setText(_translate("MainWindow", "Add More", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Processing", None))
         self.menuMore_Options.setTitle(_translate("MainWindow", "More Options", None))
+        self.menuHelp.setTitle(_translate("MainWindow", "Help", None))
         self.actionChange_ID.setText(_translate("MainWindow", "Allow identification to be changed", None))
         self.actionManually_select_output_folder.setText(_translate("MainWindow", "Allow manually selection of output folder", None))
         self.actionAccurate_folder_size_calculation.setText(_translate("MainWindow", "Accurate folder size calculation", None))
         self.actionResize.setText(_translate("MainWindow", "Resize screen for small monitors", None))
         self.actionReset_screen_size.setText(_translate("MainWindow", "Reset screen size", None))
+        self.actionAbout.setText(_translate("MainWindow", "About", None))
+        self.actionManual.setText(_translate("MainWindow", "Documentation", None))
 
