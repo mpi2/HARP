@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+#This is my test comment
 try:
 	import Image
 except ImportError:
