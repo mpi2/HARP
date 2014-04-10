@@ -1809,20 +1809,6 @@ QGroupBox::title
                  </property>
                 </widget>
                </item>
-               <item row="3" column="0">
-                <widget class="QComboBox" name="comboBoxCh">
-                 <property name="font">
-                  <font>
-                   <pointsize>12</pointsize>
-                  </font>
-                 </property>
-                 <item>
-                  <property name="text">
-                   <string>Ch-X</string>
-                  </property>
-                 </item>
-                </widget>
-               </item>
               </layout>
              </item>
             </layout>

@@ -75,6 +75,7 @@ class MainWindow(QtGui.QMainWindow):
         self.recon_log_path = ""
         self.f_size_out_gb = ""
         self.pixel_size = ""
+        self.ui.lcdNumberPixel.display(self.pixel_size)
 
         # Temp folder for pre-processing log (if in use) and z-project
         self.tmp_dir = tempfile.mkdtemp()
@@ -306,10 +307,16 @@ class MainWindow(QtGui.QMainWindow):
         except IOError as e:
             # Python standard exception identifies recon file not found
             self.ui.lineEditCTRecon.setText("Not found")
+            self.pixel_size = ""
+            self.ui.lcdNumberPixel.display(self.pixel_size)
         except Exception as inst:
             # Custom exception identifies recon file not found
+            self.pixel_size = ""
+            self.ui.lcdNumberPixel.display(self.pixel_size)
             self.ui.lineEditCTRecon.setText("Not found")
         except:
+            self.pixel_size = ""
+            self.ui.lcdNumberPixel.display(self.pixel_size)
             message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error getting recon log file',sys.exc_info()[0])
             self.ui.lineEditCTRecon.setText("Not found")
 
@@ -532,9 +539,39 @@ class MainWindow(QtGui.QMainWindow):
         ''' Get the recon folder manually'''
         self.fileDialog = QtGui.QFileDialog(self)
         file = self.fileDialog.getOpenFileName()
+        self.pixel_size = ""
+        self.ui.lcdNumberPixel.display(self.pixel_size)
         if not file == "":
-            self.ui.lineEditCTRecon.setText(file)
-            self.recon_log_path = os.path.abspath(file)
+            try:
+                self.ui.lineEditCTRecon.setText(file)
+                self.recon_log_path = os.path.abspath(file)
+
+                # Open the log file as read onlypyt
+                recon_log_file = open(self.recon_log_path, 'r')
+
+                # create a regex to pixel size
+                # We want the pixel size where it starts with Pixel. This is the pixel size with the most amount of decimal places
+                prog = re.compile("^Pixel Size \(um\)\=(\w+.\w+)")
+
+                # for loop to go through the recon log file
+                for line in recon_log_file:
+                    # "chomp" the line endings off
+                    line = line.rstrip()
+                    # if the line matches the regex print the (\w+.\w+) part of regex
+                    if prog.match(line) :
+                        # Grab the pixel size with with .group(1)
+                        self.pixel_size = prog.match(line).group(1)
+                        break
+
+                # Display the number on the lcd display
+                self.ui.lcdNumberPixel.display(self.pixel_size)
+
+                # Set recon log text
+                self.ui.lineEditCTRecon.setText(str(self.recon_log_path))
+            except IOError as e:
+                # Python standard exception identifies recon file not found
+                self.ui.lineEditCTRecon.setText("Error identifying recon file")
+
 
     def getScanMan(self):
         ''' Get the scan folder manually'''

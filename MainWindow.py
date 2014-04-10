@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Thu Apr 10 10:34:52 2014
+# Created: Thu Apr 10 16:04:13 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -966,13 +966,6 @@ class Ui_MainWindow(object):
         self.lineEditScan.setFont(font)
         self.lineEditScan.setObjectName(_fromUtf8("lineEditScan"))
         self.formLayoutuCTOnly.setWidget(2, QtGui.QFormLayout.FieldRole, self.lineEditScan)
-        self.comboBoxCh = QtGui.QComboBox(self.groupBoxuCTOnly)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.comboBoxCh.setFont(font)
-        self.comboBoxCh.setObjectName(_fromUtf8("comboBoxCh"))
-        self.comboBoxCh.addItem(_fromUtf8(""))
-        self.formLayoutuCTOnly.setWidget(3, QtGui.QFormLayout.LabelRole, self.comboBoxCh)
         self.gridLayout_8.addLayout(self.formLayoutuCTOnly, 1, 0, 1, 1)
         self.gridLayout_2.addWidget(self.groupBoxuCTOnly, 6, 0, 1, 1)
         self.gridLayoutFileSelect = QtGui.QGridLayout()
@@ -1178,7 +1171,6 @@ class Ui_MainWindow(object):
         self.pushButtonCTRecon.setText(_translate("MainWindow", "Pick recon log", None))
         self.pushButtonCTSPR.setText(_translate("MainWindow", "Pick SPR", None))
         self.pushButtonScan.setText(_translate("MainWindow", "Scan folder", None))
-        self.comboBoxCh.setItemText(0, _translate("MainWindow", "Ch-X", None))
         self.pushButtonOutput.setText(_translate("MainWindow", "Output folder", None))
         self.pushButtonInput.setText(_translate("MainWindow", "Input folder", None))
         self.pushButtonGo.setText(_translate("MainWindow", "Add to Processing List", None))
