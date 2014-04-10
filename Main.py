@@ -879,6 +879,9 @@ class MainWindow(QtGui.QMainWindow):
         # Get the directory of the script
         dir = os.path.dirname(os.path.abspath(__file__))
 
+        # get the input name for table
+        input_name = str(self.ui.lineEditInput.text())
+
         # Perform some checks before any processing is carried out
         self.errorCheck()
 
@@ -895,7 +898,7 @@ class MainWindow(QtGui.QMainWindow):
             item = QtGui.QTableWidgetItem()
             self.ui.tableWidget.setItem(self.count_in, 0, item)
             item = self.ui.tableWidget.item(self.count_in, 0)
-            item.setText(self.configOb.full_name)
+            item.setText(input_name)
 
             # Set up the output folder cell
             item = QtGui.QTableWidgetItem()
@@ -1046,6 +1049,7 @@ class MainWindow(QtGui.QMainWindow):
     def deleteRows(self,event):
         '''If the delete button is pressed on a certai row the recon is taken off the list to be processed'''
         if event.key() == QtCore.Qt.Key_Delete:
+            print "Deleted row"
             selected = self.ui.tableWidget.currentRow()
             self.ui.tableWidget.removeRow(selected)
         # The count_in will now be one less (i think...)

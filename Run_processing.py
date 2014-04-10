@@ -162,7 +162,6 @@ class WorkThread(QtCore.QThread):
         logging.debug("Memory for ImageJ:"+str(self.memory_4_imageJ))
 
         # Perform scaling as subprocess with Popen (they should be done in the background)
-
         if self.configOb.SF2 == "yes" :
             proSF2 = self.executeImagej("^0.5^x2^",session_pid,session_scale,"2",)
 
