@@ -77,6 +77,12 @@ class MainWindow(QtGui.QMainWindow):
         self.pixel_size = ""
         self.ui.lcdNumberPixel.display(self.pixel_size)
 
+        # get current directory
+        if getattr(sys, 'frozen', False):
+            self.dir = os.path.dirname(sys.executable)
+        elif __file__:
+            self.dir = os.path.dirname(__file__)
+
         # Temp folder for pre-processing log (if in use) and z-project
         self.tmp_dir = tempfile.mkdtemp()
 
@@ -145,8 +151,12 @@ class MainWindow(QtGui.QMainWindow):
         # About HARP message
         self.ui.actionAbout.triggered.connect(self.aboutMessage)
 
-        # Documentation message
-        self.ui.actionManual.triggered.connect(self.documentation)
+        # Documentation chm
+        self.ui.actionManual.triggered.connect(self.chmUserGuide)
+
+        # Documentation PDF
+        self.ui.actionPDF_user_guide.triggered.connect(self.pdfUserGuide)
+
 
         # to make the window visible
         self.show()
@@ -156,10 +166,16 @@ class MainWindow(QtGui.QMainWindow):
         message = QtGui.QMessageBox.information(self, 'Message',
                                                 'HARP v0.1: Harwell Automated Recon Processor\n\nCrop, scale and compress reconstructed images from microCT data.\nFunctionality for OPT data to be added in future versions')
 
-    def documentation(self):
-        ''' Location of documentation'''
-        message = QtGui.QMessageBox.information(self, 'Message',
-                                                'HARP v0.1: Documentation can be found at /path/to/documentation/HARP_manual.pdf')
+    def chmUserGuide(self):
+        ''' Loads up chm help file'''
+        harp_user_man_chm = os.path.join(self.dir,"HARP_user_guide.chm")
+        os.startfile(harp_user_man_chm)
+
+    def pdfUserGuide(self):
+        ''' Loads up pdf help file'''
+        harp_user_man_chm = os.path.join(self.dir,"HARP_user_guide.pdf")
+        os.startfile(harp_user_man_chm)
+
 
     def resizeScreen(self):
         ''' Resize screen for smaller monitors'''
@@ -1088,7 +1104,12 @@ class MainWindow(QtGui.QMainWindow):
         if event.key() == QtCore.Qt.Key_Delete:
             print "Deleted row"
             selected = self.ui.tableWidget.currentRow()
-            self.ui.tableWidget.removeRow(selected)
+            status = self.ui.tableWidget.item(selected,2)
+            print "status",status.text()
+            if status.text() == "Pending" or status.text() == "Processing finished" or status.text() == "Processing Cancelled!":
+                self.ui.tableWidget.removeRow(selected)
+            else :
+                message = QtGui.QMessageBox.information(self, 'Message','Warning: Can\'t delete a row that is currently being processed.\nSelect "Stop", then remove')
         # The count_in will now be one less (i think...)
         self.count_in = self.count_in-1
 

@@ -886,6 +886,9 @@ QGroupBox::title
                  <property name="text">
                   <string>Automatic</string>
                  </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
                 </widget>
                </item>
                <item row="1" column="1">
@@ -901,7 +904,7 @@ QGroupBox::title
                   <string>Manual</string>
                  </property>
                  <property name="checked">
-                  <bool>true</bool>
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
@@ -964,6 +967,9 @@ QGroupBox::title
                 <layout class="QHBoxLayout" name="horizontalLayout_3">
                  <item>
                   <widget class="QCheckBox" name="checkBoxSF2">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
                    <property name="font">
                     <font>
                      <pointsize>12</pointsize>
@@ -973,7 +979,7 @@ QGroupBox::title
                     <string>2</string>
                    </property>
                    <property name="checked">
-                    <bool>true</bool>
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
@@ -1018,7 +1024,7 @@ QGroupBox::title
                     <string>5</string>
                    </property>
                    <property name="checked">
-                    <bool>true</bool>
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
@@ -1033,7 +1039,7 @@ QGroupBox::title
                     <string>6</string>
                    </property>
                    <property name="checked">
-                    <bool>true</bool>
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
@@ -1998,7 +2004,7 @@ QGroupBox::title
    </property>
    <widget class="QMenu" name="menuMore_Options">
     <property name="title">
-     <string>More Options</string>
+     <string>View</string>
     </property>
     <addaction name="actionResize"/>
     <addaction name="actionReset_screen_size"/>
@@ -2009,6 +2015,7 @@ QGroupBox::title
     </property>
     <addaction name="actionAbout"/>
     <addaction name="actionManual"/>
+    <addaction name="actionPDF_user_guide"/>
    </widget>
    <addaction name="menuMore_Options"/>
    <addaction name="menuHelp"/>
@@ -2045,7 +2052,12 @@ QGroupBox::title
   </action>
   <action name="actionManual">
    <property name="text">
-    <string>Documentation</string>
+    <string>Contents</string>
+   </property>
+  </action>
+  <action name="actionPDF_user_guide">
+   <property name="text">
+    <string>PDF user guide</string>
    </property>
   </action>
  </widget>

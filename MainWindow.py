@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Thu Apr 10 16:04:13 2014
+# Created: Fri Apr 11 13:25:57 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -508,6 +508,7 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         font.setItalic(False)
         self.radioButtonAuto.setFont(font)
+        self.radioButtonAuto.setChecked(True)
         self.radioButtonAuto.setObjectName(_fromUtf8("radioButtonAuto"))
         self.gridLayout_4.addWidget(self.radioButtonAuto, 1, 2, 1, 1)
         self.radioButtonMan = QtGui.QRadioButton(self.groupBoxOptions)
@@ -516,7 +517,7 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         font.setItalic(False)
         self.radioButtonMan.setFont(font)
-        self.radioButtonMan.setChecked(True)
+        self.radioButtonMan.setChecked(False)
         self.radioButtonMan.setObjectName(_fromUtf8("radioButtonMan"))
         self.gridLayout_4.addWidget(self.radioButtonMan, 1, 1, 1, 1)
         self.checkBoxRF = QtGui.QCheckBox(self.groupBoxOptions)
@@ -547,10 +548,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         self.checkBoxSF2 = QtGui.QCheckBox(self.groupBoxOptions)
+        self.checkBoxSF2.setEnabled(True)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.checkBoxSF2.setFont(font)
-        self.checkBoxSF2.setChecked(True)
+        self.checkBoxSF2.setChecked(False)
         self.checkBoxSF2.setObjectName(_fromUtf8("checkBoxSF2"))
         self.horizontalLayout_3.addWidget(self.checkBoxSF2)
         self.checkBoxSF3 = QtGui.QCheckBox(self.groupBoxOptions)
@@ -571,14 +573,14 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(12)
         self.checkBoxSF5.setFont(font)
-        self.checkBoxSF5.setChecked(True)
+        self.checkBoxSF5.setChecked(False)
         self.checkBoxSF5.setObjectName(_fromUtf8("checkBoxSF5"))
         self.horizontalLayout_3.addWidget(self.checkBoxSF5)
         self.checkBoxSF6 = QtGui.QCheckBox(self.groupBoxOptions)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.checkBoxSF6.setFont(font)
-        self.checkBoxSF6.setChecked(True)
+        self.checkBoxSF6.setChecked(False)
         self.checkBoxSF6.setObjectName(_fromUtf8("checkBoxSF6"))
         self.horizontalLayout_3.addWidget(self.checkBoxSF6)
         self.gridLayout_4.addLayout(self.horizontalLayout_3, 0, 1, 1, 2)
@@ -1078,10 +1080,13 @@ class Ui_MainWindow(object):
         self.actionAbout.setObjectName(_fromUtf8("actionAbout"))
         self.actionManual = QtGui.QAction(MainWindow)
         self.actionManual.setObjectName(_fromUtf8("actionManual"))
+        self.actionPDF_user_guide = QtGui.QAction(MainWindow)
+        self.actionPDF_user_guide.setObjectName(_fromUtf8("actionPDF_user_guide"))
         self.menuMore_Options.addAction(self.actionResize)
         self.menuMore_Options.addAction(self.actionReset_screen_size)
         self.menuHelp.addAction(self.actionAbout)
         self.menuHelp.addAction(self.actionManual)
+        self.menuHelp.addAction(self.actionPDF_user_guide)
         self.menubar.addAction(self.menuMore_Options.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
@@ -1189,7 +1194,7 @@ class Ui_MainWindow(object):
         self.pushButtonStop.setText(_translate("MainWindow", "Stop", None))
         self.pushButtonAdd.setText(_translate("MainWindow", "Add More", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Processing", None))
-        self.menuMore_Options.setTitle(_translate("MainWindow", "More Options", None))
+        self.menuMore_Options.setTitle(_translate("MainWindow", "View", None))
         self.menuHelp.setTitle(_translate("MainWindow", "Help", None))
         self.actionChange_ID.setText(_translate("MainWindow", "Allow identification to be changed", None))
         self.actionManually_select_output_folder.setText(_translate("MainWindow", "Allow manually selection of output folder", None))
@@ -1197,5 +1202,6 @@ class Ui_MainWindow(object):
         self.actionResize.setText(_translate("MainWindow", "Resize screen for small monitors", None))
         self.actionReset_screen_size.setText(_translate("MainWindow", "Reset screen size", None))
         self.actionAbout.setText(_translate("MainWindow", "About", None))
-        self.actionManual.setText(_translate("MainWindow", "Documentation", None))
+        self.actionManual.setText(_translate("MainWindow", "Contents", None))
+        self.actionPDF_user_guide.setText(_translate("MainWindow", "PDF user guide", None))
 
