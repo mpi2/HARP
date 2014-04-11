@@ -184,13 +184,13 @@ class WorkThread(QtCore.QThread):
         ###############################################
         # Copying of other files from recon directory
         ###############################################
-        logging.debug("Copying other files from recon")
+        logging.debug("Copying other files from original recon")
         for file in os.listdir(self.configOb.input_folder):
             #check if folder before copying
             if os.path.isdir(file):
                 # Dont copy the sub directory
                 break
-            if os.path.exists(os.path.join(cropped_path,file)):
+            if not os.path.exists(os.path.join(cropped_path,file)):
                 # File exists so copy it over to the crop folder
                 # Need to get full path of original file though
                 file = os.path.join(self.configOb.input_folder,file)
