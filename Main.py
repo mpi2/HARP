@@ -169,12 +169,19 @@ class MainWindow(QtGui.QMainWindow):
     def chmUserGuide(self):
         ''' Loads up chm help file'''
         harp_user_man_chm = os.path.join(self.dir,"HARP_user_guide.chm")
-        os.startfile(harp_user_man_chm)
+        if sys.platform == "win32":
+            os.startfile(harp_user_man_chm)
+        else:
+            message = QtGui.QMessageBox.information(self, 'Message','chm help file not available in Linux please use PDF')
 
     def pdfUserGuide(self):
         ''' Loads up pdf help file'''
         harp_user_man_chm = os.path.join(self.dir,"HARP_user_guide.pdf")
-        os.startfile(harp_user_man_chm)
+        if sys.platform == "win32":
+            os.startfile(harp_user_man_chm)
+        else:
+            opener ="evince"
+            subprocess.call([opener, harp_user_man_chm])
 
 
     def resizeScreen(self):
