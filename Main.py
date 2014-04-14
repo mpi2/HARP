@@ -1034,6 +1034,7 @@ class MainWindow(QtGui.QMainWindow):
                 break
             count = count +1
 
+        print self.threadPool
         # Get the configobject for the row which has been identified from the previous while loop
         self.configOb_path_from_list = os.path.join(self.folder_from_list,"Metadata","configobject.txt")
 
@@ -1093,6 +1094,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.pushButtonStop.setEnabled(False)
         item.setText("Processing Cancelled!")
         self.kill_em_all()
+        self.threadPool = None
         logging.shutdown()
 
     def deleteRows(self,event):
@@ -1103,11 +1105,13 @@ class MainWindow(QtGui.QMainWindow):
             status = self.ui.tableWidget.item(selected,2)
             if status:
                 print "status",status.text()
-                if status.text() == "Pending" or status.text() == "Processing finished" or status.text() == "Processing Cancelled!" or "Cropping Error, see session log file":
+                if status.text() == "Pending" or status.text() == "Processing finished" or status.text() == "Processing Cancelled!" or status.text() == "Cropping Error, see session log file":
                     print "Deleted row"
                     self.ui.tableWidget.removeRow(selected)
                     # The count_in will now be one less (i think...)
                     self.count_in = self.count_in-1
+                    # I think the thread will be empty fo next time already
+                    #self.threadPool = []
                 else :
                     message = QtGui.QMessageBox.information(self, 'Message','Warning: Can\'t delete a row that is currently being processed.\nSelect "Stop", then remove')
 
