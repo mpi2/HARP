@@ -1098,16 +1098,19 @@ class MainWindow(QtGui.QMainWindow):
     def deleteRows(self,event):
         '''If the delete button is pressed on a certai row the recon is taken off the list to be processed'''
         if event.key() == QtCore.Qt.Key_Delete:
-            print "Deleted row"
+
             selected = self.ui.tableWidget.currentRow()
             status = self.ui.tableWidget.item(selected,2)
-            print "status",status.text()
-            if status.text() == "Pending" or status.text() == "Processing finished" or status.text() == "Processing Cancelled!" or "Cropping Error, see session log file":
-                self.ui.tableWidget.removeRow(selected)
-            else :
-                message = QtGui.QMessageBox.information(self, 'Message','Warning: Can\'t delete a row that is currently being processed.\nSelect "Stop", then remove')
-        # The count_in will now be one less (i think...)
-        self.count_in = self.count_in-1
+            if status:
+                print "status",status.text()
+                if status.text() == "Pending" or status.text() == "Processing finished" or status.text() == "Processing Cancelled!" or "Cropping Error, see session log file":
+                    print "Deleted row"
+                    self.ui.tableWidget.removeRow(selected)
+                    # The count_in will now be one less (i think...)
+                    self.count_in = self.count_in-1
+                else :
+                    message = QtGui.QMessageBox.information(self, 'Message','Warning: Can\'t delete a row that is currently being processed.\nSelect "Stop", then remove')
+
 
 def main():
     app = QtGui.QApplication(sys.argv)
