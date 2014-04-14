@@ -151,9 +151,6 @@ class MainWindow(QtGui.QMainWindow):
         # About HARP message
         self.ui.actionAbout.triggered.connect(self.aboutMessage)
 
-        # Documentation chm
-        self.ui.actionManual.triggered.connect(self.chmUserGuide)
-
         # Documentation PDF
         self.ui.actionPDF_user_guide.triggered.connect(self.pdfUserGuide)
 
@@ -165,14 +162,6 @@ class MainWindow(QtGui.QMainWindow):
         ''' Short description about what HARP is and its version'''
         message = QtGui.QMessageBox.information(self, 'Message',
                                                 'HARP v0.1: Harwell Automated Recon Processor\n\nCrop, scale and compress reconstructed images from microCT data.\nFunctionality for OPT data to be added in future versions')
-
-    def chmUserGuide(self):
-        ''' Loads up chm help file'''
-        harp_user_man_chm = os.path.join(self.dir,"HARP_user_guide.chm")
-        if sys.platform == "win32":
-            os.startfile(harp_user_man_chm)
-        else:
-            message = QtGui.QMessageBox.information(self, 'Message','chm help file not available in Linux please use PDF')
 
     def pdfUserGuide(self):
         ''' Loads up pdf help file'''

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Mon Apr 14 09:16:50 2014
+# Created: Mon Apr 14 09:35:55 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -1016,7 +1016,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 98, 89))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1216, 895))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.scrollAreaWidgetContents)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
@@ -1085,7 +1085,6 @@ class Ui_MainWindow(object):
         self.menuMore_Options.addAction(self.actionResize)
         self.menuMore_Options.addAction(self.actionReset_screen_size)
         self.menuHelp.addAction(self.actionAbout)
-        self.menuHelp.addAction(self.actionManual)
         self.menuHelp.addAction(self.actionPDF_user_guide)
         self.menubar.addAction(self.menuMore_Options.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
