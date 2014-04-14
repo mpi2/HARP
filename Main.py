@@ -1113,7 +1113,7 @@ class MainWindow(QtGui.QMainWindow):
             selected = self.ui.tableWidget.currentRow()
             status = self.ui.tableWidget.item(selected,2)
             print "status",status.text()
-            if status.text() == "Pending" or status.text() == "Processing finished" or status.text() == "Processing Cancelled!":
+            if status.text() == "Pending" or status.text() == "Processing finished" or status.text() == "Processing Cancelled!" or "Cropping Error, see session log file":
                 self.ui.tableWidget.removeRow(selected)
             else :
                 message = QtGui.QMessageBox.information(self, 'Message','Warning: Can\'t delete a row that is currently being processed.\nSelect "Stop", then remove')

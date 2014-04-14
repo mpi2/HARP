@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Apr 11 13:25:57 2014
+# Created: Mon Apr 14 09:16:50 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -541,7 +541,7 @@ class Ui_MainWindow(object):
         self.checkBoxScansReconComp.setObjectName(_fromUtf8("checkBoxScansReconComp"))
         self.gridLayout_4.addWidget(self.checkBoxScansReconComp, 4, 1, 1, 2)
         self.pushButtonGetDimensions = QtGui.QPushButton(self.groupBoxOptions)
-        self.pushButtonGetDimensions.setEnabled(True)
+        self.pushButtonGetDimensions.setEnabled(False)
         self.pushButtonGetDimensions.setCheckable(False)
         self.pushButtonGetDimensions.setObjectName(_fromUtf8("pushButtonGetDimensions"))
         self.gridLayout_4.addWidget(self.pushButtonGetDimensions, 1, 4, 1, 1)
@@ -1016,7 +1016,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1216, 895))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 98, 89))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.scrollAreaWidgetContents)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
