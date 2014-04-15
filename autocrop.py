@@ -102,15 +102,21 @@ def do_the_crop(images, crop_vals, out_dir,  padding=0):
 
 def get_cropping_box(slices, side, threshold, rev = False):
 	'''
+	Given the metrics for each row x and y coordinate, calculate the point to crop given a threshold value
+	@param slices dict: two keys x and y with metrics for respective dimensions
+	@param side str: x or y
+	@param threshold int:
 	'''
+
+	#get rid of the low values in the noise
 	vals = [lowvals(x[side]) for x in slices]
 
 	#filterout low values
-	means = map(np.std, zip(*vals))
+	means = map(entropy, zip(*vals))
 	#plt.plot(means)
 	#plt.show()
 
-	if rev == True:
+	if rev:
 		return next((i for i, v in enumerate(reversed(means)) if v > threshold ), -1)
 	else:
 		return next((i for i, v in enumerate(means) if v > threshold ), -1)
@@ -130,7 +136,7 @@ def round_down(array, divisor):
 		yield n - (n%divisor)
 
 
-def lowvals(array, value=20):
+def lowvals(array, value=15):
 	'''
 	Values lower than value, set to zero
 	'''
@@ -194,7 +200,7 @@ def run(in_dir, out_dir, file_type="bmp", def_crop=None, num_proc=2):
 		bdist = get_cropping_box(slices, "y", threshold, True)
 		cropBox = convertDistFromEdgesToCoords((ldist, tdist, rdist, bdist))
 
-		padding = int(np.mean(imdims)*0.01)
+		padding = int(np.mean(imdims)*0.025)
 		do_the_crop(files, cropBox, out_dir, padding)
 		return
 		#sys.exit(0)
@@ -229,10 +235,10 @@ def cli_run():
 	parser.add_argument('-i', dest='in_dir', help='dir with bmps to crop', required=True)
 	parser.add_argument('-o', dest='out_dir', help='destination for cropped images', required=True)
 	parser.add_argument('-t', dest='file_type', help='tif or bmp', default="bmp")
-	parser.add_argument('-d', nargs=4, type=int, dest='def_crop', help='set defined boundaries for crop x,y,w,h')
+	parser.add_argument('-d', nargs=4, type=int, dest='def_crop', help='set defined boundaries for crop x,y,w,h', default=None)
 	parser.add_argument('-p', dest="num_proc", help='number of processors to use')
 	args = parser.parse_args()
-	run(args.in_dir, args.out_dir, args.file_type, args,def_crop, args.num_proc)
+	run(args.in_dir, args.out_dir, args.file_type, args.def_crop, args.num_proc)
 	#sys.exit()
 
 
