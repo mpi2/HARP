@@ -1,8 +1,6 @@
 #!/usr/bin/python
 
-#This is my test comment Tom test
-
-#This is another comment 12:57
+#Comment for neil_test branch
 try:
 	import Image
 except ImportError:
