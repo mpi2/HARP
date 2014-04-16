@@ -172,7 +172,6 @@ class MainWindow(QtGui.QMainWindow):
             opener ="evince"
             subprocess.call([opener, harp_user_man_chm])
 
-
     def resizeScreen(self):
         ''' Resize screen for smaller monitors'''
         self.resize(1300,700)
@@ -183,10 +182,16 @@ class MainWindow(QtGui.QMainWindow):
         self.resize(1300, 1007)
         self.ui.scrollArea.setFixedSize(1241,951)
 
-
     def selectFileOut(self):
         ''' Select output folder'''
-        self.fileDialog = QtGui.QFileDialog(self)
+        outputFolder = str(self.ui.lineEditOutput.text())
+
+        # Check input and output folders assigned
+        if outputFolder :
+            self.fileDialog = QtGui.QFileDialog(self,'Open File', outputFolder)
+        else:
+            self.fileDialog = QtGui.QFileDialog(self,'Open File')
+
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
         # Check if folder variable is defined (if it not the user has pressed cancel)
         if not folder == "":
@@ -194,7 +199,14 @@ class MainWindow(QtGui.QMainWindow):
 
     def selectFileIn(self):
         ''' User selects the folder to be processed and some auto-fill methods are carried out '''
-        self.fileDialog = QtGui.QFileDialog(self)
+        inputFolder = str(self.ui.lineEditInput.text())
+
+        # Check input and output folders assigned
+        if inputFolder :
+            self.fileDialog = QtGui.QFileDialog(self,'Open File', inputFolder)
+        else:
+            self.fileDialog = QtGui.QFileDialog(self,'Open File')
+
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
 
         # if folder is not defined user has pressed cancel
