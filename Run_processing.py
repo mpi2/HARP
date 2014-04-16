@@ -114,39 +114,6 @@ class WorkThread(QtCore.QThread):
             session_pid.close()
 
         ###############################################
-        # Compression
-        ###############################################
-        if self.configOb.scans_recon_comp == "yes" or self.configOb.crop_comp == "yes" :
-            logging.debug("***Performing Compression***")
-
-        if self.configOb.scans_recon_comp == "yes" :
-            if self.configOb.scan_folder:
-                self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of scan folder" )
-                logging.debug("Compression of scan folder")
-                path_scan,folder_name_scan = os.path.split(self.configOb.scan_folder)
-
-                out = tarfile.open(str(self.configOb.scan_folder)+".tar.bz2", mode='w:bz2')
-                out.add(path_scan, arcname="Scan_folder")
-                out.close()
-                self.emit( QtCore.SIGNAL('update(QString)'), "Compression of scan folder finished" )
-
-            self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of original recon folder" )
-            logging.debug("Compression of original recon folder")
-            path_scan,folder_name_scan = os.path.split(self.configOb.input_folder)
-
-            out = tarfile.open(str(self.configOb.input_folder)+".tar.bz2", mode='w:bz2')
-            out.add(path_scan, arcname="Input_folder")
-            out.close()
-            self.emit( QtCore.SIGNAL('update(QString)'), "Compression of recon folder finished" )
-
-        if  self.configOb.crop_comp == "yes":
-            if self.configOb.crop_option != "No_crop":
-                self.emit( QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started" )
-                out = tarfile.open(cropped_path+"_"+self.configOb.full_name+".tar.bz2", mode='w:bz2')
-                out.add(cropped_path, arcname="Cropped")
-                out.close()
-
-        ###############################################
         # Scaling
         ###############################################
         logging.debug("*****Performing scaling******")
@@ -196,6 +163,39 @@ class WorkThread(QtCore.QThread):
                 file = os.path.join(self.configOb.input_folder,file)
                 shutil.copy(file,cropped_path)
                 logging.debug("File copied:"+file)
+
+        ###############################################
+        # Compression
+        ###############################################
+        if self.configOb.scans_recon_comp == "yes" or self.configOb.crop_comp == "yes" :
+            logging.debug("***Performing Compression***")
+
+        if self.configOb.scans_recon_comp == "yes" :
+            if self.configOb.scan_folder:
+                self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of scan folder" )
+                logging.debug("Compression of scan folder")
+                path_scan,folder_name_scan = os.path.split(self.configOb.scan_folder)
+
+                out = tarfile.open(str(self.configOb.scan_folder)+".tar.bz2", mode='w:bz2')
+                out.add(path_scan, arcname="Scan_folder")
+                out.close()
+                self.emit( QtCore.SIGNAL('update(QString)'), "Compression of scan folder finished" )
+
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of original recon folder" )
+            logging.debug("Compression of original recon folder")
+            path_scan,folder_name_scan = os.path.split(self.configOb.input_folder)
+
+            out = tarfile.open(str(self.configOb.input_folder)+".tar.bz2", mode='w:bz2')
+            out.add(path_scan, arcname="Input_folder")
+            out.close()
+            self.emit( QtCore.SIGNAL('update(QString)'), "Compression of recon folder finished" )
+
+        if  self.configOb.crop_comp == "yes":
+            if self.configOb.crop_option != "No_crop":
+                self.emit( QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started" )
+                out = tarfile.open(cropped_path+"_"+self.configOb.full_name+".tar.bz2", mode='w:bz2')
+                out.add(cropped_path, arcname="Cropped")
+                out.close()
 
         session_scale.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
