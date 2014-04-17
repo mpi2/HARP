@@ -649,10 +649,10 @@ class MainWindow(QtGui.QMainWindow):
         input_folder = str(self.ui.lineEditInput.text())
         self.threadPoolz = []
         self.threadPoolz.append( WorkThreadGetDimensions(input_folder,self.tmp_dir) )
-        self.connect( self.threadPoolz[len(self.threadPoolz)-1], QtCore.SIGNAL("update(QString)"), self.addz )
+        self.connect( self.threadPoolz[len(self.threadPoolz)-1], QtCore.SIGNAL("update(QString)"), self.listen2ZProject )
         self.threadPoolz[len(self.threadPoolz)-1].start()
 
-    def addz(self,message):
+    def listen2ZProject(self,message):
         '''
         This listens to the child process and displays any messages. It has records the start and stop time of the processing and starts a new
         thread after the processing has finished
@@ -984,7 +984,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.tabWidget.setCurrentIndex(1)
 
 
-    def add(self,message):
+    def listen2Processing(self,message):
         '''
         This listens to the child process and displays any messages. It has records the start and stop time of the processing and starts a new
         thread after the processing has finished
@@ -1052,7 +1052,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
         wt =  WorkThread(self.configOb_path_from_list,self.memory)
-        self.connect( wt, QtCore.SIGNAL("update(QString)"), self.add )
+        self.connect( wt, QtCore.SIGNAL("update(QString)"), self.listen2Processing )
         self.connect( self, QtCore.SIGNAL("kill(QString)"), wt.killSlot  )
         self.threadPool.append(wt)
         self.threadPool[len(self.threadPool)-1].start()

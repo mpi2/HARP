@@ -64,22 +64,8 @@ class WorkThread(QtCore.QThread):
         #===============================================
         self.cropping()
 
-        #===============================================
-        # Scaling
-        #===============================================
-        self.scaling()
-
-        #===============================================
-        # Copying
-        #===============================================
-        self.copying()
-
-        #===============================================
-        # Compression
-        #===============================================
-        self.compression()
-
-
+        # scaling, compression file copying is then done after the cropping finished signal is
+        # caught in the function "autocrop_finished_slot"
 
 
     def cropping(self):
@@ -112,20 +98,17 @@ class WorkThread(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
             dimensions_tuple = None
 
-       
-	self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
         self.thread1 = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocropCallback, def_crop=dimensions_tuple)
         self.connect( self.thread1, QtCore.SIGNAL("cropFinished(QString)"), self.autocrop_finished_slot )
         self.thread1.start() # This actually causes the thread to run
-        
-        self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
-        logging.debug("Crop finished")
+
+        logging.debug("Crop started")
 
 
     def autocropCallback(self, msg):
         self.emit( QtCore.SIGNAL('update(QString)'), msg )
 
-	
+
     def autocrop_finished_slot(self, msg):
         #print("autocrop all done")
         #         crop_result = acrop.run()
@@ -135,6 +118,23 @@ class WorkThread(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "Cropping Error, see session log file")
         self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
         logging.debug("Crop finished")
+
+        #===============================================
+        # Scaling
+        #===============================================
+        self.scaling()
+
+        #===============================================
+        # Copying
+        #===============================================
+        self.copying()
+
+        #===============================================
+        # Compression
+        #===============================================
+        self.compression()
+
+
         return
 
     def killSlot(self):
@@ -181,7 +181,8 @@ class WorkThread(QtCore.QThread):
     def executeImagej(self, scaleFactor,sf):
         '''
         Part of scaling function
-        @param: str, scaleFactor eg ":0.5:x6"
+        @param: str, scaleFactor for imagej eg "^0.5^x6"
+        @param: str, sf for calculating new pixel size
         '''
         # Gets the new pixel numbers for the scaled stack name (see in imagej macro)
         if (self.configOb.recon_pixel_size) and sf != "Pixel":
@@ -197,7 +198,7 @@ class WorkThread(QtCore.QThread):
 
         # Linux or win32 imagej jar location
         if _platform == "linux" or _platform == "linux2":
-            ijpath = os.path.join("usr","share","java","ij.jar")
+            ijpath = os.path.join("/usr","share","java","ij.jar")
         elif _platform == "win32" or _platform == "win64":
             ijpath = os.path.join(self.dir, 'ImageJ', 'ij.jar')
 
@@ -207,7 +208,7 @@ class WorkThread(QtCore.QThread):
         self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
 
         # Subprocess call for imagej macro
-        process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", "/usr/share/java/ij.jar", "-batch", os.path.join(self.dir, "siah_scale.txt"),
+        process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
                                     self.configOb.imageJ+ scaleFactor + "^" +new_pixel+"^"+interpolation],stdout=self.session_scale,stderr=self.session_scale)
 
         #Get pid of imagej macro so we can kill if the user finds a problem
