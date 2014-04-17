@@ -65,7 +65,7 @@ class Autocrop(QtCore.QThread):
 		#Report back every 20 images
 
 		if self.shared_auto_count.value % 40 == 0:
-			self.callback("Autocrop: {0} images".format(str(self.shared_auto_count.value)))
+			self.callback("Getting crop box: {0} images".format(str(self.shared_auto_count.value)))
 			pass
 
 		del im
@@ -91,12 +91,12 @@ class Autocrop(QtCore.QThread):
 		try:
 			imcrop.save(crop_out)
 		except:
-			"can't save cropped file {0}".format(crop_out)
-			del im
+			print("can't save cropped file {0}".format(crop_out))
 
-			self.shared_crop_count.value += 1
+		del im
+		self.shared_crop_count.value += 1
 			#Report back every 20 images
-		if self.shared_crop_count.value % 10 == 0:
+		if self.shared_crop_count.value % 20 == 0:
 			self.callback("Cropping: {0} images".format(str(self.shared_crop_count.value)))
 			pass
 
