@@ -36,6 +36,7 @@ class Autocrop(QtCore.QThread):
 		self.def_crop = def_crop
 		self.num_proc = num_proc
 
+
 	def processor(self, filename):
 		'''Processes each image file individually
 		Implements __call__() so it can be used in multithreading by '''
@@ -67,7 +68,6 @@ class Autocrop(QtCore.QThread):
 		if self.shared_auto_count.value % 40 == 0:
 			self.callback("Getting crop box: {0} images".format(str(self.shared_auto_count.value)))
 			pass
-
 		del im
 		return(crops)
 
@@ -144,7 +144,6 @@ class Autocrop(QtCore.QThread):
 		@param side str: x or y
 		@param threshold int:
 		'''
-
 		#get rid of the low values in the noise
 		vals = [self.lowvals(x[side]) for x in slices]
 
