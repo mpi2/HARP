@@ -64,7 +64,7 @@ class Autocrop(QtCore.QThread):
 		#Report back every 20 images
 
 		if self.shared_auto_count.value % 40 == 0:
-			#self.callback("Autocrop: {0} images".format(str(self.shared_auto_count.value)))
+			self.callback("Autocrop: {0} images".format(str(self.shared_auto_count.value)))
 			pass
 
 		del im
@@ -96,7 +96,7 @@ class Autocrop(QtCore.QThread):
 			self.shared_crop_count.value += 1
 			#Report back every 20 images
 		if self.shared_crop_count.value % 10 == 0:
-			#self.callback("Cropping: {0} images".format(str(self.shared_crop_count.value)))
+			self.callback("Cropping: {0} images".format(str(self.shared_crop_count.value)))
 			pass
 
 
