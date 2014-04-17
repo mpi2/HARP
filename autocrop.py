@@ -55,14 +55,18 @@ class Autocrop(QtCore.QThread):
 			print "Processor can't open file. {0}".format(e)
 		matrix = np.array(im)
 		crops = {}
+
 		crops["x"] = np.std(matrix, axis=0)
 		crops["y"] = np.std(matrix, axis=1)
 
 
 		self.shared_auto_count.value += (1 * self.skip_num)
 		#Report back every 20 images
+
 		if self.shared_auto_count.value % 40 == 0:
-			self.callback("Autocrop: {0} images".format(str(self.shared_auto_count.value)))
+			#self.callback("Autocrop: {0} images".format(str(self.shared_auto_count.value)))
+			pass
+
 		del im
 		return(crops)
 
@@ -78,19 +82,22 @@ class Autocrop(QtCore.QThread):
 			return
 		try:
 			im = Image.open(img)
-			imcrop = im.crop((self.crop_box[0], self.crop_box[1], self.crop_box[2], self.crop_box[3] ))
-			filename = os.path.basename(img)
-			crop_out = os.path.join(self.out_dir,filename)
+		except:
+			print("can't open {0} for cropping".format(img))
+		imcrop = im.crop((self.crop_box[0], self.crop_box[1], self.crop_box[2], self.crop_box[3] ))
+		filename = os.path.basename(img)
+		crop_out = os.path.join(self.out_dir,filename)
+		try:
 			imcrop.save(crop_out)
+		except:
+			"can't save cropped file {0}".format(crop_out)
 			del im
 
 			self.shared_crop_count.value += 1
 			#Report back every 20 images
-			if self.shared_crop_count.value % 10 == 0:
-				self.callback("Cropping: {0} images".format(str(self.shared_crop_count.value)))
-		except:
-			#Catches corrupt files
-			print "Error cropping file. The last file was {0}".format(img)
+		if self.shared_crop_count.value % 10 == 0:
+			#self.callback("Cropping: {0} images".format(str(self.shared_crop_count.value)))
+			pass
 
 
 	def do_the_crop(self, images, crop_vals,  padding=0):
@@ -119,7 +126,7 @@ class Autocrop(QtCore.QThread):
 		pool_num = 0
 		print("cropping")
 		if self.num_proc:
-			pool_num = int(num_proc)
+			pool_num = int(self.num_proc)
 		else:
 			pool_num = cpu_count()
 			if pool_num < 1:
@@ -189,14 +196,14 @@ class Autocrop(QtCore.QThread):
 		self.imdims = Image.open(sparse_files[0]).size
 
 		if self.def_crop:
-			self.do_the_crop(files, self.convertXYWH_ToCoords(def_crop))
+			self.do_the_crop(files, self.convertXYWH_ToCoords(self.def_crop))
 			#sys.exit()
 		else:
 			print("Doing autocrop")
 			self.threshold = 0.01
 			pool_num = 0
 			if self.num_proc:
-				pool_num = int(num_proc)
+				pool_num = int(self.num_proc)
 			else:
 				pool_num = cpu_count()
 				if pool_num < 1:
@@ -256,6 +263,9 @@ def terminate():
 		global shared_terminate
 		shared_terminate.value = 1
 
+def dummy_callback(msg):
+	'''use for cli running'''
+	print msg
 
 def cli_run():
 	'''
@@ -268,7 +278,7 @@ def cli_run():
 	parser.add_argument('-d', nargs=4, type=int, dest='def_crop', help='set defined boundaries for crop x,y,w,h', default=None)
 	parser.add_argument('-p', dest="num_proc", help='number of processors to use', default = None)
 	args = parser.parse_args()
-	ac = Autocrop(args.in_dir, args.out_dir, args.num_proc, args.def_crop)
+	ac = Autocrop(args.in_dir, args.out_dir, dummy_callback, args.num_proc, args.def_crop)
 	ac.run()
 		#sys.exit()
 
