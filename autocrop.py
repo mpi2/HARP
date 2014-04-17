@@ -18,6 +18,7 @@ import math
 from collections import Counter
 from matplotlib import pyplot as plt
 import threading
+import Queue
 
 
 shared_terminate = Value("i", 0)
@@ -197,7 +198,7 @@ class Autocrop(QtCore.QThread):
 
 		if self.def_crop:
 			self.do_the_crop(files, self.convertXYWH_ToCoords(self.def_crop))
-			#sys.exit()
+			self.emit( QtCore.SIGNAL('cropFinished(QString)'), "success" )
 		else:
 			print("Doing autocrop")
 			self.threshold = 0.01
