@@ -18,7 +18,6 @@ import datetime
 from multiprocessing import freeze_support
 from sys import platform as _platform
 
-
 class WorkThreadGetDimensions(QtCore.QThread):
     def __init__(self,input,tmp_dir):
         QtCore.QThread.__init__(self)
@@ -50,7 +49,6 @@ class WorkThreadGetDimensions(QtCore.QThread):
 
     def z_callback(self, msg):
         self.emit( QtCore.SIGNAL('update(QString)'), msg )
-
 
 def main():
     app = QtGui.QApplication(sys.argv)
