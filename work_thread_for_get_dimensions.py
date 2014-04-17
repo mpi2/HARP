@@ -37,7 +37,7 @@ class WorkThreadGetDimensions(QtCore.QThread):
             self.dir = os.path.dirname(__file__)
 
         # Set up a zproject object
-        zp = zproject.Zproject(self.input_folder,self.tmp_dir)
+        zp = zproject.Zproject(self.input_folder,self.tmp_dir, self.z_callback)
         # run the object
         zp_result = zp.run()
 
@@ -48,6 +48,8 @@ class WorkThreadGetDimensions(QtCore.QThread):
         # let the user know what's happened
         self.emit( QtCore.SIGNAL('update(QString)'), "Z-projection finished" )
 
+    def z_callback(self, msg):
+        self.emit( QtCore.SIGNAL('update(QString)'), msg )
 
 
 def main():

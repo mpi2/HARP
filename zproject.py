@@ -10,13 +10,16 @@ import sys
 import os
 import numpy as np
 import re
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, Value
+from multiprocessing.pool import ThreadPool
 
 class Zproject:
 
-    def __init__(self, img_dir, out_dir):
+    def __init__(self, img_dir, out_dir, callback):
         self.img_dir = img_dir
         self.out_dir = out_dir
+        self.shared_z_count = Value("i", 0)
+        self.callback = callback
 
     def run(self):
         '''
@@ -40,7 +43,8 @@ class Zproject:
         self.imdims = (im.size[1], im.size[0])
 
         #make a new list by removing every nth image
-        files = files[0::10]
+        self.skip_num = 10
+        files = files[0::self.skip_num]
 
         poolsize = cpu_count()
         p = Pool(poolsize)
@@ -50,8 +54,12 @@ class Zproject:
                   for i in range(0, len(files), chunksize)]
 
         # this returns an array of (len(files)/chunksize, 4000, 4000)
-        proc = Process(self.imdims)
-        max_arrays = np.array(p.map(proc, chunks))
+        pool_num = 0
+        pool_num = cpu_count()
+        if pool_num < 1:
+            pool_num = 1
+        pool = ThreadPool(processes=pool_num)
+        max_arrays = pool.map(self.process, chunks)
         maxi = np.amax(max_arrays, axis=0) #finds maximum along first axis
         img = Image.fromarray(np.uint8(maxi))
 
@@ -64,26 +72,22 @@ class Zproject:
 
             # Save th file to the temp directors tmp_dir
             img.save(os.path.join(self.out_dir, "max_intensity_z.tif"))
-
-
             return(0)
 
-
-class Process:
-
-    def __init__(self, imdims):
-        self.imdims = imdims
-
-    def __call__(self, chunk):
+    def process(self, chunk):
         max_ = np.zeros(self.imdims)
         #print "imdims: ", self.imdims
 
         for im in chunk:
+            self.shared_z_count.value += (1 * self.skip_num)
+            #print self.shared_z_count.value
             #Numpy is flipping the coordinates around. WTF!. So T is for transpose
             im_array = np.asarray(Image.open(im))
             #print "im: ", im_array.shape
             max_ = np.maximum(max_, im_array)
-        #print "chunk done"
+            if self.shared_z_count.value % 10 == 0:
+                self.callback("Z project: {0} images".format(str(self.shared_z_count.value)))
+
         return max_
 
 

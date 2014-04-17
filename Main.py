@@ -1051,8 +1051,10 @@ class MainWindow(QtGui.QMainWindow):
         self.configOb_path_from_list = os.path.join(self.folder_from_list,"Metadata","configobject.txt")
 
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
-        self.threadPool.append( WorkThread(self.configOb_path_from_list,self.memory) )
-        self.connect( self.threadPool[len(self.threadPool)-1], QtCore.SIGNAL("update(QString)"), self.add )
+        wt =  WorkThread(self.configOb_path_from_list,self.memory)
+        self.connect( wt, QtCore.SIGNAL("update(QString)"), self.add )
+        self.connect( self, QtCore.SIGNAL("kill(QString)"), wt.killSlot  )
+        self.threadPool.append(wt)
         self.threadPool[len(self.threadPool)-1].start()
 
     def closeEvent(self, event):
@@ -1068,6 +1070,7 @@ class MainWindow(QtGui.QMainWindow):
     def kill_em_all(self):
         """ Function to kill all processes """
         # First kill the thread
+        self.emit(QtCore.SIGNAL('kill(QString)'), "kill")
         if self.threadPool:
             self.threadPool[len(self.threadPool)-1].terminate()
 

@@ -112,18 +112,34 @@ class WorkThread(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
             dimensions_tuple = None
 
-        crop_result = autocrop.run(self.configOb.input_folder,self.configOb.cropped_path,def_crop=dimensions_tuple)
-
-        if crop_result :
-                logging.debug("Error in cropping see below:")
-                logging.debug(crop_result)
-                self.emit( QtCore.SIGNAL('update(QString)'), "Cropping Error, see session log file")
-                return
-
-
+       
+	self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
+        self.thread1 = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocropCallback, def_crop=dimensions_tuple)
+        self.connect( self.thread1, QtCore.SIGNAL("cropFinished(QString)"), self.autocrop_finished_slot )
+        self.thread1.start() # This actually causes the thread to run
+        
         self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
         logging.debug("Crop finished")
 
+
+    def autocropCallback(self, msg):
+        self.emit( QtCore.SIGNAL('update(QString)'), msg )
+
+	
+    def autocrop_finished_slot(self, msg):
+        #print("autocrop all done")
+        #         crop_result = acrop.run()
+        if msg != "success" :
+            logging.debug("Error in cropping see below:")
+            logging.debug(msg)
+            self.emit( QtCore.SIGNAL('update(QString)'), "Cropping Error, see session log file")
+        self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
+        logging.debug("Crop finished")
+        return
+
+    def killSlot(self):
+        autocrop.terminate()
+        print("Kill")
 
 
     def scaling(self):
