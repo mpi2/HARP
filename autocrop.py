@@ -36,7 +36,6 @@ class Autocrop(QtCore.QThread):
 		self.def_crop = def_crop
 		self.num_proc = num_proc
 
-
 	def processor(self, filename):
 		'''Processes each image file individually
 		Implements __call__() so it can be used in multithreading by '''
@@ -50,6 +49,8 @@ class Autocrop(QtCore.QThread):
 
 		global shared_terminate
 		if shared_terminate.value == 1:
+			# Need to inform the user that the processing has finished
+			self.callback("Processing Cancelled!")
 			return
 		try:
 			im = Image.open(filename)
@@ -80,6 +81,7 @@ class Autocrop(QtCore.QThread):
 		'''
 		global shared_terminate
 		if shared_terminate.value == 1:
+			self.callback("Processing Cancelled!")
 			return
 		try:
 			im = Image.open(img)
@@ -211,6 +213,7 @@ class Autocrop(QtCore.QThread):
 			pool = ThreadPool(processes=pool_num)
 			slices = pool.map(self.processor, sparse_files )
 			if shared_terminate.value == 1:
+				self.callback("Processing Cancelled!")
 				del slices
 				return
 
@@ -262,6 +265,11 @@ class Autocrop(QtCore.QThread):
 def terminate():
 		global shared_terminate
 		shared_terminate.value = 1
+
+def reset():
+		# Global value needs to be reset before next processing task on the list
+		global shared_terminate
+		shared_terminate.value = 0
 
 def dummy_callback(msg):
 	'''use for cli running'''

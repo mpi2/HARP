@@ -17,7 +17,7 @@ from multiprocessing import freeze_support
 from sys import platform as _platform
 
 
-class WorkThread(QtCore.QThread):
+class WorkThreadProcessing(QtCore.QThread):
     def __init__(self,configOb,memory):
         QtCore.QThread.__init__(self)
         filehandler = open(configOb, 'r')
@@ -37,6 +37,9 @@ class WorkThread(QtCore.QThread):
             self.dir = os.path.dirname(sys.executable)
         elif __file__:
             self.dir = os.path.dirname(__file__)
+
+        # Need to reset global parameter
+        autocrop.reset()
 
         #===============================================
         # Setup logging files
@@ -139,8 +142,12 @@ class WorkThread(QtCore.QThread):
         return
 
     def killSlot(self):
+        # Kills autocrop
         autocrop.terminate()
-        print("Kill")
+        # Kills the Work_Thread_Run_Processing thread (hopefully)
+        self.quit()
+        self.wait()
+        print("Kill all")
 
 
     def scaling(self):

@@ -31,7 +31,7 @@ import Autocomplete
 import Error_Checking
 import Get_Parameters
 from MainWindow import Ui_MainWindow
-from Work_Thread_Run_Processing import WorkThread
+from Work_Thread_Run_Processing import WorkThreadProcessing
 
 import crop
 from Work_Thread_Get_Dimensions import WorkThreadGetDimensions
@@ -434,7 +434,7 @@ class MainWindow(QtGui.QMainWindow):
         if message == "Z-projection finished":
             # Get the crop dimensions and save the file
             self.runCrop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
-            self.ui.textEditStatusMessages.setText("Dimensions selected")
+
 
     def cropCallback(self, box):
         ''' Method to get crop dimension text (used in getDimensions)'''
@@ -442,6 +442,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditY.setText(str(box[1]))
         self.ui.lineEditW.setText(str(box[2]))
         self.ui.lineEditH.setText(str(box[3]))
+        self.ui.textEditStatusMessages.setText("Dimensions selected")
+        self.ui.pushButtonGetDimensions.setText("Get Dimensions")
 
     def runCrop(self, img_path):
         ''' Method to create Crop object (used in getDimensions)'''
@@ -569,7 +571,7 @@ class MainWindow(QtGui.QMainWindow):
         self.configOb_path_from_list = os.path.join(self.folder_from_list,"Metadata","configobject.txt")
 
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
-        wt =  WorkThread(self.configOb_path_from_list,self.memory)
+        wt =  WorkThreadProcessing(self.configOb_path_from_list,self.memory)
         self.connect( wt, QtCore.SIGNAL("update(QString)"), self.listen2Processing )
         self.connect( self, QtCore.SIGNAL("kill(QString)"), wt.killSlot  )
         self.threadPool.append(wt)
@@ -583,15 +585,16 @@ class MainWindow(QtGui.QMainWindow):
 
     def stopProcessing(self):
         """ Stop processing, kill the current process """
-        item = QtGui.QTableWidgetItem()
-        self.ui.tableWidget.setItem(self.current_row, 2, item)
         item = self.ui.tableWidget.item(self.current_row, 2)
         self.ui.pushButtonStart.setEnabled(True)
         self.ui.pushButtonStop.setEnabled(False)
-        item.setText("Processing Cancelled!")
+
         self.kill_em_all()
-        self.threadPool = None
+
+        item.setText("Processing Cancelled!")
         logging.shutdown()
+        self.threadPool = None
+
 
     def deleteRows(self,event):
         '''If the delete button is pressed on a certai row the recon is taken off the list to be processed'''
@@ -626,10 +629,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def kill_em_all(self):
         """ Function to kill all processes """
-        # First kill the thread
+        print "starting kill em all"
+        # First kill the thread and autocrop
         self.emit(QtCore.SIGNAL('kill(QString)'), "kill")
-        if self.threadPool:
-            self.threadPool[len(self.threadPool)-1].terminate()
 
         # Get the list of processes as well from the metadata
         self.pid_path_from_list = os.path.join(self.folder_from_list,"Metadata","pid.log")
