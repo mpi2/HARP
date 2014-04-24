@@ -99,12 +99,13 @@ class WorkThreadProcessing(QtCore.QThread):
 
         self.autoCropThread = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocropCallback, def_crop=dimensions_tuple)
         self.connect( self.autoCropThread, QtCore.SIGNAL("cropFinished(QString)"), self.autocrop_finished_slot )
+        self.connect( self.autoCropThread, QtCore.SIGNAL("update(QString)"), self.autocropUpdateSlot )
         self.autoCropThread.start() # This actually causes the thread to run
 
         self.session_log.write("Crop started\n")
 
 
-    def autocropCallback(self, msg):
+    def autocropUpdateSlot(self, msg):
         self.emit( QtCore.SIGNAL('update(QString)'), msg )
 
 
@@ -140,9 +141,9 @@ class WorkThreadProcessing(QtCore.QThread):
             self.session_log.close()
             return
         else :
+            self.emit( QtCore.SIGNAL('update(QString)'), msg)
             self.session_log.write("Error in cropping see below:\n")
             self.session_log.write(msg)
-            self.emit( QtCore.SIGNAL('update(QString)'), "Cropping Error, see session log file")
 
     def killSlot(self):
         # Kills autocrop
