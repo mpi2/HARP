@@ -144,6 +144,7 @@ class WorkThreadProcessing(QtCore.QThread):
     def killSlot(self):
         # Kills autocrop
         autocrop.terminate()
+        self.emit( QtCore.SIGNAL('update(QString)'), "Processing Cancelled!" )
         # Kills the Work_Thread_Run_Processing thread (hopefully)
         self.quit()
         self.wait()

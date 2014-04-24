@@ -1,17 +1,10 @@
 #!/usr/bin/python
 
-try:
-    import Image
-except ImportError:
-    from PIL import Image
-import crop
-import tempfile
 import sys
 import os
 import numpy as np
 import re
-from multiprocessing import Pool, cpu_count, Value
-from multiprocessing.pool import ThreadPool
+from multiprocessing import cpu_count, Value
 import threading
 import Queue
 import cv2
@@ -30,8 +23,8 @@ class Zproject:
     def run(self):
         '''
         Run the Zprojection
-        @return img, PIL Image on success
-        @return string with error message
+        @return in 0 on success
+        @return string with error message (TODO)
         '''
         files = []
 
@@ -45,8 +38,8 @@ class Zproject:
         if len(files) < 1:
             return("no image files found in" + self.img_dir)
 
-        im = Image.open(files[0])
-        self.imdims = (im.size[1], im.size[0])
+        im = cv2.imread(files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE)
+        self.imdims = im.shape
 
         #make a new list by removing every nth image
         self.skip_num = 10
@@ -78,20 +71,17 @@ class Zproject:
         #Process the max intensities from the separate threads
         maxi = reduce(np.maximum, max_arrays)
 
-        img = Image.fromarray(np.uint8(maxi))
         #something wrong with image creation
-        if img.size == (0.0,0.0):
+        if maxi.shape == (0,0):
             return("something went wrong creating the Z-projection from {}".format(self.img_dir))
         else:
-            img.save(os.path.join(self.out_dir, "max_intensity_z.tif"))
+            cv2.imwrite(os.path.join(self.out_dir, "max_intensity_z.tif"), maxi)
             return(0)
 
     def fileReader(self):
         for file_ in self.files:
-            #im = PythonMagick.Image(file_)
             im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
             self.shared_z_count.value += (1 * self.skip_num)
-            #im_array = np.asarray(Image.open(file_))
             self.im_array_queue.put(im_array)
         #Insert sentinels to signal end of list
         for i in range(self.num_max_threads):

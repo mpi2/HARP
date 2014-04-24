@@ -100,7 +100,7 @@ class Autocrop(QtCore.QThread):
 
 
 
-	def do_the_crop(self,  padding=0):
+	def calc_auto_crop(self,  padding=0):
 		'''
 		'''
 		#Distances of cropping boxes from their respective sides
@@ -126,7 +126,14 @@ class Autocrop(QtCore.QThread):
 			lcrop, tcrop, rcrop - lcrop, bcrop - tcrop))
 		print lcrop, tcrop, rcrop, bcrop
 		self.crop_box = (lcrop, tcrop, rcrop, bcrop)
-		pool_num = 0
+		self.init_cropping()
+
+
+	def calc_manual_crop(self):
+		self.crop_box = self.convertXYWH_ToCoords(self.def_crop)
+		self.init_cropping()
+
+	def init_cropping(self):
 		print("cropping")
 
 
@@ -248,10 +255,12 @@ class Autocrop(QtCore.QThread):
 
 		#get image dimensions from first file
 		self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE).shape
+		padding = int(np.mean(self.imdims)*0.025)
 
 		if self.def_crop:
-			self.do_the_crop(files, self.convertXYWH_ToCoords(self.def_crop))
+			self.calc_manual_crop()
 			self.emit( QtCore.SIGNAL('cropFinished(QString)'), "success" )
+			self.callback("Cropping finished")
 		else:
 			print("Doing autocrop")
 
@@ -294,9 +303,9 @@ class Autocrop(QtCore.QThread):
 			if shared_terminate.value == 1:
 				return
 
-			padding = int(np.mean(self.imdims)*0.025)
-			self.do_the_crop(padding)
+			self.calc_auto_crop(padding)
 			self.emit( QtCore.SIGNAL('cropFinished(QString)'), "success" )
+			self.callback("Cropping finished")
 			return
 
 
@@ -335,6 +344,12 @@ class Autocrop(QtCore.QThread):
 def terminate():
 		global shared_terminate
 		shared_terminate.value = 1
+
+
+def reset():
+	# Global value needs to be reset before next processing task on the list
+	global shared_terminate
+	shared_terminate.value = 0
 
 def dummy_callback(msg):
 	'''use for cli running'''
