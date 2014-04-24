@@ -15,7 +15,7 @@ import cPickle as pickle
 import ConfigClass
 from multiprocessing import freeze_support
 from sys import platform as _platform
-from Segmentation import watershed_filter
+#from Segmentation import watershed_filter
 
 class WorkThreadProcessing(QtCore.QThread):
     def __init__(self,configOb,memory):
@@ -104,12 +104,13 @@ class WorkThreadProcessing(QtCore.QThread):
 
         self.autoCropThread = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocropCallback, def_crop=dimensions_tuple)
         self.connect( self.autoCropThread, QtCore.SIGNAL("cropFinished(QString)"), self.autocrop_finished_slot )
+        self.connect( self.autoCropThread, QtCore.SIGNAL("update(QString)"), self.autocropUpdateSlot )
         self.autoCropThread.start() # This actually causes the thread to run
 
         logging.debug("Crop started")
 
 
-    def autocropCallback(self, msg):
+    def autocropUpdateSlot(self, msg):
         self.emit( QtCore.SIGNAL('update(QString)'), msg )
 
 
@@ -119,7 +120,8 @@ class WorkThreadProcessing(QtCore.QThread):
         if msg != "success" :
             logging.debug("Error in cropping see below:")
             logging.debug(msg)
-            self.emit( QtCore.SIGNAL('update(QString)'), "Cropping Error, see session log file")
+            self.emit( QtCore.SIGNAL('update(QString)'), msg)
+
         self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
         logging.debug("Crop finished")
         self.autoCropThread.exit()

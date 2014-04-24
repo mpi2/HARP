@@ -187,7 +187,7 @@ class Autocrop(QtCore.QThread):
 				try:
 					cv2.imwrite(name, im)
 				except IOError as e:
-					print("file {0} could not be written to file {1}".format(name, e))
+					self.emit( QtCore.SIGNAL('cropFinished(QString)'), "can't write file {0}. Error: {1}".format(im, e) )
 				else:
 					self.write_file_queue.task_done()
 
@@ -260,7 +260,6 @@ class Autocrop(QtCore.QThread):
 		if self.def_crop:
 			self.calc_manual_crop()
 			self.emit( QtCore.SIGNAL('cropFinished(QString)'), "success" )
-			self.callback("Cropping finished")
 		else:
 			print("Doing autocrop")
 
@@ -287,7 +286,7 @@ class Autocrop(QtCore.QThread):
 				self.shared_auto_count.value += (1 * self.skip_num)
 				if self.shared_auto_count.value % 40 == 0:
 					print("self.metric_file_queue.qsize", self.metric_file_queue.qsize())
-					self.callback("Getting crop box: {0} images".format(str(self.shared_auto_count.value)))
+					self.emit( QtCore.SIGNAL('update(QString)', "Getting crop box: {0} images".format(str(self.shared_auto_count.value))
 				im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
 				self.metric_file_queue.put(im)
 
