@@ -1,17 +1,14 @@
 #!/usr/bin/python
 
-try:
-    import Image
-except ImportError:
-    from PIL import Image
-import crop
-import tempfile
 import sys
 import os
 import numpy as np
 import re
-from multiprocessing import Pool, cpu_count, Value
-from multiprocessing.pool import ThreadPool
+from multiprocessing import cpu_count, Value
+import threading
+import Queue
+import cv2
+
 
 class Zproject:
 
@@ -20,12 +17,14 @@ class Zproject:
         self.out_dir = out_dir
         self.shared_z_count = Value("i", 0)
         self.callback = callback
+        self.im_array_queue = Queue.Queue(maxsize=20)
+        self.maxintensity_queue = Queue.Queue()
 
     def run(self):
         '''
         Run the Zprojection
-        @return img, PIL Image on success
-        @return string with error message
+        @return in 0 on success
+        @return string with error message (TODO)
         '''
         files = []
 
@@ -39,67 +38,85 @@ class Zproject:
         if len(files) < 1:
             return("no image files found in" + self.img_dir)
 
-        im = Image.open(files[0])
-        self.imdims = (im.size[1], im.size[0])
+        im = cv2.imread(files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE)
+        self.imdims = im.shape
 
         #make a new list by removing every nth image
         self.skip_num = 10
-        files = files[0::self.skip_num]
+        self.files = files[0::self.skip_num]
 
-        poolsize = cpu_count()
-        p = Pool(poolsize)
-        chunksize = int(len(files)/poolsize) +1
-        #print "chunk {0}".format(chunksize)
-        chunks = [files[i:i+chunksize]
-                  for i in range(0, len(files), chunksize)]
+        #Start the file reader
+        read_thread = threading.Thread(target=self.fileReader)
+        read_thread.setDaemon(True)
+        read_thread.start()
 
-        # this returns an array of (len(files)/chunksize, 4000, 4000)
-        pool_num = 0
-        pool_num = cpu_count()
-        if pool_num < 1:
-            pool_num = 1
-        pool = ThreadPool(processes=pool_num)
-        max_arrays = pool.map(self.process, chunks)
-        maxi = np.amax(max_arrays, axis=0) #finds maximum along first axis
-        img = Image.fromarray(np.uint8(maxi))
+        #Start the thread to determine max intensities
+        max_threads = []
+        self.num_max_threads = 2
+        for i in range(self.num_max_threads):
+            t = threading.Thread(target=self.maxFinder)
+            t.setDaemon(True)
+            t.start()
+            max_threads.append(t)
+        for th in max_threads:
+            th.join()
+        print("maxes done")
+
+        max_arrays = []
+        while True:
+            try:
+                max_arrays.append(self.maxintensity_queue.get_nowait())
+            except Queue.Empty:
+                break
+        #Process the max intensities from the separate threads
+        maxi = reduce(np.maximum, max_arrays)
 
         #something wrong with image creation
-        if img.size == (0.0,0.0):
-
+        if maxi.shape == (0,0):
             return("something went wrong creating the Z-projection from {}".format(self.img_dir))
         else:
-            #img.save(os.path.join(str(self.out_dir), "z_projection", "max_intensity_z.tif"))
-
-            # Save th file to the temp directors tmp_dir
-            img.save(os.path.join(self.out_dir, "max_intensity_z.tif"))
+            cv2.imwrite(os.path.join(self.out_dir, "max_intensity_z.tif"), maxi)
             return(0)
 
-    def process(self, chunk):
-        max_ = np.zeros(self.imdims)
-        #print "imdims: ", self.imdims
-
-        for im in chunk:
+    def fileReader(self):
+        for file_ in self.files:
+            im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
             self.shared_z_count.value += (1 * self.skip_num)
-            #print self.shared_z_count.value
-            #Numpy is flipping the coordinates around. WTF!. So T is for transpose
-            im_array = np.asarray(Image.open(im))
-            #print "im: ", im_array.shape
-            max_ = np.maximum(max_, im_array)
-            if self.shared_z_count.value % 10 == 0:
-                self.callback("Z project: {0} images".format(str(self.shared_z_count.value)))
+            self.im_array_queue.put(im_array)
+        #Insert sentinels to signal end of list
+        for i in range(self.num_max_threads):
+            self.im_array_queue.put(None)
 
-        return max_
+
+    def maxFinder(self):
+        max_ = np.zeros(self.imdims)
+        while True:
+            try:
+                print(self.im_array_queue.qsize())
+                im_array = self.im_array_queue.get(block=True)
+                #print("write queue size:", self.write_file_queue.qsize())
+            except Queue.Empty:
+                pass
+            else:
+                self.im_array_queue.task_done()
+                if im_array == None:
+                    break
+                max_ = np.maximum(max_, im_array[:][:])
+                if self.shared_z_count.value % 10 == 0:
+                    self.callback("Z project: {0} images".format(str(self.shared_z_count.value)))
+                #self.maxintensity_queue.put(max_)
+
+        self.maxintensity_queue.put(max_)
+        return
+
+
+def dummyCallBack(msg):
+    print(msg)
 
 
 if __name__ == "__main__":
-    z = Zproject(sys.argv[1],sys.argv[2])
+    z = Zproject(sys.argv[1],sys.argv[2], dummyCallBack)
     zp_img = z.run()
-    #assert zp_img.__class__ == "Image.Image"
-    try:
-        zp_img.save(os.path.join(str(z.out_dir), "z_projection", "max_intensity_z.tif"))
-
-    except IOError as e:
-        print("cannot save the z-projection: {0}".format(e))
 
 
 
