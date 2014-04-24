@@ -15,7 +15,7 @@ import cPickle as pickle
 import ConfigClass
 from multiprocessing import freeze_support
 from sys import platform as _platform
-
+from Segmentation import watershed_filter
 
 class WorkThreadProcessing(QtCore.QThread):
     def __init__(self,configOb,memory):
@@ -23,6 +23,7 @@ class WorkThreadProcessing(QtCore.QThread):
         filehandler = open(configOb, 'r')
         self.configOb = pickle.load(filehandler)
         self.memory = memory
+        self.scale_array = []
 
     def __del__(self):
         print "Processing stopped"
@@ -128,6 +129,11 @@ class WorkThreadProcessing(QtCore.QThread):
         #===============================================
         self.scaling()
 
+#         #===============================================
+#         # Masking/Segmentation
+#         #===============================================
+#         self.masking()
+
         #===============================================
         # Copying
         #===============================================
@@ -148,6 +154,13 @@ class WorkThreadProcessing(QtCore.QThread):
         self.quit()
         self.wait()
         print("Kill all")
+
+#     def masking(self):
+#         '''
+#         Masking
+#         '''
+#         #watershed_filter()
+#         print self.scale_array
 
 
     def scaling(self):
@@ -215,6 +228,13 @@ class WorkThreadProcessing(QtCore.QThread):
         logging.info("Scale by factor:")
         logging.info(str(sf))
         self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
+
+        # Make an array of the names to be masked
+        file_name = self.configOb.output_folder+self.configOb.full_name+"_scaled_"+scaleFactor+"pixel"+new_pixel+".tif"
+        self.scale_array.append(file_name)
+
+
+        #out_path[1]+arg_array[2]_scaled+arg_array[3]_pixel_+arg_array[4].tif
 
         # Subprocess call for imagej macro
         process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
