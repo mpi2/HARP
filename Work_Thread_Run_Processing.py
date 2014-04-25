@@ -49,19 +49,14 @@ class WorkThreadProcessing(QtCore.QThread):
         self.pid_log_path = os.path.join(self.configOb.meta_path,"pid.log")
         self.scale_log_path = os.path.join(self.configOb.meta_path,"scale.log")
 
-        # Set up a python specialised logging file
-        self.logger = logging.getLogger()
-        self.logger.setLevel(logging.DEBUG)
-        file_handler = logging.FileHandler(self.session_log_path)
-        formatter = logging.Formatter("%(asctime)s %(message)s")
-        file_handler.setFormatter(formatter)
-        self.logger.addHandler(file_handler)
-        logging.debug("########################################")
-        logging.debug("### HARP Session Log                 ###")
-        logging.debug("########################################")
-
         self.session_pid = open(self.pid_log_path, 'w+')
         self.session_scale = open(self.scale_log_path, 'w+')
+        self.session_log = open(self.session_log_path, 'w+')
+
+
+        self.session_log.write("########################################\n")
+        self.session_log.write("### HARP Session Log                 ###\n")
+        self.session_log.write("########################################\n")
 
         #===============================================
         # Cropping
@@ -77,13 +72,13 @@ class WorkThreadProcessing(QtCore.QThread):
         Cropping
         '''
         # Make crop folder
-        logging.debug("*****Performing cropping******")
+        self.session_log.write("*****Performing cropping******\n")
 
         # Do not perform any crop as user specified
         if self.configOb.crop_option == "None" :
             self.emit( QtCore.SIGNAL('update(QString)'), "No Crop carried out" )
             #print "No crop carried out"
-            logging.debug("No crop carried out")
+            self.session_log.write("No crop carried out\n")
             return
 
         # Make new crop directory
@@ -92,13 +87,13 @@ class WorkThreadProcessing(QtCore.QThread):
 
         # Setup for manual crop (e.g. given dimensions)
         if self.configOb.crop_option == "Manual" :
-            logging.debug("manual crop")
+            self.session_log.write("manual crop\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing manual crop" )
             dimensions_tuple = (int(self.configOb.xcrop), int(self.configOb.ycrop), int(self.configOb.wcrop), int(self.configOb.hcrop))
 
         # Setup for automatic
         if self.configOb.crop_option == "Automatic" :
-            logging.debug("autocrop")
+            self.session_log.write("autocrop\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
             dimensions_tuple = None
 
@@ -107,7 +102,7 @@ class WorkThreadProcessing(QtCore.QThread):
         self.connect( self.autoCropThread, QtCore.SIGNAL("update(QString)"), self.autocropUpdateSlot )
         self.autoCropThread.start() # This actually causes the thread to run
 
-        logging.debug("Crop started")
+        self.session_log.write("Crop started\n")
 
 
     def autocropUpdateSlot(self, msg):
@@ -117,37 +112,38 @@ class WorkThreadProcessing(QtCore.QThread):
     def autocrop_finished_slot(self, msg):
         #print("autocrop all done")
         #         crop_result = acrop.run()
-        if msg != "success" :
-            logging.debug("Error in cropping see below:")
-            logging.debug(msg)
+
+        if msg == "success":
+
+            self.session_log.write("Crop finished\n")
+            self.autoCropThread.exit()
+
+            #===============================================
+            # Scaling
+            #===============================================
+            self.scaling()
+
+            #===============================================
+            # Masking/Segmentation
+            #===============================================
+            #self.masking()
+
+            #===============================================
+            # Copying
+            #===============================================
+            self.copying()
+
+            #===============================================
+            # Compression
+            #===============================================
+            self.compression()
+
+            self.session_log.close()
+            return
+        else :
             self.emit( QtCore.SIGNAL('update(QString)'), msg)
-
-        self.emit( QtCore.SIGNAL('update(QString)'), "Crop finished" )
-        logging.debug("Crop finished")
-        self.autoCropThread.exit()
-
-        #===============================================
-        # Scaling
-        #===============================================
-        self.scaling()
-
-#         #===============================================
-#         # Masking/Segmentation
-#         #===============================================
-#         self.masking()
-
-        #===============================================
-        # Copying
-        #===============================================
-        self.copying()
-
-        #===============================================
-        # Compression
-        #===============================================
-        self.compression()
-
-
-        return
+            self.session_log.write("Error in cropping see below:\n")
+            self.session_log.write(msg)
 
     def killSlot(self):
         # Kills autocrop
@@ -170,7 +166,7 @@ class WorkThreadProcessing(QtCore.QThread):
         '''
         Scaling
         '''
-        logging.debug("*****Performing scaling******")
+        self.session_log.write("*****Performing scaling******\n")
         # First make subfolder for scaled stacks
         if not os.path.exists(self.configOb.scale_path):
             os.makedirs(self.configOb.scale_path)
@@ -179,8 +175,8 @@ class WorkThreadProcessing(QtCore.QThread):
         # e.g 70% of total memory
         self.memory_4_imageJ = (int(self.memory)*.7)*0.00000095367
         self.memory_4_imageJ = int(self.memory_4_imageJ)
-        logging.debug("Memory of computer:"+str(self.memory))
-        logging.debug("Memory for ImageJ:"+str(self.memory_4_imageJ))
+        self.session_log.write("Memory of computer:"+str(self.memory)+"\n")
+        self.session_log.write("Memory for ImageJ:"+str(self.memory_4_imageJ)+"\n")
 
         # Perform scaling as subprocess with Popen (they should be done in the background)
 
@@ -228,8 +224,8 @@ class WorkThreadProcessing(QtCore.QThread):
             ijpath = os.path.join(self.dir, 'ImageJ', 'ij.jar')
 
         # detail what is happening
-        logging.info("Scale by factor:")
-        logging.info(str(sf))
+        self.session_log.write("Scale by factor:")
+        self.session_log.write(str(sf))
         self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
 
         # Make an array of the names to be masked
@@ -264,20 +260,20 @@ class WorkThreadProcessing(QtCore.QThread):
                 # Need to get full path of original file though
                 file = os.path.join(self.configOb.input_folder,file)
                 shutil.copy(file,self.configOb.cropped_path)
-                logging.debug("File copied:"+file)
+                self.session_log.write("File copied:"+file)
 
     def compression(self):
         '''
         Compression
         '''
         if self.configOb.scans_recon_comp == "yes" or self.configOb.crop_comp == "yes" :
-            logging.debug("***Performing Compression***")
+            self.session_log.write("***Performing Compression***")
 
         if self.configOb.scans_recon_comp == "yes" :
             # Compression for scan
             if self.configOb.scan_folder:
                 self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of scan folder" )
-                logging.debug("Compression of scan folder")
+                self.session_log.write("Compression of scan folder")
                 path_scan,folder_name_scan = os.path.split(self.configOb.scan_folder)
 
                 out = tarfile.open(str(self.configOb.scan_folder)+".tar.bz2", mode='w:bz2')
@@ -287,7 +283,7 @@ class WorkThreadProcessing(QtCore.QThread):
 
             # compression for scan
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of original recon folder" )
-            logging.debug("Compression of original recon folder")
+            self.session_log.write("Compression of original recon folder")
             path_scan,folder_name_scan = os.path.split(self.configOb.input_folder)
 
             out = tarfile.open(str(self.configOb.input_folder)+".tar.bz2", mode='w:bz2')
@@ -310,11 +306,8 @@ class WorkThreadProcessing(QtCore.QThread):
         open(self.pid_log_path, 'w').close()
 
         self.session_scale.close()
-        logging.debug("Processing finished")
-        logging.debug("########################################")
-        self.logger.handlers[0].stream.close()
-        self.logger.removeHandler(self.logger.handlers[0])
-        logging.shutdown()
+        self.session_log.write("Processing finished\n")
+        self.session_log.write("########################################\n")
 
 
 def main():

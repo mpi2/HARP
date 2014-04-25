@@ -92,7 +92,7 @@ class Zproject:
         max_ = np.zeros(self.imdims)
         while True:
             try:
-                print(self.im_array_queue.qsize())
+                #print(self.im_array_queue.qsize())
                 im_array = self.im_array_queue.get(block=True)
                 #print("write queue size:", self.write_file_queue.qsize())
             except Queue.Empty:
