@@ -18,8 +18,9 @@ from sys import platform as _platform
 #from Segmentation import watershed_filter
 
 class WorkThreadProcessing(QtCore.QThread):
-    def __init__(self,configOb,memory):
-        QtCore.QThread.__init__(self)
+    def __init__(self,configOb,memory, parent=None):
+        QtCore.QThread.__init__(self, parent)
+        #self.exec_() #need thos for self.quit() to work
         filehandler = open(configOb, 'r')
         self.configOb = pickle.load(filehandler)
         self.memory = memory
@@ -97,11 +98,8 @@ class WorkThreadProcessing(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
             dimensions_tuple = None
 
-        self.autoCropThread = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocropUpdateSlot, def_crop=dimensions_tuple)
-        self.connect( self.autoCropThread, QtCore.SIGNAL("cropFinished(QString)"), self.autocrop_finished_slot )
-        self.connect( self.autoCropThread, QtCore.SIGNAL("update(QString)"), self.autocropUpdateSlot )
-        self.autoCropThread.start() # This actually causes the thread to run
-
+        self.autoCropThread = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocropUpdateSlot, self.autocrop_finished_slot,  def_crop=dimensions_tuple)
+        self.autoCropThread.run()
         self.session_log.write("Crop started\n")
 
 
@@ -116,7 +114,7 @@ class WorkThreadProcessing(QtCore.QThread):
         if msg == "success":
 
             self.session_log.write("Crop finished\n")
-            self.autoCropThread.exit()
+            self.emit( QtCore.SIGNAL('update(QString)'), "crop finished")
 
             #===============================================
             # Scaling
@@ -147,12 +145,13 @@ class WorkThreadProcessing(QtCore.QThread):
 
     def killSlot(self):
         # Kills autocrop
+        print("Kill all")
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing Cancelled!" )
         autocrop.terminate()
         # Kills the Work_Thread_Run_Processing thread (hopefully)
         self.quit()
-        self.wait()
-        print("Kill all")
+        #self.wait() #this was hanging the GUI
+
 
 #     def masking(self):
 #         '''

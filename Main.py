@@ -571,7 +571,7 @@ class MainWindow(QtGui.QMainWindow):
         self.configOb_path_from_list = os.path.join(self.folder_from_list,"Metadata","configobject.txt")
 
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
-        wt =  WorkThreadProcessing(self.configOb_path_from_list,self.memory)
+        wt =  WorkThreadProcessing(self.configOb_path_from_list,self.memory, self)
         self.connect( wt, QtCore.SIGNAL("update(QString)"), self.listen2Processing )
         self.connect( self, QtCore.SIGNAL("kill(QString)"), wt.killSlot  )
         self.threadPool.append(wt)
