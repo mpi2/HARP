@@ -1,38 +1,35 @@
 #!/usr/bin/python
 
 #Comment for neil_test branch
-from PyQt4 import QtGui, QtCore
 import argparse
 import os
 import fnmatch
 import numpy as np
-from multiprocessing import Pool, Process, cpu_count, freeze_support, Value, Queue
-import sys
-import time
 import math
 from collections import Counter
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 import threading
-#import Queue
 import cv2
-import multiprocessing
+import multiprocessing as mp
 
 
-shared_terminate = Value("i", 0)
+shared_terminate = mp.Value("i", 0)
 
 
 class Autocrop():
-	def __init__(self, in_dir, out_dir, callback, autocrop_finished_slot, num_proc=None, def_crop=None):
+	def __init__(self, in_dir, out_dir, callback, num_proc=None, def_crop=None):
 		#call the super
 		self.callback = callback
 		self.in_dir = in_dir
 		self.out_dir = out_dir
-		self.shared_auto_count = Value("i", 0)
-		self.shared_crop_count = Value("i", 0)
+		self.shared_auto_count = mp.Value("i", 0)
+		self.shared_crop_count = mp.Value("i", 0)
 		self.imdims = None
 		self.def_crop = def_crop
 		self.num_proc = num_proc
-		self.msg_q = Queue()
+		self.msg_q = mp.Queue()
+		self.metric_file_queue = mp.Queue(30)
+		self.crop_metric_queue = mp.Queue()
 		self.skip_num = 10 #read evey n files for determining cropping box
 		self.threshold = 0.01 #Threshold for cropping metric
 
@@ -54,7 +51,7 @@ class Autocrop():
 		while True:
 			try:
 				matrix = self.metric_file_queue.get(block=True)
-				if matrix == None: #Found a sentinel
+				if matrix == 'STOP': #Found a sentinel
 					break
 			except Exception as e:
 				print("metric queue error")
@@ -64,7 +61,7 @@ class Autocrop():
 				crops["x"] = np.std(matrix, axis=0)
 				crops["y"] = np.std(matrix, axis=1)
 				self.crop_metric_queue.put(crops)
-				self.metric_file_queue.task_done()
+				#self.metric_file_queue.task_done()
 
 
 	def calc_auto_crop(self,  padding=0):
@@ -93,6 +90,7 @@ class Autocrop():
 			lcrop, tcrop, rcrop - lcrop, bcrop - tcrop))
 		print lcrop, tcrop, rcrop, bcrop
 		self.crop_box = (lcrop, tcrop, rcrop, bcrop)
+
 		self.runCropProcess()
 
 
@@ -103,7 +101,7 @@ class Autocrop():
 
 	def runCropProcess(self):
 
-		proc = multiprocessing.Process(target=self.init_cropping, args=(self.msg_q,))
+		proc = mp.Process(target=self.init_cropping, args=(self.msg_q,))
 		proc.start()
 		while True:
 			try:
@@ -118,18 +116,12 @@ class Autocrop():
 
 
 	def init_cropping(self, msg_q):
-		#self.emit(QtCore.SIGNAL('update(QString)'),"cropping")
 		for file_ in self.files:
 			im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
 			self.shared_crop_count.value += 1
 			if self.shared_crop_count.value % 20 == 0:
-				print "more"
-			#print("self.crop_file_queue.qsize", self.crop_file_queue.qsize())
-			#print("self.write_file_queue.qsize", self.write_file_queue.qsize())
 				msg_q.put( "Cropping: {0}/{1} images".format(str(self.shared_crop_count.value), str(len(self.files))))
 
-			#name = os.path.basename(file)
-			#cv2.imwrite(name, im)
 			imcrop = im[ self.crop_box[1]:self.crop_box[3],  self.crop_box[0]: self.crop_box[2]  ]
 			filename = os.path.basename(file_)
 			crop_out = os.path.join(self.out_dir,filename)
@@ -145,10 +137,8 @@ class Autocrop():
 		@param side str: x or y
 		@param threshold int:
 		'''
-		#get rid of the low values in the noise
-		metric_slices = [item for item in self.crop_metric_queue.queue]
 		#print metric_slices
-		vals = [self.lowvals(x[side]) for x in metric_slices]
+		vals = [self.lowvals(x[side]) for x in self.metric_slices]
 
 		#filterout low values
 		means = map(self.entropy, zip(*vals))
@@ -203,20 +193,9 @@ class Autocrop():
 
 		if self.def_crop:
 			self.calc_manual_crop()
-			self.emit( QtCore.SIGNAL('cropFinished(QString)'), "success" )
+			self.callback("success" )
 		else:
 			print("Doing autocrop")
-
-
-			if self.num_proc:
-				pool_num = int(self.num_proc)
-			else:
-				pool_num = cpu_count()
-			#set up the file producer thread
-			#self.file_thread = threading.Thread(target=self.fileProducer)
-			#self.file_thread.start()
-
-			#And now the consumer threads
 			pool_num = 2
 			mThreads = []
 			for i in range(pool_num):
@@ -230,16 +209,18 @@ class Autocrop():
 				self.shared_auto_count.value += (1 * self.skip_num)
 				if self.shared_auto_count.value % 40 == 0:
 					print("self.metric_file_queue.qsize", self.metric_file_queue.qsize())
-					self.emit( QtCore.SIGNAL('update(QString)'), "Getting crop box: {0}/{1} images".format(str(self.shared_auto_count.value), str(len(self.files))))
+					self.callback( "Getting crop box: {0}/{1} images".format(str(self.shared_auto_count.value), str(len(self.files))))
 				im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
 				self.metric_file_queue.put(im)
 
 			#Add some sentinels and block until threads finish
 			for i in range(pool_num):
-				self.metric_file_queue.put(None)
+				self.metric_file_queue.put('STOP')
 			for t in mThreads:
 				t.join()
 			print("metric done")
+			self.crop_metric_queue.put('STOP')
+			self.metric_slices = [item for item in iter(self.crop_metric_queue.get, 'STOP')]
 
 
 			#Die if signalled from gui
@@ -247,7 +228,7 @@ class Autocrop():
 				return
 
 			self.calc_auto_crop(padding)
-			self.emit( QtCore.SIGNAL('cropFinished(QString)'), "success" )
+			self.callback("success" )
 			return
 
 
@@ -314,5 +295,5 @@ def cli_run():
 
 
 if __name__ == '__main__':
-	freeze_support()
+	mp.freeze_support()
 	cli_run()
