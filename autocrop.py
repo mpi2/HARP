@@ -47,10 +47,13 @@ class Autocrop():
 		'''
 
 		global shared_terminate
-		if shared_terminate.value == 1:
-			return
+
 		while True:
 			try:
+				if shared_terminate.value == 1:
+					self.callback("Processing Cancelled!" )
+					return
+
 				matrix = self.metric_file_queue.get(block=True)
 				if matrix == 'STOP': #Found a sentinel
 					break
@@ -119,6 +122,7 @@ class Autocrop():
 	def init_cropping(self, msg_q):
 		for file_ in self.files:
 			if shared_terminate.value == 1:
+				self.callback("Processing Cancelled!" )
 				return
 			im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
 			self.shared_crop_count.value += 1

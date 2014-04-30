@@ -115,7 +115,7 @@ class Zproject:
 def dummyCallBack(msg):
     print(msg)
 
-class ZprojectThread(QtCore.QThread):
+class ZProjectThread(QtCore.QThread):
     def __init__(self,input,tmp_dir):
         QtCore.QThread.__init__(self)
         self.input_folder = input

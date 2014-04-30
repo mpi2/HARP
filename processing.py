@@ -104,13 +104,11 @@ class ProcessingThread(QtCore.QThread):
         ts = time.time()
         stime = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         self.session_log.write("Time"+stime+"\n")
-        self.autoCropThread = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocropUpdateSlot,  def_crop=dimensions_tuple)
-        self.autoCropThread.run()
+        self.auto_crop = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocrop_update_slot,  def_crop=dimensions_tuple)
+        self.auto_crop.run()
 
 
-
-
-    def autocropUpdateSlot(self, msg):
+    def autocrop_update_slot(self, msg):
         #print("autocrop all done")
         #         crop_result = acrop.run()
 
@@ -162,7 +160,7 @@ class ProcessingThread(QtCore.QThread):
             self.session_log.write(msg)
             return
 
-    def killSlot(self):
+    def kill_slot(self):
         # Kills autocrop
         print("Kill all")
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing Cancelled!" )
@@ -216,25 +214,25 @@ class ProcessingThread(QtCore.QThread):
         # Perform scaling as subprocess with Popen (they should be done in the background)
 
         if self.configOb.SF2 == "yes" :
-            self.executeImagej("^0.5^x2^","2")
+            self.execute_imagej("^0.5^x2^","2")
 
         if self.configOb.SF3 == "yes" :
-            self.executeImagej("^0.3333^x3^","3")
+            self.execute_imagej("^0.3333^x3^","3")
 
         if self.configOb.SF4 == "yes" :
-            self.executeImagej("^0.25^x4^","4")
+            self.execute_imagej("^0.25^x4^","4")
 
         if self.configOb.SF5 == "yes" :
-            self.executeImagej("^0.2^x5^","5")
+            self.execute_imagej("^0.2^x5^","5")
 
         if self.configOb.SF6 == "yes" :
-            self.executeImagej("^0.1667^x6^","6")
+            self.execute_imagej("^0.1667^x6^","6")
 
         if self.configOb.pixel_option == "yes" :
-            self.executeImagej("^"+str(self.configOb.SF_pixel)+"^x"+str(self.configOb.SFX_pixel)+"^","Pixel")
+            self.execute_imagej("^"+str(self.configOb.SF_pixel)+"^x"+str(self.configOb.SFX_pixel)+"^","Pixel")
 
 
-    def executeImagej(self, scaleFactor,sf):
+    def execute_imagej(self, scaleFactor,sf):
         '''
         Part of scaling function
         @param: str, scaleFactor for imagej eg "^0.5^x6"

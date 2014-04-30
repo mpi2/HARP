@@ -29,10 +29,11 @@ import psutil
 
 import autofill
 import errorcheck
-import parameters
+import getpickle
+
 from mainwindow import Ui_MainWindow
 from processing import ProcessingThread
-from zproject import ZprojectThread
+from zproject import ZProjectThread
 import crop
 
 try:
@@ -66,13 +67,12 @@ class MainWindow(QtGui.QMainWindow):
         # Initialise various switches
         self.modality = "Not_selected"
         self.selected = "Not_selected"
-        self.error = "None"
         self.stop = None
         self.count_in = 0
         self.current_row = 0
         self.list_for_processing = []
 
-        # initialise some non essential information
+        # initialise some information
         self.scan_folder = ""
         self.recon_log_path = ""
         self.f_size_out_gb = ""
@@ -106,15 +106,20 @@ class MainWindow(QtGui.QMainWindow):
         # Set cropping options
         # Auto crop (disable buttons)
         self.ui.radioButtonAuto.clicked.connect(self.man_crop_off)
+
         # No crop (disable buttons)
         self.ui.radioButtonNo.clicked.connect(self.man_crop_off)
+
         # Man crop (enable buttons).
         self.ui.radioButtonMan.clicked.connect(self.man_crop_on)
+
         # If the get dimensions button is pressed
         self.ui.pushButtonGetDimensions.clicked.connect(self.get_dimensions)
 
-        #Get the output folder name when input updated
+        #Get the output folder name when manually changed in box
         self.ui.lineEditOutput.textChanged.connect(self.output_folder_changed)
+
+        #Get the input folder name when manually changed in box
         self.ui.lineEditInput.textChanged.connect(self.input_folder_changed)
 
         # Get recon file manually
@@ -161,17 +166,19 @@ class MainWindow(QtGui.QMainWindow):
 
     def about_message(self):
         ''' Short description about what HARP is and its version'''
-        message = QtGui.QMessageBox.information(self, 'Message',
-                                                'HARP v0.1: Harwell Automated Recon Processor\n\nCrop, scale and compress reconstructed images from microCT data.\nFunctionality for OPT data to be added in future versions')
+        QtGui.QMessageBox.information(self, 'Message',(
+                                                'HARP v0.1: Harwell Automated Recon Processor\n\n'
+                                                'Crop, scale and compress reconstructed images from microCT data.\n'
+                                                'Functionality for OPT data to be added in future versions'))
 
     def user_guide(self):
         ''' Loads up pdf help file'''
-        harp_user_man_chm = os.path.join(self.dir,"HARP_user_guide.pdf")
+        user_man = os.path.join(self.dir,"HARP_user_guide.pdf")
         if sys.platform == "win32":
-            os.startfile(harp_user_man_chm)
+            os.startfile(user_man)
         else:
             opener ="evince"
-            subprocess.call([opener, harp_user_man_chm])
+            subprocess.call([opener, user_man])
 
     def resize_screen(self):
         ''' Resize screen for smaller monitors'''
@@ -185,11 +192,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def select_file_out(self):
         ''' Select output folder'''
-        outputFolder = str(self.ui.lineEditOutput.text())
+        output_folder = str(self.ui.lineEditOutput.text())
 
         # Check input and output folders assigned
-        if outputFolder :
-            self.fileDialog = QtGui.QFileDialog(self,'Open File', outputFolder)
+        if output_folder :
+            self.fileDialog = QtGui.QFileDialog(self,'Open File', output_folder)
         else:
             self.fileDialog = QtGui.QFileDialog(self,'Open File')
 
@@ -200,11 +207,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def select_file_in(self):
         ''' User selects the folder to be processed and some auto-fill methods are carried out '''
-        inputFolder = str(self.ui.lineEditInput.text())
+        input_folder = str(self.ui.lineEditInput.text())
 
         # Check input and output folders assigned
-        if inputFolder :
-            self.fileDialog = QtGui.QFileDialog(self,'Open File', inputFolder)
+        if input_folder :
+            self.fileDialog = QtGui.QFileDialog(self,'Open File', input_folder)
         else:
             self.fileDialog = QtGui.QFileDialog(self,'Open File')
 
@@ -213,28 +220,28 @@ class MainWindow(QtGui.QMainWindow):
         # if folder is not defined user has pressed cancel
         if not folder == "":
             # Reset the inputs incase this is not the first time someone has selected a file
-            self.resetInputs()
+            self.reset_inputs()
 
             # Set the input folder
             self.ui.lineEditInput.setText(folder)
 
             # Autocomplete the name
-            autofill.getName(self)
+            autofill.get_name(self)
 
             # Get the reconLog and associated pixel size
-            autofill.getReconLog(self)
+            autofill.get_recon_log(self)
 
             # Get the output folder location
-            autofill.autoFileOut(self)
+            autofill.auto_file_out(self)
 
             # Automatically identify scan folder
-            autofill.autoGetScan(self)
+            autofill.auto_get_scan(self)
 
             # Automatically get SPR file
-            autofill.autoGetSPR(self)
+            autofill.auto_get_SPR(self)
 
             # Determine size of input folder
-            autofill.folderSizeApprox(self)
+            autofill.folder_size_approx(self)
 
     def reset_inputs(self):
         ''' Reset the inputs to blank'''
@@ -254,11 +261,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def input_folder_changed(self, text):
         ''' When user changes the name of the folder manually'''
-        self.inputFolder = text
+        self.input_folder = text
 
     def output_folder_changed(self, text):
         ''' When user changes the name of the folder manually'''
-        self.outputFolder = text
+        self.output_folder = text
 
     def scale_by_pixel_on(self):
         ''' enables boxes for scaling by pixel'''
@@ -318,9 +325,9 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEditSex.setText(name_list[5])
 
         except IndexError as e:
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format.\n')
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format.\n')
         except:
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error when updating name',sys.exc_info()[0])
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error when updating name',sys.exc_info()[0])
 
         # Get output folder name, to start off with this will just be the input name
         output = str(self.ui.lineEditOutput.text())
@@ -329,8 +336,8 @@ class MainWindow(QtGui.QMainWindow):
 
     def get_recon_man(self):
         ''' Get the recon folder manually'''
-        self.fileDialog = QtGui.QFileDialog(self)
-        file = self.fileDialog.getOpenFileName()
+        self.file_dialog = QtGui.QFileDialog(self)
+        file = self.file_dialog.getOpenFileName()
         self.pixel_size = ""
         self.ui.lcdNumberPixel.display(self.pixel_size)
         if not file == "":
@@ -367,14 +374,14 @@ class MainWindow(QtGui.QMainWindow):
 
     def get_scan_man(self):
         ''' Get the scan folder manually'''
-        self.fileDialog = QtGui.QFileDialog(self)
+        self.file_dialog = QtGui.QFileDialog(self)
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
         if not folder == "":
             self.ui.lineEditScan.setText(folder)#
 
     def get_SPR_man(self):
         ''' Get the SPR file manually'''
-        self.fileDialog = QtGui.QFileDialog(self)
+        self.file_dialog = QtGui.QFileDialog(self)
         file= self.fileDialog.getOpenFileName()
         if not file == "":
             self.ui.lineEditCTSPR.setText(file)
@@ -394,15 +401,15 @@ class MainWindow(QtGui.QMainWindow):
 
         # Check input folder is defined
         if not input_folder :
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input directory not defined')
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: input directory not defined')
             return
         # Check input folder exists
         if not os.path.exists(input_folder):
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not exist')
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not exist')
             return
         #Check if folder is empty
         elif os.listdir(input_folder) == []:
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty')
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty')
             return
 
         # Get folder to store the zprojection. Stored in a temp folder untill processing is fully completed
@@ -412,17 +419,18 @@ class MainWindow(QtGui.QMainWindow):
         # Let the user know what is going on
         self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
         #Run the zprojection
-        self.threadForZ()
+        self.start_z_thread()
 
-    def thread_for_Z(self):
-        ''' starts a thread to perform all the processing in the background. The add function then listens to any messages the thread makes'''
+    def start_z_thread(self):
+        ''' starts a thread to perform all the processing in the background.'''
         input_folder = str(self.ui.lineEditInput.text())
-        self.threadPoolz = []
-        self.threadPoolz.append( ZProjectThread(input_folder,self.tmp_dir) )
-        self.connect( self.threadPoolz[len(self.threadPoolz)-1], QtCore.SIGNAL("update(QString)"), self.listen2ZProject )
-        self.threadPoolz[len(self.threadPoolz)-1].start()
 
-    def listen_2_zproject(self,message):
+        self.z_thread_pool = []
+        self.z_thread_pool.append( ZProjectThread(input_folder,self.tmp_dir) )
+        self.connect( self.z_thread_pool[len(self.z_thread_pool)-1], QtCore.SIGNAL("update(QString)"), self.zproject_slot )
+        self.z_thread_pool[len(self.z_thread_pool)-1].start()
+
+    def zproject_slot(self,message):
         '''
         This listens to the child process and displays any messages. It has records the start and stop time of the processing and starts a new
         thread after the processing has finished
@@ -430,7 +438,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.textEditStatusMessages.setText(message)
         if message == "Z-projection finished":
             # Get the crop dimensions and save the file
-            self.runCrop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
+            self.run_crop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
 
 
     def crop_call_back(self, box):
@@ -444,17 +452,17 @@ class MainWindow(QtGui.QMainWindow):
 
     def run_crop(self, img_path):
         ''' Method to create Crop object (used in getDimensions)'''
-        cropper = crop.Crop(self.cropCallback, img_path, self)
+        cropper = crop.Crop(self.crop_call_back, img_path, self)
         cropper.show()
 
     #======================================================================
     # Functions for processing
     #======================================================================
     def start_processing(self):
-        ''' Starts a thread for processing after the user has pressed the 'start button'  '''
+        ''' Starts a thread for processing after the user has pressed the 'start button' (GUI click only) '''
         self.ui.pushButtonStart.setEnabled(False)
         self.ui.pushButtonStop.setEnabled(True)
-        self.threadForProcessing()
+        self.start_processing_thread()
 
     def add_to_list(self):
         '''
@@ -472,7 +480,7 @@ class MainWindow(QtGui.QMainWindow):
         # If an error has occured self.stop will be defined. if None then no error.
         if self.stop == None :
             # Get the parameters needed for processing
-            parameters.getParamaters(self)
+            getpickle.get_pickle(self)
 
             # Set up the table. 300 rows should be enough!
             self.ui.tableWidget.setRowCount(300)
@@ -507,7 +515,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.tabWidget.setCurrentIndex(1)
 
 
-    def listen_2_processing(self,message):
+    def processing_slot(self,message):
         '''
         This listens to the child process and displays any messages. It has records the start and stop time of the processing and starts a new
         thread after the processing has finished
@@ -529,18 +537,18 @@ class MainWindow(QtGui.QMainWindow):
             item = self.ui.tableWidget.item(self.current_row, 4)
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             # Processing has finished, lets do another one!
-            self.threadForProcessing()
+            self.start_pro_thread()
 
         self.ui.tableWidget.resizeColumnsToContents()
 
-    def thread_for_processing(self):
+    def start_processing_thread(self):
         ''' starts a thread to perform all the processing in the background. The add function then listens to any messages the thread makes'''
 
         # Get memory of the computer (can't seem to do this in the thread)
         mem_summary = psutil.virtual_memory()
         prog = re.compile("total=(\d+)")
         self.memory =  re.search(prog, str(mem_summary)).group(1)
-        self.threadPool = []
+        self.p_thread_pool = []
 
         # A while loop is used to go through the processing table and decides which file to process
         count = 0
@@ -564,16 +572,16 @@ class MainWindow(QtGui.QMainWindow):
                 break
             count = count +1
 
-        print self.threadPool
+
         # Get the configobject for the row which has been identified from the previous while loop
         self.configOb_path_from_list = os.path.join(self.folder_from_list,"Metadata","configobject.txt")
 
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
         wt =  ProcessingThread(self.configOb_path_from_list,self.memory, self)
-        self.connect( wt, QtCore.SIGNAL("update(QString)"), self.listen2Processing )
-        self.connect( self, QtCore.SIGNAL("kill(QString)"), wt.killSlot  )
-        self.threadPool.append(wt)
-        self.threadPool[len(self.threadPool)-1].start()
+        self.connect( wt, QtCore.SIGNAL("update(QString)"), self.processing_slot )
+        self.connect( self, QtCore.SIGNAL("kill(QString)"), wt.kill_slot  )
+        self.p_thread_pool.append(wt)
+        self.p_thread_pool[len(self.p_thread_pool)-1].start()
 
     def add_more(self):
         """
@@ -583,15 +591,17 @@ class MainWindow(QtGui.QMainWindow):
 
     def stop_processing(self):
         """ Stop processing, kill the current process """
+        item = QtGui.QTableWidgetItem()
+        self.ui.tableWidget.setItem(self.current_row, 2, item)
         item = self.ui.tableWidget.item(self.current_row, 2)
-        self.ui.pushButtonStart.setEnabled(True)
-        self.ui.pushButtonStop.setEnabled(False)
+        item.setText("Processing Cancelled!")
 
         self.kill_em_all()
 
-        item.setText("Processing Cancelled!")
-        logging.shutdown()
-        self.threadPool = None
+        self.ui.pushButtonStart.setEnabled(True)
+        self.ui.pushButtonStop.setEnabled(False)
+
+        self.p_thread_pool = None
 
 
     def delete_rows(self,event):
@@ -608,7 +618,7 @@ class MainWindow(QtGui.QMainWindow):
                     # The count_in will now be one less (i think...)
                     self.count_in = self.count_in-1
                     # I think the thread will be empty fo next time already
-                    #self.threadPool = []
+                    #self.pthread_pool = []
                 else :
                     message = QtGui.QMessageBox.information(self, 'Message','Warning: Can\'t delete a row that is currently being processed.\nSelect "Stop", then remove')
 

@@ -14,7 +14,7 @@ import autocrop
 import cPickle as pickle
 import ConfigClass
 
-def getReconLog(self):
+def get_recon_log(self):
     '''
     Gets the recon log from the original recon folder and gets the pixel size information
     '''
@@ -77,7 +77,7 @@ def getReconLog(self):
 
 
 
-def getName(self):
+def get_name(self):
     '''
     Gets the id from the folder name. Then fills out the text boxes on the main window with the relevant information
     '''
@@ -112,7 +112,7 @@ def getName(self):
 
 
 
-def autoFileOut(self):
+def auto_file_out(self):
     '''
     Auto fill to make output folder name. Just replaces 'recons' to 'processed recons' if possible
     '''
@@ -129,7 +129,7 @@ def autoFileOut(self):
         message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected getting and auto file out',sys.exc_info()[0])
 
 
-def autoGetScan(self):
+def auto_get_scan(self):
     '''
     Auto find scan folder. Just replaces 'recons' to 'processed recons' if possible
     '''
@@ -146,7 +146,7 @@ def autoGetScan(self):
         self.ui.lineEditScan.setText("Not found")
         self.scan_folder = ""
 
-def autoGetSPR(self):
+def auto_get_SPR(self):
     '''
     Finds any SPR files. This might be a bit redundant as the SPR files are not essential and are copied over with any other
     file regardless
@@ -176,7 +176,7 @@ def autoGetSPR(self):
     else:
         self.ui.lineEditCTSPR.setText("Not found")
 
-def folderSizeApprox(self):
+def folder_size_approx(self):
     '''
     Gets the approx folder size of the original recon folder and updates the main window with
     this information. Calculating the folder size by going through each file takes a while on janus. This
@@ -221,14 +221,14 @@ def folderSizeApprox(self):
         self.f_size_out_gb = "%0.4f" % (f_size_out)
 
         #Clean up the formatting of gb mb
-        sizeCleanup(self,f_size_out,approx_size)
+        size_cleanup(self,f_size_out,approx_size)
     except Exception as e:
         # Should pontially add some other error catching
         message = QtGui.QMessageBox.warning(self, "Message", "Unexpected error in folder size calc: {0}".format(e))
 
 
 
-def sizeCleanup(self,f_size_out,approx_size):
+def size_cleanup(self,f_size_out,approx_size):
     '''
     Used in folderSizeApprox() to format the output. In a separate method Potentially to be used again for more accurate folder size calc.
     '''
