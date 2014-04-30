@@ -43,9 +43,6 @@ class WorkThreadProcessing(QtCore.QThread):
         elif __file__:
             self.dir = os.path.dirname(__file__)
 
-        # Need to reset global parameter
-        autocrop.reset()
-
 
         #===============================================
         # Setup logging files
@@ -163,6 +160,8 @@ class WorkThreadProcessing(QtCore.QThread):
         autocrop.terminate()
         # Kills the Work_Thread_Run_Processing thread (hopefully)
         self.quit()
+        self.wait()
+        print("quit")
         #self.wait() #this was hanging the GUI
 
 

@@ -32,6 +32,7 @@ class Autocrop():
 		self.crop_metric_queue = mp.Queue()
 		self.skip_num = 10 #read evey n files for determining cropping box
 		self.threshold = 0.01 #Threshold for cropping metric
+		shared_terminate.value = 0
 
 
 	def metricFinder(self):
@@ -117,6 +118,8 @@ class Autocrop():
 
 	def init_cropping(self, msg_q):
 		for file_ in self.files:
+			if shared_terminate.value == 1:
+				return
 			im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
 			self.shared_crop_count.value += 1
 			if self.shared_crop_count.value % 20 == 0:
@@ -174,8 +177,6 @@ class Autocrop():
 
 
 
-
-
 	def run(self):
 		'''
 		'''
@@ -193,6 +194,9 @@ class Autocrop():
 
 		if self.def_crop:
 			self.calc_manual_crop()
+			if shared_terminate.value == 1:
+				self.callback("Cancelled" )
+				return
 			self.callback("success" )
 		else:
 			print("Doing autocrop")
@@ -208,7 +212,6 @@ class Autocrop():
 			for file_ in sparse_files:
 				self.shared_auto_count.value += (1 * self.skip_num)
 				if self.shared_auto_count.value % 40 == 0:
-					print("self.metric_file_queue.qsize", self.metric_file_queue.qsize())
 					self.callback( "Getting crop box: {0}/{1} images".format(str(self.shared_auto_count.value), str(len(self.files))))
 				im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
 				self.metric_file_queue.put(im)
@@ -225,9 +228,13 @@ class Autocrop():
 
 			#Die if signalled from gui
 			if shared_terminate.value == 1:
+				self.callback("Cancelled" )
 				return
 
 			self.calc_auto_crop(padding)
+			if shared_terminate.value == 1:
+				self.callback("Cancelled" )
+				return
 			self.callback("success" )
 			return
 
@@ -269,10 +276,7 @@ def terminate():
 		shared_terminate.value = 1
 
 
-def reset():
-	# Global value needs to be reset before next processing task on the list
-	global shared_terminate
-	shared_terminate.value = 0
+
 
 def dummy_callback(msg):
 	'''use for cli running'''
