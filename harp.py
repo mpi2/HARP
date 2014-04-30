@@ -5,6 +5,7 @@
 #date            :2014-04-09
 #version         :0.1
 #usage           :python mMin.py or if using executable in windows .\Main.exe or clicking on the Main.exe icon.
+#formatting      :PEP8 format is used where possible
 #python_version  :2.7
 #=============================================================================
 
@@ -26,20 +27,14 @@ import uuid
 from PyQt4 import QtCore, QtGui
 import psutil
 
-import Autocomplete
-import Error_Checking
-import Get_Parameters
-from MainWindow import Ui_MainWindow
-from Work_Thread_Run_Processing import WorkThreadProcessing
-
+import autofill
+import errorcheck
+import parameters
+from mainwindow import Ui_MainWindow
+from processing import ProcessingThread
+from zproject import ZprojectThread
 import crop
-from Work_Thread_Get_Dimensions import WorkThreadGetDimensions
-import zproject
 
-
-# Import MainWindow class from QT Designer
-#from RunProcessing import *
-# cPickle is faster than pickle and is pretty much the same
 try:
     import Image
 except ImportError:
@@ -52,6 +47,9 @@ class MainWindow(QtGui.QMainWindow):
 
     Also shows a dialog box after a submission the dialog box will then keep a track of the
     image processing (not yet developed).
+
+    QT Designer automatically uses mixed case for its class object names e.g radioButton this format
+    is not PEP8 but has not been changed
     '''
 
     def __init__(self, app):
@@ -91,82 +89,82 @@ class MainWindow(QtGui.QMainWindow):
         self.tmp_dir = tempfile.mkdtemp()
 
         # get input folder
-        self.ui.pushButtonInput.clicked.connect(self.selectFileIn)
+        self.ui.pushButtonInput.clicked.connect(self.select_file_in)
 
         # Get output folder
-        self.ui.pushButtonOutput.clicked.connect(self.selectFileOut)
+        self.ui.pushButtonOutput.clicked.connect(self.select_file_out)
 
         # OPT selection
-        self.ui.radioButtonOPT.clicked.connect(self.getOPTonly)
+        self.ui.radioButtonOPT.clicked.connect(self.get_OPT_only)
 
         # uCT selection
-        self.ui.radioButtonuCT.clicked.connect(self.getuCTonly)
+        self.ui.radioButtonuCT.clicked.connect(self.get_uCT_only)
 
         # If Go button is pressed move onto track progress dialog box
-        self.ui.pushButtonGo.clicked.connect(self.addToList)
+        self.ui.pushButtonGo.clicked.connect(self.add_to_list)
 
         # Set cropping options
         # Auto crop (disable buttons)
-        self.ui.radioButtonAuto.clicked.connect(self.manCropOff)
+        self.ui.radioButtonAuto.clicked.connect(self.man_crop_off)
         # No crop (disable buttons)
-        self.ui.radioButtonNo.clicked.connect(self.manCropOff)
+        self.ui.radioButtonNo.clicked.connect(self.man_crop_off)
         # Man crop (enable buttons).
-        self.ui.radioButtonMan.clicked.connect(self.manCropOn)
+        self.ui.radioButtonMan.clicked.connect(self.man_crop_on)
         # If the get dimensions button is pressed
-        self.ui.pushButtonGetDimensions.clicked.connect(self.getDimensions)
+        self.ui.pushButtonGetDimensions.clicked.connect(self.get_dimensions)
 
         #Get the output folder name when input updated
-        self.ui.lineEditOutput.textChanged.connect(self.outputFolderChanged)
-        self.ui.lineEditInput.textChanged.connect(self.inputFolderChanged)
+        self.ui.lineEditOutput.textChanged.connect(self.output_folder_changed)
+        self.ui.lineEditInput.textChanged.connect(self.input_folder_changed)
 
         # Get recon file manually
-        self.ui.pushButtonCTRecon.clicked.connect(self.getReconMan)
+        self.ui.pushButtonCTRecon.clicked.connect(self.get_recon_man)
 
         # Get scan file manually
-        self.ui.pushButtonScan.clicked.connect(self.getScanMan)
+        self.ui.pushButtonScan.clicked.connect(self.get_scan_man)
 
         # Get SPR file manually
-        self.ui.pushButtonCTSPR.clicked.connect(self.getSPRMan)
+        self.ui.pushButtonCTSPR.clicked.connect(self.get_SPR_man)
 
         # Update name
-        self.ui.pushButtonUpdate.clicked.connect(self.updateName)
+        self.ui.pushButtonUpdate.clicked.connect(self.update_name)
 
         # Get scan file manually
-        self.ui.checkBoxPixel.clicked.connect(self.scaleByPixelOn)
+        self.ui.checkBoxPixel.clicked.connect(self.scale_by_pixel_on)
 
         # Resize for smaller monitors
-        self.ui.actionResize.triggered.connect(self.resizeScreen)
+        self.ui.actionResize.triggered.connect(self.resize_screen)
 
         # Reset screen size to standard
-        self.ui.actionReset_screen_size.triggered.connect(self.resetScreen)
+        self.ui.actionReset_screen_size.triggered.connect(self.reset_screen)
 
         # Start processing recons
-        self.ui.pushButtonStart.clicked.connect(self.startProcessing)
+        self.ui.pushButtonStart.clicked.connect(self.start_processing)
 
         # Stop processing recons
-        self.ui.pushButtonStop.clicked.connect(self.stopProcessing)
+        self.ui.pushButtonStop.clicked.connect(self.stop_processing)
 
         # Add more recons to the list
-        self.ui.pushButtonAdd.clicked.connect(self.addMore)
+        self.ui.pushButtonAdd.clicked.connect(self.add_more)
 
         # delete some recons
-        self.ui.tableWidget.__class__.keyPressEvent = self.deleteRows
+        self.ui.tableWidget.__class__.keyPressEvent = self.delete_rows
 
         # About HARP message
-        self.ui.actionAbout.triggered.connect(self.aboutMessage)
+        self.ui.actionAbout.triggered.connect(self.about_message)
 
         # Documentation PDF
-        self.ui.actionPDF_user_guide.triggered.connect(self.pdfUserGuide)
+        self.ui.actionPDF_user_guide.triggered.connect(self.user_guide)
 
         # to make the window visible
         self.show()
 
-    def aboutMessage(self):
+    def about_message(self):
         ''' Short description about what HARP is and its version'''
         message = QtGui.QMessageBox.information(self, 'Message',
                                                 'HARP v0.1: Harwell Automated Recon Processor\n\nCrop, scale and compress reconstructed images from microCT data.\nFunctionality for OPT data to be added in future versions')
 
-    def pdfUserGuide(self):
+    def user_guide(self):
         ''' Loads up pdf help file'''
         harp_user_man_chm = os.path.join(self.dir,"HARP_user_guide.pdf")
         if sys.platform == "win32":
@@ -175,17 +173,17 @@ class MainWindow(QtGui.QMainWindow):
             opener ="evince"
             subprocess.call([opener, harp_user_man_chm])
 
-    def resizeScreen(self):
+    def resize_screen(self):
         ''' Resize screen for smaller monitors'''
         self.resize(1300,700)
         self.ui.scrollArea.setFixedSize(1241,600)
 
-    def resetScreen(self):
+    def reset_screen(self):
         ''' Reset screen back to default'''
         self.resize(1300, 1007)
         self.ui.scrollArea.setFixedSize(1241,951)
 
-    def selectFileOut(self):
+    def select_file_out(self):
         ''' Select output folder'''
         outputFolder = str(self.ui.lineEditOutput.text())
 
@@ -200,7 +198,7 @@ class MainWindow(QtGui.QMainWindow):
         if not folder == "":
             self.ui.lineEditOutput.setText(folder)
 
-    def selectFileIn(self):
+    def select_file_in(self):
         ''' User selects the folder to be processed and some auto-fill methods are carried out '''
         inputFolder = str(self.ui.lineEditInput.text())
 
@@ -221,24 +219,24 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEditInput.setText(folder)
 
             # Autocomplete the name
-            Autocomplete.getName(self)
+            autofill.getName(self)
 
             # Get the reconLog and associated pixel size
-            Autocomplete.getReconLog(self)
+            autofill.getReconLog(self)
 
             # Get the output folder location
-            Autocomplete.autoFileOut(self)
+            autofill.autoFileOut(self)
 
             # Automatically identify scan folder
-            Autocomplete.autoGetScan(self)
+            autofill.autoGetScan(self)
 
             # Automatically get SPR file
-            Autocomplete.autoGetSPR(self)
+            autofill.autoGetSPR(self)
 
             # Determine size of input folder
-            Autocomplete.folderSizeApprox(self)
+            autofill.folderSizeApprox(self)
 
-    def resetInputs(self):
+    def reset_inputs(self):
         ''' Reset the inputs to blank'''
         self.ui.lineEditDate.setText("")
         self.ui.lineEditGroup.setText("")
@@ -254,22 +252,22 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lcdNumberFile.display(0.0)
         self.ui.lcdNumberPixel.display(0.0)
 
-    def inputFolderChanged(self, text):
+    def input_folder_changed(self, text):
         ''' When user changes the name of the folder manually'''
         self.inputFolder = text
 
-    def outputFolderChanged(self, text):
+    def output_folder_changed(self, text):
         ''' When user changes the name of the folder manually'''
         self.outputFolder = text
 
-    def scaleByPixelOn(self):
+    def scale_by_pixel_on(self):
         ''' enables boxes for scaling by pixel'''
         if self.ui.checkBoxPixel.isChecked() :
             self.ui.lineEditPixel.setEnabled(True)
         else :
             self.ui.lineEditPixel.setEnabled(False)
 
-    def manCropOff(self):
+    def man_crop_off(self):
         ''' disables boxes for cropping manually '''
         self.ui.lineEditX.setEnabled(False)
         self.ui.lineEditY.setEnabled(False)
@@ -277,7 +275,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditH.setEnabled(False)
         self.ui.pushButtonGetDimensions.setEnabled(False)
 
-    def manCropOn(self):
+    def man_crop_on(self):
         ''' enables boxes for cropping manually '''
         self.ui.lineEditX.setEnabled(True)
         self.ui.lineEditY.setEnabled(True)
@@ -285,19 +283,19 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditH.setEnabled(True)
         self.ui.pushButtonGetDimensions.setEnabled(True)
 
-    def getOPTonly(self):
+    def get_OPT_only(self):
         ''' unchecks uCT box (if checked) and checks OPT group box and creates or edits self.modality '''
         self.ui.groupBoxOPTOnly.setChecked(True)
         self.ui.groupBoxuCTOnly.setChecked(False)
         self.modality = "OPT"
 
-    def getuCTonly(self):
+    def get_uCT_only(self):
         ''' Simply unchecks OPTT box (if checked) and checks group uCT box and creates or edits self.modality '''
         self.ui.groupBoxOPTOnly.setChecked(False)
         self.ui.groupBoxuCTOnly.setChecked(True)
         self.modality = "MicroCT"
 
-    def updateName(self):
+    def update_name(self):
         ''' Function to update the name of the file and folder'''
         self.full_name = str(self.ui.lineEditName.text())
 
@@ -329,7 +327,7 @@ class MainWindow(QtGui.QMainWindow):
         path,output_folder_name = os.path.split(output)
         self.ui.lineEditOutput.setText(os.path.join(path,self.full_name))
 
-    def getReconMan(self):
+    def get_recon_man(self):
         ''' Get the recon folder manually'''
         self.fileDialog = QtGui.QFileDialog(self)
         file = self.fileDialog.getOpenFileName()
@@ -367,14 +365,14 @@ class MainWindow(QtGui.QMainWindow):
                 self.ui.lineEditCTRecon.setText("Error identifying recon file")
 
 
-    def getScanMan(self):
+    def get_scan_man(self):
         ''' Get the scan folder manually'''
         self.fileDialog = QtGui.QFileDialog(self)
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
         if not folder == "":
             self.ui.lineEditScan.setText(folder)#
 
-    def getSPRMan(self):
+    def get_SPR_man(self):
         ''' Get the SPR file manually'''
         self.fileDialog = QtGui.QFileDialog(self)
         file= self.fileDialog.getOpenFileName()
@@ -384,7 +382,7 @@ class MainWindow(QtGui.QMainWindow):
     #======================================================================
     # Functions for get Dimensions (z projection)
     #======================================================================
-    def getDimensions(self):
+    def get_dimensions(self):
         '''
         Perform a z projection which allows user to crop based on z projection. Two important files used. crop.py and zproject.py
         zproject peforms the zprojection and displays the image. crop.py then gets the dimensions to perform the crop
@@ -416,15 +414,15 @@ class MainWindow(QtGui.QMainWindow):
         #Run the zprojection
         self.threadForZ()
 
-    def threadForZ(self):
+    def thread_for_Z(self):
         ''' starts a thread to perform all the processing in the background. The add function then listens to any messages the thread makes'''
         input_folder = str(self.ui.lineEditInput.text())
         self.threadPoolz = []
-        self.threadPoolz.append( WorkThreadGetDimensions(input_folder,self.tmp_dir) )
+        self.threadPoolz.append( ZProjectThread(input_folder,self.tmp_dir) )
         self.connect( self.threadPoolz[len(self.threadPoolz)-1], QtCore.SIGNAL("update(QString)"), self.listen2ZProject )
         self.threadPoolz[len(self.threadPoolz)-1].start()
 
-    def listen2ZProject(self,message):
+    def listen_2_zproject(self,message):
         '''
         This listens to the child process and displays any messages. It has records the start and stop time of the processing and starts a new
         thread after the processing has finished
@@ -435,7 +433,7 @@ class MainWindow(QtGui.QMainWindow):
             self.runCrop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
 
 
-    def cropCallback(self, box):
+    def crop_call_back(self, box):
         ''' Method to get crop dimension text (used in getDimensions)'''
         self.ui.lineEditX.setText(str(box[0]))
         self.ui.lineEditY.setText(str(box[1]))
@@ -444,7 +442,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.textEditStatusMessages.setText("Dimensions selected")
         self.ui.pushButtonGetDimensions.setText("Get Dimensions")
 
-    def runCrop(self, img_path):
+    def run_crop(self, img_path):
         ''' Method to create Crop object (used in getDimensions)'''
         cropper = crop.Crop(self.cropCallback, img_path, self)
         cropper.show()
@@ -452,13 +450,13 @@ class MainWindow(QtGui.QMainWindow):
     #======================================================================
     # Functions for processing
     #======================================================================
-    def startProcessing(self):
+    def start_processing(self):
         ''' Starts a thread for processing after the user has pressed the 'start button'  '''
         self.ui.pushButtonStart.setEnabled(False)
         self.ui.pushButtonStop.setEnabled(True)
         self.threadForProcessing()
 
-    def addToList(self):
+    def add_to_list(self):
         '''
         This will set off all the processing scripts and shows the dialog box to keep track of progress
         '''
@@ -469,12 +467,12 @@ class MainWindow(QtGui.QMainWindow):
         input_name = str(self.ui.lineEditInput.text())
 
         # Perform some checks before any processing is carried out
-        Error_Checking.errorCheck(self)
+        errorcheck.errorCheck(self)
 
         # If an error has occured self.stop will be defined. if None then no error.
         if self.stop == None :
             # Get the parameters needed for processing
-            Get_Parameters.getParamaters(self)
+            parameters.getParamaters(self)
 
             # Set up the table. 300 rows should be enough!
             self.ui.tableWidget.setRowCount(300)
@@ -509,7 +507,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.tabWidget.setCurrentIndex(1)
 
 
-    def listen2Processing(self,message):
+    def listen_2_processing(self,message):
         '''
         This listens to the child process and displays any messages. It has records the start and stop time of the processing and starts a new
         thread after the processing has finished
@@ -535,7 +533,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.tableWidget.resizeColumnsToContents()
 
-    def threadForProcessing(self):
+    def thread_for_processing(self):
         ''' starts a thread to perform all the processing in the background. The add function then listens to any messages the thread makes'''
 
         # Get memory of the computer (can't seem to do this in the thread)
@@ -571,19 +569,19 @@ class MainWindow(QtGui.QMainWindow):
         self.configOb_path_from_list = os.path.join(self.folder_from_list,"Metadata","configobject.txt")
 
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
-        wt =  WorkThreadProcessing(self.configOb_path_from_list,self.memory, self)
+        wt =  ProcessingThread(self.configOb_path_from_list,self.memory, self)
         self.connect( wt, QtCore.SIGNAL("update(QString)"), self.listen2Processing )
         self.connect( self, QtCore.SIGNAL("kill(QString)"), wt.killSlot  )
         self.threadPool.append(wt)
         self.threadPool[len(self.threadPool)-1].start()
 
-    def addMore(self):
+    def add_more(self):
         """
         When the add more button is pressed, just go back to the first tab
         """
         self.ui.tabWidget.setCurrentIndex(0)
 
-    def stopProcessing(self):
+    def stop_processing(self):
         """ Stop processing, kill the current process """
         item = self.ui.tableWidget.item(self.current_row, 2)
         self.ui.pushButtonStart.setEnabled(True)
@@ -596,7 +594,7 @@ class MainWindow(QtGui.QMainWindow):
         self.threadPool = None
 
 
-    def deleteRows(self,event):
+    def delete_rows(self,event):
         '''If the delete button is pressed on a certai row the recon is taken off the list to be processed'''
         if event.key() == QtCore.Qt.Key_Delete:
 
@@ -617,7 +615,7 @@ class MainWindow(QtGui.QMainWindow):
     #======================================================================
     # Kill HARP functions
     #======================================================================
-    def closeEvent(self, event):
+    def close_event(self, event):
         """ Function for when the program has been closed down """
         reply = QtGui.QMessageBox.question(self,  'Message',  'Are you sure to quit?',  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
         event.accept()
@@ -633,27 +631,6 @@ class MainWindow(QtGui.QMainWindow):
         # First kill the thread and autocrop
         self.emit(QtCore.SIGNAL('kill(QString)'), "kill")
 
-        # Get the list of processes as well from the metadata
-        self.pid_path_from_list = os.path.join(self.folder_from_list,"Metadata","pid.log")
-        # Open the file and kill all on the list!
-        ins = open( self.pid_path_from_list, "r" )
-        for line in ins:
-            try :
-                if _platform == "linux" or _platform == "linux2":
-                    os.kill(int(line),signal.SIGKILL)
-                elif _platform == "win32" or _platform == "win64":
-                    line = line.rstrip()
-                    proc = subprocess.Popen(["taskkill", "/f", "/t", "/im",str(line)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    (out, err) = proc.communicate()
-                    if out:
-                        print "program output:", out
-                    if err:
-                         print "program error output:", err
-
-            except OSError as e:
-                print("os.kill could not kill process, reason: {0}".format(e))
-        # Try and shutdown any logging
-        logging.shutdown()
 
 
 
