@@ -15,6 +15,7 @@ import cPickle as pickle
 import ConfigClass
 from multiprocessing import freeze_support
 from sys import platform as _platform
+import copy
 #from Segmentation import watershed_filter
 
 class WorkThreadProcessing(QtCore.QThread):
@@ -22,8 +23,8 @@ class WorkThreadProcessing(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         #self.exec_() #need thos for self.quit() to work
         filehandler = open(configOb, 'r')
-        self.configOb = pickle.load(filehandler)
-        self.memory = memory
+        self.configOb = copy.deepcopy(pickle.load(filehandler))
+        self.memory = copy.deepcopy(memory)
         self.scale_array = []
 
     def __del__(self):
