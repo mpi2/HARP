@@ -26,6 +26,10 @@ print("input folder:");
 print(arg_array[0]);
 
 image_list = getFileList(arg_array[0]);
+print(image_list[0]);
+print(image_list[1]);
+
+
 //Not sure what this is for
 run("Close All");
 
