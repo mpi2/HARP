@@ -2,7 +2,6 @@ import sys
 import subprocess
 import os, signal
 import re
-import pickle
 import pprint
 import time
 import shutil
@@ -10,7 +9,11 @@ import logging
 import logging.handlers
 import tarfile
 import autocrop
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from ConfigClass import ConfigClass
 
 
@@ -36,8 +39,7 @@ def getParamaters(self):
     self.log_path = os.path.join(self.meta_path,"config4user.log")
 
     # Create config file and log file
-    config = open(self.config_path, 'w')
-    log = open(self.log_path, 'w')
+    log = open(self.log_path, 'w+')
 
     #######################################
     # Create config object                #
@@ -153,12 +155,12 @@ def getParamaters(self):
     log.write("Recon_pixel_size  "+self.configOb.recon_pixel_size+"\n");
 
     # Pickle the class to a file
-    pickle.dump(self.configOb, config)
+    with open(self.config_path, 'w+') as config:
+        pickle.dump(self.configOb, config)
 
     # Copy temp files
     if self.configOb.crop_option == "Manual" :
         if os.path.exists(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif")):
             shutil.copyfile(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif"), os.path.join(self.configOb.meta_path,"max_intensity_z.tif"))
 
-    config.close()
     log.close()

@@ -3,14 +3,16 @@ import sys
 import subprocess
 import os, signal
 import re
-import pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 import pprint
 import time
 import shutil
-import logging
-import logging.handlers
 import tarfile
 import autocrop
+import datetime
 import cPickle as pickle
 import ConfigClass
 from multiprocessing import freeze_support
@@ -43,6 +45,7 @@ class WorkThreadProcessing(QtCore.QThread):
         # Need to reset global parameter
         autocrop.reset()
 
+
         #===============================================
         # Setup logging files
         #===============================================
@@ -58,7 +61,9 @@ class WorkThreadProcessing(QtCore.QThread):
         self.session_log.write("########################################\n")
         self.session_log.write("### HARP Session Log                 ###\n")
         self.session_log.write("########################################\n")
-
+        # start time
+        self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
+        #self.session_log.flush()
         #===============================================
         # Cropping
         #===============================================
@@ -98,28 +103,33 @@ class WorkThreadProcessing(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
             dimensions_tuple = None
 
-        self.autoCropThread = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocropUpdateSlot, self.autocrop_finished_slot,  def_crop=dimensions_tuple)
-        self.autoCropThread.run()
         self.session_log.write("Crop started\n")
+        ts = time.time()
+        stime = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        self.session_log.write("Time"+stime+"\n")
+        self.autoCropThread = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocropUpdateSlot,  def_crop=dimensions_tuple)
+        self.autoCropThread.run()
+
+
 
 
     def autocropUpdateSlot(self, msg):
-        self.emit( QtCore.SIGNAL('update(QString)'), msg )
-
-
-    def autocrop_finished_slot(self, msg):
         #print("autocrop all done")
         #         crop_result = acrop.run()
+
+        self.emit( QtCore.SIGNAL('update(QString)'), msg)
 
         if msg == "success":
 
             self.session_log.write("Crop finished\n")
-            self.emit( QtCore.SIGNAL('update(QString)'), "crop finished")
+            self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
+            #self.emit( QtCore.SIGNAL('update(QString)'), "crop finished")
 
             #===============================================
             # Scaling
             #===============================================
             self.scaling()
+            self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
 
             #===============================================
             # Masking/Segmentation
@@ -130,6 +140,7 @@ class WorkThreadProcessing(QtCore.QThread):
             # Copying
             #===============================================
             self.copying()
+            self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
 
             #===============================================
             # Compression
@@ -138,10 +149,11 @@ class WorkThreadProcessing(QtCore.QThread):
 
             self.session_log.close()
             return
-        else :
-            self.emit( QtCore.SIGNAL('update(QString)'), msg)
+        elif re.search("error",msg):
+            #self.emit( QtCore.SIGNAL('update(QString)'), msg)
             self.session_log.write("Error in cropping see below:\n")
             self.session_log.write(msg)
+            return
 
     def killSlot(self):
         # Kills autocrop
@@ -166,6 +178,8 @@ class WorkThreadProcessing(QtCore.QThread):
         Scaling
         '''
         self.session_log.write("*****Performing scaling******\n")
+        self.session_log.write(str(os.listdir(self.configOb.input_folder)))
+        self.session_log.write("\n")
         # First make subfolder for scaled stacks
         if not os.path.exists(self.configOb.scale_path):
             os.makedirs(self.configOb.scale_path)
@@ -223,7 +237,7 @@ class WorkThreadProcessing(QtCore.QThread):
             ijpath = os.path.join(self.dir, 'ImageJ', 'ij.jar')
 
         # detail what is happening
-        self.session_log.write("Scale by factor:")
+        self.session_log.write("Scale by factor:\n")
         self.session_log.write(str(sf))
         self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
 
@@ -241,14 +255,13 @@ class WorkThreadProcessing(QtCore.QThread):
         #Get pid of imagej macro so we can kill if the user finds a problem
         self.session_pid.write(str(process.pid)+"\n")
         out, err = process.communicate()
-
-        logging.info("Finished scaling")
+        self.session_log.write("Finished scaling\n")
 
     def copying(self):
         '''
         Copying
         '''
-        logging.debug("Copying other files from original recon")
+        self.session_log.write("***Copying other files from original recon***\n")
         for file in os.listdir(self.configOb.input_folder):
             #check if folder before copying
             if os.path.isdir(os.path.join(self.configOb.input_folder,file)):
@@ -259,7 +272,7 @@ class WorkThreadProcessing(QtCore.QThread):
                 # Need to get full path of original file though
                 file = os.path.join(self.configOb.input_folder,file)
                 shutil.copy(file,self.configOb.cropped_path)
-                self.session_log.write("File copied:"+file)
+                self.session_log.write("File copied:"+file+"\n")
 
     def compression(self):
         '''
