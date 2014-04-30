@@ -1,44 +1,40 @@
 #!/usr/bin/python
 
 #Comment for neil_test branch
+from PyQt4 import QtGui, QtCore
 import argparse
 import os
 import fnmatch
 import numpy as np
-from multiprocessing import cpu_count, freeze_support, Value
+from multiprocessing import Pool, Process, cpu_count, freeze_support, Value, Queue
+import sys
+import time
 import math
 from collections import Counter
 from matplotlib import pyplot as plt
 import threading
-import Queue
+#import Queue
 import cv2
-import subprocess
-import contextlib
-import signal
+import multiprocessing
 
 
 shared_terminate = Value("i", 0)
-#the pids of the c++ croppers. For killing
-cropper_pids = []
 
 
 class Autocrop():
-	def __init__(self, in_dir, out_dir, callback, finishedCallback, num_proc=None, def_crop=None):
-
+	def __init__(self, in_dir, out_dir, callback, autocrop_finished_slot, num_proc=None, def_crop=None):
 		#call the super
 		self.callback = callback
-		self.finishedCallback = finishedCallback
 		self.in_dir = in_dir
 		self.out_dir = out_dir
 		self.shared_auto_count = Value("i", 0)
+		self.shared_crop_count = Value("i", 0)
 		self.imdims = None
 		self.def_crop = def_crop
 		self.num_proc = num_proc
-		self.metric_file_queue = Queue.Queue(maxsize=30)
-		self.crop_metric_queue = Queue.Queue()
+		self.msg_q = Queue()
 		self.skip_num = 10 #read evey n files for determining cropping box
 		self.threshold = 0.01 #Threshold for cropping metric
-		self.shared_crops_done = Value("i", 0)
 
 
 	def metricFinder(self):
@@ -60,8 +56,8 @@ class Autocrop():
 				matrix = self.metric_file_queue.get(block=True)
 				if matrix == None: #Found a sentinel
 					break
-			except Queue.Empty:
-				pass
+			except Exception as e:
+				print("metric queue error")
 			else:
 				#matrix = np.array(im)
 				crops = {}
@@ -79,7 +75,7 @@ class Autocrop():
 		tdist = self.get_cropping_box( "y")
 		rdist = self.get_cropping_box( "x", True)
 		bdist = self.get_cropping_box( "y", True)
-		crop_vals = self.convertDistFromEdgesToXYWH((ldist, tdist, rdist, bdist))
+		crop_vals = self.convertDistFromEdgesToCoords((ldist, tdist, rdist, bdist))
 
 		#Get the distances of the box sides from the sides of the image
 		lcrop = crop_vals[0] - padding
@@ -95,86 +91,51 @@ class Autocrop():
 			lcrop, tcrop, rcrop, bcrop))
 		print("Imagej: makeRectangle({0},{1},{2},{3});".format(
 			lcrop, tcrop, rcrop - lcrop, bcrop - tcrop))
-		print(lcrop, tcrop, rcrop, bcrop)
+		print lcrop, tcrop, rcrop, bcrop
 		self.crop_box = (lcrop, tcrop, rcrop, bcrop)
-		self.init_cropping()
+		self.runCropProcess()
 
 
 	def calc_manual_crop(self):
-		self.crop_box = self.def_crop
-		self.init_cropping()
-
-	def init_cropping(self):
-		#self.emit(QtCore.SIGNAL('update(QString)'),"cropping")
-		#Increasing  number of threads should not increase speed as it's CPU/bound
-		#Spawning processes might help though. Mixing threads and processes can be bad apparently though
-
-		#Setup cropping threads
-		fileList1 = open("filelist1", "w")
-		for name in self.files:
-			fileList1.write(name + "\n")
-		fileList1.close()
-
-# 		fileList2 = open("filelist2", "w")
-# 		for i in range(len(self.files)/2, len(self.files)):
-# 			fileList2.write(self.files[i] + "\n")
-# 		fileList2.close()
-		thread1 = threading.Thread(target=self.runCropBin, args=("filelist1",))
-		thread1.setDaemon(True)
-		thread1.start()
-# 		thread2 = threading.Thread(target=self.runCropBin, args=("filelist2",))
-# 		thread2.setDaemon(True)
-# 		thread2.start()
-		thread1.join()
-# 		thread2.join()
+		self.crop_box = self.convertXYWH_ToCoords(self.def_crop)
+		self.runCropProcess()
 
 
-	def runCropBin(self, fileList):
-		global shared_terminate
-		crop_binary = os.path.join(os.path.dirname(os.path.realpath(__file__)), "cropper")
-		x, y, w, h = self.crop_box
-		cmd = [crop_binary, fileList, str(x), str(y), str(w), str(h), self.out_dir]
-		p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-		self.crop_proc = p
-		global cropper_pids
-		cropper_pids.append(p.pid)
-		for line in self.unbuffered(p):
-			if shared_terminate == 1:
-				return
+	def runCropProcess(self):
+
+		proc = multiprocessing.Process(target=self.init_cropping, args=(self.msg_q,))
+		proc.start()
+		while True:
 			try:
-				int(line)
-			except ValueError:#Not an int so it's a finished message
-				self.finishedCallback(line)
-				break
-			else:
-				num = int(line)
-				with self.shared_auto_count.get_lock():
-					self.shared_auto_count.value += num
-				self.callback("cropping:{self.shared_auto_count.value}/{self.num_files}".format(**locals()))
-
-
-
-	def unbuffered(self, proc, stream='stdout'):
-		'''
-		Get real time unbuffered output from cropper
-		'''
-		newlines = ['\n', '\r\n', '\r']
-		stream = getattr(proc, stream)
-		with contextlib.closing(stream):
-			while True:
-				out = []
-				last = stream.read(1)
-				# Don't loop forever
-				if last == '' and proc.poll() is not None:
+				msg = self.msg_q.get(block=True)
+				if msg == "STOP":
 					break
-				while last not in newlines:
-					# Don't loop forever
-					if last == '' and proc.poll() is not None:
-						break
-					out.append(last)
-					last = stream.read(1)
-				out = ''.join(out)
-				yield out
+				#print("write queue size:", self.write_file_queue.qsize())
+			except Exception as e:
+				print("message q error: {0}".format(e))
+			else:
+				self.callback(msg)
+
+
+	def init_cropping(self, msg_q):
+		#self.emit(QtCore.SIGNAL('update(QString)'),"cropping")
+		for file_ in self.files:
+			im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+			self.shared_crop_count.value += 1
+			if self.shared_crop_count.value % 20 == 0:
+				print "more"
+			#print("self.crop_file_queue.qsize", self.crop_file_queue.qsize())
+			#print("self.write_file_queue.qsize", self.write_file_queue.qsize())
+				msg_q.put( "Cropping: {0}/{1} images".format(str(self.shared_crop_count.value), str(len(self.files))))
+
+			#name = os.path.basename(file)
+			#cv2.imwrite(name, im)
+			imcrop = im[ self.crop_box[1]:self.crop_box[3],  self.crop_box[0]: self.crop_box[2]  ]
+			filename = os.path.basename(file_)
+			crop_out = os.path.join(self.out_dir,filename)
+			cv2.imwrite(crop_out, imcrop)
+		msg_q.put("STOP")#sentinel
+
 
 
 	def get_cropping_box(self, side, rev = False):
@@ -222,6 +183,9 @@ class Autocrop():
 		return array
 
 
+
+
+
 	def run(self):
 		'''
 		'''
@@ -229,7 +193,6 @@ class Autocrop():
 
 		sparse_files, files = self.getFileList(self.in_dir, self.skip_num)
 		self.files = files
-		self.num_files = len(self.files)
 
 		if len(sparse_files) < 1:
 			return("no image files found in " + self.in_dir)
@@ -240,14 +203,20 @@ class Autocrop():
 
 		if self.def_crop:
 			self.calc_manual_crop()
-			if shared_terminate.value == 1:
-				self.crop_proc.kill()
-				return
-			self.finishedCallback("success" )
+			self.emit( QtCore.SIGNAL('cropFinished(QString)'), "success" )
 		else:
 			print("Doing autocrop")
 
 
+			if self.num_proc:
+				pool_num = int(self.num_proc)
+			else:
+				pool_num = cpu_count()
+			#set up the file producer thread
+			#self.file_thread = threading.Thread(target=self.fileProducer)
+			#self.file_thread.start()
+
+			#And now the consumer threads
 			pool_num = 2
 			mThreads = []
 			for i in range(pool_num):
@@ -261,7 +230,7 @@ class Autocrop():
 				self.shared_auto_count.value += (1 * self.skip_num)
 				if self.shared_auto_count.value % 40 == 0:
 					print("self.metric_file_queue.qsize", self.metric_file_queue.qsize())
-					self.callback("Getting crop box: {0}/{1}".format(str(self.shared_auto_count.value), str(len(self.files))))
+					self.emit( QtCore.SIGNAL('update(QString)'), "Getting crop box: {0}/{1} images".format(str(self.shared_auto_count.value), str(len(self.files))))
 				im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
 				self.metric_file_queue.put(im)
 
@@ -278,19 +247,16 @@ class Autocrop():
 				return
 
 			self.calc_auto_crop(padding)
-			if shared_terminate.value == 1:
-				return
-			else:
-				self.finishedCallback("success")
-				return
+			self.emit( QtCore.SIGNAL('cropFinished(QString)'), "success" )
+			return
 
 
-	def getFileList(self, dir_, skip):
+	def getFileList(self, dir, skip):
 		'''
 		Get the list of files from dir. Exclude known non slice files
 		'''
 		files = []
-		for fn in os.listdir(dir_):
+		for fn in os.listdir(dir):
 			if any(fn.endswith(x) for x in ('spr.bmp','spr.BMP','spr.tif', 'spr.TIF', 'spr.jpg', 'spr.JPG', '*spr.jpeg', 'spr.JPEG')):
 				continue
 			if any(fnmatch.fnmatch(fn, x) for x in ('*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF', '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG' )):
@@ -298,14 +264,14 @@ class Autocrop():
 		return(tuple(files [0::skip]), files)
 
 
-	def convertDistFromEdgesToXYWH(self, distances):
+	def convertDistFromEdgesToCoords(self, distances):
 		'''
 		Convert distances from sides(which comes from auto detection) sides into x,y,w,h
 		PIL uses actual coords not width height
 		'''
-		w = distances[2] - self.imdims[0]
-		h = distances[3] - self.imdims[1]
-		return((distances[0], distances[1], w, h))
+		x2 = self.imdims[0] - distances[2]
+		y2 = self.imdims[1] - distances[3]
+		return((distances[0], distances[1], x2, y2))
 
 
 	def convertXYWH_ToCoords(self, xywh):
@@ -318,15 +284,8 @@ class Autocrop():
 
 
 def terminate():
-	print("terminate")
-	global cropper_pids
-	global shared_terminate
- 	for pid in cropper_pids:
- 		os.kill(int(pid), signal.SIGQUIT)
-	shared_terminate.value = 1
-
-
-
+		global shared_terminate
+		shared_terminate.value = 1
 
 
 def reset():
@@ -334,14 +293,9 @@ def reset():
 	global shared_terminate
 	shared_terminate.value = 0
 
-
 def dummy_callback(msg):
 	'''use for cli running'''
-	print(msg)
-
-def dummy_finishedCallback(msg):
-	'''use for cli running'''
-	print(msg)
+	print msg
 
 def cli_run():
 	'''
@@ -354,8 +308,9 @@ def cli_run():
 	parser.add_argument('-d', nargs=4, type=int, dest='def_crop', help='set defined boundaries for crop x,y,w,h', default=None)
 	parser.add_argument('-p', dest="num_proc", help='number of processors to use', default = None)
 	args = parser.parse_args()
-	ac = Autocrop(args.in_dir, args.out_dir, dummy_callback, dummy_finishedCallback, def_crop=args.def_crop)
+	ac = Autocrop(args.in_dir, args.out_dir, args.num_proc, args.def_crop)
 	ac.run()
+		#sys.exit()
 
 
 if __name__ == '__main__':
