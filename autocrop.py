@@ -11,7 +11,7 @@ from collections import Counter
 import threading
 import cv2
 import multiprocessing as mp
-
+import time
 
 shared_terminate = mp.Value("i", 0)
 
@@ -195,7 +195,7 @@ class Autocrop():
 		if self.def_crop:
 			self.calc_manual_crop()
 			if shared_terminate.value == 1:
-				self.callback("Cancelled" )
+				self.callback("Processing Cancelled!" )
 				return
 			self.callback("success" )
 		else:
@@ -210,6 +210,10 @@ class Autocrop():
 
 			#setup the file queue for finding metric
 			for file_ in sparse_files:
+				if shared_terminate.value == 1:
+					self.callback("Processing Cancelled!" )
+					return
+
 				self.shared_auto_count.value += (1 * self.skip_num)
 				if self.shared_auto_count.value % 40 == 0:
 					self.callback( "Getting crop box: {0}/{1} images".format(str(self.shared_auto_count.value), str(len(self.files))))
@@ -228,12 +232,12 @@ class Autocrop():
 
 			#Die if signalled from gui
 			if shared_terminate.value == 1:
-				self.callback("Cancelled" )
+				self.callback("Processing Cancelled!" )
 				return
 
 			self.calc_auto_crop(padding)
 			if shared_terminate.value == 1:
-				self.callback("Cancelled" )
+				self.callback("Cancelled Processing!" )
 				return
 			self.callback("success" )
 			return

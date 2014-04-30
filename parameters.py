@@ -14,7 +14,7 @@ try:
 except ImportError:
     import pickle
 
-from ConfigClass import ConfigClass
+import config
 
 
 def getParamaters(self):

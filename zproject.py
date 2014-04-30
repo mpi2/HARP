@@ -4,11 +4,14 @@ import sys
 import os
 import numpy as np
 import re
-from multiprocessing import cpu_count, Value
+from multiprocessing import cpu_count, Value,freeze_support
 import threading
 import Queue
 import cv2
 
+# For QThread class
+from PyQt4 import QtGui, QtCore
+from sys import platform as _platform
 
 class Zproject:
 
@@ -109,9 +112,40 @@ class Zproject:
         self.maxintensity_queue.put(max_)
         return
 
-
 def dummyCallBack(msg):
     print(msg)
+
+class ZprojectThread(QtCore.QThread):
+    def __init__(self,input,tmp_dir):
+        QtCore.QThread.__init__(self)
+        self.input_folder = input
+        self.tmp_dir = tmp_dir
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+
+        # Get the directory of the script
+        if getattr(sys, 'frozen', False):
+            self.dir = os.path.dirname(sys.executable)
+        elif __file__:
+            self.dir = os.path.dirname(__file__)
+
+        # Set up a zproject object
+        zp = Zproject(self.input_folder,self.tmp_dir, self.z_callback)
+        # run the object
+        zp_result = zp.run()
+
+        # An error has happened. The error message will be shown on the status section
+        if zp_result != 0:
+            self.emit( QtCore.SIGNAL('update(QString)'), "Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(zp_result))
+            return
+        # let the user know what's happened
+        self.emit( QtCore.SIGNAL('update(QString)'), "Z-projection finished" )
+
+    def z_callback(self, msg):
+        self.emit( QtCore.SIGNAL('update(QString)'), msg )
 
 
 if __name__ == "__main__":

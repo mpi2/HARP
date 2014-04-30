@@ -14,13 +14,13 @@ import tarfile
 import autocrop
 import datetime
 import cPickle as pickle
-import ConfigClass
+import config
 from multiprocessing import freeze_support
 from sys import platform as _platform
 import copy
 #from Segmentation import watershed_filter
 
-class WorkThreadProcessing(QtCore.QThread):
+class ProcessingThread(QtCore.QThread):
     def __init__(self,configOb,memory, parent=None):
         QtCore.QThread.__init__(self, parent)
         #self.exec_() #need thos for self.quit() to work
@@ -28,6 +28,8 @@ class WorkThreadProcessing(QtCore.QThread):
         self.configOb = copy.deepcopy(pickle.load(filehandler))
         self.memory = copy.deepcopy(memory)
         self.scale_array = []
+        self.kill_check = 0
+        self.imagej_pid = ""
 
     def __del__(self):
         print "Processing stopped"
@@ -48,13 +50,10 @@ class WorkThreadProcessing(QtCore.QThread):
         # Setup logging files
         #===============================================
         self.session_log_path = os.path.join(self.configOb.meta_path,"session.log")
-        self.pid_log_path = os.path.join(self.configOb.meta_path,"pid.log")
         self.scale_log_path = os.path.join(self.configOb.meta_path,"scale.log")
 
-        self.session_pid = open(self.pid_log_path, 'w+')
         self.session_scale = open(self.scale_log_path, 'w+')
         self.session_log = open(self.session_log_path, 'w+')
-
 
         self.session_log.write("########################################\n")
         self.session_log.write("### HARP Session Log                 ###\n")
@@ -126,8 +125,11 @@ class WorkThreadProcessing(QtCore.QThread):
             #===============================================
             # Scaling
             #===============================================
-            self.scaling()
-            self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
+            if self.kill_check== 1 :
+                return
+            else :
+                self.scaling()
+                self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
 
             #===============================================
             # Masking/Segmentation
@@ -137,16 +139,23 @@ class WorkThreadProcessing(QtCore.QThread):
             #===============================================
             # Copying
             #===============================================
-            self.copying()
-            self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
+            if self.kill_check== 1 :
+                return
+            else :
+                self.copying()
+                self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
 
             #===============================================
             # Compression
             #===============================================
-            self.compression()
+            if self.kill_check== 1 :
+                return
+            else :
+                self.compression()
 
             self.session_log.close()
             return
+
         elif re.search("error",msg):
             #self.emit( QtCore.SIGNAL('update(QString)'), msg)
             self.session_log.write("Error in cropping see below:\n")
@@ -159,11 +168,24 @@ class WorkThreadProcessing(QtCore.QThread):
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing Cancelled!" )
         autocrop.terminate()
         # Kills the Work_Thread_Run_Processing thread (hopefully)
-        self.quit()
-        self.wait()
-        print("quit")
-        #self.wait() #this was hanging the GUI
+        self.kill_check =  1
 
+
+        try :
+            if self.imagej_pid :
+                if _platform == "linux" or _platform == "linux2":
+                    print "Killing"
+                    print self.imagej_pid
+                    os.kill(int(self.imagej_pid),signal.SIGKILL)
+                elif _platform == "win32" or _platform == "win64":
+                    proc = subprocess.Popen(["taskkill", "/f", "/t", "/im",str(self.imagej_pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    (out, err) = proc.communicate()
+                    if out:
+                        print "program output:", out
+                    if err:
+                        print "program error output:", err
+        except OSError as e:
+                print("os.kill could not kill process, reason: {0}".format(e))
 
 #     def masking(self):
 #         '''
@@ -253,8 +275,10 @@ class WorkThreadProcessing(QtCore.QThread):
                                     self.configOb.imageJ+ scaleFactor + "^" +new_pixel+"^"+interpolation],stdout=self.session_scale,stderr=self.session_scale)
 
         #Get pid of imagej macro so we can kill if the user finds a problem
-        self.session_pid.write(str(process.pid)+"\n")
+        self.imagej_pid = str(process.pid)
         out, err = process.communicate()
+        self.imagej_pid = ""
+
         self.session_log.write("Finished scaling\n")
 
     def copying(self):
@@ -281,41 +305,47 @@ class WorkThreadProcessing(QtCore.QThread):
         if self.configOb.scans_recon_comp == "yes" or self.configOb.crop_comp == "yes" :
             self.session_log.write("***Performing Compression***")
 
-        if self.configOb.scans_recon_comp == "yes" :
-            # Compression for scan
-            if self.configOb.scan_folder:
-                self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of scan folder" )
-                self.session_log.write("Compression of scan folder")
-                path_scan,folder_name_scan = os.path.split(self.configOb.scan_folder)
+        if self.kill_check== 1 :
+            return
+        else:
+            if self.configOb.scans_recon_comp == "yes" :
+                # Compression for scan
+                if self.configOb.scan_folder:
+                    self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of scan folder" )
+                    self.session_log.write("Compression of scan folder")
+                    path_scan,folder_name_scan = os.path.split(self.configOb.scan_folder)
 
-                out = tarfile.open(str(self.configOb.scan_folder)+".tar.bz2", mode='w:bz2')
-                out.add(path_scan, arcname="Scan_folder")
-                out.close()
-                self.emit( QtCore.SIGNAL('update(QString)'), "Compression of scan folder finished" )
+                    out = tarfile.open(str(self.configOb.scan_folder)+".tar.bz2", mode='w:bz2')
+                    out.add(path_scan, arcname="Scan_folder")
+                    out.close()
+                    self.emit( QtCore.SIGNAL('update(QString)'), "Compression of scan folder finished" )
 
-            # compression for scan
-            self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of original recon folder" )
-            self.session_log.write("Compression of original recon folder")
-            path_scan,folder_name_scan = os.path.split(self.configOb.input_folder)
+                    if self.kill_check== 1 :
+                        return
+                    else :
+                        # compression for scan
+                        self.emit( QtCore.SIGNAL('update(QString)'), "Performing compression of original recon folder" )
+                        self.session_log.write("Compression of original recon folder")
+                        path_scan,folder_name_scan = os.path.split(self.configOb.input_folder)
 
-            out = tarfile.open(str(self.configOb.input_folder)+".tar.bz2", mode='w:bz2')
-            out.add(path_scan, arcname="Input_folder")
-            out.close()
-            self.emit( QtCore.SIGNAL('update(QString)'), "Compression of recon folder finished" )
+                        out = tarfile.open(str(self.configOb.input_folder)+".tar.bz2", mode='w:bz2')
+                        out.add(path_scan, arcname="Input_folder")
+                        out.close()
+                        self.emit( QtCore.SIGNAL('update(QString)'), "Compression of recon folder finished" )
 
         # compression for crop folder
-        if  self.configOb.crop_comp == "yes":
-            if self.configOb.crop_option != "No_crop":
-                self.emit( QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started" )
-                out = tarfile.open(self.configOb.cropped_path+"_"+self.configOb.full_name+".tar.bz2", mode='w:bz2')
-                out.add(self.configOb.cropped_path, arcname="Cropped")
-                out.close()
+        if self.kill_check== 1 :
+            return
+        else :
+            if  self.configOb.crop_comp == "yes":
+                if self.configOb.crop_option != "No_crop":
+                    self.emit( QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started" )
+                    out = tarfile.open(self.configOb.cropped_path+"_"+self.configOb.full_name+".tar.bz2", mode='w:bz2')
+                    out.add(self.configOb.cropped_path, arcname="Cropped")
+                    out.close()
 
         self.session_scale.close()
         self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
-        self.session_pid.close()
-        # Presume processes finished so clear PID file
-        open(self.pid_log_path, 'w').close()
 
         self.session_scale.close()
         self.session_log.write("Processing finished\n")
