@@ -100,7 +100,24 @@ class Autocrop():
 		print lcrop, tcrop, rcrop, bcrop
 		self.crop_box = (lcrop, tcrop, rcrop, bcrop)
 
-		self.runCropProcess()
+		# self.runCropProcess()
+
+		print "starting cropping"
+		for file_ in self.files:
+			if shared_terminate.value == 1:
+				self.callback("Processing Cancelled!" )
+				return
+			im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+			self.shared_crop_count.value += 1
+			if self.shared_crop_count.value % 20 == 0:
+				self.callback("Cropping: {0}/{1} images".format(str(self.shared_crop_count.value), str(len(self.files))))
+
+			imcrop = im[ self.crop_box[1]:self.crop_box[3],  self.crop_box[0]: self.crop_box[2]  ]
+			filename = os.path.basename(file_)
+			crop_out = os.path.join(self.out_dir,filename)
+			cv2.imwrite(crop_out, imcrop)
+		print "cropping finished"
+		self.callback("cropping finished" )
 
 
 	def calc_manual_crop(self):
@@ -110,7 +127,7 @@ class Autocrop():
 
 	def runCropProcess(self):
 		global msg_q
-		proc = mp.Process(target=init_cropping_win, args=(self,))
+		proc = mp.Process(target=init_cropping_win(self))
 
 
 		#proc = mp.Process(target=self.init_cropping, args=(self.msg_q,))
@@ -188,7 +205,6 @@ class Autocrop():
 		return array
 
 
-
 	def run(self):
 		'''
 		'''
@@ -249,7 +265,7 @@ class Autocrop():
 
 			self.calc_auto_crop(padding)
 			if shared_terminate.value == 1:
-				self.callback("Cancelled Processing!" )
+				self.callback("Processing Cancelled!" )
 				return
 			self.callback("success" )
 			return
