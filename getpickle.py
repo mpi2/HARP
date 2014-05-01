@@ -1,12 +1,8 @@
 import sys
-import subprocess
-import os, signal
+import os
 import re
-import pprint
 import time
 import shutil
-import logging
-import logging.handlers
 import tarfile
 import autocrop
 try:
