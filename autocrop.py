@@ -3,6 +3,7 @@
 #Comment for neil_test branch
 import argparse
 import os
+from sys import platform as _platform
 import fnmatch
 import numpy as np
 import math
@@ -14,10 +15,14 @@ import multiprocessing as mp
 import time
 
 shared_terminate = mp.Value("i", 0)
-
+msg_q = mp.Queue()
 
 class Autocrop():
 	def __init__(self, in_dir, out_dir, callback, num_proc=None, def_crop=None):
+		# freeze support (windows only)
+		if _platform == "win32" or _platform == "win64":
+			mp.freeze_support()
+
 		#call the super
 		self.callback = callback
 		self.in_dir = in_dir
@@ -27,7 +32,7 @@ class Autocrop():
 		self.imdims = None
 		self.def_crop = def_crop
 		self.num_proc = num_proc
-		self.msg_q = mp.Queue()
+
 		self.metric_file_queue = mp.Queue(30)
 		self.crop_metric_queue = mp.Queue()
 		self.skip_num = 10 #read evey n files for determining cropping box
@@ -104,12 +109,15 @@ class Autocrop():
 
 
 	def runCropProcess(self):
+		global msg_q
+		proc = mp.Process(target=init_cropping_win(self))
 
-		proc = mp.Process(target=self.init_cropping, args=(self.msg_q,))
+
+		#proc = mp.Process(target=self.init_cropping, args=(self.msg_q,))
 		proc.start()
 		while True:
 			try:
-				msg = self.msg_q.get(block=True)
+				msg = msg_q.get(block=True)
 				if msg == "STOP":
 					break
 				#print("write queue size:", self.write_file_queue.qsize())
@@ -283,7 +291,23 @@ def terminate():
 		global shared_terminate
 		shared_terminate.value = 1
 
+def init_cropping_win(self):
+	global msg_q
+	print "init crop win"
+	for file_ in self.files:
+		if shared_terminate.value == 1:
+			return
+		im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+		self.shared_crop_count.value += 1
+		if self.shared_crop_count.value % 20 == 0:
+			print "Cropping: {0}/{1} images".format(str(self.shared_crop_count.value), str(len(self.files)))
+			msg_q.put( "Cropping: {0}/{1} images".format(str(self.shared_crop_count.value), str(len(self.files))))
 
+		imcrop = im[ self.crop_box[1]:self.crop_box[3],  self.crop_box[0]: self.crop_box[2]  ]
+		filename = os.path.basename(file_)
+		crop_out = os.path.join(self.out_dir,filename)
+		cv2.imwrite(crop_out, imcrop)
+	msg_q.put("STOP")#sentinel
 
 
 def dummy_callback(msg):

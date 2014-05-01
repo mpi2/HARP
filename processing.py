@@ -13,7 +13,10 @@ import shutil
 import tarfile
 import autocrop
 import datetime
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 import config
 from multiprocessing import freeze_support
 from sys import platform as _platform
