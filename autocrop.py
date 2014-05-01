@@ -110,7 +110,7 @@ class Autocrop():
 
 	def runCropProcess(self):
 		global msg_q
-		proc = mp.Process(target=init_cropping_win(self))
+		proc = mp.Process(target=init_cropping_win, args=(self,))
 
 
 		#proc = mp.Process(target=self.init_cropping, args=(self.msg_q,))
