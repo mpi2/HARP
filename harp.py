@@ -391,7 +391,8 @@ class MainWindow(QtGui.QMainWindow):
     #======================================================================
     def get_dimensions(self):
         '''
-        Perform a z projection which allows user to crop based on z projection. Two important files used. crop.py and zproject.py
+        Perform a z projection which allows user to crop based on z projection.
+        Two important files used. crop.py and zproject.py
         zproject peforms the zprojection and displays the image. crop.py then gets the dimensions to perform the crop
         NOTE: The cropping is not actually done here
         '''
@@ -432,7 +433,8 @@ class MainWindow(QtGui.QMainWindow):
 
     def zproject_slot(self,message):
         '''
-        This listens to the child process and displays any messages. It has records the start and stop time of the processing and starts a new
+        This listens to the child process and displays any messages.
+        It has records the start and stop time of the processing and starts a new
         thread after the processing has finished
         '''
         self.ui.textEditStatusMessages.setText(message)
@@ -517,7 +519,8 @@ class MainWindow(QtGui.QMainWindow):
 
     def processing_slot(self,message):
         '''
-        This listens to the child process and displays any messages. It has records the start and stop time of the processing and starts a new
+        This listens to the child process and displays any messages.
+        It has records the start and stop time of the processing and starts a new
         thread after the processing has finished
         '''
         item = QtGui.QTableWidgetItem()
@@ -537,12 +540,14 @@ class MainWindow(QtGui.QMainWindow):
             item = self.ui.tableWidget.item(self.current_row, 4)
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             # Processing has finished, lets do another one!
-            self.start_pro_thread()
+            self.start_processing_thread()
 
         self.ui.tableWidget.resizeColumnsToContents()
 
     def start_processing_thread(self):
-        ''' starts a thread to perform all the processing in the background. The add function then listens to any messages the thread makes'''
+        ''' starts a thread to perform all the processing in the background.
+        The add function then listens to any messages the thread makes
+        '''
 
         # Get memory of the computer (can't seem to do this in the thread)
         mem_summary = psutil.virtual_memory()
@@ -612,7 +617,9 @@ class MainWindow(QtGui.QMainWindow):
             status = self.ui.tableWidget.item(selected,2)
             if status:
                 print "status",status.text()
-                if status.text() == "Pending" or status.text() == "Processing finished" or status.text() == "Processing Cancelled!" or re.search("error",status.text()):
+                if (status.text() == "Pending" or status.text() == "Processing finished"
+                    or status.text() == "Processing Cancelled!" or re.search("error",status.text())):
+
                     print "Deleted row"
                     self.ui.tableWidget.removeRow(selected)
                     # The count_in will now be one less (i think...)
@@ -620,20 +627,49 @@ class MainWindow(QtGui.QMainWindow):
                     # I think the thread will be empty fo next time already
                     #self.pthread_pool = []
                 else :
-                    message = QtGui.QMessageBox.information(self, 'Message','Warning: Can\'t delete a row that is currently being processed.\nSelect "Stop", then remove')
+                    QtGui.QMessageBox.information(self, 'Message','Warning: Can\'t delete a row that is currently being processed.'
+                                                  '\nSelect "Stop", then remove')
 
     #======================================================================
     # Kill HARP functions
     #======================================================================
-    def close_event(self, event):
-        """ Function for when the program has been closed down """
-        reply = QtGui.QMessageBox.question(self,  'Message',  'Are you sure to quit?',  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
-        event.accept()
-        if reply == QtGui.QMessageBox.Yes:
-            # Kill_em_all class to try and kill any processes
-            self.kill_em_all
-        else:
+    def closeEvent(self, event):
+        """
+        Function for when the program has been closed down
+        function name has to be mixed case format as it is from qt
+        """
+        print "Close event"
+        # First check if a process still running
+        stopped = 0
+        count = 0
+        while True:
+            # This gets the status text
+            status = self.ui.tableWidget.item(count,2)
+            if not status:
+                # if not defined it means there are no recons left to process
+                break
+            if (status.text() == "pending" or status.text() == "Processing finished"
+                or status.text() == "Processing Cancelled!" or re.search("error",status.text())):
+                # this row needs processing, record the row and break out
+                stopped = 1
+                break
+            count = count +1
+
+        count = 0
+
+        if stopped == 0:
+            QtGui.QMessageBox.information(self, 'Message','Warning: Processing still running.\nStop processing and then close down')
             event.ignore()
+            stopped = 1
+        else :
+            reply = QtGui.QMessageBox.question(self,  'Message',  'Are you sure to quit?',
+                                                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+            event.accept()
+            if reply == QtGui.QMessageBox.Yes:
+                # Kill_em_all class to try and kill any processes
+                self.kill_em_all
+            else:
+                event.ignore()
 
     def kill_em_all(self):
         """ Function to kill all processes """

@@ -59,7 +59,7 @@ class ProcessingThread(QtCore.QThread):
         self.session_log.write("### HARP Session Log                 ###\n")
         self.session_log.write("########################################\n")
         # start time
-        self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
+        self.session_log.write(str(datetime.datetime.now())+"\n")
         #self.session_log.flush()
         #===============================================
         # Cropping
@@ -101,9 +101,7 @@ class ProcessingThread(QtCore.QThread):
             dimensions_tuple = None
 
         self.session_log.write("Crop started\n")
-        ts = time.time()
-        stime = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-        self.session_log.write("Time"+stime+"\n")
+        self.session_log.write(str(datetime.datetime.now())+"\n")
         self.auto_crop = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocrop_update_slot,  def_crop=dimensions_tuple)
         self.auto_crop.run()
 
@@ -117,7 +115,6 @@ class ProcessingThread(QtCore.QThread):
         if msg == "success":
 
             self.session_log.write("Crop finished\n")
-            self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
             #self.emit( QtCore.SIGNAL('update(QString)'), "crop finished")
 
             #===============================================
@@ -126,8 +123,9 @@ class ProcessingThread(QtCore.QThread):
             if self.kill_check== 1 :
                 return
             else :
+                self.session_log.write(str(datetime.datetime.now())+"\n")
                 self.scaling()
-                self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
+
 
             #===============================================
             # Masking/Segmentation
@@ -140,8 +138,9 @@ class ProcessingThread(QtCore.QThread):
             if self.kill_check== 1 :
                 return
             else :
+                self.session_log.write(str(datetime.datetime.now())+"\n")
                 self.copying()
-                self.session_log.write("Time"+str(datetime.datetime.now())+"\n")
+
 
             #===============================================
             # Compression

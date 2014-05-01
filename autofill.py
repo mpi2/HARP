@@ -12,7 +12,7 @@ import logging.handlers
 import tarfile
 import autocrop
 import cPickle as pickle
-import ConfigClass
+from config import ConfigClass
 
 def get_recon_log(self):
     '''
