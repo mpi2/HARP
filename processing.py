@@ -15,6 +15,7 @@ from multiprocessing import freeze_support
 from sys import platform as _platform
 
 import autocrop
+from vtkRenderAnimation import Animator
 #from Segmentation import watershed_filter
 
 class ProcessingThread(QtCore.QThread):
@@ -127,6 +128,11 @@ class ProcessingThread(QtCore.QThread):
             #self.masking()
 
             #===============================================
+            # Movies
+            #===============================================
+            #self.movies()
+
+            #===============================================
             # Copying
             #===============================================
             self.copying()
@@ -135,6 +141,8 @@ class ProcessingThread(QtCore.QThread):
             # Compression
             #===============================================
             self.compression()
+
+
 
             self.session_log.close()
             return
@@ -205,25 +213,25 @@ class ProcessingThread(QtCore.QThread):
         # Perform scaling as subprocess with Popen (they should be done in the background)
 
         if self.configOb.SF2 == "yes" :
-            self.execute_imagej("^0.5^x2^","2")
+            self.execute_imagej(2.0)
 
         if self.configOb.SF3 == "yes" :
-            self.execute_imagej("^0.3333^x3^","3")
+            self.execute_imagej(3.0)
 
         if self.configOb.SF4 == "yes" :
-            self.execute_imagej("^0.25^x4^","4")
+            self.execute_imagej(4.0)
 
         if self.configOb.SF5 == "yes" :
-            self.execute_imagej("^0.2^x5^","5")
+            self.execute_imagej(5.0)
 
         if self.configOb.SF6 == "yes" :
-            self.execute_imagej("^0.1667^x6^","6")
+            self.execute_imagej(6.0)
 
         if self.configOb.pixel_option == "yes" :
             self.execute_imagej("^"+str(self.configOb.SF_pixel)+"^x"+str(self.configOb.SFX_pixel)+"^","Pixel")
 
 
-    def execute_imagej(self, scaleFactor,sf):
+    def execute_imagej(self, sf):
         '''
         Part of scaling function
         @param: str, scaleFactor for imagej eg "^0.5^x6"
@@ -240,6 +248,12 @@ class ProcessingThread(QtCore.QThread):
         else :
             new_pixel = "NA"
             interpolation = "default"
+
+        new_pixel_conv = str(new_pixel).replace('.', '-')
+
+        # Get the scaling factor in decimal
+        dec_sf = round((1/sf),4)
+
 
         # Linux or win32 imagej jar location
         if _platform == "linux" or _platform == "linux2":
@@ -258,7 +272,9 @@ class ProcessingThread(QtCore.QThread):
         self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
 
         # Make an array of the names to be masked
-        file_name = self.configOb.output_folder+self.configOb.full_name+"_scaled_"+scaleFactor+"pixel"+new_pixel+".tif"
+
+        #file_name = self.configOb.scale_path+self.configOb.full_name+"_scaled_"+sf+"pixel"+new_pixel+".tif"
+        file_name = os.path.join(self.configOb.scale_path,self.configOb.full_name+"_scaled_"+str(sf)+"_pixel_"+new_pixel_conv+".tif")
         self.scale_array.append(file_name)
 
 
@@ -266,7 +282,8 @@ class ProcessingThread(QtCore.QThread):
 
         # Subprocess call for imagej macro
         process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
-                                    self.configOb.imageJ+ scaleFactor + "^" +new_pixel+"^"+interpolation],stdout=self.session_scale,stderr=self.session_scale)
+                                    self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name],
+                                   stdout=self.session_scale,stderr=self.session_scale)
 
         #Get pid of imagej macro so we can kill if the user finds a problem
         self.imagej_pid = str(process.pid)
@@ -274,6 +291,34 @@ class ProcessingThread(QtCore.QThread):
         self.imagej_pid = ""
 
         self.session_log.write("Finished scaling\n")
+
+
+    def movies(self):
+        '''
+        movies
+        '''
+        movie_path = os.path.join(self.configOb.output_folder,"movies")
+        if not os.path.exists(movie_path):
+            os.makedirs(movie_path)
+
+        print "starting movies"
+
+        for file in range(len(self.scale_array)):
+
+            print self.scale_array[file]
+            movie = Animator(str(file),movie_path)
+
+        #self.scale_array.
+        #movie = Animator(self., out_dir)
+
+    def masking(self):
+        '''
+        masking
+        '''
+        print "masking"
+
+
+
 
     def copying(self):
         '''

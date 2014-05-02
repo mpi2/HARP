@@ -22,12 +22,8 @@ args = getArgument;
 if (args=="") exit ("No argument!");
 
 arg_array = split(args,"^");
-print("input folder:");
-print(arg_array[0]);
 
 image_list = getFileList(arg_array[0]);
-print(image_list[0]);
-print(image_list[1]);
 
 
 //Not sure what this is for
@@ -38,19 +34,18 @@ setBatchMode(true);
 out_path = arg_array[1];
 recon_name = arg_array[2];
 scale = arg_array[3];
-// 1 divided by scale gives the scaling factor which the user sees, e.g 2,3,4 etc
-divide_scale = arg_array[4];
-new_pixel = arg_array[5];
-interpolation = arg_array[6];
+interpolation = arg_array[4];
+full_file_name = arg_array[5];
 
-print("divide_scale:");
-print(divide_scale);
-print("new_pixel:");
-print(new_pixel);
+
+print("input folder:");
+print(arg_array[0]);
 print("output folder:");
 print(out_path);
 print("scale factor:");
 print(scale);
+print("full_file_name:");
+print(full_file_name);
 
 
 //open the image sequence as a stack
@@ -61,7 +56,6 @@ rename("unscaled");
 
 //Set number of images in stack
 zdepth = floor(image_list.length * scale);
-
 
 
 //run the scaling in the x, y and z dimensions
@@ -75,7 +69,6 @@ if (interpolation=="yes") {
 	print("default");
 	run("Scale...", "x=" + scale + " y=" + scale +  " z=" + zdepth + " depth=" + zdepth + " average process create title=scaled");
 }
-full_file_name = out_path+recon_name+"_scaled_"+divide_scale+"_pixel_"+new_pixel+".tif";
 
 
 //Create directory (this is now done in python
