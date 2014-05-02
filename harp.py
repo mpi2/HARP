@@ -51,6 +51,14 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.app = app
 
+        # style sheet
+        app.setStyle("plastique")
+        style_file = "darkorange.stylesheet"
+        with open(style_file, "r") as sf:
+            self.setStyleSheet(sf.read())
+
+
+
         # Make unique ID if this is the first time mainwindow has been called
         self.unique_ID = uuid.uuid1()
 
