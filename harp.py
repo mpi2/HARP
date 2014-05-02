@@ -10,23 +10,17 @@
 #=============================================================================
 
 # Import PyQT module
+from PyQt4 import QtCore, QtGui
 import datetime
-import logging
 from multiprocessing import freeze_support
 import os, signal
-import pprint
 import re
-import shutil
 import subprocess
-from sys import platform as _platform
 import sys
 import tempfile
 import time
 import uuid
-
-from PyQt4 import QtCore, QtGui
 import psutil
-
 import autofill
 import errorcheck
 import getpickle
@@ -36,10 +30,6 @@ from processing import ProcessingThread
 from zproject import ZProjectThread
 import crop
 
-try:
-    import Image
-except ImportError:
-    from PIL import Image
 
 class MainWindow(QtGui.QMainWindow):
     '''
@@ -551,7 +541,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Get memory of the computer (can't seem to do this in the thread)
         mem_summary = psutil.virtual_memory()
-        prog = re.compile("total=(\d+)")
+        prog = re.compile("available=(\d+)")
         self.memory =  re.search(prog, str(mem_summary)).group(1)
         self.p_thread_pool = []
 
@@ -636,31 +626,34 @@ class MainWindow(QtGui.QMainWindow):
     def closeEvent(self, event):
         """
         Function for when the program has been closed down
-        function name has to be mixed case format as it is from qt
+        Function name has to be mixed case format as it is from qt
+        Performs a loop through the item list and checks if any process still running
         """
         print "Close event"
         # First check if a process still running
-        stopped = 0
+        switch = ""
         count = 0
         while True:
             # This gets the status text
             status = self.ui.tableWidget.item(count,2)
             if not status:
-                # if not defined it means there are no recons left to process
+                #print "status dead"
+                switch = "dead"
                 break
-            if (status.text() == "pending" or status.text() == "Processing finished"
-                or status.text() == "Processing Cancelled!" or re.search("error",status.text())):
-                # this row needs processing, record the row and break out
-                stopped = 1
-                break
+            if status:
+                if (status.text() != "Pending" and status.text() != "Processing finished"
+                    and status.text() != "Processing Cancelled!" and not re.search("error",status.text())):
+                    #print "Status message", status.text()
+                    switch = "live"
+                    break
             count = count +1
 
         count = 0
-
-        if stopped == 0:
+        #print "switch", switch
+        if switch == "live":
             QtGui.QMessageBox.information(self, 'Message','Warning: Processing still running.\nStop processing and then close down')
             event.ignore()
-            stopped = 1
+            switch == "live"
         else :
             reply = QtGui.QMessageBox.question(self,  'Message',  'Are you sure to quit?',
                                                  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
@@ -670,6 +663,8 @@ class MainWindow(QtGui.QMainWindow):
                 self.kill_em_all
             else:
                 event.ignore()
+        #reset stop
+        switch = ""
 
     def kill_em_all(self):
         """ Function to kill all processes """

@@ -1,18 +1,7 @@
 from PyQt4 import QtCore, QtGui
 import sys
-import subprocess
-import os, signal
+import os
 import re
-import pickle
-import pprint
-import time
-import shutil
-import logging
-import logging.handlers
-import tarfile
-import autocrop
-import cPickle as pickle
-from config import ConfigClass
 
 def get_recon_log(self):
     '''

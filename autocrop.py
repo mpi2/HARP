@@ -100,9 +100,17 @@ class Autocrop():
 		print lcrop, tcrop, rcrop, bcrop
 		self.crop_box = (lcrop, tcrop, rcrop, bcrop)
 
-		# self.runCropProcess()
+		# do the cropping in cv2
+		self.run_crop_process()
 
-		print "starting cropping"
+	def calc_manual_crop(self):
+		self.crop_box = self.convertXYWH_ToCoords(self.def_crop)
+		self.run_crop_process()
+
+
+	def run_crop_process(self):
+		global shared_terminate
+		# Perform the cropping using cv2
 		for file_ in self.files:
 			if shared_terminate.value == 1:
 				self.callback("Processing Cancelled!" )
@@ -116,32 +124,7 @@ class Autocrop():
 			filename = os.path.basename(file_)
 			crop_out = os.path.join(self.out_dir,filename)
 			cv2.imwrite(crop_out, imcrop)
-		print "cropping finished"
 		self.callback("cropping finished" )
-
-
-	def calc_manual_crop(self):
-		self.crop_box = self.convertXYWH_ToCoords(self.def_crop)
-		self.runCropProcess()
-
-
-	def runCropProcess(self):
-		global msg_q
-		proc = mp.Process(target=init_cropping_win(self))
-
-
-		#proc = mp.Process(target=self.init_cropping, args=(self.msg_q,))
-		proc.start()
-		while True:
-			try:
-				msg = msg_q.get(block=True)
-				if msg == "STOP":
-					break
-				#print("write queue size:", self.write_file_queue.qsize())
-			except Exception as e:
-				print("message q error: {0}".format(e))
-			else:
-				self.callback(msg)
 
 
 	def init_cropping(self, msg_q):
@@ -253,7 +236,7 @@ class Autocrop():
 				self.metric_file_queue.put('STOP')
 			for t in mThreads:
 				t.join()
-			print("metric done")
+			print("cropping box determined")
 			self.crop_metric_queue.put('STOP')
 			self.metric_slices = [item for item in iter(self.crop_metric_queue.get, 'STOP')]
 
@@ -263,11 +246,13 @@ class Autocrop():
 				self.callback("Processing Cancelled!" )
 				return
 
+			# Perform the actuall cropping
 			self.calc_auto_crop(padding)
+
 			if shared_terminate.value == 1:
-				self.callback("Processing Cancelled!" )
 				return
-			self.callback("success" )
+
+			self.callback("success")
 			return
 
 

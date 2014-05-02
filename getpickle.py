@@ -1,10 +1,5 @@
-import sys
 import os
-import re
-import time
 import shutil
-import tarfile
-import autocrop
 try:
     import cPickle as pickle
 except ImportError:
