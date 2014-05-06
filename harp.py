@@ -51,11 +51,11 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.app = app
 
-        # style sheet
-        app.setStyle("plastique")
-        style_file = "darkorange.stylesheet"
-        with open(style_file, "r") as sf:
-            self.setStyleSheet(sf.read())
+#         # style sheet
+#         app.setStyle("plastique")
+#         style_file = "darkorange.stylesheet"
+#         with open(style_file, "r") as sf:
+#             self.setStyleSheet(sf.read())
 
 
 
