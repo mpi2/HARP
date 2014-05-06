@@ -15,7 +15,7 @@ from multiprocessing import freeze_support
 from sys import platform as _platform
 
 import autocrop
-#from vtkRenderAnimation import Animator
+from vtkRenderAnimation import Animator
 #from Segmentation import watershed_filter
 
 class ProcessingThread(QtCore.QThread):
