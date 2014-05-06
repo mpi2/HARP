@@ -6,7 +6,7 @@ TODO:
 Add option to hide the window when processing
 '''
 
-from vtk import *
+#from vtk import *
 import sys
 import os
 import numpy as np
@@ -16,7 +16,9 @@ import subprocess as sub
 
 class Animator:
     def __init__(self, tiff, out_dir):
+        print "started"
         self.out_dir = out_dir
+        print "reading in file"
         self.reader =  vtkTIFFReader()
         self.reader.SetFileName(tiff)
         self.reader.Update()
@@ -27,6 +29,7 @@ class Animator:
 
     def mip_projection(self):
         # Color
+        print "setting colour"
         colorTransferFunction = vtkColorTransferFunction()
         colorTransferFunction.AddHSVPoint(0, 0.0, 0.0, 0.0)
         colorTransferFunction.AddHSVPoint(55, 0.15, 0.32, 1)
