@@ -1,10 +1,10 @@
 #!/usr/bin/python
-#title           :Main.py
+#title           :harp.py
 #description     :Runs the HARP GUI
 #author          :SIG
-#date            :2014-04-09
-#version         :0.1
-#usage           :python mMin.py or if using executable in windows .\Main.exe or clicking on the Main.exe icon.
+#date            :2014-05-06
+#version         :0.2
+#usage           :python harp.py or if using executable in windows .\harp.exe or clicking on the Main.exe icon.
 #formatting      :PEP8 format is used where possible
 #python_version  :2.7
 #=============================================================================
@@ -51,11 +51,11 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.app = app
 
-        # style sheet
-        app.setStyle("plastique")
-        style_file = "darkorange.stylesheet"
-        with open(style_file, "r") as sf:
-            self.setStyleSheet(sf.read())
+#         # style sheet
+#         app.setStyle("plastique")
+#         style_file = "darkorange.stylesheet"
+#         with open(style_file, "r") as sf:
+#             self.setStyleSheet(sf.read())
 
 
 
