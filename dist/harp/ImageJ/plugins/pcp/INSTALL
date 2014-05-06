@@ -1,0 +1,68 @@
+Plugins Control Panel.
+Version 0.4b
+
+Installation:
+
+0) If you have installed a previous version, please remove if first. 
+Specifically, remove the files Plugins_ControlPanel.* and any pcp* 
+subdirectory from the ImageJ's "plugins" directory.
+
+1) Unzip the "pcp-0_4b.zip" archive in a temporary directory - please 
+DO NOT discard pathnames during the extraction. This should result in 
+a "pcp" directory with the following contents:
+
+.
+|-- Changes
+|-- INSTALL
+|-- PClassLoader2.class
+|-- PClassLoader2.java
+|-- PanelClassLoader.class
+|-- PanelClassLoader.java
+|-- PluginsExecuter.class
+|-- PluginsExecuter.java
+|-- Plugins_Control_Panel.class
+|-- Plugins_Control_Panel.java
+|-- README
+|-- TabbedControlPanel.class
+|-- TabbedControlPanel.java
+|-- TreeControlPanel$1.class
+|-- TreeControlPanel$2.class
+|-- TreeControlPanel$3.class
+|-- TreeControlPanel.class
+|-- TreeControlPanel.java
+|-- cw
+|   `-- notebook
+|       |-- NBButton$1.class
+|       |-- NBButton.class
+|       |-- NBButton.java
+|       |-- NoteBook$1.class
+|       |-- NoteBook.class
+|       |-- NoteBook.java
+|       |-- PagePanel.class
+|       |-- PagePanel.java
+|       |-- Tab.class
+|       |-- Tab.java
+|       |-- TabPanel$1.class
+|       |-- TabPanel.class
+|       |-- TabPanel.java
+|       |-- TabScroller.class
+|       `-- TabScroller.java
+|-- pcp_help1.txt
+`-- pcp_help2.html
+ 
+2 directories, 35 files 
+
+2) Move the other user plugin classes into subdirectories of the plugin directory, 
+named according to your choice.
+
+2) Move the "pcp" directory in the "plugins" directory.
+
+3) (re)start ImageJ
+
+4) The plugin can now be started from ImageJ's "plugins/pcp" menu.
+
+
+
+
+
+

@@ -137,7 +137,7 @@ class MainWidget(QtGui.QWidget):
         #print "frame ", self.parent.geometry().width()
         #print "widget ", self.geometry().width()
         pos = (event.pos().x() + self.img_dist_left, event.pos().y() + self.img_dist_top)
-        print(pos)
+        #print(pos)
         if not self.cornerSet:
             self.x = pos[0]
             self.y = pos[1]

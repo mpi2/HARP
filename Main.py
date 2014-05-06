@@ -172,6 +172,7 @@ class MainWindow(QtGui.QMainWindow):
             opener ="evince"
             subprocess.call([opener, harp_user_man_chm])
 
+
     def resizeScreen(self):
         ''' Resize screen for smaller monitors'''
         self.resize(1300,700)
@@ -182,16 +183,10 @@ class MainWindow(QtGui.QMainWindow):
         self.resize(1300, 1007)
         self.ui.scrollArea.setFixedSize(1241,951)
 
+
     def selectFileOut(self):
         ''' Select output folder'''
-        outputFolder = str(self.ui.lineEditOutput.text())
-
-        # Check input and output folders assigned
-        if outputFolder :
-            self.fileDialog = QtGui.QFileDialog(self,'Open File', outputFolder)
-        else:
-            self.fileDialog = QtGui.QFileDialog(self,'Open File')
-
+        self.fileDialog = QtGui.QFileDialog(self)
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
         # Check if folder variable is defined (if it not the user has pressed cancel)
         if not folder == "":
@@ -199,14 +194,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def selectFileIn(self):
         ''' User selects the folder to be processed and some auto-fill methods are carried out '''
-        inputFolder = str(self.ui.lineEditInput.text())
-
-        # Check input and output folders assigned
-        if inputFolder :
-            self.fileDialog = QtGui.QFileDialog(self,'Open File', inputFolder)
-        else:
-            self.fileDialog = QtGui.QFileDialog(self,'Open File')
-
+        self.fileDialog = QtGui.QFileDialog(self)
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
 
         # if folder is not defined user has pressed cancel
@@ -1051,10 +1039,8 @@ class MainWindow(QtGui.QMainWindow):
         self.configOb_path_from_list = os.path.join(self.folder_from_list,"Metadata","configobject.txt")
 
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
-        wt =  WorkThread(self.configOb_path_from_list,self.memory)
-        self.connect( wt, QtCore.SIGNAL("update(QString)"), self.add )
-        self.connect( self, QtCore.SIGNAL("kill(QString)"), wt.killSlot  )
-        self.threadPool.append(wt)
+        self.threadPool.append( WorkThread(self.configOb_path_from_list,self.memory) )
+        self.connect( self.threadPool[len(self.threadPool)-1], QtCore.SIGNAL("update(QString)"), self.add )
         self.threadPool[len(self.threadPool)-1].start()
 
     def closeEvent(self, event):
@@ -1070,7 +1056,6 @@ class MainWindow(QtGui.QMainWindow):
     def kill_em_all(self):
         """ Function to kill all processes """
         # First kill the thread
-        self.emit(QtCore.SIGNAL('kill(QString)'), "kill")
         if self.threadPool:
             self.threadPool[len(self.threadPool)-1].terminate()
 
