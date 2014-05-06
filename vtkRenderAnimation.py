@@ -6,7 +6,7 @@ TODO:
 Add option to hide the window when processing
 '''
 
-#from vtk import *
+from vtk import *
 import sys
 import os
 import numpy as np
