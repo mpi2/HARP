@@ -228,7 +228,8 @@ class ProcessingThread(QtCore.QThread):
             self.execute_imagej(6.0)
 
         if self.configOb.pixel_option == "yes" :
-            self.execute_imagej("^"+str(self.configOb.SF_pixel)+"^x"+str(self.configOb.SFX_pixel)+"^","Pixel")
+
+            self.execute_imagej("Pixel")
 
 
     def execute_imagej(self, sf):
@@ -242,17 +243,22 @@ class ProcessingThread(QtCore.QThread):
             new_pixel = float(self.configOb.recon_pixel_size)*float(sf)
             new_pixel = str(round(new_pixel,4))
             interpolation = "default"
+
         elif self.configOb.pixel_option == "yes" :
+            sf = self.configOb.SFX_pixel
             new_pixel = self.configOb.user_specified_pixel
+
             interpolation = "yes"
         else :
             new_pixel = "NA"
             interpolation = "default"
 
-        new_pixel_conv = str(new_pixel).replace('.', '-')
+        # Dont think this is required
+        #new_pixel = str(new_pixel).replace('.', '-')
 
         # Get the scaling factor in decimal
         dec_sf = round((1/sf),4)
+
 
 
         # Linux or win32 imagej jar location
@@ -274,7 +280,7 @@ class ProcessingThread(QtCore.QThread):
         # Make an array of the names to be masked
 
         #file_name = self.configOb.scale_path+self.configOb.full_name+"_scaled_"+sf+"pixel"+new_pixel+".tif"
-        file_name = os.path.join(self.configOb.scale_path,self.configOb.full_name+"_scaled_"+str(sf)+"_pixel_"+new_pixel_conv+".tif")
+        file_name = os.path.join(self.configOb.scale_path,self.configOb.full_name+"_scaled_"+str(sf)+"_pixel_"+new_pixel+".tif")
         self.scale_array.append(file_name)
 
 
