@@ -164,10 +164,12 @@ class ProcessingThread(QtCore.QThread):
 
         try :
             if self.imagej_pid :
+                print "Killing imagej"
                 if _platform == "linux" or _platform == "linux2":
                     print "Killing"
                     print self.imagej_pid
                     os.kill(int(self.imagej_pid),signal.SIGKILL)
+                    self.emit( QtCore.SIGNAL('update(QString)'), "Processing Cancelled!" )
                 elif _platform == "win32" or _platform == "win64":
                     proc = subprocess.Popen(["taskkill", "/f", "/t", "/im",str(self.imagej_pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     (out, err) = proc.communicate()
@@ -175,6 +177,7 @@ class ProcessingThread(QtCore.QThread):
                         print "program output:", out
                     if err:
                         print "program error output:", err
+                self.emit( QtCore.SIGNAL('update(QString)'), "Processing Cancelled!" )
         except OSError as e:
                 print("os.kill could not kill process, reason: {0}".format(e))
 
@@ -238,6 +241,9 @@ class ProcessingThread(QtCore.QThread):
         @param: str, scaleFactor for imagej eg "^0.5^x6"
         @param: str, sf for calculating new pixel size
         '''
+        if self.kill_check == 1 :
+            return
+
         # Gets the new pixel numbers for the scaled stack name (see in imagej macro)
         if (self.configOb.recon_pixel_size) and sf != "Pixel":
             new_pixel = float(self.configOb.recon_pixel_size)*float(sf)
