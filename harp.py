@@ -549,7 +549,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Get memory of the computer (can't seem to do this in the thread)
         mem_summary = psutil.virtual_memory()
-        prog = re.compile("available=(\d+)")
+        prog = re.compile("total=(\d+)")
         self.memory =  re.search(prog, str(mem_summary)).group(1)
         self.p_thread_pool = []
 

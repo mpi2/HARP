@@ -206,12 +206,13 @@ class ProcessingThread(QtCore.QThread):
             os.makedirs(self.configOb.scale_path)
 
         # Memory of computer being used will depend on how much memory will be used in imageJ
-        # e.g 70% of total memory
-        self.memory_4_imageJ = (int(self.memory)*.7)
+        # e.g 80% total memory of the computer
+        self.memory_4_imageJ = (int(self.memory)*.8)
         self.memory_4_imageJ = self.memory_4_imageJ*0.00000095367
         self.memory_4_imageJ = int(self.memory_4_imageJ)
-        self.session_log.write("Memory of computer:"+str(self.memory)+"\n")
-        self.session_log.write("Memory for ImageJ:"+str(self.memory_4_imageJ)+"\n")
+        memory_mb = int(int(self.memory)*0.00000095367)
+        self.session_log.write("Total Memory of Computer(mb):"+str(memory_mb)+"\n")
+        self.session_log.write("Memory for ImageJ(mb):"+str(self.memory_4_imageJ)+"\n")
 
         # Perform scaling as subprocess with Popen (they should be done in the background)
 
