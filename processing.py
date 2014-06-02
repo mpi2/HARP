@@ -80,7 +80,7 @@ class ProcessingThread(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "No Crop carried out" )
             #print "No crop carried out"
             self.session_log.write("No crop carried out\n")
-            autocrop_update_slot("sucess")
+            self.autocrop_update_slot("success")
             return
 
         # Make new crop directory
