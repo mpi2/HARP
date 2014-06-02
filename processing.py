@@ -136,7 +136,8 @@ class ProcessingThread(QtCore.QThread):
             #===============================================
             # Copying
             #===============================================
-            self.copying()
+            if not self.configOb.crop_option == "No_crop" :
+                self.copying()
 
             #===============================================
             # Compression
