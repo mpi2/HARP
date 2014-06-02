@@ -76,7 +76,7 @@ class ProcessingThread(QtCore.QThread):
         self.session_log.write("*****Performing cropping******\n")
 
         # Do not perform any crop as user specified
-        if self.configOb.crop_option == "None" :
+        if self.configOb.crop_option == "No_crop" :
             self.emit( QtCore.SIGNAL('update(QString)'), "No Crop carried out" )
             #print "No crop carried out"
             self.session_log.write("No crop carried out\n")
