@@ -1,0 +1,46 @@
+ImageJ Plugins Control Panel Help
+
+Version 0.4b
+
+Author: Cezar M. Tigaret (c.tigaret@ucl.ac.uk)
+
+"ImageJ Plugins Control Panel" provides access to ImageJ plugins installed in 
+subdirectories (or folders) within the ImageJ's "plugins" directory. Plugins
+can thus be grouped by a common (usually functional) feature by installing them
+in more than one subdirectory of the main "plugins" directory. Subdirectories can
+be nested. 
+
+The names of these subdirectories (folders) and what plugins should they contain 
+are entirely at the user's choice. 
+
+Using the Tabbed Control Panel interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Tabbed Control Panel provides access to plugins through a notebook-like window.
+
+A row of named tabs at the top of the Panel shows the plugin groups (subfolders). 
+For each group of plugins there is one named tab and one page below, in the Panel. 
+
+To run a plugins in a certain group, click on the tab bearing the group name, then 
+click on the button bearing the plugin's name in the page below.
+
+If the panel is too narrow to fit all the groups, scroll through the groups using 
+the arrow tabs showing at the ends of the tabs row. The button at the top right of 
+the panel provides a menu for jumping to a plugins group.
+
+New plugins can be added and used immediately (i.e., without restarting ImageJ) after 
+pressing the "Reload" button at the bottom left corner of the Panel. Please note, 
+however, that this function will not update ImageJ's Plugins menu.
+
+To stop the plugin, either close its window or just press the "Dismiss" button at the 
+bottom right corner of the Panel.
+
+Notes about plugin and plugin folders names
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The name of the plugin classes should conform to the traditional convention in ImageJ,
+which is to use underscores as word separator in the main plugin class files (i.e., those 
+that are executed by the user).
+
+
+
+
+

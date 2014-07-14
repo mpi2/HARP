@@ -24,7 +24,6 @@ import psutil
 import autofill
 import errorcheck
 import getpickle
-
 from mainwindow import Ui_MainWindow
 from processing import ProcessingThread
 from zproject import ZProjectThread
@@ -189,7 +188,11 @@ class MainWindow(QtGui.QMainWindow):
     def user_guide(self):
         ''' Loads up pdf help file'''
         user_man = os.path.join(self.dir,"HARP_user_guide.pdf")
-        if sys.platform == "win32":
+
+        if sys.platform == "win32" or sys.platform == "win64":
+            if not os.path.exists(user_man):
+                #if HARP run from exe
+                user_man = os.path.join("..","..","HARP_user_guide.pdf")
             os.startfile(user_man)
         else:
             opener ="evince"

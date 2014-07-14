@@ -1,0 +1,82 @@
+ImageJ Plugins Control Panel
+
+Author: Cezar M. Tigaret <c.tigaret@ucl.ac.uk>
+
+Current version is 0.4b
+
+For detailed changes in the code, please look at the comments in the source files.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Version 0.4b - GUI enhancements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Thursday 21 August 2001 - Saturday 01 September 2001
+
+- Added a button in the top right of the control panel that pops up a menu for
+navigation and help; this replaces the popup menu from the older versions.
+
+- Added "Help" and "About" menu items to the popup menu. The "About" menuitem displays
+the current plugins version in ImageJ's console.
+
+- The row of tabs in the Tabbed Control Panel (GUI for Java 1) is now scrollable (to left or 
+right) by keeping the (left) mouse button pressed on the appropriate arrow tab.
+
+- Accessing the help file(s) through the panel(s) does not depend on the name of the pcp
+directory anymore i.e., this directory can now be renamed as it best suits the user.
+
+-The Tree Control Panel now has a "Help" menu  with two items:
+	"Help/Contents" - calls a short descriptive help file (html format); replaces the
+former "Help" button.
+	"Help/About" - prints the version of Plugins_Control_Panel on ImageJ's console.
+
+- Bugs and limitations: 
+	* when an arrow tab reappears (after it has been "scrolled-out") it shows as if it was
+pressed, although the functionality is preserved; the normal graphic status is restored by
+hovering with the mouse over the arrow tab.
+	* when scrolling the tabs, a java.lang.NoClassDefFoundError is sometimes thrown; 
+this does not seem to affect the functionality of the plugin
+	* jumping to a page via the popup menu does not result in a tab panel scroll (i.e., does
+not bring the active tab into the tabpanel viewport)
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Version 0.4a
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1) Fixed bug (hopefully) in v 0.4 class loading mechanism for Java 1 version of the code on Windows platform.
+
+2) The popup menu in the tabbed control panel (for Java 1 platform) is back: 
+it is called by the (left) mouse button pressed in the narrow space between 
+the tabs row and the button panels; the pop-up menu is also available for MacOS users.
+
+3) The tabbed control panel (Java 1 platform) lays out the buttons in a scroll panel; users can now
+resize the control panel for screen estate, and still have access all the buttons on the page
+using the scroll bars.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Version 0.4 (not publicly released)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1) The plugin supports deep hierarchy of plugins directories and accept blanks 
+and/or underscores in the directory file names. Plugins that bring their own 
+packages are also supported (tested with VolumeJ package by Michael Abramoff, 
+Volume Renderer plugin) (since version 0.3). 
+
+2) A new function ("Reload") has been added to the control panel, that re-scans 
+the plugins directory so that pre-compiled plugin classes can be installed and 
+used immediately without the need to restart ImageJ. The "Reload" button is also 
+useful after modifying the "plugins" directory tree structure.
+
+However, the new plugin directory structure will not be reflected in ImageJ "Plugins" 
+menu unless ImageJ is restarted.
+
+3) Help on panel usage is now available, for Java2 only. Java 1 users, please rely on this file
+ for help.
+
+Version 0.3 (not released):
+Bug fixes in class loading mechanism: the plugins classes are 
+loaded independently of ImageJ; allows for blanks in directory names; allows for
+plugin packages.
+
+
+
+
+

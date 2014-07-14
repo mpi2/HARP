@@ -389,14 +389,25 @@ class ProcessingThread(QtCore.QThread):
         # Get the scaling factor in decimal
         dec_sf = round((1/sf),4)
 
-        # Linux or win32 imagej jar location
-        if _platform == "linux" or _platform == "linux2":
-            ijpath = os.path.join("/usr","share","java","ij.jar")
-        elif _platform == "win32" or _platform == "win64":
-            ijpath = os.path.join(self.dir, 'ImageJ', 'ij.jar')
+        # ij path if run from executable
+        ijpath = os.path.join('..','..','ImageJ', 'ij.jar')
+        if not os.path.exists(ijpath):
+            #ij path if ran from script
+            ijpath = os.path.join(self.dir,'ImageJ', 'ij.jar')
 
         if not os.path.exists(ijpath):
             self.emit( QtCore.SIGNAL('update(QString)'), "Error: Can't find Imagej" )
+            self.kill_check =  1
+            return
+
+        # Macro path if run from exectutable
+        ij_macro_path = os.path.join('..','..', "siah_scale.txt")
+        if not os.path.exists(ij_macro_path):
+            #macro path if ran from script
+            ij_macro_path = os.path.join(self.dir, "siah_scale.txt")
+
+        if not os.path.exists(ij_macro_path):
+            self.emit( QtCore.SIGNAL('update(QString)'), "Error: Can't find Imagej macro scrip" )
             self.kill_check =  1
             return
 
@@ -406,30 +417,27 @@ class ProcessingThread(QtCore.QThread):
         self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
 
         # Make an array of the names to be masked
-
-        #file_name = self.configOb.scale_path+self.configOb.full_name+"_scaled_"+sf+"pixel"+new_pixel+".tif"
         file_name = os.path.join(self.configOb.scale_path,self.configOb.full_name+"_scaled_"+str(sf)+"_pixel_"+new_pixel+".tif")
         self.scale_array.append(file_name)
 
 
         # Subprocess call for imagej macro
-        process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
+        process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", ij_macro_path,
                                     self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name],
                                    stdout=self.session_scale,stderr=self.session_scale)
 
-        #Get pid of imagej macro so we can kill if the user finds a problem
-
-
         # record a process ID incase we need to kill imagej
         self.imagej_pid = str(process.pid)
+
+        #NOTE: process.communicate catches when processing is finished
         # I dont think the out and error variables work here as we already assigned stderr and stdout in the subprocess call
         out, err = process.communicate()
 
         # Scale log file is now closed for writing
         self.session_scale.close()
+
         # But we reopen for just reading, also goes back to the start
         self.session_scale = open(self.scale_log_path, "r")
-
 
         # reset processing ID, as processing has finished.
         self.imagej_pid = ""
@@ -439,7 +447,6 @@ class ProcessingThread(QtCore.QThread):
         prog2 = re.compile(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
         out_of_memory = None
         other_ij_problem = None
-
 
         # First check for memory problems
         for line in self.session_scale:
