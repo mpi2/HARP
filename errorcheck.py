@@ -46,7 +46,7 @@ def errorCheck(self):
         # if the line matches the regex break
         if prog.match(line) :
             file_check = True
-            return
+            break
 
     if file_check:
         self.stop = None
@@ -75,6 +75,8 @@ def errorCheck(self):
         except ValueError:
             if not self.ui.lineEditPixel.text():
                 message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: User has not specified a new pixel size value')
+                self.stop = True
+                return
             else :
                 message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: User defined pixel is not a numerical value')
                 self.stop = True
@@ -82,7 +84,7 @@ def errorCheck(self):
 
     # Check user has not selected to scale by pixel without having a recon folder
     if self.ui.checkBoxPixel.isChecked() and self.pixel_size == "" :
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Pixel size could not be obtained from original recon log. Scaling "By Pixel (um) is not possible')
+        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Pixel size could not be obtained from original recon log. Scaling "By Pixel (um) is not possible"')
         self.stop = True
         return
 

@@ -551,7 +551,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.tableWidget.setItem(self.current_row, 3, item)
             item = self.ui.tableWidget.item(self.current_row, 3)
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        if message == "Processing finished" or re.search("error",message):
+        if re.search("Processing finished",message) or re.search("error",message):
             print message
             item = QtGui.QTableWidgetItem()
             self.ui.tableWidget.setItem(self.current_row, 4, item)
@@ -583,7 +583,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.ui.pushButtonStart.setEnabled(True)
                 self.ui.pushButtonStop.setEnabled(False)
                 return
-            if status.text() == "Processing finished" or status.text() == "Processing Cancelled!" or re.search("error",status.text()):
+            if re.search("Processing finished",status.text()) or status.text() == "Processing Cancelled!" or re.search("error",status.text()):
                 # this row has finished, move on
                 count = count +1
                 continue
@@ -635,7 +635,7 @@ class MainWindow(QtGui.QMainWindow):
             status = self.ui.tableWidget.item(selected,2)
             if status:
                 print "status",status.text()
-                if (status.text() == "Pending" or status.text() == "Processing finished"
+                if (status.text() == "Pending" or re.search("Processing finished",status.text())
                     or status.text() == "Processing Cancelled!" or re.search("error",status.text())):
 
                     print "Deleted row"
@@ -669,7 +669,7 @@ class MainWindow(QtGui.QMainWindow):
                 switch = "dead"
                 break
             if status:
-                if (status.text() != "Pending" and status.text() != "Processing finished"
+                if (status.text() != "Pending" and not re.search("Processing finished",status.text())
                     and status.text() != "Processing Cancelled!" and not re.search("error",status.text())):
                     #print "Status message", status.text()
                     switch = "live"

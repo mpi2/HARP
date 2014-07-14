@@ -44,13 +44,14 @@ class ProcessingThread(QtCore.QThread):
         elif __file__:
             self.dir = os.path.dirname(__file__)
 
-
         #===============================================
         # Setup logging files
         #===============================================
         self.session_log_path = os.path.join(self.configOb.meta_path,"session.log")
         self.session_log = open(self.session_log_path, 'w+')
 
+        #logging if there is an error with scaling
+        self.scale_error = None
 
 
         self.session_log.write("########################################\n")
@@ -182,11 +183,13 @@ class ProcessingThread(QtCore.QThread):
             self.compression()
 
 
-            self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
+            if self.scale_error:
+                self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished (problems creating some of the scaled stacks, see log file)" )
+            else:
+                self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
 
             self.session_log.write("Processing finished\n")
             self.session_log.write("########################################\n")
-            self.session_log.close()
             self.session_log.close()
             return
 
@@ -267,7 +270,6 @@ class ProcessingThread(QtCore.QThread):
             if memory_result:
                 self.execute_imagej(2.0)
 
-
         if self.configOb.SF3 == "yes" :
             memory_result = self.memory_check(3)
             if memory_result:
@@ -335,9 +337,8 @@ class ProcessingThread(QtCore.QThread):
         # will be divided by 0.5, 0.5 and 0.5
         memory_for_scale = crop_folder_size_mb*(scale_div*scale_div*scale_div)
 
-        # Based on a very approximate estimate I have said it will take imagej 3x that of the memory of the approx scaled stack
-        memory_for_scale = memory_for_scale*3
-
+        # Based on a very approximate estimate I have said it will take imagej 4x that of the memory of the approx scaled stack
+        memory_for_scale = memory_for_scale*4
 
         # Check if there is enough memory  available.
         if self.memory_4_imageJ < memory_for_scale:
@@ -348,6 +349,7 @@ class ProcessingThread(QtCore.QThread):
             fail_file_name = os.path.join(self.configOb.scale_path,"insufficient_memory_for_scaling_"+str(scale))
             fail_file = open(fail_file_name, 'w+')
             fail_file.close()
+            self.scale_error = True
             return 0
         else :
             # enough memory
@@ -420,7 +422,6 @@ class ProcessingThread(QtCore.QThread):
         file_name = os.path.join(self.configOb.scale_path,self.configOb.full_name+"_scaled_"+str(sf)+"_pixel_"+new_pixel+".tif")
         self.scale_array.append(file_name)
 
-
         # Subprocess call for imagej macro
         process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", ij_macro_path,
                                     self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name],
@@ -433,6 +434,7 @@ class ProcessingThread(QtCore.QThread):
         # I dont think the out and error variables work here as we already assigned stderr and stdout in the subprocess call
         out, err = process.communicate()
 
+        print process.returncode
         # Scale log file is now closed for writing
         self.session_scale.close()
 
@@ -478,12 +480,16 @@ class ProcessingThread(QtCore.QThread):
             fail_file_name = os.path.join(self.configOb.scale_path,"not_enough_memory_to_scale_by_"+str(sf))
             fail_file = open(fail_file_name, 'w+')
             fail_file.close()
+            self.scale_error = True
+
         elif other_ij_problem:
             self.emit( QtCore.SIGNAL('update(QString)'), "Problem in scaling. Check log file\n" )
             self.session_log.write("Error in scaling\n")
             fail_file_name = os.path.join(self.configOb.scale_path,"error_performing_scaling_by_"+str(sf))
             fail_file = open(fail_file_name, 'w+')
             fail_file.close()
+
+            self.scale_error = True
         else:
             self.session_log.write("Finished scaling\n")
 
