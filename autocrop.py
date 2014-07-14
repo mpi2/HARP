@@ -124,6 +124,8 @@ class Autocrop():
 			filename = os.path.basename(file_)
 			crop_out = os.path.join(self.out_dir,filename)
 			cv2.imwrite(crop_out, imcrop)
+
+
 		self.callback("cropping finished" )
 
 

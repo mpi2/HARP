@@ -9,6 +9,8 @@ def errorCheck(self):
     #any changes the user might have made
     inputFolder = str(self.ui.lineEditInput.text())
     outputFolder = str(self.ui.lineEditOutput.text())
+    self.stop = None
+
 
     # Check input and output folders assigned
     if not inputFolder :
@@ -16,20 +18,43 @@ def errorCheck(self):
         self.stop = True
         return
 
+    if not outputFolder :
+        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: output directory not defined')
+        self.stop = True
+        return
+
+    # Check if input folder exists
     if not os.path.exists(inputFolder):
         message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not exist')
         self.stop = True
         return
+
     #Check if folder is empty
-    elif os.listdir(inputFolder) == []:
+    if os.listdir(inputFolder) == []:
         message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty')
         self.stop = True
         return
 
-    elif not outputFolder :
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: output directory not defined')
+    #Check if input folder contains any image files
+    prog = re.compile("(.*).(bmp|tif|jpg|jpeg)",re.IGNORECASE)
+
+    file_check = None
+    # for loop to go through the directory
+    for line in os.listdir(inputFolder) :
+        line =str(line)
+        #print line+"\n"
+        # if the line matches the regex break
+        if prog.match(line) :
+            file_check = True
+            return
+
+    if file_check:
+        self.stop = None
+    else:
+        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not contain image files')
         self.stop = True
         return
+
 
     # Check if scan folder available if compression is required
     if self.ui.checkBoxScansReconComp.isChecked():
@@ -110,3 +135,15 @@ def errorCheck(self):
     else :
         os.makedirs(outputFolder)
         self.stop = None
+
+    # Check if a crop folder is available if UseOldCrop is used
+    if self.ui.radioButtonUseOldCrop.isChecked():
+        if not os.path.exists(os.path.join(str(self.ui.lineEditOutput.text()),"cropped")):
+            self.stop = True
+            message = QtGui.QMessageBox.warning(self,
+                                                'Message',
+                                                 'Warning: Use old crop option selected. This requires a previous crop to have been performed')
+
+
+
+

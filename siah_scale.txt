@@ -49,6 +49,7 @@ print(full_file_name);
 
 
 //open the image sequence as a stack
+print("reading image in");
 run("Image Sequence...", "open=[" + arg_array[0] + image_list[0] + "] file=[] or=[] sort use");
 rename("unscaled");
 //run('Nrrd ... ', "nrrd=" + "/home/neil/test/test.nrrd");
@@ -59,21 +60,29 @@ zdepth = floor(image_list.length * scale);
 
 
 //run the scaling in the x, y and z dimensions
+print("performing scaling");
 // interpolation is bicubic if requested
 if (interpolation=="yes") {
 	print("Interpolation:");
 	print("Bicubic");
-	run("Scale...", "x=" + scale + " y=" + scale +  " z=" + zdepth + " depth=" + zdepth + " interpolation=Bicubic average process create title=scaled");
+	//run("Scale...", "x=" + scale + " y=" + scale +  " z=" + zdepth + " depth=" + zdepth + " interpolation=Bicubic average process create title=scaled");
+
+	run("Scale...", "x=" + scale + " y=" + scale +  " z=" + scale + " depth=" + zdepth + " interpolation=Bicubic average process title=scaled");
+
+
 } else {
 	print("Interpolation:");
 	print("default");
-	run("Scale...", "x=" + scale + " y=" + scale +  " z=" + zdepth + " depth=" + zdepth + " average process create title=scaled");
+	//run("Scale...", "x=" + scale + " y=" + scale +  " z=" + zdepth + " depth=" + zdepth + " average process create title=scaled");
+
+	run("Scale...", "x=" + scale + " y=" + scale +  " z=" + scale + " depth=" + zdepth + " average process title=scaled");
+
 }
 
 
 //Create directory (this is now done in python
 //File.makeDirectory(out_path + divide_scale);
-
+print("saving file");
 saveAs("Tiff", full_file_name);
 print("Scaling Finished");
 

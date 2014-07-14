@@ -191,7 +191,7 @@ def folder_size_approx(self):
                 filename = line
                 break
 
-        filename = input+"/"+filename
+        filename = os.path.join(input,filename)
         file1_size = os.stat(filename).st_size
 
         # Need to distinguish between the file types. The calculation only includes recon files, as we known they will all be the same size.

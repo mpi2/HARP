@@ -1,14 +1,23 @@
-import os
+import sys
+import subprocess
+import os, signal
+import re
+import pprint
+import time
 import shutil
+import logging
+import logging.handlers
+import tarfile
+import autocrop
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
-from config import ConfigClass
+import config
 
 
-def get_pickle(self):
+def getParamaters(self):
     '''
     Creates the config file for future processing
     '''

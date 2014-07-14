@@ -1,10 +1,10 @@
 #!/usr/bin/python
-#title           :Main.py
+#title           :harp.py
 #description     :Runs the HARP GUI
 #author          :SIG
-#date            :2014-04-09
-#version         :0.1
-#usage           :python mMin.py or if using executable in windows .\Main.exe or clicking on the Main.exe icon.
+#date            :2014-07-14
+#version         :0.1.1 (update for memory and exceptions)
+#usage           :python harp.py or if using executable in windows .\harp.exe or clicking on the harp.exe icon.
 #formatting      :PEP8 format is used where possible
 #python_version  :2.7
 #=============================================================================
@@ -108,6 +108,9 @@ class MainWindow(QtGui.QMainWindow):
         # No crop (disable buttons)
         self.ui.radioButtonNo.clicked.connect(self.man_crop_off)
 
+        # Use Old crop (disable buttons)
+        self.ui.radioButtonUseOldCrop.clicked.connect(self.man_crop_off)
+
         # Man crop (enable buttons).
         self.ui.radioButtonMan.clicked.connect(self.man_crop_on)
 
@@ -159,8 +162,22 @@ class MainWindow(QtGui.QMainWindow):
         # Documentation PDF
         self.ui.actionPDF_user_guide.triggered.connect(self.user_guide)
 
+        # Example Data for testing purposes
+        self.ui.actionExample_data.triggered.connect(self.example_data)
+
         # to make the window visible
         self.show()
+
+    def example_data(self):
+        ''' loads in data for tesing purposes '''
+        self.ui.lineEditInput.setText(os.path.join("D:","fakedata","recons","20140408_RCAS_17_18.4e_wt_rec"))
+        self.reset_inputs()
+        autofill.get_name(self)
+        autofill.get_recon_log(self)
+        autofill.auto_file_out(self)
+        autofill.auto_get_scan(self)
+        autofill.auto_get_SPR(self)
+        autofill.folder_size_approx(self)
 
     def about_message(self):
         ''' Short description about what HARP is and its version'''

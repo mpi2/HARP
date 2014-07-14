@@ -13,6 +13,7 @@ import datetime
 import copy
 from multiprocessing import freeze_support
 from sys import platform as _platform
+import traceback
 
 import autocrop
 #from vtkRenderAnimation import Animator
@@ -48,10 +49,9 @@ class ProcessingThread(QtCore.QThread):
         # Setup logging files
         #===============================================
         self.session_log_path = os.path.join(self.configOb.meta_path,"session.log")
-        self.scale_log_path = os.path.join(self.configOb.meta_path,"scale.log")
-
-        self.session_scale = open(self.scale_log_path, 'w+')
         self.session_log = open(self.session_log_path, 'w+')
+
+
 
         self.session_log.write("########################################\n")
         self.session_log.write("### HARP Session Log                 ###\n")
@@ -70,13 +70,24 @@ class ProcessingThread(QtCore.QThread):
 
     def cropping(self):
         '''
-        Cropping
+        Performs cropping procedures. If the option "no crop" or "old crop" was used by the user no cropping will be peformed
         '''
         # Make crop folder
         self.session_log.write("*****Performing cropping******\n")
+        self.folder_for_scaling = self.configOb.cropped_path
 
         # Do not perform any crop as user specified
         if self.configOb.crop_option == "No_crop" :
+            self.emit( QtCore.SIGNAL('update(QString)'), "No Crop carried out" )
+            #print "No crop carried out"
+            self.session_log.write("No crop carried out\n")
+            self.autocrop_update_slot("success")
+
+            self.folder_for_scaling = self.configOb.input_folder
+
+            return
+
+        if self.configOb.crop_option == "Old_crop" :
             self.emit( QtCore.SIGNAL('update(QString)'), "No Crop carried out" )
             #print "No crop carried out"
             self.session_log.write("No crop carried out\n")
@@ -101,11 +112,37 @@ class ProcessingThread(QtCore.QThread):
 
         self.session_log.write("Crop started\n")
         self.session_log.write(str(datetime.datetime.now())+"\n")
+
+        # run crop and catch its errors
         self.auto_crop = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocrop_update_slot,  def_crop=dimensions_tuple)
-        self.auto_crop.run()
+
+        try:
+            self.auto_crop.run()
+        except WindowsError as e:
+            self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the network. Exception message:\n"
+                                   +"Exception traceback:"+
+                                   traceback.format_exc()+"\n")
+            self.emit( QtCore.SIGNAL('update(QString)'), "error: HARP can't find the folder, see log file" )
+
+        except TypeError as e:
+            # This is referring to an error in either the functions run_crop_process or init_cropping. Possibly the exception would be more beneficial
+            # placed directly in autocrop....
+            self.session_log.write("error: HARP most likely can't find the folder, maybe a temporary problem connecting to the network. Exception message:\n"
+                                   +"Exception traceback:"+
+                                   traceback.format_exc()+"\n")
+            self.emit( QtCore.SIGNAL('update(QString)'), "error: HARP can't find the files, see log file" )
+
+        except Exception as e:
+            self.session_log.write("error: Unknown autocrop exception. Exception message:\n"
+                                   +"Exception traceback:"+
+                                   traceback.format_exc()+"\n")
+            self.emit( QtCore.SIGNAL('update(QString)'), "error: autocrop problem, see log file" )
 
 
     def autocrop_update_slot(self, msg):
+        '''
+        Listens to autocrop. If autocrop sends a signal with the message "success" then the next steps in the processing will occur
+        '''
         #print("autocrop all done")
         #         crop_result = acrop.run()
 
@@ -136,7 +173,7 @@ class ProcessingThread(QtCore.QThread):
             #===============================================
             # Copying
             #===============================================
-            if not self.configOb.crop_option == "No_crop" :
+            if not self.configOb.crop_option == "No_crop" or  self.configOb.crop_option == "Old_crop" :
                 self.copying()
 
             #===============================================
@@ -145,14 +182,20 @@ class ProcessingThread(QtCore.QThread):
             self.compression()
 
 
+            self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
 
+            self.session_log.write("Processing finished\n")
+            self.session_log.write("########################################\n")
+            self.session_log.close()
             self.session_log.close()
             return
+
 
         elif re.search("error",msg):
             #self.emit( QtCore.SIGNAL('update(QString)'), msg)
             self.session_log.write("Error in cropping see below:\n")
             self.session_log.write(msg)
+            self.session_log.close()
             return
 
     def kill_slot(self):
@@ -201,41 +244,115 @@ class ProcessingThread(QtCore.QThread):
         print "Scaling started"
         self.session_log.write("*****Performing scaling******\n")
         self.session_log.write(str(datetime.datetime.now())+"\n")
-        self.session_log.write(str(os.listdir(self.configOb.input_folder)))
-        self.session_log.write("\n")
+        #self.session_log.write(str(os.listdir(self.configOb.input_folder)))
+        #self.session_log.write("\n")
         # First make subfolder for scaled stacks
         if not os.path.exists(self.configOb.scale_path):
             os.makedirs(self.configOb.scale_path)
 
         # Memory of computer being used will depend on how much memory will be used in imageJ
         # e.g 80% total memory of the computer
-        self.memory_4_imageJ = (int(self.memory)*.8)
+        self.memory_4_imageJ = (int(self.memory)*.9)
         self.memory_4_imageJ = self.memory_4_imageJ*0.00000095367
         self.memory_4_imageJ = int(self.memory_4_imageJ)
         memory_mb = int(int(self.memory)*0.00000095367)
         self.session_log.write("Total Memory of Computer(mb):"+str(memory_mb)+"\n")
         self.session_log.write("Memory for ImageJ(mb):"+str(self.memory_4_imageJ)+"\n")
 
+
         # Perform scaling as subprocess with Popen (they should be done in the background)
 
         if self.configOb.SF2 == "yes" :
-            self.execute_imagej(2.0)
+            memory_result = self.memory_check(2)
+            if memory_result:
+                self.execute_imagej(2.0)
+
 
         if self.configOb.SF3 == "yes" :
-            self.execute_imagej(3.0)
+            memory_result = self.memory_check(3)
+            if memory_result:
+                self.execute_imagej(3.0)
 
         if self.configOb.SF4 == "yes" :
-            self.execute_imagej(4.0)
+            memory_result = self.memory_check(4)
+            if memory_result:
+                self.execute_imagej(4.0)
 
         if self.configOb.SF5 == "yes" :
-            self.execute_imagej(5.0)
+            memory_result = self.memory_check(5)
+            if memory_result:
+                self.execute_imagej(5.0)
 
         if self.configOb.SF6 == "yes" :
-            self.execute_imagej(6.0)
+            memory_result = self.memory_check(6)
+            if memory_result:
+                self.execute_imagej(6.0)
 
         if self.configOb.pixel_option == "yes" :
 
             self.execute_imagej("Pixel")
+
+    def memory_check(self,scale):
+        #self.memory_4_imageJ
+        scale_div = float(1.0/scale)
+
+        # If no crop option the memory check is done using data extrapolate from the original recon folder
+        if self.configOb.crop_option == "No_crop" :
+            crop_folder_size_mb = float(self.configOb.recon_folder_size)*1024.0
+            print "Recon folder size to downsize (mb)",crop_folder_size_mb
+        else :
+
+            prog = re.compile("(.*)_rec\d+\.(bmp|tif|jpg|jpeg)",re.IGNORECASE)
+
+            filename = ""
+            # for loop to go through the directory
+            for line in os.listdir(self.folder_for_scaling) :
+                line =str(line)
+                #print line+"\n"
+                # if the line matches the regex break
+                if prog.match(line) :
+                    filename = line
+                    break
+
+            # get the number of files, ignore any non recon files
+            num_files = len([f for f in os.listdir(self.configOb.cropped_path) if ((f[-4:] == ".bmp") or (f[-4:] == ".tif") or (f[-4:] == ".jpg") or (f[-4:] == ".jpeg") or
+                          (f[-4:] == ".BMP") or (f[-4:] == ".TIF") or (f[-4:] == ".JPG") or (f[-4:] == ".JPEG") and
+                          (f[-7:] != "spr.bmp") and (f[-7:] != "spr.tif") and (f[-7:] != "spr.jpg") and (f[-7:] != "spr.jpeg") and
+                          (f[-7:] != "spr.BMP") and (f[-7:] != "spr.TIF") and (f[-7:] != "spr.JPG") and (f[-7:] != "spr.JPEG"))])
+
+            # get the size of the file matched previously
+            filename = os.path.join(self.folder_for_scaling,filename)
+            file1_size = os.path.getsize(filename)
+
+            # approx folder size
+            approx_size = num_files*file1_size
+
+            # convert to mb
+            crop_folder_size_mb =  (approx_size/(1024*1024.0))
+
+
+        # Get the approx size of the statck by dividing by x,y ans z of the folder size. e.g. for scaling by 2
+        # will be divided by 0.5, 0.5 and 0.5
+        memory_for_scale = crop_folder_size_mb*(scale_div*scale_div*scale_div)
+
+        # Based on a very approximate estimate I have said it will take imagej 3x that of the memory of the approx scaled stack
+        memory_for_scale = memory_for_scale*3
+
+
+        # Check if there is enough memory  available.
+        if self.memory_4_imageJ < memory_for_scale:
+            # not enough memory for this"
+            print "not enough memory"
+            self.session_log.write("Not enough memory for this scaling\n")
+            self.emit( QtCore.SIGNAL('update(QString)'), "Not enough memory for scaling\n" )
+            fail_file_name = os.path.join(self.configOb.scale_path,"insufficient_memory_for_scaling_"+str(scale))
+            fail_file = open(fail_file_name, 'w+')
+            fail_file.close()
+            return 0
+        else :
+            # enough memory
+            return 1
+
 
 
     def execute_imagej(self, sf):
@@ -246,6 +363,10 @@ class ProcessingThread(QtCore.QThread):
         '''
         if self.kill_check == 1 :
             return
+
+        # Setup a logging file
+        self.scale_log_path = os.path.join(self.configOb.meta_path,str(sf)+"_scale.log")
+        self.session_scale = open(self.scale_log_path, 'w+')
 
         # Gets the new pixel numbers for the scaled stack name (see in imagej macro)
         if (self.configOb.recon_pixel_size) and sf != "Pixel":
@@ -267,8 +388,6 @@ class ProcessingThread(QtCore.QThread):
 
         # Get the scaling factor in decimal
         dec_sf = round((1/sf),4)
-
-
 
         # Linux or win32 imagej jar location
         if _platform == "linux" or _platform == "linux2":
@@ -293,24 +412,78 @@ class ProcessingThread(QtCore.QThread):
         self.scale_array.append(file_name)
 
 
-        #out_path[1]+arg_array[2]_scaled+arg_array[3]_pixel_+arg_array[4].tif
-
         # Subprocess call for imagej macro
         process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", os.path.join(self.dir, "siah_scale.txt"),
                                     self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name],
                                    stdout=self.session_scale,stderr=self.session_scale)
 
         #Get pid of imagej macro so we can kill if the user finds a problem
+
+
+        # record a process ID incase we need to kill imagej
         self.imagej_pid = str(process.pid)
+        # I dont think the out and error variables work here as we already assigned stderr and stdout in the subprocess call
         out, err = process.communicate()
+
+        # Scale log file is now closed for writing
+        self.session_scale.close()
+        # But we reopen for just reading, also goes back to the start
+        self.session_scale = open(self.scale_log_path, "r")
+
+
+        # reset processing ID, as processing has finished.
         self.imagej_pid = ""
 
-        self.session_log.write("Finished scaling\n")
+        # Check the self.session_scale file for memory or any other problem messages
+        prog1 = re.compile("<Out of memory>")
+        prog2 = re.compile(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        out_of_memory = None
+        other_ij_problem = None
+
+
+        # First check for memory problems
+        for line in self.session_scale:
+            # "chomp" the line endings off
+            line = line.rstrip()
+            # if the line matches the regex print the (\w+.\w+) part of regex
+            if prog1.match(line) :
+                # Grab the pixel size with with .group(1)
+                out_of_memory = True
+                break
+
+        # Then check for any other problems.
+        for line in self.session_scale:
+            # "chomp" the line endings off
+            line = line.rstrip()
+            # if the line matches the regex print the (\w+.\w+) part of regex
+            if prog2.match(line) :
+                # Grab the pixel size with with .group(1)
+                other_ij_problem  = True
+                break
+
+        self.session_scale.close()
+
+        if out_of_memory:
+            # Dont use the word "error" in the signal message. If "error" is used HARP might skip any further processing for this
+            # HARP processing list.
+            self.emit( QtCore.SIGNAL('update(QString)'), "Problem in scaling. Not enough memory\n" )
+            self.session_log.write("Error in scaling\n")
+            fail_file_name = os.path.join(self.configOb.scale_path,"not_enough_memory_to_scale_by_"+str(sf))
+            fail_file = open(fail_file_name, 'w+')
+            fail_file.close()
+        elif other_ij_problem:
+            self.emit( QtCore.SIGNAL('update(QString)'), "Problem in scaling. Check log file\n" )
+            self.session_log.write("Error in scaling\n")
+            fail_file_name = os.path.join(self.configOb.scale_path,"error_performing_scaling_by_"+str(sf))
+            fail_file = open(fail_file_name, 'w+')
+            fail_file.close()
+        else:
+            self.session_log.write("Finished scaling\n")
 
 
     def movies(self):
         '''
-        movies
+        movies: todo
         '''
         movie_path = os.path.join(self.configOb.output_folder,"movies")
         if not os.path.exists(movie_path):
@@ -328,7 +501,7 @@ class ProcessingThread(QtCore.QThread):
 
     def masking(self):
         '''
-        masking
+        masking: todo
         '''
         print "masking"
 
@@ -341,6 +514,8 @@ class ProcessingThread(QtCore.QThread):
         '''
         if self.kill_check == 1 :
             return
+
+        self.emit( QtCore.SIGNAL('update(QString)'), "Copying files\n" )
 
         self.session_log.write("***Copying other files from original recon***\n")
         self.session_log.write(str(datetime.datetime.now())+"\n")
@@ -403,12 +578,8 @@ class ProcessingThread(QtCore.QThread):
                 out.add(self.configOb.cropped_path, arcname="Cropped")
                 out.close()
 
-        self.session_scale.close()
-        self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
 
-        self.session_scale.close()
-        self.session_log.write("Processing finished\n")
-        self.session_log.write("########################################\n")
+
 
 
 def main():
