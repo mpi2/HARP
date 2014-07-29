@@ -2,6 +2,30 @@ from PyQt4 import QtCore, QtGui
 import sys
 import os
 import re
+import datetime
+
+def opt_uCT_check(self):
+    print "doing opt_uct check"
+    file_in = str(self.ui.lineEditInput.text())
+    print file_in
+    p_opt = re.compile("OPT",re.IGNORECASE)
+    p_uCT = re.compile("MicroCT",re.IGNORECASE)
+    if p_opt.search(file_in):
+        self.modality = "OPT"
+        self.ui.radioButtonOPT.setChecked(True)
+        self.ui.lineEditChannel.setEnabled(True)
+        self.ui.labelChannel.setEnabled(True)
+    elif p_uCT.search(file_in):
+        self.modality = "MicroCT"
+        self.ui.radioButtonuCT.setChecked(True)
+        self.ui.lineEditChannel.setEnabled(False)
+        self.ui.labelChannel.setEnabled(False)
+    else:
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: Cannot automatically determine if uCT or OPT please check')
+
+
+
+
 
 def get_recon_log(self):
     '''
@@ -13,15 +37,18 @@ def get_recon_log(self):
     path,folder_name = os.path.split(input)
 
     try:
-        # I think some times the log file is .txt and sometimes .log, a check for both types follows:
-        recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
+        # I think some times the log file is .txt and sometimes .log, a check for both types and other
+        # old formats of log files is checked as follows:
         if os.path.exists(os.path.join(path,folder_name,folder_name+".txt")):
             recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
+        elif os.path.exists(os.path.join(path,folder_name,folder_name+"_rec.txt")):
+            recon_log_path = os.path.join(path,folder_name,folder_name+"_rec.txt")
         elif os.path.exists(os.path.join(path,folder_name,folder_name+".log")):
             recon_log_path = os.path.join(path,folder_name,folder_name+".log")
+        elif os.path.exists(os.path.join(path,folder_name,folder_name+"_rec.log")):
+            recon_log_path = os.path.join(path,folder_name,folder_name+"_rec.log")
         else :
             raise Exception('No log file')
-
         # To make sure the path is in the correct format (probab not necessary..)
         self.recon_log_path = os.path.abspath(recon_log_path)
 
@@ -29,8 +56,12 @@ def get_recon_log(self):
         recon_log_file = open(self.recon_log_path, 'r')
 
         # create a regex to pixel size
-        # We want the pixel size where it starts with Pixel. This is the pixel size with the most amount of decimal places
-        prog = re.compile("^Pixel Size \(um\)\=(\w+.\w+)")
+        # We want the pixel size where it starts with Pixel. This is the pixel size with the most amount of decimal
+        # places for uCT. For OPT this is the "image pixel size"
+        if self.modality == "OPT":
+            prog = re.compile("^Image Pixel Size \(um\)=(\w+.\w+)")
+        else:
+            prog = re.compile("^Pixel Size \(um\)\=(\w+.\w+)")
 
         # for loop to go through the recon log file
         for line in recon_log_file:
@@ -50,6 +81,7 @@ def get_recon_log(self):
 
     except IOError as e:
         # Python standard exception identifies recon file not found
+        print "exception re"
         self.ui.lineEditCTRecon.setText("Not found")
         self.pixel_size = ""
         self.ui.lcdNumberPixel.display(self.pixel_size)
@@ -57,6 +89,8 @@ def get_recon_log(self):
         # Custom exception identifies recon file not found
         self.pixel_size = ""
         self.ui.lcdNumberPixel.display(self.pixel_size)
+        print "exception inst"
+        print self.recon_log_path
         self.ui.lineEditCTRecon.setText("Not found")
     except:
         self.pixel_size = ""
@@ -78,26 +112,70 @@ def get_name(self):
 
     # first split the folder into list of identifiers
     name_list = folder_name.split("_")
+    print name_list
     # the full name will at first just be the folder name
     self.ui.lineEditName.setText(folder_name)
     self.full_name = folder_name
 
     # Need to have exception to catch if the name is not in correct format.
     # If the name is not in the correct format it should flag to the user that this needs to be sorted
-    # Could put additional regexes to check format is correct but could be a little bit annoying for the user
+    # Added additional regex which the user has to check
+
+    error_list = []
+
+    # Checking Date
     try:
         self.ui.lineEditDate.setText(name_list[0])
+        datetime.datetime.strptime(name_list[0], '%Y%m%d')
+    except IndexError:
+        error_list.append("Date not available")
+    except ValueError:
+        error_list.append("Incorrect date format should be = [YYYYMMDD]")
+
+    # Checking gene name/group
+    try:
         self.ui.lineEditGroup.setText(name_list[1])
+    except IndexError:
+        error_list.append("Gene name info not available")
+
+    # Checking age/stage
+    try:
         self.ui.lineEditAge.setText(name_list[2])
+    except IndexError:
+        error_list.append("Stage/age info not available")
+
+    # Litter
+    try:
         self.ui.lineEditLitter.setText(name_list[3])
+    except IndexError:
+        error_list.append("Litter info not available")
+
+    # Zygosity
+    try:
         self.ui.lineEditZygosity.setText(name_list[4])
+    except IndexError:
+        error_list.append("Zygosity info not available")
+
+    # Sex
+    try:
         self.ui.lineEditSex.setText(name_list[5])
+    except IndexError:
+        error_list.append("Sex info not available")
+
+    # Channel (OPT only)
+    try:
+        if self.modality == "OPT":
+            if not name_list[6] is None or name_list[6].lower() == "rec" :
+                QtGui.QMessageBox.warning(self, 'Message',
+                                            'Warning: OPT needs to include channel information. e.g. UV)')
+
+            self.ui.lineEditChannel.setText(name_list[6])
     except IndexError as e:
-        pass
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format\n')
-        self.full_name = folder_name
-    except:
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Auto-populate not possible. Unexpected error:',sys.exc_info()[0])
+        error_list.append("Channel info not available")
+
+    if error_list:
+        error_string = os.linesep.join(error_list)
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning (Naming not canonical):'+os.linesep+error_string)
 
 
 

@@ -114,11 +114,17 @@ class ProcessingThread(QtCore.QThread):
         self.session_log.write("Crop started\n")
         self.session_log.write(str(datetime.datetime.now())+"\n")
 
-        # run crop and catch its errors
+        # make autocrop object
         self.auto_crop = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocrop_update_slot,  def_crop=dimensions_tuple)
 
+        # WindowsError is an execption only available on Windows need to make a fake WindowsError exception for linux
+        if not getattr(__builtins__, "WindowsError", None):
+            class WindowsError(OSError): pass
+
         try:
+            # Run autocrop and catch errors
             self.auto_crop.run()
+
         except WindowsError as e:
             self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the network. Exception message:\n"
                                    +"Exception traceback:"+
@@ -141,13 +147,14 @@ class ProcessingThread(QtCore.QThread):
 
 
     def autocrop_update_slot(self, msg):
-        '''
+        """
         Listens to autocrop. If autocrop sends a signal with the message "success" then the next steps in the processing will occur
-        '''
-        #print("autocrop all done")
-        #         crop_result = acrop.run()
-
+        """
         self.emit( QtCore.SIGNAL('update(QString)'), msg)
+
+        p = re.compile("{\d,2}\s{\d,2}\s{\d,2}\s{\d,2}",re.IGNORECASE)
+        if p.search(msg):
+            print "the crop box",msg
 
         if msg == "success":
             print "crop finished"
