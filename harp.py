@@ -168,6 +168,9 @@ class MainWindow(QtGui.QMainWindow):
         # Decide which channel to be used for autocrop (this table is on the first tab)
         self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
 
+        # When user double clicks on OPT alternative channel open it on the parameter tab
+        self.ui.tableWidgetOPT.doubleClicked.connect(self.change_opt_chn)
+
         # to make the window visible
         self.show()
 
@@ -776,6 +779,21 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.tableWidgetOPT.setItem(i, 3, item)
             item = self.ui.tableWidgetOPT.item(i, 3)
             item.setText("")
+
+    def change_opt_chn(self):
+        in_dir = str(self.ui.lineEditInput.text())
+        path_out,folder_name = os.path.split(in_dir)
+        selected = self.ui.tableWidgetOPT.currentRow()
+        name = self.ui.tableWidgetOPT.item(selected, 1)
+
+        # check if anythin on the OPT list
+        if not name:
+            print "Selected a row with no opt info"
+        else:
+            print "change channel"
+            self.ui.lineEditInput.setText(os.path.join(path_out,str(name.text())))
+            self.reset_inputs()
+            self.autofill_pipe()
 
 
 
