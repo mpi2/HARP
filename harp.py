@@ -103,8 +103,9 @@ class MainWindow(QtGui.QMainWindow):
         # Auto crop (disable buttons)
         self.ui.radioButtonAuto.clicked.connect(self.man_crop_off)
 
-        # No crop (disable buttons)
-        self.ui.radioButtonNo.clicked.connect(self.man_crop_off)
+        # Crop button on
+        self.ui.checkBoxCropYes.clicked.connect(self.crop_switch)
+        #self.ui.radioButtonNo.clicked.connect(self.man_crop_off)
 
         # Use Old crop (disable buttons)
         self.ui.radioButtonUseOldCrop.clicked.connect(self.man_crop_off)
@@ -154,6 +155,9 @@ class MainWindow(QtGui.QMainWindow):
         # delete some recons
         self.ui.tableWidget.__class__.keyPressEvent = self.delete_rows
 
+        # Decide which channel to be used for autocrop
+        self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
+
         # About HARP message
         self.ui.actionAbout.triggered.connect(self.about_message)
 
@@ -170,13 +174,7 @@ class MainWindow(QtGui.QMainWindow):
         """ loads in data for tesing purposes """
         self.ui.lineEditInput.setText(os.path.join("D:", "fakedata", "recons", "20140408_RCAS_17_18.4e_wt_rec"))
         self.reset_inputs()
-        autofill.get_name(self)
-        autofill.opt_uCT_check(self)
-        autofill.get_recon_log(self)
-        autofill.auto_file_out(self)
-        autofill.auto_get_scan(self)
-        autofill.auto_get_SPR(self)
-        autofill.folder_size_approx(self)
+        self.autofill_pipe()
 
     def about_message(self):
         """ Short description about what HARP is and its version"""
@@ -238,30 +236,42 @@ class MainWindow(QtGui.QMainWindow):
         if not folder == "":
             # Reset the inputs incase this is not the first time someone has selected a file
             self.reset_inputs()
-
             # Set the input folder
             self.ui.lineEditInput.setText(folder)
+            # run all the autofill functions
+            self.autofill_pipe()
 
-            # check if uCT or opt data
-            autofill.opt_uCT_check(self)
 
-            # Autocomplete the name
-            autofill.get_name(self)
 
-            # Get the reconLog and associated pixel size
-            autofill.get_recon_log(self)
+    def autofill_pipe(self):
 
-            # Get the output folder location
-            autofill.auto_file_out(self)
+        # Remove the contents of the OPT table
+        self.ui.tableWidgetOPT.clearContents()
 
-            # Automatically identify scan folder
-            autofill.auto_get_scan(self)
+        # check if uCT or opt data
+        autofill.opt_uCT_check(self)
 
-            # Automatically get SPR file
-            autofill.auto_get_SPR(self)
+        # Autocomplete the name
+        autofill.get_name(self, str(self.ui.lineEditInput.text()))
 
-            # Determine size of input folder
-            autofill.folder_size_approx(self)
+        # Get the reconLog and associated pixel size
+        autofill.get_recon_log(self)
+
+        # Get the output folder location
+        autofill.auto_file_out(self)
+
+        # See what OPT channels are available
+        autofill.get_channels(self)
+
+        # Automatically identify scan folder
+        autofill.auto_get_scan(self)
+
+        # Automatically get SPR file
+        autofill.auto_get_SPR(self)
+
+        # Determine size of input folder
+        autofill.folder_size_approx(self)
+
 
     def reset_inputs(self):
         """ Reset the inputs to blank"""
@@ -294,6 +304,30 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.ui.lineEditPixel.setEnabled(False)
 
+    def crop_switch(self):
+        """ turns crop options on or off depending on the status of the check """
+        if self.ui.checkBoxCropYes.isChecked():
+            self.ui.radioButtonAuto.setEnabled(True)
+            self.ui.radioButtonMan.setEnabled(True)
+            self.ui.radioButtonUseOldCrop.setEnabled(True)
+            self.ui.radioButtonDerived.setEnabled(True)
+            if self.ui.radioButtonMan.isChecked():
+                self.ui.lineEditX.setEnabled(True)
+                self.ui.lineEditY.setEnabled(True)
+                self.ui.lineEditW.setEnabled(True)
+                self.ui.lineEditH.setEnabled(True)
+                self.ui.pushButtonGetDimensions.setEnabled(True)
+        else:
+            self.ui.radioButtonAuto.setEnabled(False)
+            self.ui.radioButtonMan.setEnabled(False)
+            self.ui.radioButtonUseOldCrop.setEnabled(False)
+            self.ui.radioButtonDerived.setEnabled(False)
+            self.ui.lineEditX.setEnabled(False)
+            self.ui.lineEditY.setEnabled(False)
+            self.ui.lineEditW.setEnabled(False)
+            self.ui.lineEditH.setEnabled(False)
+            self.ui.pushButtonGetDimensions.setEnabled(False)
+
     def man_crop_off(self):
         """ disables boxes for cropping manually """
         self.ui.lineEditX.setEnabled(False)
@@ -315,40 +349,20 @@ class MainWindow(QtGui.QMainWindow):
         self.modality = "OPT"
         self.ui.lineEditChannel.setEnabled(True)
         self.ui.labelChannel.setEnabled(True)
+        self.ui.tableWidgetOPT.setEnabled(True)
 
     def get_uCT_only(self):
         """ edits self.modality """
         self.modality = "MicroCT"
         self.ui.lineEditChannel.setEnabled(False)
         self.ui.labelChannel.setEnabled(False)
+        self.ui.tableWidgetOPT.setEnabled(False)
 
     def update_name(self):
         """ Function to update the name of the file and folder"""
         self.full_name = str(self.ui.lineEditName.text())
 
-        try:
-            name_list = self.full_name.split("_")
-            # Remove previous data
-            self.ui.lineEditDate.setText("")
-            self.ui.lineEditGroup.setText("")
-            self.ui.lineEditAge.setText("")
-            self.ui.lineEditLitter.setText("")
-            self.ui.lineEditZygosity.setText("")
-            self.ui.lineEditSex.setText("")
-
-            # Add new data
-            self.ui.lineEditDate.setText(name_list[0])
-            self.ui.lineEditGroup.setText(name_list[1])
-            self.ui.lineEditAge.setText(name_list[2])
-            self.ui.lineEditLitter.setText(name_list[3])
-            self.ui.lineEditZygosity.setText(name_list[4])
-            self.ui.lineEditSex.setText(name_list[5])
-
-        except IndexError as e:
-            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Name ID is not in the correct format.\n')
-        except:
-            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error when updating name',
-                                      sys.exc_info()[0])
+        autofill.get_name(self, self.full_name)
 
         # Get output folder name, to start off with this will just be the input name
         output = str(self.ui.lineEditOutput.text())
@@ -500,6 +514,12 @@ class MainWindow(QtGui.QMainWindow):
 
         # get the input name for table
         input_name = str(self.ui.lineEditInput.text())
+
+        # Get the location of the pickle file with the cropbox to be used (if required)
+        if self.ui.radioButtonDerived.isChecked():
+            self.crop_pickle_path = autofill.get_selected_crop_box(self)
+        else:
+            self.crop_pickle_path = "NA"
 
         # Perform some checks before any processing is carried out
         errorcheck.errorCheck(self)
@@ -653,7 +673,7 @@ class MainWindow(QtGui.QMainWindow):
                     # I think the thread will be empty fo next time already
                     #self.pthread_pool = []
                 else:
-                    QtGui.QMessageBox.information(self, 'Message',
+                    QtGui.QMessageBox.warning(self, 'Message',
                                                   'Warning: Can\'t delete a row that is currently being processed.'
                                                   '\nSelect "Stop", then remove')
 
@@ -688,7 +708,7 @@ class MainWindow(QtGui.QMainWindow):
         count = 0
         #print "switch", switch
         if switch == "live":
-            QtGui.QMessageBox.information(self, 'Message',
+            QtGui.QMessageBox.warning(self, 'Message',
                                           'Warning: Processing still running.\nStop processing and then close down')
             event.ignore()
             switch == "live"
@@ -710,6 +730,26 @@ class MainWindow(QtGui.QMainWindow):
         # First kill the thread and autocrop
         self.emit(QtCore.SIGNAL('kill(QString)'), "kill")
 
+    def choose_channel_for_crop(self,event):
+        """
+        If the return button is pressed on a certain row of the
+        opt list this recon will be used for the automatic crop
+        """
+        if event.key() == QtCore.Qt.Key_Return:
+            print "key pressed"
+            selected = self.ui.tableWidgetOPT.currentRow()
+            status = self.ui.tableWidgetOPT.item(selected, 1)
+            if status:
+                # Need to check if the file has already been processed or is on the list
+
+                item = QtGui.QTableWidgetItem()
+                self.ui.tableWidgetOPT.setItem(selected, 3, item)
+                item = self.ui.tableWidgetOPT.item(selected, 3)
+                item.setText("Yes")
+            else:
+                QtGui.QMessageBox.warning(self, 'Message',
+                                                  'Warning: Can\'t use this for autocrop calculation as no folder'
+                                                  '\nSelect "Stop", then remove')
 
 def main():
     app = QtGui.QApplication(sys.argv)

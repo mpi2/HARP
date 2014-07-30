@@ -16,6 +16,7 @@ from sys import platform as _platform
 import traceback
 
 import autocrop
+from config import ConfigClass
 #from vtkRenderAnimation import Animator
 #from Segmentation import watershed_filter
 
@@ -111,6 +112,14 @@ class ProcessingThread(QtCore.QThread):
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
             dimensions_tuple = None
 
+        # setup for derived crop
+        if self.configOb.crop_option == "Derived" :
+            self.session_log.write("Derived crop\n")
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing crop from derived cropbox" )
+            dimensions_tuple = None
+
+
+
         self.session_log.write("Crop started\n")
         self.session_log.write(str(datetime.datetime.now())+"\n")
 
@@ -143,18 +152,34 @@ class ProcessingThread(QtCore.QThread):
             self.session_log.write("error: Unknown autocrop exception. Exception message:\n"
                                    +"Exception traceback:"+
                                    traceback.format_exc()+"\n")
-            self.emit( QtCore.SIGNAL('update(QString)'), "error: autocrop problem, see log file" )
+            self.emit( QtCore.SIGNAL('update(QString)'), "error: Unknown autocrop exception (see log): "+str(e))
 
 
     def autocrop_update_slot(self, msg):
         """
         Listens to autocrop. If autocrop sends a signal with the message "success" then the next steps in the processing will occur
         """
-        self.emit( QtCore.SIGNAL('update(QString)'), msg)
+        # check if a tuple. If it is a tuple it means that the crop box has been sen from the autocrop. Then make
+        # a pickle object of the object so it can be used at another point
+        if type(msg) == tuple:
+            # create our generic class for pickles
+            crop_box_ob = ConfigClass()
 
-        p = re.compile("{\d,2}\s{\d,2}\s{\d,2}\s{\d,2}",re.IGNORECASE)
-        if p.search(msg):
-            print "the crop box",msg
+            # get path
+            crop_box_path = os.path.join(self.configOb.meta_path,"cropbox.txt")
+
+            # save cropbox tuple to cropbox object
+            crop_box_ob.cropbox = msg
+
+            # save the pickle
+            with open(crop_box_path, 'w+') as config:
+                pickle.dump(crop_box_ob, config)
+
+            # that's the end of this callback
+            return
+
+        else:
+            self.emit( QtCore.SIGNAL('update(QString)'), msg)
 
         if msg == "success":
             print "crop finished"

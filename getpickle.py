@@ -36,7 +36,10 @@ def get_pickle(self):
     # Create config object                #
     #######################################
     # Get cropping options
-    if self.ui.radioButtonMan.isChecked() :
+    if not self.ui.checkBoxCropYes.isChecked() :
+        self.configOb.crop_manual = "Not_applicable"
+        self.configOb.crop_option = "No_crop"
+    elif self.ui.radioButtonMan.isChecked() :
         self.configOb.xcrop = str(self.ui.lineEditX.text())
         self.configOb.ycrop = str(self.ui.lineEditY.text())
         self.configOb.wcrop = str(self.ui.lineEditW.text())
@@ -46,12 +49,13 @@ def get_pickle(self):
     elif self.ui.radioButtonAuto.isChecked() :
         self.configOb.crop_manual = "Not_applicable"
         self.configOb.crop_option = "Automatic"
-    elif self.ui.radioButtonNo.isChecked() :
-        self.configOb.crop_manual = "Not_applicable"
-        self.configOb.crop_option = "No_crop"
     elif self.ui.radioButtonUseOldCrop.isChecked() :
         self.configOb.crop_manual = "Not_applicable"
         self.configOb.crop_option = "Old_crop"
+    elif self.ui.radioButtonDerived.isChecked() :
+        self.configOb.crop_manual = "Not_applicable"
+        self.configOb.crop_option = "Derived"
+        self.configOb.cropbox_path = self.crop_pickle_path
 
     ##### Get Scaling factors ####
     if self.ui.checkBoxSF2.isChecked() :
@@ -133,6 +137,7 @@ def get_pickle(self):
     log.write("Crop_option    "+self.configOb.crop_option+"\n");
     log.write("Crop_manual    "+self.configOb.crop_manual+"\n");
     log.write("Crop_folder    "+self.configOb.cropped_path+"\n");
+    log.write("Cropbox_location ")+self.configOb.cropbox_path+"\n");
     log.write("Downsize_by_factor_2?    "+self.configOb.SF2+"\n");
     log.write("Downsize_by_factor_3?    "+self.configOb.SF3+"\n");
     log.write("Downsize_by_factor_4?    "+self.configOb.SF4+"\n");
@@ -158,3 +163,4 @@ def get_pickle(self):
             shutil.copyfile(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif"), os.path.join(self.configOb.meta_path,"max_intensity_z.tif"))
 
     log.close()
+

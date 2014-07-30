@@ -5,6 +5,9 @@ import re
 import datetime
 
 def opt_uCT_check(self):
+    '''
+    Checks whether or not folder name contains reference to either opt or microCT
+    '''
     print "doing opt_uct check"
     file_in = str(self.ui.lineEditInput.text())
     print file_in
@@ -15,17 +18,157 @@ def opt_uCT_check(self):
         self.ui.radioButtonOPT.setChecked(True)
         self.ui.lineEditChannel.setEnabled(True)
         self.ui.labelChannel.setEnabled(True)
+        self.ui.tableWidgetOPT.setEnabled(True)
     elif p_uCT.search(file_in):
         self.modality = "MicroCT"
         self.ui.radioButtonuCT.setChecked(True)
         self.ui.lineEditChannel.setEnabled(False)
         self.ui.labelChannel.setEnabled(False)
+        self.ui.tableWidgetOPT.setEnabled(False)
     else:
         QtGui.QMessageBox.warning(self, 'Message', 'Warning: Cannot automatically determine if uCT or OPT please check')
 
+def get_crop_box(self,alt_name):
+    """
+
+    """
+    if not self.modality == "OPT":
+        return
+    out_dir = str(self.ui.lineEditOutput.text())
+    path_out,folder_name = os.path.split(out_dir)
+
+    # go through all the folders indentified to see if one has a cropbox pickle file. If it does save the
+    cropbox_path = os.path.join(path_out, alt_name,"Metadata","cropbox.txt")
+    print cropbox_path
+    if os.path.exists(cropbox_path):
+        return True
+
+def check_if_on_list(self,alt_name):
+    # A while loop is used to go through the processing table see if the alternative channel is on the list already
+    count = 0
+    while True:
+        # This gets the status text
+        name_on_list = self.ui.tableWidget.item(count, 0)
+        if not name_on_list:
+            # if not defined it means there are no recons left to process
+            print "Nothing on processing list"
+            return False
+        if re.search(alt_name, name_on_list.text()):
+            # this row has the OPT channel ID meaning a cropbox will be ready when this is ran
+            print "on list"
+            return True
 
 
 
+def get_channels(self):
+    """
+    Check if OPT is selected
+    look up recon parent folder and search for other available
+    Then checks if are there similar named folders in the input directory
+    Go through the folders identified and put in table
+    :return:
+    """
+    if not self.modality == "OPT":
+        return
+
+    # Are there matching folders in the parent directory of the input directory
+    in_dir = str(self.ui.lineEditInput.text())
+    # Get the folder name and path name
+    path,folder_name = os.path.split(in_dir)
+    # get a list of the names in the folder name
+    l_init = folder_name.split("_")
+    # get the name without the channel (only works if name is in the correct format)
+    base_name = '_'.join(l_init[0:6])
+
+    alt_chan_full = []
+    alt_chan_short = []
+    # for loop to go through the parent input directory
+    for line in os.listdir(path) :
+        line =str(line)
+        # if the line matches the base_name but is not the same as the input file. The folder is probably another
+        # channel
+        m = re.search(base_name,line)
+        if m and (not line == folder_name):
+            alt_chan_full.append(line)
+            alt_chan_short.append(m.group(0))
+
+    self.alt_chan_full = alt_chan_full
+    count = 0
+    crop_box_use = False
+
+    # Save the the opt channels to the opt channel table
+    for alt_name in alt_chan_full:
+
+        # Set the data for an individual row
+        # Set up the channel type
+        l = alt_name.split("_")
+        chn = l[6]
+        item = QtGui.QTableWidgetItem()
+        self.ui.tableWidgetOPT.setItem(count, 0, item)
+        item = self.ui.tableWidgetOPT.item(count, 0)
+        item.setText(chn)
+
+        # Set up the name of the recon
+        item = QtGui.QTableWidgetItem()
+        self.ui.tableWidgetOPT.setItem(count, 1, item)
+        tem = self.ui.tableWidgetOPT.item(count, 1)
+        item.setText(alt_name)
+
+        # Set up whether or not there is a crop box available
+        if get_crop_box(self,alt_name):
+            crop_status = "Yes"
+        elif check_if_on_list(self,alt_name):
+            crop_status = "On list"
+        else:
+            crop_status = "No"
+
+        item = QtGui.QTableWidgetItem()
+        self.ui.tableWidgetOPT.setItem(count, 2, item)
+        item = self.ui.tableWidgetOPT.item(count, 2)
+        # Status is pending untill processing has started
+        item.setText(crop_status)
+
+        if not crop_status == "No" and not crop_box_use:
+            item = QtGui.QTableWidgetItem()
+            self.ui.tableWidgetOPT.setItem(count, 3, item)
+            item = self.ui.tableWidgetOPT.item(count, 3)
+            # Status is pending untill processing has started
+            item.setText("Yes")
+            crop_box_use = True
+            self.ui.radioButtonDerived.setChecked(True)
+
+        # count_in is the counter for the row to add data
+        count += 1
+
+        # Reszie the columns to fit the data
+        self.ui.tableWidgetOPT.resizeColumnsToContents()
+
+    if crop_box_use:
+        QtGui.QMessageBox.information(self, 'Message',
+                                      'Derived cropbox from a previously analysed reconstruction will be used'
+                                      '\nSee \'OPT channels\'')
+
+def get_selected_crop_box(self):
+    out_dir = str(self.ui.lineEditOutput.text())
+    path_out,folder_name = os.path.split(out_dir)
+
+    count = 0
+    while True:
+        # This gets the status text
+        name_on_list = self.ui.tableWidgetOPT.item(count, 1)
+        cropbox_option = self.ui.tableWidgetOPT.item(count, 3)
+        if not name_on_list:
+            # if not defined it means there are no recons left to process
+            print "Nothing on processing list"
+            break
+        if cropbox_option:
+            if cropbox_option.text() == "Yes":
+                print name_on_list.text()
+                cropbox_path = os.path.join(path_out, str(name_on_list.text()),"Metadata","cropbox.txt")
+                if os.path.exists(cropbox_path):
+                    return cropbox_path
+                    break
+        count += 1
 
 def get_recon_log(self):
     '''
@@ -100,15 +243,12 @@ def get_recon_log(self):
 
 
 
-def get_name(self):
+def get_name(self,name):
     '''
     Gets the id from the folder name. Then fills out the text boxes on the main window with the relevant information
     '''
-    # Get input folder
-    input = str(self.ui.lineEditInput.text())
-
     # Get the folder name and path
-    path,folder_name = os.path.split(input)
+    path,folder_name = os.path.split(name)
 
     # first split the folder into list of identifiers
     name_list = folder_name.split("_")
@@ -128,50 +268,59 @@ def get_name(self):
         self.ui.lineEditDate.setText(name_list[0])
         datetime.datetime.strptime(name_list[0], '%Y%m%d')
     except IndexError:
-        error_list.append("Date not available")
+        error_list.append("- Date not available")
     except ValueError:
-        error_list.append("Incorrect date format should be = [YYYYMMDD]")
+        error_list.append("- Incorrect date format should be = [YYYYMMDD]")
 
     # Checking gene name/group
     try:
         self.ui.lineEditGroup.setText(name_list[1])
     except IndexError:
-        error_list.append("Gene name info not available")
+        error_list.append("- Gene name info not available")
 
     # Checking age/stage
     try:
         self.ui.lineEditAge.setText(name_list[2])
     except IndexError:
-        error_list.append("Stage/age info not available")
+        error_list.append("- Stage/age info not available")
 
     # Litter
     try:
         self.ui.lineEditLitter.setText(name_list[3])
     except IndexError:
-        error_list.append("Litter info not available")
+        error_list.append("- Litter info not available")
 
     # Zygosity
     try:
         self.ui.lineEditZygosity.setText(name_list[4])
+        prog = re.compile("HOM|HET|WT|ND|NA",re.IGNORECASE)
+        if not prog.search(name_list[4]):
+            error_list.append("- Zygosity should be either HOM,HET,WT,ND or NA")
+
     except IndexError:
-        error_list.append("Zygosity info not available")
+        error_list.append("- Zygosity info not available")
 
     # Sex
     try:
         self.ui.lineEditSex.setText(name_list[5])
+
+        prog = re.compile("XX|XY|ND",re.IGNORECASE)
+        if not prog.search(name_list[5]):
+            error_list.append("- Sex should be either XX,XY or ND")
+
     except IndexError:
-        error_list.append("Sex info not available")
+        error_list.append("- Sex info not available")
 
     # Channel (OPT only)
     try:
         if self.modality == "OPT":
-            if not name_list[6] is None or name_list[6].lower() == "rec" :
-                QtGui.QMessageBox.warning(self, 'Message',
-                                            'Warning: OPT needs to include channel information. e.g. UV)')
-
             self.ui.lineEditChannel.setText(name_list[6])
+            if name_list[6].lower() == "rec" :
+                error_list.append("- IMPORTANT: OPT needs to include channel information. e.g. UV")
+
+
     except IndexError as e:
-        error_list.append("Channel info not available")
+        error_list.append("- IMPORTANT: OPT needs to include channel information. e.g. UV")
 
     if error_list:
         error_string = os.linesep.join(error_list)

@@ -33,6 +33,7 @@ class Autocrop():
         self.imdims = None
         self.def_crop = def_crop
         self.num_proc = num_proc
+        self.repeat_crop = repeat_crop
 
         self.metric_file_queue = mp.Queue(30)
         self.crop_metric_queue = mp.Queue()
@@ -104,8 +105,7 @@ class Autocrop():
             lcrop, tcrop, rcrop - lcrop, bcrop - tcrop))
         print lcrop, tcrop, rcrop, bcrop
         self.crop_box = (lcrop, tcrop, rcrop, bcrop)
-        crop_box_string = str(self.crop_box)
-        self.callback(crop_box_string)
+        self.callback(self.crop_box)
         self.yield_python()
 
         # do the cropping in cv2
@@ -119,7 +119,9 @@ class Autocrop():
         # self.def_crop is the crop box manually selected by the user
         elif self.def_crop:
             self.crop_box = self.convertXYWH_ToCoords(self.def_crop)
-        # If no crop box has been manaually selected something has gone wrong
+            # Will save the manual crop box here as well as it will be in the correct coordinate system
+            self.callback(self.cropbox)
+        # If no crop box has been manually selected something has gone wrong
         else:
             self.callback("Processing Cancelled!")
             return
