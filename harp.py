@@ -258,29 +258,38 @@ class MainWindow(QtGui.QMainWindow):
     def autofill_pipe(self):
 
         # Remove the contents of the OPT table
+        print "clearing opt table"
         self.ui.tableWidgetOPT.clearContents()
 
         # check if uCT or opt data
+        print "checking if uct or opt"
         autofill.opt_uCT_check(self)
 
         # Autocomplete the name
+        print "autocompleting name"
         autofill.get_name(self, str(self.ui.lineEditInput.text()))
 
         # Get the reconLog and associated pixel size
+        print "geting recon log"
         autofill.get_recon_log(self)
 
         # Get the output folder location
+        print "getting output folder"
         autofill.auto_file_out(self)
 
         # See what OPT channels are available
+        print "getting channels"
         autofill.get_channels(self)
 
         # Automatically identify scan folder
+        print "getting scan folder"
         autofill.auto_get_scan(self)
 
         # Automatically get SPR file
+        print "getting spr folder"
         autofill.auto_get_SPR(self)
 
+        print "deteriming size of input folder"
         # Determine size of input folder
         autofill.folder_size_approx(self)
 
@@ -529,7 +538,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # Get the location of the pickle file with the cropbox to be used (if required)
         if self.ui.radioButtonDerived.isChecked():
+            print "pickle crop box path"
             self.crop_pickle_path = autofill.get_selected_crop_box(self)
+            print self.crop_pickle_path
         else:
             self.crop_pickle_path = "NA"
 
@@ -651,6 +662,7 @@ class MainWindow(QtGui.QMainWindow):
         When the add more button is pressed, just go back to the first tab
         """
         self.ui.tabWidget.setCurrentIndex(0)
+        self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
 
     def stop_processing(self):
         """ Stop processing, kill the current process """

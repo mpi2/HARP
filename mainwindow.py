@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow - Copy.ui'
 #
-# Created: Wed Jul 30 16:05:38 2014
+# Created: Wed Jul 30 16:41:14 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -814,7 +814,7 @@ class Ui_MainWindow(object):
         self.tableWidgetOPT.verticalHeader().setStretchLastSection(True)
         self.scrollArea_3.setWidget(self.scrollAreaWidgetContents_3)
         self.gridLayoutWidget_2 = QtGui.QWidget(self.groupBoxOPTChannels)
-        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 30, 441, 31))
+        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 30, 551, 31))
         self.gridLayoutWidget_2.setObjectName(_fromUtf8("gridLayoutWidget_2"))
         self.gridLayout_15 = QtGui.QGridLayout(self.gridLayoutWidget_2)
         self.gridLayout_15.setMargin(0)

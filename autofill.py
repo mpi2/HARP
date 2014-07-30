@@ -46,6 +46,7 @@ def get_crop_box(self,alt_name):
 def check_if_on_list(self,alt_name):
     # A while loop is used to go through the processing table see if the alternative channel is on the list already
     count = 0
+    print "start check on list"
     while True:
         # This gets the status text
         name_on_list = self.ui.tableWidget.item(count, 0)
@@ -57,6 +58,7 @@ def check_if_on_list(self,alt_name):
             # this row has the OPT channel ID meaning a cropbox will be ready when this is ran
             print "on list"
             return True
+        count += 1
 
 
 
@@ -116,7 +118,7 @@ def get_channels(self):
         # Set up the name of the recon
         item = QtGui.QTableWidgetItem()
         self.ui.tableWidgetOPT.setItem(count, 1, item)
-        tem = self.ui.tableWidgetOPT.item(count, 1)
+        item = self.ui.tableWidgetOPT.item(count, 1)
         item.setText(alt_name)
 
         # Set up whether or not there is a crop box available
@@ -154,6 +156,7 @@ def get_channels(self):
                                       '\nSee \'OPT channels\'')
 
 def get_selected_crop_box(self):
+    print "get selectecd crop box"
     out_dir = str(self.ui.lineEditOutput.text())
     path_out,folder_name = os.path.split(out_dir)
 
@@ -168,11 +171,9 @@ def get_selected_crop_box(self):
             break
         if cropbox_option:
             if cropbox_option.text() == "Yes":
-                print name_on_list.text()
                 cropbox_path = os.path.join(path_out, str(name_on_list.text()),"Metadata","cropbox.txt")
-                if os.path.exists(cropbox_path):
-                    return cropbox_path
-                    break
+                return cropbox_path
+                break
         count += 1
 
 def get_recon_log(self):

@@ -47,6 +47,7 @@ def get_pickle(self):
         self.configOb.hcrop = str(self.ui.lineEditH.text())
         self.configOb.crop_option = "Manual"
         self.configOb.crop_manual = self.configOb.xcrop+" "+self.configOb.ycrop+" "+self.configOb.wcrop+" "+self.configOb.hcrop
+        self.configOb.cropbox_path = "Not_applicable"
     elif self.ui.radioButtonAuto.isChecked() :
         self.configOb.cropbox_path = "Not_applicable"
         self.configOb.crop_manual = "Not_applicable"
