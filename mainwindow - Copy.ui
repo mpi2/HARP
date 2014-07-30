@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1305</width>
-    <height>892</height>
+    <height>882</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -41,7 +41,7 @@
           <x>0</x>
           <y>0</y>
           <width>1281</width>
-          <height>801</height>
+          <height>791</height>
          </rect>
         </property>
         <property name="widgetResizable">
@@ -53,7 +53,7 @@
            <x>0</x>
            <y>0</y>
            <width>1279</width>
-           <height>799</height>
+           <height>789</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
@@ -106,7 +106,7 @@
             </item>
            </layout>
           </item>
-          <item row="8" column="0" colspan="2">
+          <item row="9" column="0" colspan="2">
            <widget class="QPushButton" name="pushButtonGo">
             <property name="minimumSize">
              <size>
@@ -125,275 +125,6 @@
             <property name="default">
              <bool>false</bool>
             </property>
-           </widget>
-          </item>
-          <item row="4" column="1" rowspan="2">
-           <widget class="QGroupBox" name="groupBoxuCTOnly">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>600</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QGroupBox
-{
-    background-color:transparent;
-    border: 1px solid #acacac;
-    margin-top: 5px;
-}
-
-QGroupBox::title
-{
-    subcontrol-origin: margin;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    border: 1px solid #0b477b;
-    border-bottom: none;
-    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-        stop: 0 #005192, stop: 1 #002f60);
-    padding: 2 2px;
-    color: white;
-}</string>
-            </property>
-            <property name="title">
-             <string>Additional files and folders</string>
-            </property>
-            <property name="flat">
-             <bool>false</bool>
-            </property>
-            <property name="checkable">
-             <bool>false</bool>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_8">
-             <item row="1" column="0">
-              <layout class="QFormLayout" name="formLayoutuCTOnly">
-               <property name="fieldGrowthPolicy">
-                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-               </property>
-               <item row="0" column="0">
-                <widget class="QPushButton" name="pushButtonCTRecon">
-                 <property name="font">
-                  <font>
-                   <pointsize>12</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Pick recon log</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QLineEdit" name="lineEditCTRecon">
-                 <property name="font">
-                  <font>
-                   <pointsize>12</pointsize>
-                  </font>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QPushButton" name="pushButtonCTSPR">
-                 <property name="font">
-                  <font>
-                   <pointsize>12</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Pick SPR</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QLineEdit" name="lineEditCTSPR">
-                 <property name="font">
-                  <font>
-                   <pointsize>12</pointsize>
-                  </font>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QPushButton" name="pushButtonScan">
-                 <property name="font">
-                  <font>
-                   <family>Sans Serif</family>
-                   <pointsize>12</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Scan folder</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QLineEdit" name="lineEditScan">
-                 <property name="font">
-                  <font>
-                   <family>Sans Serif</family>
-                   <pointsize>12</pointsize>
-                  </font>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="0" column="0">
-              <spacer name="verticalSpacer_6">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>13</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QGroupBox" name="groupBoxModality_2">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>100</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QGroupBox
-{
-    background-color:transparent;
-    border: 1px solid #acacac;
-    margin-top: 5px;
-}
-
-QGroupBox::title
-{
-    subcontrol-origin: margin;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    border: 1px solid #0b477b;
-    border-bottom: none;
-    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-        stop: 0 #005192, stop: 1 #002f60);
-    padding: 2 2px;
-    color: white;
-}</string>
-            </property>
-            <property name="title">
-             <string>Status</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_12">
-             <item row="0" column="0">
-              <spacer name="verticalSpacer_5">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="1" column="0">
-              <widget class="QTextEdit" name="textEditStatusMessages">
-               <property name="palette">
-                <palette>
-                 <active>
-                  <colorrole role="WindowText">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>255</red>
-                     <green>0</green>
-                     <blue>0</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                  <colorrole role="Text">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>255</red>
-                     <green>0</green>
-                     <blue>0</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                 </active>
-                 <inactive>
-                  <colorrole role="WindowText">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>255</red>
-                     <green>0</green>
-                     <blue>0</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                  <colorrole role="Text">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>255</red>
-                     <green>0</green>
-                     <blue>0</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                 </inactive>
-                 <disabled>
-                  <colorrole role="WindowText">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>123</red>
-                     <green>123</green>
-                     <blue>123</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                  <colorrole role="Text">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>123</red>
-                     <green>123</green>
-                     <blue>123</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                 </disabled>
-                </palette>
-               </property>
-               <property name="font">
-                <font>
-                 <family>Sans Serif</family>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-              </widget>
-             </item>
-            </layout>
            </widget>
           </item>
           <item row="0" column="1">
@@ -1488,7 +1219,276 @@ QGroupBox::title
             </layout>
            </widget>
           </item>
-          <item row="4" column="0" rowspan="4">
+          <item row="4" column="0">
+           <widget class="QGroupBox" name="groupBoxuCTOnly">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>600</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QGroupBox
+{
+    background-color:transparent;
+    border: 1px solid #acacac;
+    margin-top: 5px;
+}
+
+QGroupBox::title
+{
+    subcontrol-origin: margin;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border: 1px solid #0b477b;
+    border-bottom: none;
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+        stop: 0 #005192, stop: 1 #002f60);
+    padding: 2 2px;
+    color: white;
+}</string>
+            </property>
+            <property name="title">
+             <string>Additional files and folders</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_8">
+             <item row="1" column="0">
+              <layout class="QFormLayout" name="formLayoutuCTOnly">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+               </property>
+               <item row="0" column="0">
+                <widget class="QPushButton" name="pushButtonCTRecon">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Pick recon log</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="lineEditCTRecon">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QPushButton" name="pushButtonCTSPR">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Pick SPR</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="lineEditCTSPR">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QPushButton" name="pushButtonScan">
+                 <property name="font">
+                  <font>
+                   <family>Sans Serif</family>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Scan folder</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QLineEdit" name="lineEditScan">
+                 <property name="font">
+                  <font>
+                   <family>Sans Serif</family>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="0" column="0">
+              <spacer name="verticalSpacer_6">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>13</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QGroupBox" name="groupBoxModality_2">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QGroupBox
+{
+    background-color:transparent;
+    border: 1px solid #acacac;
+    margin-top: 5px;
+}
+
+QGroupBox::title
+{
+    subcontrol-origin: margin;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border: 1px solid #0b477b;
+    border-bottom: none;
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+        stop: 0 #005192, stop: 1 #002f60);
+    padding: 2 2px;
+    color: white;
+}</string>
+            </property>
+            <property name="title">
+             <string>Status</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_12">
+             <item row="0" column="0">
+              <spacer name="verticalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="1" column="0">
+              <widget class="QTextEdit" name="textEditStatusMessages">
+               <property name="palette">
+                <palette>
+                 <active>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>255</red>
+                     <green>0</green>
+                     <blue>0</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>255</red>
+                     <green>0</green>
+                     <blue>0</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </active>
+                 <inactive>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>255</red>
+                     <green>0</green>
+                     <blue>0</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>255</red>
+                     <green>0</green>
+                     <blue>0</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </inactive>
+                 <disabled>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>123</red>
+                     <green>123</green>
+                     <blue>123</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                  <colorrole role="Text">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>123</red>
+                     <green>123</green>
+                     <blue>123</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </disabled>
+                </palette>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Sans Serif</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="3" column="1" rowspan="3">
            <widget class="QGroupBox" name="groupBoxOPTChannels">
             <property name="enabled">
              <bool>true</bool>
@@ -1526,9 +1526,9 @@ QGroupBox::title
              <property name="geometry">
               <rect>
                <x>10</x>
-               <y>30</y>
-               <width>651</width>
-               <height>131</height>
+               <y>90</y>
+               <width>551</width>
+               <height>201</height>
               </rect>
              </property>
              <property name="widgetResizable">
@@ -1539,8 +1539,8 @@ QGroupBox::title
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>649</width>
-                <height>129</height>
+                <width>549</width>
+                <height>199</height>
                </rect>
               </property>
               <widget class="QTableWidget" name="tableWidgetOPT">
@@ -1551,8 +1551,8 @@ QGroupBox::title
                 <rect>
                  <x>10</x>
                  <y>10</y>
-                 <width>631</width>
-                 <height>111</height>
+                 <width>531</width>
+                 <height>181</height>
                 </rect>
                </property>
                <property name="editTriggers">
@@ -1619,7 +1619,7 @@ QGroupBox::title
                </column>
                <column>
                 <property name="text">
-                 <string>Get cropbox</string>
+                 <string>Use cropbox</string>
                 </property>
                </column>
                <item row="0" column="3">
@@ -1628,12 +1628,73 @@ QGroupBox::title
                 </property>
                </item>
               </widget>
-              <zorder>tableWidgetOPT</zorder>
-              <zorder>label_4</zorder>
-              <zorder>label_4</zorder>
-              <zorder>formLayoutWidget</zorder>
-              <zorder>gridLayoutWidget</zorder>
              </widget>
+            </widget>
+            <widget class="QWidget" name="gridLayoutWidget_2">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>441</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_15">
+              <item row="0" column="0">
+               <widget class="QLabel" name="labelCurrentChn">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Current channel</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineEditCurrentChnType">
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLineEdit" name="lineEditCurrentName">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QLabel" name="label_8">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>70</y>
+               <width>151</width>
+               <height>25</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Associated channels</string>
+             </property>
             </widget>
            </widget>
           </item>
@@ -1657,7 +1718,7 @@ QGroupBox::title
              <x>0</x>
              <y>0</y>
              <width>1261</width>
-             <height>748</height>
+             <height>738</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout">

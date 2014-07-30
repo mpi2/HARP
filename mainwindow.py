@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow - Copy.ui'
 #
-# Created: Wed Jul 30 13:34:04 2014
+# Created: Wed Jul 30 16:05:38 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1305, 892)
+        MainWindow.resize(1305, 882)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -44,11 +44,11 @@ class Ui_MainWindow(object):
         self.tab = QtGui.QWidget()
         self.tab.setObjectName(_fromUtf8("tab"))
         self.scrollArea = QtGui.QScrollArea(self.tab)
-        self.scrollArea.setGeometry(QtCore.QRect(0, 0, 1281, 801))
+        self.scrollArea.setGeometry(QtCore.QRect(0, 0, 1281, 791))
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents_2 = QtGui.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 1279, 799))
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 1279, 789))
         self.scrollAreaWidgetContents_2.setObjectName(_fromUtf8("scrollAreaWidgetContents_2"))
         self.gridLayout_2 = QtGui.QGridLayout(self.scrollAreaWidgetContents_2)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
@@ -87,139 +87,7 @@ class Ui_MainWindow(object):
         self.pushButtonGo.setFont(font)
         self.pushButtonGo.setDefault(False)
         self.pushButtonGo.setObjectName(_fromUtf8("pushButtonGo"))
-        self.gridLayout_2.addWidget(self.pushButtonGo, 8, 0, 1, 2)
-        self.groupBoxuCTOnly = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
-        self.groupBoxuCTOnly.setMaximumSize(QtCore.QSize(16777215, 600))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.groupBoxuCTOnly.setFont(font)
-        self.groupBoxuCTOnly.setStyleSheet(_fromUtf8("QGroupBox\n"
-"{\n"
-"    background-color:transparent;\n"
-"    border: 1px solid #acacac;\n"
-"    margin-top: 5px;\n"
-"}\n"
-"\n"
-"QGroupBox::title\n"
-"{\n"
-"    subcontrol-origin: margin;\n"
-"    border-top-left-radius: 3px;\n"
-"    border-top-right-radius: 3px;\n"
-"    border: 1px solid #0b477b;\n"
-"    border-bottom: none;\n"
-"    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
-"        stop: 0 #005192, stop: 1 #002f60);\n"
-"    padding: 2 2px;\n"
-"    color: white;\n"
-"}"))
-        self.groupBoxuCTOnly.setFlat(False)
-        self.groupBoxuCTOnly.setCheckable(False)
-        self.groupBoxuCTOnly.setChecked(False)
-        self.groupBoxuCTOnly.setObjectName(_fromUtf8("groupBoxuCTOnly"))
-        self.gridLayout_8 = QtGui.QGridLayout(self.groupBoxuCTOnly)
-        self.gridLayout_8.setObjectName(_fromUtf8("gridLayout_8"))
-        self.formLayoutuCTOnly = QtGui.QFormLayout()
-        self.formLayoutuCTOnly.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
-        self.formLayoutuCTOnly.setObjectName(_fromUtf8("formLayoutuCTOnly"))
-        self.pushButtonCTRecon = QtGui.QPushButton(self.groupBoxuCTOnly)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.pushButtonCTRecon.setFont(font)
-        self.pushButtonCTRecon.setObjectName(_fromUtf8("pushButtonCTRecon"))
-        self.formLayoutuCTOnly.setWidget(0, QtGui.QFormLayout.LabelRole, self.pushButtonCTRecon)
-        self.lineEditCTRecon = QtGui.QLineEdit(self.groupBoxuCTOnly)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.lineEditCTRecon.setFont(font)
-        self.lineEditCTRecon.setObjectName(_fromUtf8("lineEditCTRecon"))
-        self.formLayoutuCTOnly.setWidget(0, QtGui.QFormLayout.FieldRole, self.lineEditCTRecon)
-        self.pushButtonCTSPR = QtGui.QPushButton(self.groupBoxuCTOnly)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.pushButtonCTSPR.setFont(font)
-        self.pushButtonCTSPR.setObjectName(_fromUtf8("pushButtonCTSPR"))
-        self.formLayoutuCTOnly.setWidget(1, QtGui.QFormLayout.LabelRole, self.pushButtonCTSPR)
-        self.lineEditCTSPR = QtGui.QLineEdit(self.groupBoxuCTOnly)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.lineEditCTSPR.setFont(font)
-        self.lineEditCTSPR.setObjectName(_fromUtf8("lineEditCTSPR"))
-        self.formLayoutuCTOnly.setWidget(1, QtGui.QFormLayout.FieldRole, self.lineEditCTSPR)
-        self.pushButtonScan = QtGui.QPushButton(self.groupBoxuCTOnly)
-        font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
-        font.setPointSize(12)
-        self.pushButtonScan.setFont(font)
-        self.pushButtonScan.setObjectName(_fromUtf8("pushButtonScan"))
-        self.formLayoutuCTOnly.setWidget(2, QtGui.QFormLayout.LabelRole, self.pushButtonScan)
-        self.lineEditScan = QtGui.QLineEdit(self.groupBoxuCTOnly)
-        font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
-        font.setPointSize(12)
-        self.lineEditScan.setFont(font)
-        self.lineEditScan.setObjectName(_fromUtf8("lineEditScan"))
-        self.formLayoutuCTOnly.setWidget(2, QtGui.QFormLayout.FieldRole, self.lineEditScan)
-        self.gridLayout_8.addLayout(self.formLayoutuCTOnly, 1, 0, 1, 1)
-        spacerItem = QtGui.QSpacerItem(20, 13, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        self.gridLayout_8.addItem(spacerItem, 0, 0, 1, 1)
-        self.gridLayout_2.addWidget(self.groupBoxuCTOnly, 4, 1, 2, 1)
-        self.groupBoxModality_2 = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
-        self.groupBoxModality_2.setMaximumSize(QtCore.QSize(16777215, 100))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.groupBoxModality_2.setFont(font)
-        self.groupBoxModality_2.setStyleSheet(_fromUtf8("QGroupBox\n"
-"{\n"
-"    background-color:transparent;\n"
-"    border: 1px solid #acacac;\n"
-"    margin-top: 5px;\n"
-"}\n"
-"\n"
-"QGroupBox::title\n"
-"{\n"
-"    subcontrol-origin: margin;\n"
-"    border-top-left-radius: 3px;\n"
-"    border-top-right-radius: 3px;\n"
-"    border: 1px solid #0b477b;\n"
-"    border-bottom: none;\n"
-"    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
-"        stop: 0 #005192, stop: 1 #002f60);\n"
-"    padding: 2 2px;\n"
-"    color: white;\n"
-"}"))
-        self.groupBoxModality_2.setObjectName(_fromUtf8("groupBoxModality_2"))
-        self.gridLayout_12 = QtGui.QGridLayout(self.groupBoxModality_2)
-        self.gridLayout_12.setObjectName(_fromUtf8("gridLayout_12"))
-        spacerItem1 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        self.gridLayout_12.addItem(spacerItem1, 0, 0, 1, 1)
-        self.textEditStatusMessages = QtGui.QTextEdit(self.groupBoxModality_2)
-        palette = QtGui.QPalette()
-        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
-        brush.setStyle(QtCore.Qt.SolidPattern)
-        palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.WindowText, brush)
-        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
-        brush.setStyle(QtCore.Qt.SolidPattern)
-        palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.Text, brush)
-        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
-        brush.setStyle(QtCore.Qt.SolidPattern)
-        palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.WindowText, brush)
-        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
-        brush.setStyle(QtCore.Qt.SolidPattern)
-        palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.Text, brush)
-        brush = QtGui.QBrush(QtGui.QColor(123, 123, 123))
-        brush.setStyle(QtCore.Qt.SolidPattern)
-        palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, brush)
-        brush = QtGui.QBrush(QtGui.QColor(123, 123, 123))
-        brush.setStyle(QtCore.Qt.SolidPattern)
-        palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Text, brush)
-        self.textEditStatusMessages.setPalette(palette)
-        font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
-        font.setPointSize(14)
-        self.textEditStatusMessages.setFont(font)
-        self.textEditStatusMessages.setObjectName(_fromUtf8("textEditStatusMessages"))
-        self.gridLayout_12.addWidget(self.textEditStatusMessages, 1, 0, 1, 1)
-        self.gridLayout_2.addWidget(self.groupBoxModality_2, 3, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.pushButtonGo, 9, 0, 1, 2)
         self.groupBoxModality = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -260,8 +128,8 @@ class Ui_MainWindow(object):
         self.radioButtonOPT.setFont(font)
         self.radioButtonOPT.setObjectName(_fromUtf8("radioButtonOPT"))
         self.gridLayout_3.addWidget(self.radioButtonOPT, 1, 1, 1, 1)
-        spacerItem2 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        self.gridLayout_3.addItem(spacerItem2, 0, 0, 1, 1)
+        spacerItem = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        self.gridLayout_3.addItem(spacerItem, 0, 0, 1, 1)
         self.gridLayout_2.addWidget(self.groupBoxModality, 0, 1, 1, 1)
         self.groupBoxReconInfo = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
         self.groupBoxReconInfo.setMaximumSize(QtCore.QSize(16777215, 65))
@@ -322,8 +190,8 @@ class Ui_MainWindow(object):
         self.labelFile.setObjectName(_fromUtf8("labelFile"))
         self.gridLayoutReconInfo.addWidget(self.labelFile, 0, 0, 1, 1)
         self.gridLayout_5.addLayout(self.gridLayoutReconInfo, 1, 0, 1, 1)
-        spacerItem3 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        self.gridLayout_5.addItem(spacerItem3, 0, 0, 1, 1)
+        spacerItem1 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        self.gridLayout_5.addItem(spacerItem1, 0, 0, 1, 1)
         self.gridLayout_2.addWidget(self.groupBoxReconInfo, 1, 0, 1, 1)
         self.groupBoxOptions = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
         font = QtGui.QFont()
@@ -353,8 +221,8 @@ class Ui_MainWindow(object):
         self.groupBoxOptions.setObjectName(_fromUtf8("groupBoxOptions"))
         self.gridLayout = QtGui.QGridLayout(self.groupBoxOptions)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        spacerItem4 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        self.gridLayout.addItem(spacerItem4, 0, 0, 1, 1)
+        spacerItem2 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        self.gridLayout.addItem(spacerItem2, 0, 0, 1, 1)
         self.gridLayout_4 = QtGui.QGridLayout()
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
         self.label_zwait = QtGui.QLabel(self.groupBoxOptions)
@@ -517,8 +385,8 @@ class Ui_MainWindow(object):
         self.lineEditW.setFont(font)
         self.lineEditW.setObjectName(_fromUtf8("lineEditW"))
         self.gridLayout_4.addWidget(self.lineEditW, 4, 3, 1, 1)
-        spacerItem5 = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        self.gridLayout_4.addItem(spacerItem5, 5, 1, 1, 1)
+        spacerItem3 = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        self.gridLayout_4.addItem(spacerItem3, 5, 1, 1, 1)
         self.radioButtonDerived = QtGui.QRadioButton(self.groupBoxOptions)
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -591,8 +459,8 @@ class Ui_MainWindow(object):
         self.groupBoxID.setObjectName(_fromUtf8("groupBoxID"))
         self.gridLayout_6 = QtGui.QGridLayout(self.groupBoxID)
         self.gridLayout_6.setObjectName(_fromUtf8("gridLayout_6"))
-        spacerItem6 = QtGui.QSpacerItem(20, 13, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        self.gridLayout_6.addItem(spacerItem6, 0, 0, 1, 1)
+        spacerItem4 = QtGui.QSpacerItem(20, 13, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        self.gridLayout_6.addItem(spacerItem4, 0, 0, 1, 1)
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.gridLayoutIDs = QtGui.QGridLayout()
@@ -722,8 +590,8 @@ class Ui_MainWindow(object):
         self.gridLayoutIDs.addWidget(self.pushButtonUpdate, 3, 5, 1, 1)
         self.verticalLayout.addLayout(self.gridLayoutIDs)
         self.gridLayout_6.addLayout(self.verticalLayout, 1, 0, 1, 1)
-        spacerItem7 = QtGui.QSpacerItem(20, 25, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        self.gridLayout_6.addItem(spacerItem7, 5, 0, 1, 1)
+        spacerItem5 = QtGui.QSpacerItem(20, 25, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        self.gridLayout_6.addItem(spacerItem5, 5, 0, 1, 1)
         self.horizontalLayout_4 = QtGui.QHBoxLayout()
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
         self.label_7 = QtGui.QLabel(self.groupBoxID)
@@ -733,10 +601,10 @@ class Ui_MainWindow(object):
         self.label_7.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.label_7.setObjectName(_fromUtf8("label_7"))
         self.horizontalLayout_4.addWidget(self.label_7)
-        spacerItem8 = QtGui.QSpacerItem(15, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_4.addItem(spacerItem8)
-        spacerItem9 = QtGui.QSpacerItem(10, 20, QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_4.addItem(spacerItem9)
+        spacerItem6 = QtGui.QSpacerItem(15, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem6)
+        spacerItem7 = QtGui.QSpacerItem(10, 20, QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem7)
         self.label_6 = QtGui.QLabel(self.groupBoxID)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -746,6 +614,138 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.addWidget(self.label_6)
         self.gridLayout_6.addLayout(self.horizontalLayout_4, 6, 0, 1, 1)
         self.gridLayout_2.addWidget(self.groupBoxID, 2, 0, 2, 1)
+        self.groupBoxuCTOnly = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
+        self.groupBoxuCTOnly.setMaximumSize(QtCore.QSize(16777215, 600))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.groupBoxuCTOnly.setFont(font)
+        self.groupBoxuCTOnly.setStyleSheet(_fromUtf8("QGroupBox\n"
+"{\n"
+"    background-color:transparent;\n"
+"    border: 1px solid #acacac;\n"
+"    margin-top: 5px;\n"
+"}\n"
+"\n"
+"QGroupBox::title\n"
+"{\n"
+"    subcontrol-origin: margin;\n"
+"    border-top-left-radius: 3px;\n"
+"    border-top-right-radius: 3px;\n"
+"    border: 1px solid #0b477b;\n"
+"    border-bottom: none;\n"
+"    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
+"        stop: 0 #005192, stop: 1 #002f60);\n"
+"    padding: 2 2px;\n"
+"    color: white;\n"
+"}"))
+        self.groupBoxuCTOnly.setFlat(False)
+        self.groupBoxuCTOnly.setCheckable(False)
+        self.groupBoxuCTOnly.setChecked(False)
+        self.groupBoxuCTOnly.setObjectName(_fromUtf8("groupBoxuCTOnly"))
+        self.gridLayout_8 = QtGui.QGridLayout(self.groupBoxuCTOnly)
+        self.gridLayout_8.setObjectName(_fromUtf8("gridLayout_8"))
+        self.formLayoutuCTOnly = QtGui.QFormLayout()
+        self.formLayoutuCTOnly.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayoutuCTOnly.setObjectName(_fromUtf8("formLayoutuCTOnly"))
+        self.pushButtonCTRecon = QtGui.QPushButton(self.groupBoxuCTOnly)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.pushButtonCTRecon.setFont(font)
+        self.pushButtonCTRecon.setObjectName(_fromUtf8("pushButtonCTRecon"))
+        self.formLayoutuCTOnly.setWidget(0, QtGui.QFormLayout.LabelRole, self.pushButtonCTRecon)
+        self.lineEditCTRecon = QtGui.QLineEdit(self.groupBoxuCTOnly)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEditCTRecon.setFont(font)
+        self.lineEditCTRecon.setObjectName(_fromUtf8("lineEditCTRecon"))
+        self.formLayoutuCTOnly.setWidget(0, QtGui.QFormLayout.FieldRole, self.lineEditCTRecon)
+        self.pushButtonCTSPR = QtGui.QPushButton(self.groupBoxuCTOnly)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.pushButtonCTSPR.setFont(font)
+        self.pushButtonCTSPR.setObjectName(_fromUtf8("pushButtonCTSPR"))
+        self.formLayoutuCTOnly.setWidget(1, QtGui.QFormLayout.LabelRole, self.pushButtonCTSPR)
+        self.lineEditCTSPR = QtGui.QLineEdit(self.groupBoxuCTOnly)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEditCTSPR.setFont(font)
+        self.lineEditCTSPR.setObjectName(_fromUtf8("lineEditCTSPR"))
+        self.formLayoutuCTOnly.setWidget(1, QtGui.QFormLayout.FieldRole, self.lineEditCTSPR)
+        self.pushButtonScan = QtGui.QPushButton(self.groupBoxuCTOnly)
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setPointSize(12)
+        self.pushButtonScan.setFont(font)
+        self.pushButtonScan.setObjectName(_fromUtf8("pushButtonScan"))
+        self.formLayoutuCTOnly.setWidget(2, QtGui.QFormLayout.LabelRole, self.pushButtonScan)
+        self.lineEditScan = QtGui.QLineEdit(self.groupBoxuCTOnly)
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setPointSize(12)
+        self.lineEditScan.setFont(font)
+        self.lineEditScan.setObjectName(_fromUtf8("lineEditScan"))
+        self.formLayoutuCTOnly.setWidget(2, QtGui.QFormLayout.FieldRole, self.lineEditScan)
+        self.gridLayout_8.addLayout(self.formLayoutuCTOnly, 1, 0, 1, 1)
+        spacerItem8 = QtGui.QSpacerItem(20, 13, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        self.gridLayout_8.addItem(spacerItem8, 0, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.groupBoxuCTOnly, 4, 0, 1, 1)
+        self.groupBoxModality_2 = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
+        self.groupBoxModality_2.setMaximumSize(QtCore.QSize(16777215, 100))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.groupBoxModality_2.setFont(font)
+        self.groupBoxModality_2.setStyleSheet(_fromUtf8("QGroupBox\n"
+"{\n"
+"    background-color:transparent;\n"
+"    border: 1px solid #acacac;\n"
+"    margin-top: 5px;\n"
+"}\n"
+"\n"
+"QGroupBox::title\n"
+"{\n"
+"    subcontrol-origin: margin;\n"
+"    border-top-left-radius: 3px;\n"
+"    border-top-right-radius: 3px;\n"
+"    border: 1px solid #0b477b;\n"
+"    border-bottom: none;\n"
+"    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
+"        stop: 0 #005192, stop: 1 #002f60);\n"
+"    padding: 2 2px;\n"
+"    color: white;\n"
+"}"))
+        self.groupBoxModality_2.setObjectName(_fromUtf8("groupBoxModality_2"))
+        self.gridLayout_12 = QtGui.QGridLayout(self.groupBoxModality_2)
+        self.gridLayout_12.setObjectName(_fromUtf8("gridLayout_12"))
+        spacerItem9 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        self.gridLayout_12.addItem(spacerItem9, 0, 0, 1, 1)
+        self.textEditStatusMessages = QtGui.QTextEdit(self.groupBoxModality_2)
+        palette = QtGui.QPalette()
+        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.WindowText, brush)
+        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.Text, brush)
+        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.WindowText, brush)
+        brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.Text, brush)
+        brush = QtGui.QBrush(QtGui.QColor(123, 123, 123))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, brush)
+        brush = QtGui.QBrush(QtGui.QColor(123, 123, 123))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Text, brush)
+        self.textEditStatusMessages.setPalette(palette)
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setPointSize(14)
+        self.textEditStatusMessages.setFont(font)
+        self.textEditStatusMessages.setObjectName(_fromUtf8("textEditStatusMessages"))
+        self.gridLayout_12.addWidget(self.textEditStatusMessages, 1, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.groupBoxModality_2, 5, 0, 1, 1)
         self.groupBoxOPTChannels = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
         self.groupBoxOPTChannels.setEnabled(True)
         font = QtGui.QFont()
@@ -772,15 +772,15 @@ class Ui_MainWindow(object):
 "}"))
         self.groupBoxOPTChannels.setObjectName(_fromUtf8("groupBoxOPTChannels"))
         self.scrollArea_3 = QtGui.QScrollArea(self.groupBoxOPTChannels)
-        self.scrollArea_3.setGeometry(QtCore.QRect(10, 30, 651, 131))
+        self.scrollArea_3.setGeometry(QtCore.QRect(10, 90, 551, 201))
         self.scrollArea_3.setWidgetResizable(True)
         self.scrollArea_3.setObjectName(_fromUtf8("scrollArea_3"))
         self.scrollAreaWidgetContents_3 = QtGui.QWidget()
-        self.scrollAreaWidgetContents_3.setGeometry(QtCore.QRect(0, 0, 649, 129))
+        self.scrollAreaWidgetContents_3.setGeometry(QtCore.QRect(0, 0, 549, 199))
         self.scrollAreaWidgetContents_3.setObjectName(_fromUtf8("scrollAreaWidgetContents_3"))
         self.tableWidgetOPT = QtGui.QTableWidget(self.scrollAreaWidgetContents_3)
         self.tableWidgetOPT.setEnabled(False)
-        self.tableWidgetOPT.setGeometry(QtCore.QRect(10, 10, 631, 111))
+        self.tableWidgetOPT.setGeometry(QtCore.QRect(10, 10, 531, 181))
         self.tableWidgetOPT.setEditTriggers(QtGui.QAbstractItemView.AnyKeyPressed|QtGui.QAbstractItemView.EditKeyPressed)
         self.tableWidgetOPT.setAlternatingRowColors(True)
         self.tableWidgetOPT.setObjectName(_fromUtf8("tableWidgetOPT"))
@@ -813,7 +813,38 @@ class Ui_MainWindow(object):
         self.tableWidgetOPT.verticalHeader().setCascadingSectionResizes(True)
         self.tableWidgetOPT.verticalHeader().setStretchLastSection(True)
         self.scrollArea_3.setWidget(self.scrollAreaWidgetContents_3)
-        self.gridLayout_2.addWidget(self.groupBoxOPTChannels, 4, 0, 4, 1)
+        self.gridLayoutWidget_2 = QtGui.QWidget(self.groupBoxOPTChannels)
+        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 30, 441, 31))
+        self.gridLayoutWidget_2.setObjectName(_fromUtf8("gridLayoutWidget_2"))
+        self.gridLayout_15 = QtGui.QGridLayout(self.gridLayoutWidget_2)
+        self.gridLayout_15.setMargin(0)
+        self.gridLayout_15.setObjectName(_fromUtf8("gridLayout_15"))
+        self.labelCurrentChn = QtGui.QLabel(self.gridLayoutWidget_2)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.labelCurrentChn.setFont(font)
+        self.labelCurrentChn.setObjectName(_fromUtf8("labelCurrentChn"))
+        self.gridLayout_15.addWidget(self.labelCurrentChn, 0, 0, 1, 1)
+        self.lineEditCurrentChnType = QtGui.QLineEdit(self.gridLayoutWidget_2)
+        self.lineEditCurrentChnType.setMaximumSize(QtCore.QSize(50, 16777215))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEditCurrentChnType.setFont(font)
+        self.lineEditCurrentChnType.setObjectName(_fromUtf8("lineEditCurrentChnType"))
+        self.gridLayout_15.addWidget(self.lineEditCurrentChnType, 0, 1, 1, 1)
+        self.lineEditCurrentName = QtGui.QLineEdit(self.gridLayoutWidget_2)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.lineEditCurrentName.setFont(font)
+        self.lineEditCurrentName.setObjectName(_fromUtf8("lineEditCurrentName"))
+        self.gridLayout_15.addWidget(self.lineEditCurrentName, 0, 2, 1, 1)
+        self.label_8 = QtGui.QLabel(self.groupBoxOPTChannels)
+        self.label_8.setGeometry(QtCore.QRect(10, 70, 151, 25))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.label_8.setFont(font)
+        self.label_8.setObjectName(_fromUtf8("label_8"))
+        self.gridLayout_2.addWidget(self.groupBoxOPTChannels, 3, 1, 3, 1)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents_2)
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
         self.tab_2 = QtGui.QWidget()
@@ -824,7 +855,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1261, 748))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1261, 738))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.scrollAreaWidgetContents)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
@@ -909,11 +940,6 @@ class Ui_MainWindow(object):
         self.pushButtonOutput.setText(_translate("MainWindow", "Output folder", None))
         self.pushButtonInput.setText(_translate("MainWindow", "Input folder", None))
         self.pushButtonGo.setText(_translate("MainWindow", "Add to Processing List", None))
-        self.groupBoxuCTOnly.setTitle(_translate("MainWindow", "Additional files and folders", None))
-        self.pushButtonCTRecon.setText(_translate("MainWindow", "Pick recon log", None))
-        self.pushButtonCTSPR.setText(_translate("MainWindow", "Pick SPR", None))
-        self.pushButtonScan.setText(_translate("MainWindow", "Scan folder", None))
-        self.groupBoxModality_2.setTitle(_translate("MainWindow", "Status", None))
         self.groupBoxModality.setTitle(_translate("MainWindow", "Imaging modality", None))
         self.radioButtonuCT.setText(_translate("MainWindow", "µCT", None))
         self.radioButtonOPT.setText(_translate("MainWindow", "OPT", None))
@@ -974,6 +1000,11 @@ class Ui_MainWindow(object):
 "<br>20140211_RIC8B_E18.5_16.4a_HOM_ND_rec      \n"
 "<br><br><b>Example name (OPT):</b>\n"
 "<br>20140211_RIC8B_E18.5_16.4a_HOM_XX_UV_rec", None))
+        self.groupBoxuCTOnly.setTitle(_translate("MainWindow", "Additional files and folders", None))
+        self.pushButtonCTRecon.setText(_translate("MainWindow", "Pick recon log", None))
+        self.pushButtonCTSPR.setText(_translate("MainWindow", "Pick SPR", None))
+        self.pushButtonScan.setText(_translate("MainWindow", "Scan folder", None))
+        self.groupBoxModality_2.setTitle(_translate("MainWindow", "Status", None))
         self.groupBoxOPTChannels.setTitle(_translate("MainWindow", "OPT channels", None))
         item = self.tableWidgetOPT.verticalHeaderItem(0)
         item.setText(_translate("MainWindow", "1", None))
@@ -996,10 +1027,12 @@ class Ui_MainWindow(object):
         item = self.tableWidgetOPT.horizontalHeaderItem(2)
         item.setText(_translate("MainWindow", "Processed", None))
         item = self.tableWidgetOPT.horizontalHeaderItem(3)
-        item.setText(_translate("MainWindow", "Get cropbox", None))
+        item.setText(_translate("MainWindow", "Use cropbox", None))
         __sortingEnabled = self.tableWidgetOPT.isSortingEnabled()
         self.tableWidgetOPT.setSortingEnabled(False)
         self.tableWidgetOPT.setSortingEnabled(__sortingEnabled)
+        self.labelCurrentChn.setText(_translate("MainWindow", "Current channel", None))
+        self.label_8.setText(_translate("MainWindow", "Associated channels", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Parameters", None))
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "Input", None))

@@ -105,26 +105,32 @@ class ProcessingThread(QtCore.QThread):
             self.session_log.write("manual crop\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing manual crop" )
             dimensions_tuple = (int(self.configOb.xcrop), int(self.configOb.ycrop), int(self.configOb.wcrop), int(self.configOb.hcrop))
+            derived_cropbox = None
 
         # Setup for automatic
         if self.configOb.crop_option == "Automatic" :
             self.session_log.write("autocrop\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing autocrop" )
             dimensions_tuple = None
+            derived_cropbox = None
 
         # setup for derived crop
         if self.configOb.crop_option == "Derived" :
             self.session_log.write("Derived crop\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing crop from derived cropbox" )
             dimensions_tuple = None
-
+            filehandler = open(self.configOb.cropbox_path, 'r')
+            cropbox_object = copy.deepcopy(pickle.load(filehandler))
+            derived_cropbox = cropbox_object.cropbox
 
 
         self.session_log.write("Crop started\n")
         self.session_log.write(str(datetime.datetime.now())+"\n")
 
         # make autocrop object
-        self.auto_crop = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path, self.autocrop_update_slot,  def_crop=dimensions_tuple)
+        self.auto_crop = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path,
+                                           self.autocrop_update_slot,  def_crop=dimensions_tuple,
+                                           repeat_crop = derived_cropbox )
 
         # WindowsError is an execption only available on Windows need to make a fake WindowsError exception for linux
         if not getattr(__builtins__, "WindowsError", None):

@@ -80,6 +80,11 @@ def get_channels(self):
     # get the name without the channel (only works if name is in the correct format)
     base_name = '_'.join(l_init[0:6])
 
+    # set the name up for the current channel
+    chn_init = str(l_init[6])
+    self.ui.lineEditCurrentName.setText(folder_name)
+    self.ui.lineEditCurrentChnType.setText(chn_init)
+
     alt_chan_full = []
     alt_chan_short = []
     # for loop to go through the parent input directory

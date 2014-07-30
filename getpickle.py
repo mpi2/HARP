@@ -37,6 +37,7 @@ def get_pickle(self):
     #######################################
     # Get cropping options
     if not self.ui.checkBoxCropYes.isChecked() :
+        self.configOb.cropbox_path = "Not_applicable"
         self.configOb.crop_manual = "Not_applicable"
         self.configOb.crop_option = "No_crop"
     elif self.ui.radioButtonMan.isChecked() :
@@ -47,12 +48,14 @@ def get_pickle(self):
         self.configOb.crop_option = "Manual"
         self.configOb.crop_manual = self.configOb.xcrop+" "+self.configOb.ycrop+" "+self.configOb.wcrop+" "+self.configOb.hcrop
     elif self.ui.radioButtonAuto.isChecked() :
+        self.configOb.cropbox_path = "Not_applicable"
         self.configOb.crop_manual = "Not_applicable"
         self.configOb.crop_option = "Automatic"
     elif self.ui.radioButtonUseOldCrop.isChecked() :
         self.configOb.crop_manual = "Not_applicable"
         self.configOb.crop_option = "Old_crop"
-    elif self.ui.radioButtonDerived.isChecked() :
+        self.configOb.cropbox_path = "Not_applicable"
+    elif self.ui.radioButtonDerived.isChecked() and self.ui.radioButtonOPT.isChecked:
         self.configOb.crop_manual = "Not_applicable"
         self.configOb.crop_option = "Derived"
         self.configOb.cropbox_path = self.crop_pickle_path
@@ -129,29 +132,29 @@ def get_pickle(self):
         self.configOb.imageJ = self.configOb.cropped_path+os.sep+'^'+self.configOb.scale_path+os.sep+'^'+self.configOb.full_name
 
     # write the config information into an easily readable log file
-    log.write("Session_ID    "+self.configOb.unique_ID+"\n");
-    log.write("full_name    "+self.configOb.full_name+"\n");
-    log.write("Input_folder    "+self.configOb.input_folder+"\n");
-    log.write("Output_folder    "+self.configOb.output_folder+"\n");
-    log.write("Scan_folder    "+self.configOb.scan_folder+"\n");
-    log.write("Crop_option    "+self.configOb.crop_option+"\n");
-    log.write("Crop_manual    "+self.configOb.crop_manual+"\n");
-    log.write("Crop_folder    "+self.configOb.cropped_path+"\n");
-    log.write("Cropbox_location ")+self.configOb.cropbox_path+"\n");
-    log.write("Downsize_by_factor_2?    "+self.configOb.SF2+"\n");
-    log.write("Downsize_by_factor_3?    "+self.configOb.SF3+"\n");
-    log.write("Downsize_by_factor_4?    "+self.configOb.SF4+"\n");
-    log.write("Downsize_by_factor_5?    "+self.configOb.SF5+"\n");
-    log.write("Downsize_by_factor_6?    "+self.configOb.SF6+"\n");
-    log.write("Downsize_by_pixel?    "+self.configOb.pixel_option+"\n");
-    log.write("User_specified_pixel_size?    "+self.configOb.user_specified_pixel+"\n");
-    log.write("Downsize_value_for_pixel    "+str(self.configOb.SF_pixel)+"\n");
-    log.write("Compression_of_scans_and_original_recon?    "+self.configOb.scans_recon_comp+"\n");
-    log.write("Compression_of_cropped_recon?    "+self.configOb.crop_comp+"\n");
-    log.write("ImageJconfig    "+self.configOb.imageJ+"\n");
-    log.write("Recon_log_file    "+self.configOb.recon_log_file+"\n");
-    log.write("Recon_folder_size   "+self.configOb.recon_folder_size+"\n");
-    log.write("Recon_pixel_size  "+self.configOb.recon_pixel_size+"\n");
+    log.write("Session_ID    "+self.configOb.unique_ID+"\n")
+    log.write("full_name    "+self.configOb.full_name+"\n")
+    log.write("Input_folder    "+self.configOb.input_folder+"\n")
+    log.write("Output_folder    "+self.configOb.output_folder+"\n")
+    log.write("Scan_folder    "+self.configOb.scan_folder+"\n")
+    log.write("Crop_option    "+self.configOb.crop_option+"\n")
+    log.write("Crop_manual    "+self.configOb.crop_manual+"\n")
+    log.write("Crop_folder    "+self.configOb.cropped_path+"\n")
+    log.write("Cropbox_location "+self.configOb.cropbox_path+"\n")
+    log.write("Downsize_by_factor_2?    "+self.configOb.SF2+"\n")
+    log.write("Downsize_by_factor_3?    "+self.configOb.SF3+"\n")
+    log.write("Downsize_by_factor_4?    "+self.configOb.SF4+"\n")
+    log.write("Downsize_by_factor_5?    "+self.configOb.SF5+"\n")
+    log.write("Downsize_by_factor_6?    "+self.configOb.SF6+"\n")
+    log.write("Downsize_by_pixel?    "+self.configOb.pixel_option+"\n")
+    log.write("User_specified_pixel_size?    "+self.configOb.user_specified_pixel+"\n")
+    log.write("Downsize_value_for_pixel    "+str(self.configOb.SF_pixel)+"\n")
+    log.write("Compression_of_scans_and_original_recon?    "+self.configOb.scans_recon_comp+"\n")
+    log.write("Compression_of_cropped_recon?    "+self.configOb.crop_comp+"\n")
+    log.write("ImageJconfig    "+self.configOb.imageJ+"\n")
+    log.write("Recon_log_file    "+self.configOb.recon_log_file+"\n")
+    log.write("Recon_folder_size   "+self.configOb.recon_folder_size+"\n")
+    log.write("Recon_pixel_size  "+self.configOb.recon_pixel_size+"\n")
 
     # Pickle the class to a file
     with open(self.config_path, 'w+') as config:

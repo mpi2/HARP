@@ -11,6 +11,7 @@
 
 # Import PyQT module
 from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import pyqtSlot,SIGNAL,SLOT
 import datetime
 from multiprocessing import freeze_support
 import os
@@ -152,12 +153,6 @@ class MainWindow(QtGui.QMainWindow):
         # Add more recons to the list
         self.ui.pushButtonAdd.clicked.connect(self.add_more)
 
-        # delete some recons
-        self.ui.tableWidget.__class__.keyPressEvent = self.delete_rows
-
-        # Decide which channel to be used for autocrop
-        self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
-
         # About HARP message
         self.ui.actionAbout.triggered.connect(self.about_message)
 
@@ -167,8 +162,22 @@ class MainWindow(QtGui.QMainWindow):
         # Example Data for testing purposes
         self.ui.actionExample_data.triggered.connect(self.example_data)
 
+        # need to monitor when the tab is changed as it determines what qtable uses key commands
+        self.connect(self.ui.tabWidget, SIGNAL('currentChanged(int)'), self.tab_change)
+
+        # Decide which channel to be used for autocrop (this table is on the first tab)
+        self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
+
         # to make the window visible
         self.show()
+
+    def tab_change(self):
+        if self.ui.tabWidget.currentIndex() == 0:
+            # Decide which channel to be used for autocrop
+            self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
+        elif self.ui.tabWidget.currentIndex() == 1:
+            # delete some recons
+            self.ui.tableWidget.__class__.keyPressEvent = self.delete_rows
 
     def example_data(self):
         """ loads in data for tesing purposes """
@@ -730,6 +739,9 @@ class MainWindow(QtGui.QMainWindow):
         # First kill the thread and autocrop
         self.emit(QtCore.SIGNAL('kill(QString)'), "kill")
 
+    #======================================================================
+    # User keyboard options for OPT channels
+    #======================================================================
     def choose_channel_for_crop(self,event):
         """
         If the return button is pressed on a certain row of the
@@ -739,8 +751,13 @@ class MainWindow(QtGui.QMainWindow):
             print "key pressed"
             selected = self.ui.tableWidgetOPT.currentRow()
             status = self.ui.tableWidgetOPT.item(selected, 1)
-            if status:
-                # Need to check if the file has already been processed or is on the list
+            # check if anythin on the OPT list
+            if not status:
+                print "Selected a row with no opt info"
+
+            elif self.ui.radioButtonOPT.isChecked() and self.ui.radioButtonDerived.isChecked():
+
+                self.clear_cropbox_info()
 
                 item = QtGui.QTableWidgetItem()
                 self.ui.tableWidgetOPT.setItem(selected, 3, item)
@@ -748,8 +765,19 @@ class MainWindow(QtGui.QMainWindow):
                 item.setText("Yes")
             else:
                 QtGui.QMessageBox.warning(self, 'Message',
-                                                  'Warning: Can\'t use this for autocrop calculation as no folder'
+                                                  'Warning: Can\ only change  use this for autocrop calculation as no folder'
                                                   '\nSelect "Stop", then remove')
+
+    def clear_cropbox_info(self):
+        n = self.ui.tableWidgetOPT.rowCount()
+
+        for i in range(n):
+            item = QtGui.QTableWidgetItem()
+            self.ui.tableWidgetOPT.setItem(i, 3, item)
+            item = self.ui.tableWidgetOPT.item(i, 3)
+            item.setText("")
+
+
 
 def main():
     app = QtGui.QApplication(sys.argv)
