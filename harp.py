@@ -279,7 +279,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # See what OPT channels are available
         print "getting channels"
-        autofill.get_channels(self)
+        if self.modality == "OPT":
+            autofill.get_channels(self)
 
         # Automatically identify scan folder
         print "getting scan folder"
@@ -371,6 +372,11 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditChannel.setEnabled(True)
         self.ui.labelChannel.setEnabled(True)
         self.ui.tableWidgetOPT.setEnabled(True)
+        self.ui.labelCurrentChn.setEnabled(True)
+        self.ui.lineEditCurrentChnType.setEnabled(True)
+        self.ui.lineEditCurrentName.setEnabled(True)
+        self.ui.labelAssociatedChannels.setEnabled(True)
+        self.ui.radioButtonDerived.setEnabled(True)
 
     def get_uCT_only(self):
         """ edits self.modality """
@@ -378,6 +384,11 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditChannel.setEnabled(False)
         self.ui.labelChannel.setEnabled(False)
         self.ui.tableWidgetOPT.setEnabled(False)
+        self.ui.labelCurrentChn.setEnabled(False)
+        self.ui.lineEditCurrentChnType.setEnabled(False)
+        self.ui.lineEditCurrentName.setEnabled(False)
+        self.ui.labelAssociatedChannels.setEnabled(False)
+        self.ui.radioButtonDerived.setEnabled(False)
 
     def update_name(self):
         """ Function to update the name of the file and folder"""

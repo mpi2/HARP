@@ -742,6 +742,9 @@ QGroupBox::title
                </item>
                <item row="2" column="3">
                 <widget class="QRadioButton" name="radioButtonDerived">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="font">
                   <font>
                    <pointsize>12</pointsize>
@@ -1642,6 +1645,9 @@ QGroupBox::title
              <layout class="QGridLayout" name="gridLayout_15">
               <item row="0" column="0">
                <widget class="QLabel" name="labelCurrentChn">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="font">
                  <font>
                   <pointsize>12</pointsize>
@@ -1654,6 +1660,9 @@ QGroupBox::title
               </item>
               <item row="0" column="1">
                <widget class="QLineEdit" name="lineEditCurrentChnType">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>50</width>
@@ -1669,6 +1678,9 @@ QGroupBox::title
               </item>
               <item row="0" column="2">
                <widget class="QLineEdit" name="lineEditCurrentName">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="font">
                  <font>
                   <pointsize>12</pointsize>
@@ -1678,7 +1690,10 @@ QGroupBox::title
               </item>
              </layout>
             </widget>
-            <widget class="QLabel" name="label_8">
+            <widget class="QLabel" name="labelAssociatedChannels">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="geometry">
               <rect>
                <x>10</x>

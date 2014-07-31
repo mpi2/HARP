@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow - Copy.ui'
 #
-# Created: Wed Jul 30 16:41:14 2014
+# Created: Thu Jul 31 10:20:11 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -388,6 +388,7 @@ class Ui_MainWindow(object):
         spacerItem3 = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         self.gridLayout_4.addItem(spacerItem3, 5, 1, 1, 1)
         self.radioButtonDerived = QtGui.QRadioButton(self.groupBoxOptions)
+        self.radioButtonDerived.setEnabled(False)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.radioButtonDerived.setFont(font)
@@ -820,12 +821,14 @@ class Ui_MainWindow(object):
         self.gridLayout_15.setMargin(0)
         self.gridLayout_15.setObjectName(_fromUtf8("gridLayout_15"))
         self.labelCurrentChn = QtGui.QLabel(self.gridLayoutWidget_2)
+        self.labelCurrentChn.setEnabled(False)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.labelCurrentChn.setFont(font)
         self.labelCurrentChn.setObjectName(_fromUtf8("labelCurrentChn"))
         self.gridLayout_15.addWidget(self.labelCurrentChn, 0, 0, 1, 1)
         self.lineEditCurrentChnType = QtGui.QLineEdit(self.gridLayoutWidget_2)
+        self.lineEditCurrentChnType.setEnabled(False)
         self.lineEditCurrentChnType.setMaximumSize(QtCore.QSize(50, 16777215))
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -833,17 +836,19 @@ class Ui_MainWindow(object):
         self.lineEditCurrentChnType.setObjectName(_fromUtf8("lineEditCurrentChnType"))
         self.gridLayout_15.addWidget(self.lineEditCurrentChnType, 0, 1, 1, 1)
         self.lineEditCurrentName = QtGui.QLineEdit(self.gridLayoutWidget_2)
+        self.lineEditCurrentName.setEnabled(False)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.lineEditCurrentName.setFont(font)
         self.lineEditCurrentName.setObjectName(_fromUtf8("lineEditCurrentName"))
         self.gridLayout_15.addWidget(self.lineEditCurrentName, 0, 2, 1, 1)
-        self.label_8 = QtGui.QLabel(self.groupBoxOPTChannels)
-        self.label_8.setGeometry(QtCore.QRect(10, 70, 151, 25))
+        self.labelAssociatedChannels = QtGui.QLabel(self.groupBoxOPTChannels)
+        self.labelAssociatedChannels.setEnabled(False)
+        self.labelAssociatedChannels.setGeometry(QtCore.QRect(10, 70, 151, 25))
         font = QtGui.QFont()
         font.setPointSize(12)
-        self.label_8.setFont(font)
-        self.label_8.setObjectName(_fromUtf8("label_8"))
+        self.labelAssociatedChannels.setFont(font)
+        self.labelAssociatedChannels.setObjectName(_fromUtf8("labelAssociatedChannels"))
         self.gridLayout_2.addWidget(self.groupBoxOPTChannels, 3, 1, 3, 1)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents_2)
         self.tabWidget.addTab(self.tab, _fromUtf8(""))
@@ -1032,7 +1037,7 @@ class Ui_MainWindow(object):
         self.tableWidgetOPT.setSortingEnabled(False)
         self.tableWidgetOPT.setSortingEnabled(__sortingEnabled)
         self.labelCurrentChn.setText(_translate("MainWindow", "Current channel", None))
-        self.label_8.setText(_translate("MainWindow", "Associated channels", None))
+        self.labelAssociatedChannels.setText(_translate("MainWindow", "Associated channels", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Parameters", None))
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "Input", None))
