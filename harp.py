@@ -2,10 +2,10 @@
 # title           :harp.py
 # description     :Runs the HARP GUI
 # author          :SIG
-# date            :2014-07-14
+# date            :2014-08-04
 # version         :2.0.0 (OPT update)
 #usage            :python harp.py or if using executable in windows .\harp.exe or clicking on the harp.exe icon.
-#formatting       :PEP8 format is used where possible
+#formatting       :PEP8 format is used where possible. QT classes in C++ standard format.
 #python_version   :2.7
 #=============================================================================
 

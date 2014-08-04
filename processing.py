@@ -129,7 +129,7 @@ class ProcessingThread(QtCore.QThread):
                                    traceback.format_exc()+"\n")
                 self.emit( QtCore.SIGNAL('update(QString)'), "error: Could not open cropbox dimension file for "
                                                              "derived dimension crop: "+str(e))
-            except:
+            except Exception as e:
                 self.session_log.write("error: Unknown exception trying to get derived dimension:\n"
                                    +"Exception traceback:"+
                                    traceback.format_exc()+"\n")

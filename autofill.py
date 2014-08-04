@@ -91,8 +91,11 @@ def get_channels(self):
     # get the name without the channel (only works if name is in the correct format)
     base_name = '_'.join(l_init[0:6])
 
-    # set the name up for the current channel
-    chn_init = str(l_init[6])
+    # set the name up for the current channel. Blank if name not set up properly
+    try:
+        chn_init = str(l_init[6])
+    except IndexError:
+        chn_init = "NA"
 
     chan_full = []
     chan_short = []
@@ -120,7 +123,10 @@ def get_channels(self):
         # Set the data for an individual row
         # Set up the channel type
         l = alt_name.split("_")
-        chn = l[6]
+        try:
+            chn = l[6]
+        except IndexError:
+            chn = "NA"
 
         # Make the current channel highlighted
         chn_item = QtGui.QTableWidgetItem()
