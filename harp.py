@@ -68,6 +68,7 @@ class MainWindow(QtGui.QMainWindow):
         self.count_in = 0
         self.current_row = 0
         self.list_for_processing = []
+        self.crop_pickle_path = "NA"
 
         # initialise some information
         self.scan_folder = ""
@@ -175,6 +176,10 @@ class MainWindow(QtGui.QMainWindow):
         self.show()
 
     def tab_change(self):
+        # Update OPT Channel list. As something may have changed on the processing list
+        autofill.get_channels(self)
+
+
         if self.ui.tabWidget.currentIndex() == 0:
             # Decide which channel to be used for autocrop
             self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
@@ -260,6 +265,9 @@ class MainWindow(QtGui.QMainWindow):
         # Remove the contents of the OPT table
         print "clearing opt table"
         self.ui.tableWidgetOPT.clearContents()
+        self.crop_box_use = False
+        self.ui.radioButtonAuto.setChecked(True)
+        self.ui.lineEditDerivedChnName.setText("")
 
         # check if uCT or opt data
         print "checking if uct or opt"
@@ -281,6 +289,7 @@ class MainWindow(QtGui.QMainWindow):
         print "getting channels"
         if self.modality == "OPT":
             autofill.get_channels(self)
+            autofill.auto_get_derived(self)
 
         # Automatically identify scan folder
         print "getting scan folder"
@@ -293,7 +302,6 @@ class MainWindow(QtGui.QMainWindow):
         print "deteriming size of input folder"
         # Determine size of input folder
         autofill.folder_size_approx(self)
-
 
     def reset_inputs(self):
         """ Reset the inputs to blank"""
@@ -372,10 +380,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditChannel.setEnabled(True)
         self.ui.labelChannel.setEnabled(True)
         self.ui.tableWidgetOPT.setEnabled(True)
-        self.ui.labelCurrentChn.setEnabled(True)
-        self.ui.lineEditCurrentChnType.setEnabled(True)
-        self.ui.lineEditCurrentName.setEnabled(True)
-        self.ui.labelAssociatedChannels.setEnabled(True)
         self.ui.radioButtonDerived.setEnabled(True)
 
     def get_uCT_only(self):
@@ -384,10 +388,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditChannel.setEnabled(False)
         self.ui.labelChannel.setEnabled(False)
         self.ui.tableWidgetOPT.setEnabled(False)
-        self.ui.labelCurrentChn.setEnabled(False)
-        self.ui.lineEditCurrentChnType.setEnabled(False)
-        self.ui.lineEditCurrentName.setEnabled(False)
-        self.ui.labelAssociatedChannels.setEnabled(False)
         self.ui.radioButtonDerived.setEnabled(False)
 
     def update_name(self):
@@ -537,23 +537,13 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.pushButtonStop.setEnabled(True)
         self.start_processing_thread()
 
-    def add_to_list(self):
-        """
-        This will set off all the processing scripts and shows the dialog box to keep track of progress
-        """
-        # Get the directory of the script
+    def add_to_list_action(self):
+        # This adds a recon folder to be processed.
+           # Get the directory of the script
         dir = os.path.dirname(os.path.abspath(__file__))
 
         # get the input name for table
         input_name = str(self.ui.lineEditInput.text())
-
-        # Get the location of the pickle file with the cropbox to be used (if required)
-        if self.ui.radioButtonDerived.isChecked():
-            print "pickle crop box path"
-            self.crop_pickle_path = autofill.get_selected_crop_box(self)
-            print self.crop_pickle_path
-        else:
-            self.crop_pickle_path = "NA"
 
         # Perform some checks before any processing is carried out
         errorcheck.errorCheck(self)
@@ -594,6 +584,32 @@ class MainWindow(QtGui.QMainWindow):
 
             # Go to second tab
             self.ui.tabWidget.setCurrentIndex(1)
+
+
+    def add_to_list(self):
+        """
+        This will set off all the processing scripts and shows the dialog box to keep track of progress
+        """
+        in_dir = str(self.ui.lineEditInput.text())
+        path,folder_name = os.path.split(in_dir)
+        # Check if multiple channels will be added to the list at the same time
+        if self.ui.checkBoxInd.isChecked():
+            self.add_to_list_action()
+        else:
+            # go through list and get the channel names
+            for name in self.chan_full:
+                chan_path = os.path.join(path,name)
+
+                # Check if the input director is already set the channel in the loop
+                # if the current channel is not the same as the loop then perform autofill before adding to the list
+                if chan_path != in_dir:
+                    self.ui.lineEditInput.setText(chan_path)
+                    self.reset_inputs()
+                    self.autofill_pipe()
+
+                self.add_to_list_action()
+
+
 
 
     def processing_slot(self, message):
@@ -672,8 +688,37 @@ class MainWindow(QtGui.QMainWindow):
         """
         When the add more button is pressed, just go back to the first tab
         """
+        # change tab
         self.ui.tabWidget.setCurrentIndex(0)
+        # need opt table to handle key press events
         self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
+
+        in_dir = str(self.ui.lineEditInput.text())
+        path_in,folder_name = os.path.split(in_dir)
+        print path_in
+
+
+        #Check if user wants to use the next opt channel available
+        if self.modality == "OPT":
+            # check if a channel which has not been analysed
+            n = self.ui.tableWidgetOPT.rowCount()
+            for i in range(n):
+                processed = self.ui.tableWidgetOPT.item(i, 2)
+                if processed:
+                    print processed.text()
+                    if processed.text() == "No":
+                        reply = QtGui.QMessageBox.question(self, 'Message', 'Would you like to setup the next '
+                                                                            'OPT Channel?',
+                                               QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+                        if reply:
+                            name = self.ui.tableWidgetOPT.item(i, 1)
+                            self.ui.lineEditInput.setText(os.path.join(path_in, str(name.text())))
+                            self.reset_inputs()
+                            self.autofill_pipe()
+                            return
+
+
+
 
     def stop_processing(self):
         """ Stop processing, kill the current process """

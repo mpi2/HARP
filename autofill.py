@@ -60,8 +60,6 @@ def check_if_on_list(self,alt_name):
             return True
         count += 1
 
-
-
 def get_channels(self):
     """
     Check if OPT is selected
@@ -70,6 +68,9 @@ def get_channels(self):
     Go through the folders identified and put in table
     :return:
     """
+    # reset the table
+    self.ui.tableWidgetOPT.clearContents()
+
     if not self.modality == "OPT":
         return
 
@@ -84,11 +85,16 @@ def get_channels(self):
 
     # set the name up for the current channel
     chn_init = str(l_init[6])
-    self.ui.lineEditCurrentName.setText(folder_name)
-    self.ui.lineEditCurrentChnType.setText(chn_init)
 
-    alt_chan_full = []
-    alt_chan_short = []
+    chan_full = []
+    chan_short = []
+
+    # add current to channel list
+    chan_full.append(folder_name)
+    chan_short.append(chn_init)
+
+    self.chan_full = chan_full
+
     # for loop to go through the parent input directory
     for line in os.listdir(path) :
         line =str(line)
@@ -96,24 +102,25 @@ def get_channels(self):
         # channel
         m = re.search(base_name,line)
         if m and (not line == folder_name):
-            alt_chan_full.append(line)
-            alt_chan_short.append(m.group(0))
+            chan_full.append(line)
+            chan_short.append(m.group(0))
 
-    self.alt_chan_full = alt_chan_full
     count = 0
-    crop_box_use = False
 
     # Save the the opt channels to the opt channel table
-    for alt_name in alt_chan_full:
-
+    for alt_name in chan_full:
         # Set the data for an individual row
         # Set up the channel type
         l = alt_name.split("_")
         chn = l[6]
-        item = QtGui.QTableWidgetItem()
-        self.ui.tableWidgetOPT.setItem(count, 0, item)
-        item = self.ui.tableWidgetOPT.item(count, 0)
-        item.setText(chn)
+
+        # Make the current channel highlighted
+        chn_item = QtGui.QTableWidgetItem()
+        self.ui.tableWidgetOPT.setItem(count, 0, chn_item)
+        chn_item = self.ui.tableWidgetOPT.item(count, 0)
+        chn_item.setText(chn)
+        if alt_name == folder_name:#
+            chn_item.setBackground(QtGui.QColor(220, 0, 0))
 
         # Set up the name of the recon
         item = QtGui.QTableWidgetItem()
@@ -135,46 +142,43 @@ def get_channels(self):
         # Status is pending untill processing has started
         item.setText(crop_status)
 
-        if not crop_status == "No" and not crop_box_use:
-            item = QtGui.QTableWidgetItem()
-            self.ui.tableWidgetOPT.setItem(count, 3, item)
-            item = self.ui.tableWidgetOPT.item(count, 3)
-            # Status is pending untill processing has started
-            item.setText("Yes")
-            crop_box_use = True
-            self.ui.radioButtonDerived.setChecked(True)
-
         # count_in is the counter for the row to add data
         count += 1
 
         # Reszie the columns to fit the data
         self.ui.tableWidgetOPT.resizeColumnsToContents()
 
-    if crop_box_use:
-        QtGui.QMessageBox.information(self, 'Message',
-                                      'Derived cropbox from a previously analysed reconstruction will be used'
-                                      '\nSee \'OPT channels\'')
+        self.ui.tableWidgetOPT.setSortingEnabled(True)
+        self.ui.tableWidgetOPT.sortByColumn(0)
 
-def get_selected_crop_box(self):
-    print "get selectecd crop box"
+def auto_get_derived(self):
+    """
+    While loop through OPT list. See if one of them is either processed or on list. if they are set the derived crop box
+    settings
+    :return:
+    """
+    n = self.ui.tableWidgetOPT.rowCount()
     out_dir = str(self.ui.lineEditOutput.text())
     path_out,folder_name = os.path.split(out_dir)
 
-    count = 0
-    while True:
-        # This gets the status text
-        name_on_list = self.ui.tableWidgetOPT.item(count, 1)
-        cropbox_option = self.ui.tableWidgetOPT.item(count, 3)
-        if not name_on_list:
-            # if not defined it means there are no recons left to process
-            print "Nothing on processing list"
-            break
-        if cropbox_option:
-            if cropbox_option.text() == "Yes":
-                cropbox_path = os.path.join(path_out, str(name_on_list.text()),"Metadata","cropbox.txt")
-                return cropbox_path
+    for i in range(n):
+        print i
+        processed = self.ui.tableWidgetOPT.item(i, 2)
+        if processed:
+            print processed.text()
+            if processed.text() == "Yes" or processed.text() == "On list":
+                print "use dirived crop box"
+                self.crop_box_use = True
+                self.ui.radioButtonDerived.setEnabled(True)
+                self.ui.radioButtonDerived.setChecked(True)
+                self.ui.lineEditDerivedChnName.setEnabled(True)
+
+                # show name for user
+                name = self.ui.tableWidgetOPT.item(i,1)
+                self.ui.lineEditDerivedChnName.setText(name.text())
+                self.crop_pickle_path = os.path.join(path_out, str(name.text()),"Metadata","cropbox.txt")
                 break
-        count += 1
+
 
 def get_recon_log(self):
     '''
