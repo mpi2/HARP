@@ -850,6 +850,9 @@ QGroupBox::title
                    <pointsize>10</pointsize>
                   </font>
                  </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Derive dimensions (OPT only)&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This option provides additional functionality that for most instances should not be required.&lt;/p&gt;&lt;p&gt;This option allows dimensions for the crop to be derived from a previous processed channel. &lt;/p&gt;&lt;p&gt;The channel from which the crop dimensions can be derived can be chosen in the OPT channels section. In the OPT channels section the user should select &amp;quot;Return&amp;quot; on the keyboard on the appropiate channel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="readOnly">
                   <bool>true</bool>
                  </property>

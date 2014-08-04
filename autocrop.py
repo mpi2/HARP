@@ -120,7 +120,7 @@ class Autocrop():
         elif self.def_crop:
             self.crop_box = self.convertXYWH_ToCoords(self.def_crop)
             # Will save the manual crop box here as well as it will be in the correct coordinate system
-            self.callback(self.cropbox)
+            self.callback(self.crop_box)
         # If no crop box has been manually selected something has gone wrong
         else:
             self.callback("Processing Cancelled!")
