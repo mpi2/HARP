@@ -359,7 +359,10 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.radioButtonAuto.setEnabled(True)
             self.ui.radioButtonMan.setEnabled(True)
             self.ui.radioButtonUseOldCrop.setEnabled(True)
-            self.ui.radioButtonDerived.setEnabled(True)
+            if self.ui.radioButtonOPT.isChecked():
+                self.ui.radioButtonDerived.setEnabled(True)
+                if self.ui.radioButtonDerived.isChecked():
+                    self.ui.lineEditDerivedChnName.setEnabled(True)
             if self.ui.radioButtonMan.isChecked():
                 self.ui.lineEditX.setEnabled(True)
                 self.ui.lineEditY.setEnabled(True)
@@ -371,11 +374,13 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.radioButtonMan.setEnabled(False)
             self.ui.radioButtonUseOldCrop.setEnabled(False)
             self.ui.radioButtonDerived.setEnabled(False)
+            self.ui.lineEditDerivedChnName.setEnabled(False)
             self.ui.lineEditX.setEnabled(False)
             self.ui.lineEditY.setEnabled(False)
             self.ui.lineEditW.setEnabled(False)
             self.ui.lineEditH.setEnabled(False)
             self.ui.pushButtonGetDimensions.setEnabled(False)
+
 
     def man_crop_off(self):
         """ disables boxes for cropping manually """
