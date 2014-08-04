@@ -408,6 +408,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.checkBoxInd.setEnabled(True)
         if self.ui.radioButtonDerived.isChecked():
             self.ui.lineEditDerivedChnName.setEnabled(True)
+        autofill.get_channels(self)
+
 
 
     def get_uCT_only(self):

@@ -14,24 +14,30 @@ def errorCheck(self):
 
     # Check input and output folders assigned
     if not inputFolder :
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input directory not defined')
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: input directory not defined')
         self.stop = True
         return
 
     if not outputFolder :
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: output directory not defined')
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: output directory not defined')
         self.stop = True
         return
 
     # Check if input folder exists
     if not os.path.exists(inputFolder):
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not exist')
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not exist')
+        self.stop = True
+        return
+
+    # Check if a directory
+    if not os.path.isdir(inputFolder):
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is not a directory')
         self.stop = True
         return
 
     #Check if folder is empty
     if os.listdir(inputFolder) == []:
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty')
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty')
         self.stop = True
         return
 

@@ -111,6 +111,11 @@ def get_channels(self):
         line =str(line)
         # if the line matches the base_name but is not the same as the input file. The folder is probably another
         # channel
+
+        # Check if it is a folder with recons etc for the other channels
+        if error_check_chn(os.path.join(path,line)) == 1:
+            continue
+
         m = re.search(base_name,line)
         if m and (not line == folder_name):
             chan_full.append(line)
@@ -164,6 +169,36 @@ def get_channels(self):
 
         self.ui.tableWidgetOPT.setSortingEnabled(True)
         self.ui.tableWidgetOPT.sortByColumn(0)
+
+def error_check_chn(inputFolder):
+    # Check if input folder exists
+    if not os.path.exists(inputFolder):
+        return 1
+
+    # Check if a directory
+    if not os.path.isdir(inputFolder):
+        return 1
+
+    #Check if folder is empty
+    if os.listdir(inputFolder) == []:
+        return 1
+
+    #Check if input folder contains any image files
+    prog = re.compile("(.*).(bmp|tif|jpg|jpeg)",re.IGNORECASE)
+
+    file_check = None
+    # for loop to go through the directory
+    for line in os.listdir(inputFolder) :
+        line =str(line)
+        #print line+"\n"
+        # if the line matches the regex break
+        if prog.match(line) :
+            file_check = True
+            break
+
+    if not file_check:
+        return 1
+
 
 def auto_get_derived(self):
     """
