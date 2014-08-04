@@ -62,13 +62,14 @@ class MainWindow(QtGui.QMainWindow):
         self.unique_ID = uuid.uuid1()
 
         # Initialise various switches
-        self.modality = "Not_selected"
+        self.modality = "MicroCT"
         self.selected = "Not_selected"
         self.stop = None
         self.count_in = 0
         self.current_row = 0
         self.list_for_processing = []
         self.crop_pickle_path = "NA"
+        self.stop_pro_switch = 0
 
         # initialise some information
         self.scan_folder = ""
@@ -622,8 +623,13 @@ class MainWindow(QtGui.QMainWindow):
         in_dir = str(self.ui.lineEditInput.text())
         path,folder_name = os.path.split(in_dir)
         # Check if multiple channels will be added to the list at the same time
-        if self.ui.checkBoxInd.isChecked():
+        # Standard microCT run
+        if self.modality == "MicroCT":
             self.add_to_list_action()
+        # Individual OPT run
+        elif self.ui.checkBoxInd.isChecked():
+            self.add_to_list_action()
+        # Batch OPT run
         else:
             # Save the initial settings to be displayed again after all processing has been added
             # Recon log
@@ -701,6 +707,9 @@ class MainWindow(QtGui.QMainWindow):
         It has records the start and stop time of the processing and starts a new
         thread after the processing has finished
         """
+        if self.stop_pro_switch:
+            return
+
         item = QtGui.QTableWidgetItem()
         self.ui.tableWidget.setItem(self.current_row, 2, item)
         item = self.ui.tableWidget.item(self.current_row, 2)
@@ -728,7 +737,7 @@ class MainWindow(QtGui.QMainWindow):
         """ starts a thread to perform all the processing in the background.
         The add function then listens to any messages the thread makes
         """
-
+        self.stop_pro_switch = 0
         # Get memory of the computer (can't seem to do this in the thread)
         mem_summary = psutil.virtual_memory()
         prog = re.compile("total=(\d+)")
@@ -809,6 +818,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def stop_processing(self):
         """ Stop processing, kill the current process """
+        print "Stop!!"
         item = QtGui.QTableWidgetItem()
         self.ui.tableWidget.setItem(self.current_row, 2, item)
         item = self.ui.tableWidget.item(self.current_row, 2)
@@ -820,6 +830,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.pushButtonStop.setEnabled(False)
 
         self.p_thread_pool = None
+
+        self.stop_pro_switch = 1
 
 
     def delete_rows(self, event):

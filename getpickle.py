@@ -16,6 +16,7 @@ def get_pickle(self):
     #any changes the user might have made
     inputFolder = str(self.ui.lineEditInput.text())
     outputFolder = str(self.ui.lineEditOutput.text())
+    path_out,folder_name = os.path.split(outputFolder)
 
     #### Write to config file ####
     self.configOb = ConfigClass()
@@ -59,6 +60,7 @@ def get_pickle(self):
     elif self.ui.radioButtonDerived.isChecked() and self.ui.radioButtonOPT.isChecked:
         self.configOb.crop_manual = "Not_applicable"
         self.configOb.crop_option = "Derived"
+        self.crop_pickle_path = os.path.join(path_out, str(self.ui.lineEditDerivedChnName.text()),"Metadata","cropbox.txt")
         self.configOb.cropbox_path = self.crop_pickle_path
 
     ##### Get Scaling factors ####

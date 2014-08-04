@@ -188,7 +188,6 @@ def auto_get_derived(self):
                 # show name for user
 
                 self.ui.lineEditDerivedChnName.setText(name.text())
-                self.crop_pickle_path = os.path.join(path_out, str(name.text()),"Metadata","cropbox.txt")
                 break
 
 

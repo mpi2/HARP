@@ -119,9 +119,24 @@ class ProcessingThread(QtCore.QThread):
             self.session_log.write("Derived crop\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "Performing crop from derived cropbox" )
             dimensions_tuple = None
-            filehandler = open(self.configOb.cropbox_path, 'r')
-            cropbox_object = copy.deepcopy(pickle.load(filehandler))
-            derived_cropbox = cropbox_object.cropbox
+            try:
+                filehandler = open(self.configOb.cropbox_path, 'r')
+                cropbox_object = copy.deepcopy(pickle.load(filehandler))
+                derived_cropbox = cropbox_object.cropbox
+            except IOError as e:
+                self.session_log.write("error: Cropbox not available for derived dimension crop:\n"
+                                   +"Exception traceback:"+
+                                   traceback.format_exc()+"\n")
+                self.emit( QtCore.SIGNAL('update(QString)'), "error: Could not open cropbox dimension file for "
+                                                             "derived dimension crop: "+str(e))
+            except:
+                self.session_log.write("error: Unknown exception trying to get derived dimension:\n"
+                                   +"Exception traceback:"+
+                                   traceback.format_exc()+"\n")
+                self.emit( QtCore.SIGNAL('update(QString)'), "error: Unknown exception trying to get derived dimension"
+                                                             " (see log): "+str(e))
+
+
 
 
         self.session_log.write("Crop started\n")
