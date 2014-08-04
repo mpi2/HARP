@@ -115,6 +115,9 @@ class MainWindow(QtGui.QMainWindow):
         # Man crop (enable buttons).
         self.ui.radioButtonMan.clicked.connect(self.man_crop_on)
 
+        # derived crop (enable buttons).
+        self.ui.radioButtonDerived.clicked.connect(self.derive_on)
+
         # If the get dimensions button is pressed
         self.ui.pushButtonGetDimensions.clicked.connect(self.get_dimensions)
 
@@ -172,8 +175,23 @@ class MainWindow(QtGui.QMainWindow):
         # When user double clicks on OPT alternative channel open it on the parameter tab
         self.ui.tableWidgetOPT.doubleClicked.connect(self.change_opt_chn)
 
+        #Accept drag and drop
+        self.setAcceptDrops(True)
+
         # to make the window visible
         self.show()
+
+    def dropEvent(self, event):
+        volList = [str(v.toLocalFile()) for v in event.mimeData().urls()]
+        vol1 = volList[0]
+        self.ui.lineEditInput.setText(vol1)
+        self.reset_inputs()
+        self.autofill_pipe()
+
+
+    def dragEnterEvent(self, event):
+        event.accept()
+
 
     def tab_change(self):
         # Update OPT Channel list. As something may have changed on the processing list
@@ -260,7 +278,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
 
-    def autofill_pipe(self):
+    def autofill_pipe(self,suppress=False):
 
         # Remove the contents of the OPT table
         print "clearing opt table"
@@ -271,11 +289,11 @@ class MainWindow(QtGui.QMainWindow):
 
         # check if uCT or opt data
         print "checking if uct or opt"
-        autofill.opt_uCT_check(self)
+        autofill.opt_uCT_check(self,suppress)
 
         # Autocomplete the name
         print "autocompleting name"
-        autofill.get_name(self, str(self.ui.lineEditInput.text()))
+        autofill.get_name(self, str(self.ui.lineEditInput.text()),suppress)
 
         # Get the reconLog and associated pixel size
         print "geting recon log"
@@ -365,6 +383,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditW.setEnabled(False)
         self.ui.lineEditH.setEnabled(False)
         self.ui.pushButtonGetDimensions.setEnabled(False)
+        self.ui.lineEditDerivedChnName.setEnabled(False)
 
     def man_crop_on(self):
         """ enables boxes for cropping manually """
@@ -373,6 +392,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditW.setEnabled(True)
         self.ui.lineEditH.setEnabled(True)
         self.ui.pushButtonGetDimensions.setEnabled(True)
+        self.ui.lineEditDerivedChnName.setEnabled(False)
+
+    def derive_on(self):
+        self.ui.lineEditDerivedChnName.setEnabled(True)
 
     def get_OPT_only(self):
         """ edits self.modality """
@@ -381,6 +404,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.labelChannel.setEnabled(True)
         self.ui.tableWidgetOPT.setEnabled(True)
         self.ui.radioButtonDerived.setEnabled(True)
+        self.ui.checkBoxInd.setEnabled(True)
+        if self.ui.radioButtonDerived.isChecked():
+            self.ui.lineEditDerivedChnName.setEnabled(True)
+
 
     def get_uCT_only(self):
         """ edits self.modality """
@@ -389,6 +416,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.labelChannel.setEnabled(False)
         self.ui.tableWidgetOPT.setEnabled(False)
         self.ui.radioButtonDerived.setEnabled(False)
+        self.ui.lineEditDerivedChnName.setEnabled(False)
+        self.ui.checkBoxInd.setEnabled(False)
 
     def update_name(self):
         """ Function to update the name of the file and folder"""
@@ -596,6 +625,29 @@ class MainWindow(QtGui.QMainWindow):
         if self.ui.checkBoxInd.isChecked():
             self.add_to_list_action()
         else:
+            # Save the initial settings to be displayed again after all processing has been added
+            # Recon log
+            recon_log = self.ui.lineEditCTRecon.text()
+            # SPR (should prob get rid of this
+            spr = self.ui.lineEditCTSPR.text()
+            # Scan folder
+            scan = self.ui.lineEditScan.text()
+            # Output folder
+            out_dir_original = self.ui.lineEditOutput.text()
+            # Input folder
+            in_dir_orignal = self.ui.lineEditInput.text()
+            # derived name
+            derive = self.ui.lineEditDerivedChnName.text()
+            # crop option
+            if self.ui.radioButtonAuto.isChecked():
+                crop_option = "auto"
+            elif self.ui.radioButtonDerived.isChecked():
+                crop_option = "derived"
+            elif self.ui.radioButtonUseOldCrop.isChecked():
+                crop_option = "old"
+            elif self.ui.radioButtonMan.isChecked():
+                crop_option = "man"
+
             # go through list and get the channel names
             for name in self.chan_full:
                 chan_path = os.path.join(path,name)
@@ -605,9 +657,40 @@ class MainWindow(QtGui.QMainWindow):
                 if chan_path != in_dir:
                     self.ui.lineEditInput.setText(chan_path)
                     self.reset_inputs()
-                    self.autofill_pipe()
+                    self.autofill_pipe(suppress=True)
 
                 self.add_to_list_action()
+
+            # reset the parameters tab back to what originally was for the user.
+            # Save the initial settings to be displayed again after all processing has been added
+            # Input folder
+            self.ui.lineEditInput.setText(in_dir_orignal)
+            self.autofill_pipe(suppress=True)
+
+            # The following may have been changed from the user so have to be changed after the autofill
+            # Recon log
+            self.ui.lineEditCTRecon.setText(recon_log)
+            # SPR (should prob get rid of this
+            self.ui.lineEditCTSPR.setText(spr)
+            # Scan folder
+            self.ui.lineEditScan.setText(scan)
+            # Output folder
+            self.ui.lineEditOutput.setText(out_dir_original)
+            # derived name
+            self.ui.lineEditDerivedChnName.setText(derive)
+            # crop option
+            if crop_option == "auto":
+                self.ui.radioButtonAuto.setChecked(True)
+                self.man_crop_off()
+            elif crop_option == "derived":
+                self.ui.radioButtonDerived.setChecked(True)
+                self.derive_on()
+            elif crop_option == "old":
+                self.ui.radioButtonUseOldCrop.setChecked(True)
+                self.man_crop_on()
+            elif crop_option == "man":
+                self.ui.radioButtonMan.setChecked(True)
+                self.man_crop_on()
 
 
 
@@ -636,6 +719,8 @@ class MainWindow(QtGui.QMainWindow):
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             # Processing has finished, lets do another one!
             self.start_processing_thread()
+            # update the opt channels table
+            autofill.get_channels(self)
 
         self.ui.tableWidget.resizeColumnsToContents()
 
@@ -710,11 +795,13 @@ class MainWindow(QtGui.QMainWindow):
                         reply = QtGui.QMessageBox.question(self, 'Message', 'Would you like to setup the next '
                                                                             'OPT Channel?',
                                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
-                        if reply:
+                        if reply == QtGui.QMessageBox.Yes:
                             name = self.ui.tableWidgetOPT.item(i, 1)
                             self.ui.lineEditInput.setText(os.path.join(path_in, str(name.text())))
                             self.reset_inputs()
                             self.autofill_pipe()
+                            return
+                        if reply == QtGui.QMessageBox.No:
                             return
 
 
@@ -821,32 +908,33 @@ class MainWindow(QtGui.QMainWindow):
         if event.key() == QtCore.Qt.Key_Return:
             print "key pressed"
             selected = self.ui.tableWidgetOPT.currentRow()
-            status = self.ui.tableWidgetOPT.item(selected, 1)
+            name = self.ui.tableWidgetOPT.item(selected, 1)
             # check if anythin on the OPT list
-            if not status:
+            if not name:
                 print "Selected a row with no opt info"
 
             elif self.ui.radioButtonOPT.isChecked() and self.ui.radioButtonDerived.isChecked():
 
-                self.clear_cropbox_info()
+                pro = self.ui.tableWidgetOPT.item(selected, 2)
+                if pro.text() == "No":
+                    QtGui.QMessageBox.warning(self, 'Message',
+                                              'Warning: Chosen channel to derive dimensions (cropbox) has either\n'
+                                              'not been analysed or has not been added onto the processing list')
+                if pro.text() == "On list":
+                    in_dir = str(self.ui.lineEditInput.text())
+                    path,folder_name = os.path.split(in_dir)
+                    if name.text() == folder_name:
+                        QtGui.QMessageBox.warning(self, 'Message',
+                                                'Warning: Chosen channel to derive dimensions (cropbox) cannot be\n'
+                                                'the current channel unless already processed')
+                else:
 
-                item = QtGui.QTableWidgetItem()
-                self.ui.tableWidgetOPT.setItem(selected, 3, item)
-                item = self.ui.tableWidgetOPT.item(selected, 3)
-                item.setText("Yes")
+                    self.ui.lineEditDerivedChnName.setText(name.text())
+
             else:
                 QtGui.QMessageBox.warning(self, 'Message',
-                                                  'Warning: Can\ only change  use this for autocrop calculation as no folder'
-                                                  '\nSelect "Stop", then remove')
+                                          "Warning: Derived dimension options has not been chosen")
 
-    def clear_cropbox_info(self):
-        n = self.ui.tableWidgetOPT.rowCount()
-
-        for i in range(n):
-            item = QtGui.QTableWidgetItem()
-            self.ui.tableWidgetOPT.setItem(i, 3, item)
-            item = self.ui.tableWidgetOPT.item(i, 3)
-            item.setText("")
 
     def change_opt_chn(self):
         in_dir = str(self.ui.lineEditInput.text())

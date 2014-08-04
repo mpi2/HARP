@@ -150,6 +150,9 @@ QGroupBox::title
                 <pointsize>12</pointsize>
                </font>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Output folder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;HARP will suggest a folder called: &amp;quot;processed recon\name_of_recon&amp;quot;&lt;/p&gt;&lt;p&gt;If the output folder is not appropiate please select this button and choose a more suitable location&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Output folder</string>
               </property>
@@ -179,6 +182,9 @@ QGroupBox::title
                <font>
                 <pointsize>12</pointsize>
                </font>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Input folder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Choose the folder containing the recon image files.&lt;/p&gt;&lt;p&gt;HARP will automatically suggest the:&lt;/p&gt;&lt;p&gt;- Output folder&lt;/p&gt;&lt;p&gt;- Recon log file&lt;/p&gt;&lt;p&gt;- Scan folder&lt;/p&gt;&lt;p&gt;- SPR file&lt;/p&gt;&lt;p&gt;- imaging modality&lt;/p&gt;&lt;p&gt;Additional the naming of the file folder will be checked to see if it matches the Harwell IMPC naming criteria. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Input folder</string>
@@ -381,6 +387,9 @@ QGroupBox::title
                    <italic>false</italic>
                   </font>
                  </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Manual&lt;/span&gt;&lt;/p&gt;&lt;p&gt;In cases where the automatic crop is not capable of determining the crop dimensions the user can either manually enter the dimensiosn or press the &amp;quot;Get Dimensions&amp;quot; button.&lt;/p&gt;&lt;p&gt;The &amp;quot;Get dimensions&amp;quot; button provides a Z-projected image of the stack and allows the user to select a cropping region. (see the HARP user guide)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="text">
                   <string>Manual</string>
                  </property>
@@ -397,6 +406,9 @@ QGroupBox::title
                    <pointsize>12</pointsize>
                    <italic>false</italic>
                   </font>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Automatic cropping&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The cropping dimensions will be determined automatically. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="text">
                   <string>Automatic</string>
@@ -690,6 +702,9 @@ QGroupBox::title
                  <property name="enabled">
                   <bool>false</bool>
                  </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Get dimensions&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This button provides a Z-projected image of the stack and allows the user to select a cropping region. (see the HARP user guide) &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="text">
                   <string>Get dimensions</string>
                  </property>
@@ -735,6 +750,9 @@ QGroupBox::title
                   <font>
                    <pointsize>12</pointsize>
                   </font>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose whether cropping should be perfomed&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="text">
                   <string>Yes</string>
@@ -799,6 +817,9 @@ QGroupBox::title
                    <pointsize>12</pointsize>
                   </font>
                  </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Derive dimensions (OPT only)&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This option provides additional functionality that for most instances should not be required.&lt;/p&gt;&lt;p&gt;This option allows dimensions for the crop to be derived from a previous processed channel. &lt;/p&gt;&lt;p&gt;The channel from which the crop dimensions can be derived can be chosen in the OPT channels section. In the OPT channels section the user should select &amp;quot;Return&amp;quot; on the keyboard on the appropiate channel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="text">
                   <string>Derive dimensions</string>
                  </property>
@@ -810,6 +831,9 @@ QGroupBox::title
                   <font>
                    <pointsize>12</pointsize>
                   </font>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Use old&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If HARP has previously been used to perform the cropping of a recon the cropped image can be used to perform additional processes such as downsizing.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="text">
                   <string>Use old</string>
@@ -1119,7 +1143,7 @@ QGroupBox::title
                     </font>
                    </property>
                    <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;You can update the name of recon here and check to see if it is in the right format. &lt;/p&gt;&lt;p&gt;Each identifier is separated by a underscore _ &lt;/p&gt;&lt;p&gt;Any additional info can be stored after &amp;quot;rec&amp;quot;:&lt;/p&gt;&lt;p&gt;[date]_[gene]_[stage]_[litter]_[zygosity]_[sex]_rec_[any additional info]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Identification&lt;/span&gt;&lt;/p&gt;&lt;p&gt;You can update the name of recon here and check to see if it is in the right format. &lt;/p&gt;&lt;p&gt;Each identifier is separated by a underscore _ &lt;/p&gt;&lt;p&gt;Any additional info can be stored after &amp;quot;rec&amp;quot;:&lt;/p&gt;&lt;p&gt;[date]_[gene]_[stage]_[litter]_[zygosity]_[sex]_rec_[any additional info]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="readOnly">
                     <bool>false</bool>
@@ -1296,8 +1320,11 @@ QGroupBox::title
                    <pointsize>12</pointsize>
                   </font>
                  </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Recon log&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The recon log is identified automatically but can be selected by the user using this button.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="text">
-                  <string>Pick recon log</string>
+                  <string>Recon log</string>
                  </property>
                 </widget>
                </item>
@@ -1317,8 +1344,11 @@ QGroupBox::title
                    <pointsize>12</pointsize>
                   </font>
                  </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SPR&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A SPR file is identified automatically but can be selected by the user using this button.&lt;/p&gt;&lt;p&gt;[NOTE: This may be removed as the information is not essential. All additional files are copied over to the processed recon folder]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="text">
-                  <string>Pick SPR</string>
+                  <string>SPR file</string>
                  </property>
                 </widget>
                </item>
@@ -1338,6 +1368,9 @@ QGroupBox::title
                    <family>Sans Serif</family>
                    <pointsize>12</pointsize>
                   </font>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Scan folder&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The scan folder is identified automatically but can be selected by the user using this button.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="text">
                   <string>Scan folder</string>
@@ -1501,6 +1534,9 @@ QGroupBox::title
                  <pointsize>14</pointsize>
                 </font>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Status&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;This updates the user about the status of HARP when determining the manual crop dimensions after selecting &amp;quot;Get Dimensions&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
               </widget>
              </item>
             </layout>
@@ -1656,6 +1692,9 @@ QGroupBox::title
                <width>121</width>
                <height>17</height>
               </rect>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Process Individually&lt;/span&gt;&lt;/p&gt;&lt;p&gt;By default all OPT channels will be added to the processing list togther. &lt;/p&gt;&lt;p&gt;The crop box dimensions will be deterimined using the channel currently selected (highlighted red).&lt;/p&gt;&lt;p&gt;All other channels will derive their cropping dimensions from the first channel.&lt;/p&gt;&lt;p&gt;Alternatively if this &amp;quot;Process Individual Box&amp;quot; is pressed the individual channels can be processed individually. The user can then choose the cropping method used for each channel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
               <string>Process Individually</string>

@@ -4,7 +4,7 @@ import os
 import re
 import datetime
 
-def opt_uCT_check(self):
+def opt_uCT_check(self,suppress=False):
     '''
     Checks whether or not folder name contains reference to either opt or microCT
     '''
@@ -19,14 +19,22 @@ def opt_uCT_check(self):
         self.ui.lineEditChannel.setEnabled(True)
         self.ui.labelChannel.setEnabled(True)
         self.ui.tableWidgetOPT.setEnabled(True)
+        self.ui.radioButtonDerived.setEnabled(True)
+        if self.ui.radioButtonDerived.isChecked():
+            self.ui.lineEditDerivedChnName.setEnabled(True)
+        self.ui.checkBoxInd.setEnabled(True)
     elif p_uCT.search(file_in):
         self.modality = "MicroCT"
         self.ui.radioButtonuCT.setChecked(True)
         self.ui.lineEditChannel.setEnabled(False)
         self.ui.labelChannel.setEnabled(False)
         self.ui.tableWidgetOPT.setEnabled(False)
+        self.ui.radioButtonDerived.setEnabled(False)
+        self.ui.lineEditDerivedChnName.setEnabled(False)
+        self.ui.checkBoxInd.setEnabled(False)
     else:
-        QtGui.QMessageBox.warning(self, 'Message', 'Warning: Cannot automatically determine if uCT or OPT please check')
+        if not suppress:
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Cannot automatically determine if uCT or OPT please check')
 
 def get_crop_box(self,alt_name):
     """
@@ -164,8 +172,12 @@ def auto_get_derived(self):
     for i in range(n):
         print i
         processed = self.ui.tableWidgetOPT.item(i, 2)
+        name = self.ui.tableWidgetOPT.item(i,1)
         if processed:
             print processed.text()
+            if processed.text() == "On list":
+                    if name.text() == folder_name:
+                        continue
             if processed.text() == "Yes" or processed.text() == "On list":
                 print "use dirived crop box"
                 self.crop_box_use = True
@@ -174,7 +186,7 @@ def auto_get_derived(self):
                 self.ui.lineEditDerivedChnName.setEnabled(True)
 
                 # show name for user
-                name = self.ui.tableWidgetOPT.item(i,1)
+
                 self.ui.lineEditDerivedChnName.setText(name.text())
                 self.crop_pickle_path = os.path.join(path_out, str(name.text()),"Metadata","cropbox.txt")
                 break
@@ -253,7 +265,7 @@ def get_recon_log(self):
 
 
 
-def get_name(self,name):
+def get_name(self,name,suppress=False):
     '''
     Gets the id from the folder name. Then fills out the text boxes on the main window with the relevant information
     '''
@@ -334,7 +346,8 @@ def get_name(self,name):
 
     if error_list:
         error_string = os.linesep.join(error_list)
-        QtGui.QMessageBox.warning(self, 'Message', 'Warning (Naming not canonical):'+os.linesep+error_string)
+        if not suppress:
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning (Naming not canonical):'+os.linesep+error_string)
 
 
 
@@ -352,7 +365,7 @@ def auto_file_out(self):
             output_full = os.path.join(output_path,self.full_name)
             self.ui.lineEditOutput.setText(output_full)
     except:
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected getting and auto file out',sys.exc_info()[0])
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected getting and auto file out',sys.exc_info()[0])
 
 
 def auto_get_scan(self):

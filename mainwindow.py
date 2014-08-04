@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow2.ui'
 #
-# Created: Mon Aug 04 09:29:12 2014
+# Created: Mon Aug 04 12:55:43 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -919,7 +919,9 @@ class Ui_MainWindow(object):
         self.groupBoxModality.setTitle(_translate("MainWindow", "Imaging modality", None))
         self.radioButtonuCT.setText(_translate("MainWindow", "µCT", None))
         self.radioButtonOPT.setText(_translate("MainWindow", "OPT", None))
+        self.pushButtonOutput.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Output folder</span></p><p>HARP will suggest a folder called: &quot;processed recon\\name_of_recon&quot;</p><p>If the output folder is not appropiate please select this button and choose a more suitable location</p></body></html>", None))
         self.pushButtonOutput.setText(_translate("MainWindow", "Output folder", None))
+        self.pushButtonInput.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Input folder</span></p><p>Choose the folder containing the recon image files.</p><p>HARP will automatically suggest the:</p><p>- Output folder</p><p>- Recon log file</p><p>- Scan folder</p><p>- SPR file</p><p>- imaging modality</p><p>Additional the naming of the file folder will be checked to see if it matches the Harwell IMPC naming criteria. </p></body></html>", None))
         self.pushButtonInput.setText(_translate("MainWindow", "Input folder", None))
         self.pushButtonGo.setText(_translate("MainWindow", "Add to Processing List", None))
         self.groupBoxReconInfo.setTitle(_translate("MainWindow", "Recon file info", None))
@@ -928,7 +930,9 @@ class Ui_MainWindow(object):
         self.lcdNumberFile.setToolTip(_translate("MainWindow", "This is the approximate folder size of the original recon", None))
         self.labelFile.setText(_translate("MainWindow", "Folder size (Mb)", None))
         self.groupBoxOptions.setTitle(_translate("MainWindow", "Options", None))
+        self.radioButtonMan.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Manual</span></p><p>In cases where the automatic crop is not capable of determining the crop dimensions the user can either manually enter the dimensiosn or press the &quot;Get Dimensions&quot; button.</p><p>The &quot;Get dimensions&quot; button provides a Z-projected image of the stack and allows the user to select a cropping region. (see the HARP user guide)</p></body></html>", None))
         self.radioButtonMan.setText(_translate("MainWindow", "Manual", None))
+        self.radioButtonAuto.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Automatic cropping</span></p><p>The cropping dimensions will be determined automatically. </p></body></html>", None))
         self.radioButtonAuto.setText(_translate("MainWindow", "Automatic", None))
         self.label_3.setText(_translate("MainWindow", "Masking", None))
         self.checkBoxRF.setText(_translate("MainWindow", "Yes", None))
@@ -948,14 +952,18 @@ class Ui_MainWindow(object):
         self.checkBoxCropComp.setText(_translate("MainWindow", "Cropped recon", None))
         self.lineEditH.setText(_translate("MainWindow", "h", None))
         self.lineEditX.setText(_translate("MainWindow", "x", None))
+        self.pushButtonGetDimensions.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Get dimensions</span></p><p>This button provides a Z-projected image of the stack and allows the user to select a cropping region. (see the HARP user guide) </p></body></html>", None))
         self.pushButtonGetDimensions.setText(_translate("MainWindow", "Get dimensions", None))
         self.lineEditW.setText(_translate("MainWindow", "w", None))
+        self.checkBoxCropYes.setToolTip(_translate("MainWindow", "<html><head/><body><p>Choose whether cropping should be perfomed</p></body></html>", None))
         self.checkBoxCropYes.setText(_translate("MainWindow", "Yes", None))
         self.label_14.setText(_translate("MainWindow", "Cropping", None))
         self.checkBoxPixel.setToolTip(_translate("MainWindow", "You can downsize by pixel. Just put the desired pixel size in the text box.", None))
         self.checkBoxPixel.setText(_translate("MainWindow", "By Pixel (µm)", None))
         self.lineEditPixel.setToolTip(_translate("MainWindow", "You can downsize by pixel. Just put the desired pixel size in the text box.", None))
+        self.radioButtonDerived.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Derive dimensions (OPT only)</span></p><p>This option provides additional functionality that for most instances should not be required.</p><p>This option allows dimensions for the crop to be derived from a previous processed channel. </p><p>The channel from which the crop dimensions can be derived can be chosen in the OPT channels section. In the OPT channels section the user should select &quot;Return&quot; on the keyboard on the appropiate channel.</p></body></html>", None))
         self.radioButtonDerived.setText(_translate("MainWindow", "Derive dimensions", None))
+        self.radioButtonUseOldCrop.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Use old</span></p><p>If HARP has previously been used to perform the cropping of a recon the cropped image can be used to perform additional processes such as downsizing.</p></body></html>", None))
         self.radioButtonUseOldCrop.setText(_translate("MainWindow", "Use old", None))
         self.groupBoxID.setTitle(_translate("MainWindow", "Identification", None))
         self.labelAge.setText(_translate("MainWindow", "Stage", None))
@@ -966,7 +974,7 @@ class Ui_MainWindow(object):
         self.labelChannel.setText(_translate("MainWindow", "Channel", None))
         self.labelLitter.setText(_translate("MainWindow", "Litter", None))
         self.labelName.setText(_translate("MainWindow", "Full name", None))
-        self.lineEditName.setToolTip(_translate("MainWindow", "<html><head/><body><p>You can update the name of recon here and check to see if it is in the right format. </p><p>Each identifier is separated by a underscore _ </p><p>Any additional info can be stored after &quot;rec&quot;:</p><p>[date]_[gene]_[stage]_[litter]_[zygosity]_[sex]_rec_[any additional info]</p></body></html>", None))
+        self.lineEditName.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Identification</span></p><p>You can update the name of recon here and check to see if it is in the right format. </p><p>Each identifier is separated by a underscore _ </p><p>Any additional info can be stored after &quot;rec&quot;:</p><p>[date]_[gene]_[stage]_[litter]_[zygosity]_[sex]_rec_[any additional info]</p></body></html>", None))
         self.pushButtonUpdate.setText(_translate("MainWindow", "Update", None))
         self.label_7.setText(_translate("MainWindow", "<b>Name format</b>: \n"
 "<br>[date]_[gene]_[stage]_[litter]_[zygosity]_[sex]_{channel}_rec \n"
@@ -980,10 +988,14 @@ class Ui_MainWindow(object):
 "<br><br><b>Example name (OPT):</b>\n"
 "<br>20140211_RIC8B_E18.5_16.4a_HOM_XX_UV_rec", None))
         self.groupBoxuCTOnly.setTitle(_translate("MainWindow", "Additional files and folders", None))
-        self.pushButtonCTRecon.setText(_translate("MainWindow", "Pick recon log", None))
-        self.pushButtonCTSPR.setText(_translate("MainWindow", "Pick SPR", None))
+        self.pushButtonCTRecon.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Recon log</span></p><p>The recon log is identified automatically but can be selected by the user using this button.</p></body></html>", None))
+        self.pushButtonCTRecon.setText(_translate("MainWindow", "Recon log", None))
+        self.pushButtonCTSPR.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">SPR</span></p><p>A SPR file is identified automatically but can be selected by the user using this button.</p><p>[NOTE: This may be removed as the information is not essential. All additional files are copied over to the processed recon folder]</p></body></html>", None))
+        self.pushButtonCTSPR.setText(_translate("MainWindow", "SPR file", None))
+        self.pushButtonScan.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Scan folder</span></p><p>The scan folder is identified automatically but can be selected by the user using this button.</p></body></html>", None))
         self.pushButtonScan.setText(_translate("MainWindow", "Scan folder", None))
         self.groupBoxModality_2.setTitle(_translate("MainWindow", "Status", None))
+        self.textEditStatusMessages.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">Status</span></p><p><span style=\" font-size:12pt;\">This updates the user about the status of HARP when determining the manual crop dimensions after selecting &quot;Get Dimensions&quot;.</span></p></body></html>", None))
         self.groupBoxOPTChannels.setTitle(_translate("MainWindow", "OPT channels", None))
         item = self.tableWidgetOPT.verticalHeaderItem(0)
         item.setText(_translate("MainWindow", "1", None))
@@ -1005,6 +1017,7 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "Name", None))
         item = self.tableWidgetOPT.horizontalHeaderItem(2)
         item.setText(_translate("MainWindow", "Processed", None))
+        self.checkBoxInd.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Process Individually</span></p><p>By default all OPT channels will be added to the processing list togther. </p><p>The crop box dimensions will be deterimined using the channel currently selected (highlighted red).</p><p>All other channels will derive their cropping dimensions from the first channel.</p><p>Alternatively if this &quot;Process Individual Box&quot; is pressed the individual channels can be processed individually. The user can then choose the cropping method used for each channel.</p></body></html>", None))
         self.checkBoxInd.setText(_translate("MainWindow", "Process Individually", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Parameters", None))
         item = self.tableWidget.horizontalHeaderItem(0)
