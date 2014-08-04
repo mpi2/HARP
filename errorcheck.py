@@ -50,14 +50,14 @@ def errorCheck(self):
         line =str(line)
         #print line+"\n"
         # if the line matches the regex break
-        if prog.match(line) :
+        if prog.match(line):
             file_check = True
             break
 
     if file_check:
         self.stop = None
     else:
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not contain image files')
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not contain image files')
         self.stop = True
         return
 
@@ -65,11 +65,11 @@ def errorCheck(self):
     # Check if scan folder available if compression is required
     if self.ui.checkBoxScansReconComp.isChecked():
         if self.scan_folder == "":
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Scan folder not defined')
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Scan folder not defined')
             self.stop = True
             return
         elif not os.path.exists(self.scan_folder):
-            message = QtGui.QMessageBox.warning(self, 'Message', "Warning: Scan folder does not exist")
+            QtGui.QMessageBox.warning(self, 'Message', "Warning: Scan folder does not exist")
             self.stop = True
             return
 
@@ -77,20 +77,20 @@ def errorCheck(self):
     if self.ui.checkBoxPixel.isChecked() :
 
         try:
-            testing = float(self.ui.lineEditPixel.text())
+            float(self.ui.lineEditPixel.text())
         except ValueError:
             if not self.ui.lineEditPixel.text():
-                message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: User has not specified a new pixel size value')
+                QtGui.QMessageBox.warning(self, 'Message', 'Warning: User has not specified a new pixel size value')
                 self.stop = True
                 return
             else :
-                message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: User defined pixel is not a numerical value')
+                QtGui.QMessageBox.warning(self, 'Message', 'Warning: User defined pixel is not a numerical value')
                 self.stop = True
                 return
 
     # Check user has not selected to scale by pixel without having a recon folder
     if self.ui.checkBoxPixel.isChecked() and self.pixel_size == "" :
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Pixel size could not be obtained from original recon log. Scaling "By Pixel (um) is not possible"')
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: Pixel size could not be obtained from original recon log. Scaling "By Pixel (um) is not possible"')
         self.stop = True
         return
 
@@ -102,13 +102,13 @@ def errorCheck(self):
             testing = float(self.ui.lineEditW.text())
             testing = float(self.ui.lineEditH.text())
         except ValueError:
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Cropping dimensions have not been defined')
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Cropping dimensions have not been defined')
             self.stop = True
             return
 
     # Check input directory contains something
     if os.listdir(inputFolder) == []:
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty, please check')
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty, please check')
         self.stop = True
         return
 
@@ -120,10 +120,24 @@ def errorCheck(self):
             self.stop = None
             break
         if twi0.text() == outputFolder:
-            message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Output folder is already on the processing list')
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Output folder is already on the processing list')
             self.stop = True
             return
         count = count+1
+
+    # Check if a crop folder is available if UseOldCrop is used
+    if self.ui.radioButtonUseOldCrop.isChecked():
+        if not os.path.exists(os.path.join(str(self.ui.lineEditOutput.text()),"cropped")):
+            self.stop = True
+            QtGui.QMessageBox.warning(self,'Message','Warning: Use old crop option selected. '
+                                                               'This requires a previous crop to have been performed')
+            return
+
+    if self.ui.radioButtonuCT.isChecked() and self.ui.radioButtonDerived.isChecked():
+            self.stop = True
+            QtGui.QMessageBox.warning(self,'Message','Warning: Derived Dimension crop option is not available for'
+                                                     ' uCT processing')
+            return
 
     # seeing if outpu folder exists
     if self.ui.checkBoxRF.isChecked():
@@ -134,23 +148,20 @@ def errorCheck(self):
     # Check if output folder already exists. Ask if it is ok to overwrite
     elif os.path.exists(outputFolder):
         # Running dialog box to inform user of options
-        message = QtGui.QMessageBox.question(self, 'Message', 'Folder already exists for the location:\n{0}\nCan this folder be overwritten?'.format(outputFolder) , QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+        message = QtGui.QMessageBox.question(self, 'Message',
+                                             'Folder already exists for the location:\n{0}\n'
+                                             'Can this folder be overwritten?'.format(outputFolder),
+                                             QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
         if message == QtGui.QMessageBox.Yes:
             self.stop = None
         if message == QtGui.QMessageBox.No:
             self.stop = True
             return
-    else :
+    else:
         os.makedirs(outputFolder)
         self.stop = None
 
-    # Check if a crop folder is available if UseOldCrop is used
-    if self.ui.radioButtonUseOldCrop.isChecked():
-        if not os.path.exists(os.path.join(str(self.ui.lineEditOutput.text()),"cropped")):
-            self.stop = True
-            message = QtGui.QMessageBox.warning(self,
-                                                'Message',
-                                                 'Warning: Use old crop option selected. This requires a previous crop to have been performed')
+
 
 
 

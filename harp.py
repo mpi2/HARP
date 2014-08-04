@@ -577,6 +577,16 @@ class MainWindow(QtGui.QMainWindow):
         # get the input name for table
         input_name = str(self.ui.lineEditInput.text())
 
+        # Error check for multiple channel for loop
+        if self.modality == "OPT" and self.ui.radioButtonDerived.isChecked() \
+                and not self.ui.lineEditDerivedChnName.text():
+            self.stop = True
+            self.stop_chn_for_loop = True
+            QtGui.QMessageBox.warning(self,'Message','Warning: Derived dimensions for autocrop option selected.'
+                                                     ' This requires a valid channel to be used to get the crop '
+                                                     'dimensions from')
+            return
+
         # Perform some checks before any processing is carried out
         errorcheck.errorCheck(self)
 
@@ -656,8 +666,13 @@ class MainWindow(QtGui.QMainWindow):
             elif self.ui.radioButtonMan.isChecked():
                 crop_option = "man"
 
+            self.stop_chn_for_loop = False
+
             # go through list and get the channel names
             for name in self.chan_full:
+                if self.stop_chn_for_loop == True:
+                    break
+
                 chan_path = os.path.join(path,name)
 
                 # Check if the input director is already set the channel in the loop
@@ -934,7 +949,7 @@ class MainWindow(QtGui.QMainWindow):
                     QtGui.QMessageBox.warning(self, 'Message',
                                               'Warning: Chosen channel to derive dimensions (cropbox) has either\n'
                                               'not been analysed or has not been added onto the processing list')
-                if pro.text() == "On list":
+                elif pro.text() == "On list":
                     in_dir = str(self.ui.lineEditInput.text())
                     path,folder_name = os.path.split(in_dir)
                     if name.text() == folder_name:
