@@ -107,7 +107,7 @@ def get_channels(self):
     self.chan_full = chan_full
     if not os.path.exists(path):
         return
-    
+
     # for loop to go through the parent input directory
     for line in os.listdir(path) :
         line =str(line)

@@ -1697,7 +1697,7 @@ QGroupBox::title
               </rect>
              </property>
              <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Process Individually&lt;/span&gt;&lt;/p&gt;&lt;p&gt;By default all OPT channels will be added to the processing list togther. &lt;/p&gt;&lt;p&gt;The crop box dimensions will be deterimined using the channel currently selected (highlighted red).&lt;/p&gt;&lt;p&gt;All other channels will derive their cropping dimensions from the first channel.&lt;/p&gt;&lt;p&gt;Alternatively if this &amp;quot;Process Individual Box&amp;quot; is pressed the individual channels can be processed individually. The user can then choose the cropping method used for each channel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Process Individually&lt;/span&gt;&lt;/p&gt;&lt;p&gt;By default all OPT channels will be added to the processing list together. &lt;/p&gt;&lt;p&gt;The crop box dimensions will be determined using the channel currently selected (highlighted red). &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;All other channels will derive their cropping dimensions from the first channel. &lt;/p&gt;&lt;p&gt;Alternatively if this &amp;quot;Process Individual Box&amp;quot; is pressed the individual channels can be processed individually. The user can then choose the cropping method used for each channel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
               <string>Process Individually</string>
@@ -1724,8 +1724,8 @@ QGroupBox::title
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1261</width>
-             <height>780</height>
+             <width>98</width>
+             <height>89</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout">

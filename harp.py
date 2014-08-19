@@ -2,8 +2,8 @@
 # title           :harp.py
 # description     :Runs the HARP GUI
 # author          :SIG
-# date            :2014-08-04
-# version         :2.0.0 (OPT update)
+# date            :2014-08-14
+# version         :1.0.0 (OPT update)
 #usage            :python harp.py or if using executable in windows .\harp.exe or clicking on the harp.exe icon.
 #formatting       :PEP8 format is used where possible. QT classes in C++ standard format.
 #python_version   :2.7
@@ -413,7 +413,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.checkBoxInd.setEnabled(True)
         if self.ui.radioButtonDerived.isChecked():
             self.ui.lineEditDerivedChnName.setEnabled(True)
+        autofill.get_recon_log(self)
         autofill.get_channels(self)
+
 
 
 
@@ -426,6 +428,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.radioButtonDerived.setEnabled(False)
         self.ui.lineEditDerivedChnName.setEnabled(False)
         self.ui.checkBoxInd.setEnabled(False)
+        autofill.get_recon_log(self)
+
 
     def update_name(self):
         """ Function to update the name of the file and folder"""
@@ -593,6 +597,7 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # Perform some checks before any processing is carried out
+        print str(self.ui.lineEditOutput.text())
         errorcheck.errorCheck(self)
 
         # If an error has occured self.stop will be defined. if None then no error.
@@ -682,7 +687,13 @@ class MainWindow(QtGui.QMainWindow):
 
                 # Check if the input director is already set the channel in the loop
                 # if the current channel is not the same as the loop then perform autofill before adding to the list
-                if chan_path != in_dir:
+                chan_short = chan_path.replace("\\", "")
+                chan_short = chan_short.replace("/", "")
+                in_dir_short = chan_path.replace("\\", "")
+                in_dir_short = in_dir_short.replace("/", "")
+                if chan_short != in_dir_short:
+                    print "chn_path", chan_path
+                    print "indir", in_dir
                     self.ui.lineEditInput.setText(chan_path)
                     self.reset_inputs()
                     self.autofill_pipe(suppress=True)
