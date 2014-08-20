@@ -684,19 +684,26 @@ class MainWindow(QtGui.QMainWindow):
                     break
 
                 chan_path = os.path.join(path,name)
-
                 # Check if the input director is already set the channel in the loop
                 # if the current channel is not the same as the loop then perform autofill before adding to the list
                 chan_short = chan_path.replace("\\", "")
                 chan_short = chan_short.replace("/", "")
-                in_dir_short = chan_path.replace("\\", "")
+                in_dir_short = in_dir.replace("\\", "")
                 in_dir_short = in_dir_short.replace("/", "")
+                print "chn_path", chan_path
+                print "indir", in_dir
                 if chan_short != in_dir_short:
+                    print "chan does not match/n"
                     print "chn_path", chan_path
                     print "indir", in_dir
                     self.ui.lineEditInput.setText(chan_path)
                     self.reset_inputs()
                     self.autofill_pipe(suppress=True)
+
+                #need to setup the output folder based on original folder used for output
+                path_out,old_folder_name = os.path.split(str(out_dir_original))
+                output_folder = os.path.join(path_out,name)
+                self.ui.lineEditOutput.setText(output_folder)
 
                 self.add_to_list_action()
 

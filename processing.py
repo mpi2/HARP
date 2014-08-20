@@ -136,9 +136,6 @@ class ProcessingThread(QtCore.QThread):
                 self.emit( QtCore.SIGNAL('update(QString)'), "error: Unknown exception trying to get derived dimension"
                                                              " (see log): "+str(e))
 
-
-
-
         self.session_log.write("Crop started\n")
         self.session_log.write(str(datetime.datetime.now())+"\n")
 
@@ -282,13 +279,6 @@ class ProcessingThread(QtCore.QThread):
         except OSError as e:
                 print("os.kill could not kill process, reason: {0}".format(e))
 
-#     def masking(self):
-#         '''
-#         Masking
-#         '''
-#         #watershed_filter()
-#         print self.scale_array
-
 
     def scaling(self):
         '''
@@ -300,8 +290,7 @@ class ProcessingThread(QtCore.QThread):
         print "Scaling started"
         self.session_log.write("*****Performing scaling******\n")
         self.session_log.write(str(datetime.datetime.now())+"\n")
-        #self.session_log.write(str(os.listdir(self.configOb.input_folder)))
-        #self.session_log.write("\n")
+
         # First make subfolder for scaled stacks
         if not os.path.exists(self.configOb.scale_path):
             os.makedirs(self.configOb.scale_path)
@@ -316,36 +305,49 @@ class ProcessingThread(QtCore.QThread):
         self.session_log.write("Memory for ImageJ(mb):"+str(self.memory_4_imageJ)+"\n")
 
 
-        # Perform scaling as subprocess with Popen (they should be done in the background)
-
+        # Perform scaling as subprocess with Popen
         if self.configOb.SF2 == "yes" :
             memory_result = self.memory_check(2)
             if memory_result:
                 self.execute_imagej(2.0)
+            else:
+                self.execute_imagej(2.0,True)
 
         if self.configOb.SF3 == "yes" :
             memory_result = self.memory_check(3)
             if memory_result:
                 self.execute_imagej(3.0)
+            else:
+                self.execute_imagej(3.0,True)
 
         if self.configOb.SF4 == "yes" :
             memory_result = self.memory_check(4)
             if memory_result:
                 self.execute_imagej(4.0)
+            else:
+                self.execute_imagej(4.0,True)
 
         if self.configOb.SF5 == "yes" :
             memory_result = self.memory_check(5)
             if memory_result:
                 self.execute_imagej(5.0)
+            else:
+                self.execute_imagej(5.0,True)
 
         if self.configOb.SF6 == "yes" :
             memory_result = self.memory_check(6)
             if memory_result:
                 self.execute_imagej(6.0)
+            else:
+                self.execute_imagej(6.0,True)
 
         if self.configOb.pixel_option == "yes" :
+            memory_result = self.memory_check(self.configOb.SFX_pixel)
+            if memory_result:
+                self.execute_imagej("Pixel")
+            else:
+                self.execute_imagej("Pixel",True)
 
-            self.execute_imagej("Pixel")
 
     def memory_check(self,scale):
         #self.memory_4_imageJ
@@ -395,14 +397,11 @@ class ProcessingThread(QtCore.QThread):
 
         # Check if there is enough memory  available.
         if self.memory_4_imageJ < memory_for_scale:
-            # not enough memory for this"
+            # not enough memory for standard imagej processing have to try low mem version
             print "not enough memory"
-            self.session_log.write("Not enough memory for this scaling\n")
-            self.emit( QtCore.SIGNAL('update(QString)'), "Not enough memory for scaling\n" )
-            fail_file_name = os.path.join(self.configOb.scale_path,"insufficient_memory_for_scaling_"+str(scale))
-            fail_file = open(fail_file_name, 'w+')
-            fail_file.close()
-            self.scale_error = True
+            self.session_log.write("Low memory scaling will be used\n")
+            self.emit( QtCore.SIGNAL('update(QString)'), "Low memory scaling to be used\n" )
+
             return 0
         else :
             # enough memory
@@ -410,7 +409,7 @@ class ProcessingThread(QtCore.QThread):
 
 
 
-    def execute_imagej(self, sf):
+    def execute_imagej(self, sf, mem = False):
         '''
         Part of scaling function
         @param: str, scaleFactor for imagej eg "^0.5^x6"
@@ -475,8 +474,16 @@ class ProcessingThread(QtCore.QThread):
         file_name = os.path.join(self.configOb.scale_path,self.configOb.full_name+"_scaled_"+str(sf)+"_pixel_"+new_pixel+".tif")
         self.scale_array.append(file_name)
 
-        # Subprocess call for imagej macro
-        process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", ij_macro_path,
+        if mem:
+            # Subprocess call for imagej macro
+            print "low mem version"
+            process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", ij_macro_path,
+                                    self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name],
+                                   stdout=self.session_scale,stderr=self.session_scale)
+
+        else:
+            # Subprocess call for imagej macro
+            process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", ij_macro_path,
                                     self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name],
                                    stdout=self.session_scale,stderr=self.session_scale)
 
@@ -541,7 +548,6 @@ class ProcessingThread(QtCore.QThread):
             fail_file_name = os.path.join(self.configOb.scale_path,"error_performing_scaling_by_"+str(sf))
             fail_file = open(fail_file_name, 'w+')
             fail_file.close()
-
             self.scale_error = True
         else:
             self.session_log.write("Finished scaling\n")
