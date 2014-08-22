@@ -1,7 +1,7 @@
 # README #
 
-## OPT Testing ##
+## HARP v1.0 OPT update ##
 
-Branch to get OPT functionality
+
 
 
