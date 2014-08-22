@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'mainwindow2.ui'
+# Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Mon Aug 04 13:53:36 2014
+# Created: Fri Aug 22 11:07:19 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -834,7 +834,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1261, 780))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 98, 89))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.scrollAreaWidgetContents)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
@@ -965,6 +965,7 @@ class Ui_MainWindow(object):
         self.radioButtonDerived.setText(_translate("MainWindow", "Derive dimensions", None))
         self.radioButtonUseOldCrop.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Use old</span></p><p>If HARP has previously been used to perform the cropping of a recon the cropped image can be used to perform additional processes such as downsizing.</p></body></html>", None))
         self.radioButtonUseOldCrop.setText(_translate("MainWindow", "Use old", None))
+        self.lineEditDerivedChnName.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Derive dimensions (OPT only)</span></p><p>This option provides additional functionality that for most instances should not be required.</p><p>This option allows dimensions for the crop to be derived from a previous processed channel. </p><p>The channel from which the crop dimensions can be derived can be chosen in the OPT channels section. In the OPT channels section the user should select &quot;Return&quot; on the keyboard on the appropiate channel.</p></body></html>", None))
         self.groupBoxID.setTitle(_translate("MainWindow", "Identification", None))
         self.labelAge.setText(_translate("MainWindow", "Stage", None))
         self.labelDate.setText(_translate("MainWindow", "Date", None))
@@ -1017,7 +1018,7 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "Name", None))
         item = self.tableWidgetOPT.horizontalHeaderItem(2)
         item.setText(_translate("MainWindow", "Processed", None))
-        self.checkBoxInd.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Process Individually</span></p><p>By default all OPT channels will be added to the processing list togther. </p><p>The crop box dimensions will be deterimined using the channel currently selected (highlighted red).</p><p>All other channels will derive their cropping dimensions from the first channel.</p><p>Alternatively if this &quot;Process Individual Box&quot; is pressed the individual channels can be processed individually. The user can then choose the cropping method used for each channel.</p></body></html>", None))
+        self.checkBoxInd.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Process Individually</span></p><p>By default all OPT channels will be added to the processing list together. </p><p>The crop box dimensions will be determined using the channel currently selected (highlighted red). </p><p><br/></p><p>All other channels will derive their cropping dimensions from the first channel. </p><p>Alternatively if this &quot;Process Individual Box&quot; is pressed the individual channels can be processed individually. The user can then choose the cropping method used for each channel.</p></body></html>", None))
         self.checkBoxInd.setText(_translate("MainWindow", "Process Individually", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Parameters", None))
         item = self.tableWidget.horizontalHeaderItem(0)
