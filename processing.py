@@ -152,30 +152,32 @@ class ProcessingThread(QtCore.QThread):
             # Run autocrop and catch errors
             self.auto_crop.run()
 
+        # It may be better to add the execptions closer to the event as these can catch a broad range
         except WindowsError as e:
-            self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the network. Exception message:\n"
-                                   +"Exception traceback:"+
+            self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the "
+                                   "network. Exception message:\n Exception traceback:"+
                                    traceback.format_exc()+"\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "error: HARP can't find the folder, see log file" )
 
-        # except TypeError as e:
-        #     # This is referring to an error in either the functions run_crop_process or init_cropping. Possibly the exception would be more beneficial
-        #     # placed directly in autocrop....
-        #     self.session_log.write("error: HARP most likely can't find the folder, maybe a temporary problem connecting to the network. Exception message:\n"
-        #                            +"Exception traceback:"+
-        #                            traceback.format_exc()+"\n")
-        #     self.emit( QtCore.SIGNAL('update(QString)'), "error: HARP can't find the files, see log file" )
-        #
-        # except Exception as e:
-        #     self.session_log.write("error: Unknown autocrop exception. Exception message:\n"
-        #                            +"Exception traceback:"+
-        #                            traceback.format_exc()+"\n")
-        #     self.emit( QtCore.SIGNAL('update(QString)'), "error: Unknown autocrop exception (see log): "+str(e))
+        except TypeError as e:
+            # This is referring to an error in either the functions run_crop_process or init_cropping. P
+            # ossibly the exception would be more beneficial placed directly in autocrop....
+            self.session_log.write("error: HARP most likely can't find the folder, maybe a temporary problem connecting"
+                                   " to the network. Exception message:\n Exception traceback:"+
+                                   traceback.format_exc()+"\n")
+            self.emit( QtCore.SIGNAL('update(QString)'), "error: HARP can't find the files, see log file" )
+
+        except Exception as e:
+            self.session_log.write("error: Unknown exception. Exception message:\n"
+                                   +"Exception traceback:"+
+                                   traceback.format_exc()+"\n")
+            self.emit( QtCore.SIGNAL('update(QString)'), "error: Unknown exception (see log): "+str(e))
 
 
     def autocrop_update_slot(self, msg):
         """
-        Listens to autocrop. If autocrop sends a signal with the message "success" then the next steps in the processing will occur
+        Listens to autocrop. If autocrop sends a signal with the message "success" then the next steps in the processing
+        will occur
         """
         # check if a tuple. If it is a tuple it means that the crop box has been sen from the autocrop. Then make
         # a pickle object of the object so it can be used at another point
@@ -234,7 +236,8 @@ class ProcessingThread(QtCore.QThread):
 
 
             if self.scale_error:
-                self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished (problems creating some of the scaled stacks, see log file)" )
+                self.emit( QtCore.SIGNAL('update(QString)'),
+                           "Processing finished (problems creating some of the scaled stacks, see log file)" )
             else:
                 self.emit( QtCore.SIGNAL('update(QString)'), "Processing finished" )
 
@@ -269,7 +272,9 @@ class ProcessingThread(QtCore.QThread):
                     os.kill(int(self.imagej_pid),signal.SIGKILL)
                     self.emit( QtCore.SIGNAL('update(QString)'), "Processing Cancelled!" )
                 elif _platform == "win32" or _platform == "win64":
-                    proc = subprocess.Popen(["taskkill", "/f", "/t", "/im",str(self.imagej_pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    proc = subprocess.Popen(["taskkill", "/f", "/t", "/im",str(self.imagej_pid)],
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
                     (out, err) = proc.communicate()
                     if out:
                         print "program output:", out
@@ -476,7 +481,8 @@ class ProcessingThread(QtCore.QThread):
 
         print "norm scaling"
         # file name
-        file_name = os.path.join(self.configOb.scale_path,self.configOb.full_name+"_scaled_"+str(sf)+"_pixel_"+new_pixel+".tif")
+        file_name = os.path.join(self.configOb.scale_path,
+                                 self.configOb.full_name+"_scaled_"+str(sf)+"_pixel_"+new_pixel+".tif")
         # Subprocess call for imagej macro
         process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", ij_macro_path,
                                     self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name],
@@ -555,7 +561,6 @@ class ProcessingThread(QtCore.QThread):
         out_of_memory = None
         other_ij_problem = None
 
-        print "check mem prob"
         # First check for memory problems
         for line in self.session_scale_check:
             # "chomp" the line endings off
@@ -566,7 +571,6 @@ class ProcessingThread(QtCore.QThread):
                 out_of_memory = True
                 break
 
-        print "check other probs"
         # Then check for any other problems.
         for line in self.session_scale_check:
             # "chomp" the line endings off
@@ -579,8 +583,8 @@ class ProcessingThread(QtCore.QThread):
 
 
         if out_of_memory and mem_opt=="norm":
-            # Dont use the word "error" in the signal message. If "error" is used HARP might skip any further processing for this
-            # HARP processing list.
+            # Dont use the word "error" in the signal message. If "error" is used HARP might skip any further
+            # processing for this  # HARP processing list.
             self.emit( QtCore.SIGNAL('update(QString)'),
                        "Problem in scaling. Not enough memory will try low memory version\n" )
             self.session_scale.write("Error in scaling will try low memory version\n")
@@ -615,7 +619,6 @@ class ProcessingThread(QtCore.QThread):
             os.makedirs(movie_path)
 
         print "starting movies"
-
         for file in range(len(self.scale_array)):
 
             print self.scale_array[file]

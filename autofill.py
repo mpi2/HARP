@@ -47,20 +47,17 @@ def get_crop_box(self,alt_name):
 
     # go through all the folders indentified to see if one has a cropbox pickle file. If it does save the
     cropbox_path = os.path.join(path_out, alt_name,"Metadata","cropbox.txt")
-    print cropbox_path
     if os.path.exists(cropbox_path):
         return True
 
 def check_if_on_list(self,alt_name):
     # A while loop is used to go through the processing table see if the alternative channel is on the list already
     count = 0
-    print "start check on list"
     while True:
         # This gets the status text
         name_on_list = self.ui.tableWidget.item(count, 0)
         if not name_on_list:
             # if not defined it means there are no recons left to process
-            print "Nothing on processing list"
             return False
         if re.search(alt_name, name_on_list.text()):
             # this row has the OPT channel ID meaning a cropbox will be ready when this is ran
@@ -180,10 +177,8 @@ def error_check_chn(inputFolder):
         return 1
 
     #Check if folder is empty
-    print "inputfolder check", inputFolder
     if os.listdir(inputFolder) == []:
             return 1
-
 
     #Check if input folder contains any image files
     prog = re.compile("(.*).(bmp|tif|jpg|jpeg)",re.IGNORECASE)
@@ -296,8 +291,6 @@ def get_recon_log(self):
         # Custom exception identifies recon file not found
         self.pixel_size = ""
         self.ui.lcdNumberPixel.display(self.pixel_size)
-        print "exception inst"
-        print self.recon_log_path
         self.ui.lineEditCTRecon.setText("Not found")
     except:
         self.pixel_size = ""
@@ -316,7 +309,6 @@ def get_name(self,name,suppress=False):
 
     # first split the folder into list of identifiers
     name_list = folder_name.split("_")
-    print name_list
     # the full name will at first just be the folder name
     self.ui.lineEditName.setText(folder_name)
     self.full_name = folder_name

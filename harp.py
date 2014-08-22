@@ -282,43 +282,34 @@ class MainWindow(QtGui.QMainWindow):
     def autofill_pipe(self,suppress=False):
 
         # Remove the contents of the OPT table
-        print "clearing opt table"
         self.ui.tableWidgetOPT.clearContents()
         self.crop_box_use = False
         self.ui.radioButtonAuto.setChecked(True)
         self.ui.lineEditDerivedChnName.setText("")
 
         # check if uCT or opt data
-        print "checking if uct or opt"
         autofill.opt_uCT_check(self,suppress)
 
         # Autocomplete the name
-        print "autocompleting name"
         autofill.get_name(self, str(self.ui.lineEditInput.text()),suppress)
 
         # Get the reconLog and associated pixel size
-        print "geting recon log"
         autofill.get_recon_log(self)
 
         # Get the output folder location
-        print "getting output folder"
         autofill.auto_file_out(self)
 
         # See what OPT channels are available
-        print "getting channels"
         if self.modality == "OPT":
             autofill.get_channels(self)
             autofill.auto_get_derived(self)
 
         # Automatically identify scan folder
-        print "getting scan folder"
         autofill.auto_get_scan(self)
 
         # Automatically get SPR file
-        print "getting spr folder"
         autofill.auto_get_SPR(self)
 
-        print "deteriming size of input folder"
         # Determine size of input folder
         autofill.folder_size_approx(self)
 
@@ -691,12 +682,7 @@ class MainWindow(QtGui.QMainWindow):
                 chan_short = chan_short.replace("/", "")
                 in_dir_short = in_dir.replace("\\", "")
                 in_dir_short = in_dir_short.replace("/", "")
-                print "chn_path", chan_path
-                print "indir", in_dir
                 if chan_short != in_dir_short:
-                    print "chan does not match/n"
-                    print "chn_path", chan_path
-                    print "indir", in_dir
                     self.ui.lineEditInput.setText(chan_path)
                     self.reset_inputs()
                     self.autofill_pipe(suppress=True)
