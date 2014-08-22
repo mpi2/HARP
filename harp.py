@@ -185,7 +185,7 @@ class MainWindow(QtGui.QMainWindow):
     def dropEvent(self, event):
         volList = [str(v.toLocalFile()) for v in event.mimeData().urls()]
         vol1 = volList[0]
-        self.ui.lineEditInput.setText(vol1)
+        self.ui.lineEditInput.setText(os.path.abspath(vol1))
         self.reset_inputs()
         self.autofill_pipe()
 
@@ -254,7 +254,7 @@ class MainWindow(QtGui.QMainWindow):
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
         # Check if folder variable is defined (if it not the user has pressed cancel)
         if not folder == "":
-            self.ui.lineEditOutput.setText(folder)
+            self.ui.lineEditOutput.setText(os.path.abspath(folder))
 
     def select_file_in(self):
         """ User selects the folder to be processed and some auto-fill methods are carried out """
@@ -273,7 +273,7 @@ class MainWindow(QtGui.QMainWindow):
             # Reset the inputs incase this is not the first time someone has selected a file
             self.reset_inputs()
             # Set the input folder
-            self.ui.lineEditInput.setText(folder)
+            self.ui.lineEditInput.setText(os.path.abspath(folder))
             # run all the autofill functions
             self.autofill_pipe()
 
@@ -440,7 +440,8 @@ class MainWindow(QtGui.QMainWindow):
         # Get output folder name, to start off with this will just be the input name
         output = str(self.ui.lineEditOutput.text())
         path, output_folder_name = os.path.split(output)
-        self.ui.lineEditOutput.setText(os.path.join(path, self.full_name))
+
+        self.ui.lineEditOutput.setText(os.path.abspath(os.path.join(path, self.full_name)))
 
     def get_recon_man(self):
         """ Get the recon folder manually"""
@@ -703,7 +704,7 @@ class MainWindow(QtGui.QMainWindow):
                 #need to setup the output folder based on original folder used for output
                 path_out,old_folder_name = os.path.split(str(out_dir_original))
                 output_folder = os.path.join(path_out,name)
-                self.ui.lineEditOutput.setText(output_folder)
+                self.ui.lineEditOutput.setText(os.path.abspath(output_folder))
 
                 self.add_to_list_action()
 
@@ -846,7 +847,7 @@ class MainWindow(QtGui.QMainWindow):
                                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
                         if reply == QtGui.QMessageBox.Yes:
                             name = self.ui.tableWidgetOPT.item(i, 1)
-                            self.ui.lineEditInput.setText(os.path.join(path_in, str(name.text())))
+                            self.ui.lineEditInput.setText(os.path.abspath(os.path.join(path_in, str(name.text()))))
                             self.reset_inputs()
                             self.autofill_pipe()
                             return
@@ -999,7 +1000,7 @@ class MainWindow(QtGui.QMainWindow):
             print "Selected a row with no opt info"
         else:
             print "change channel"
-            self.ui.lineEditInput.setText(os.path.join(path_out,str(name.text())))
+            self.ui.lineEditInput.setText(os.path.abspath(os.path.join(path_out,str(name.text()))))
             self.reset_inputs()
             self.autofill_pipe()
 
