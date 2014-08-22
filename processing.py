@@ -158,19 +158,19 @@ class ProcessingThread(QtCore.QThread):
                                    traceback.format_exc()+"\n")
             self.emit( QtCore.SIGNAL('update(QString)'), "error: HARP can't find the folder, see log file" )
 
-        except TypeError as e:
-            # This is referring to an error in either the functions run_crop_process or init_cropping. Possibly the exception would be more beneficial
-            # placed directly in autocrop....
-            self.session_log.write("error: HARP most likely can't find the folder, maybe a temporary problem connecting to the network. Exception message:\n"
-                                   +"Exception traceback:"+
-                                   traceback.format_exc()+"\n")
-            self.emit( QtCore.SIGNAL('update(QString)'), "error: HARP can't find the files, see log file" )
-
-        except Exception as e:
-            self.session_log.write("error: Unknown autocrop exception. Exception message:\n"
-                                   +"Exception traceback:"+
-                                   traceback.format_exc()+"\n")
-            self.emit( QtCore.SIGNAL('update(QString)'), "error: Unknown autocrop exception (see log): "+str(e))
+        # except TypeError as e:
+        #     # This is referring to an error in either the functions run_crop_process or init_cropping. Possibly the exception would be more beneficial
+        #     # placed directly in autocrop....
+        #     self.session_log.write("error: HARP most likely can't find the folder, maybe a temporary problem connecting to the network. Exception message:\n"
+        #                            +"Exception traceback:"+
+        #                            traceback.format_exc()+"\n")
+        #     self.emit( QtCore.SIGNAL('update(QString)'), "error: HARP can't find the files, see log file" )
+        #
+        # except Exception as e:
+        #     self.session_log.write("error: Unknown autocrop exception. Exception message:\n"
+        #                            +"Exception traceback:"+
+        #                            traceback.format_exc()+"\n")
+        #     self.emit( QtCore.SIGNAL('update(QString)'), "error: Unknown autocrop exception (see log): "+str(e))
 
 
     def autocrop_update_slot(self, msg):
@@ -309,44 +309,34 @@ class ProcessingThread(QtCore.QThread):
         if self.configOb.SF2 == "yes" :
             memory_result = self.memory_check(2)
             if memory_result:
+                print "scale by 2 norm"
                 self.execute_imagej(2.0)
-            else:
-                self.execute_imagej(2.0,True)
 
         if self.configOb.SF3 == "yes" :
             memory_result = self.memory_check(3)
             if memory_result:
                 self.execute_imagej(3.0)
-            else:
-                self.execute_imagej(3.0,True)
 
         if self.configOb.SF4 == "yes" :
             memory_result = self.memory_check(4)
             if memory_result:
                 self.execute_imagej(4.0)
-            else:
-                self.execute_imagej(4.0,True)
 
         if self.configOb.SF5 == "yes" :
             memory_result = self.memory_check(5)
             if memory_result:
                 self.execute_imagej(5.0)
-            else:
-                self.execute_imagej(5.0,True)
 
         if self.configOb.SF6 == "yes" :
             memory_result = self.memory_check(6)
             if memory_result:
                 self.execute_imagej(6.0)
-            else:
-                self.execute_imagej(6.0,True)
 
         if self.configOb.pixel_option == "yes" :
             memory_result = self.memory_check(self.configOb.SFX_pixel)
             if memory_result:
                 self.execute_imagej("Pixel")
-            else:
-                self.execute_imagej("Pixel",True)
+
 
 
     def memory_check(self,scale):
@@ -395,26 +385,31 @@ class ProcessingThread(QtCore.QThread):
         # Based on a very approximate estimate I have said it will take imagej 4x that of the memory of the approx scaled stack
         memory_for_scale = memory_for_scale*4
 
+        self.num_files = num_files
+
         # Check if there is enough memory  available.
         if self.memory_4_imageJ < memory_for_scale:
-            # not enough memory for standard imagej processing have to try low mem version
             print "not enough memory"
-            self.session_log.write("Low memory scaling will be used\n")
-            self.emit( QtCore.SIGNAL('update(QString)'), "Low memory scaling to be used\n" )
-
-            return 0
+            self.session_log.write("Not enough memory for this scaling\n")
+            self.emit( QtCore.SIGNAL('update(QString)'), "Not enough memory for scaling\n" )
+            fail_file_name = os.path.join(self.configOb.scale_path,"insufficient_memory_for_scaling_"+str(scale))
+            fail_file = open(fail_file_name, 'w+')
+            fail_file.close()
+            self.scale_error = True
+            return False
         else :
             # enough memory
-            return 1
+            return True
 
 
 
-    def execute_imagej(self, sf, mem = False):
+    def execute_imagej(self, sf):
         '''
         Part of scaling function
         @param: str, scaleFactor for imagej eg "^0.5^x6"
         @param: str, sf for calculating new pixel size
         '''
+        print "kill check"
         if self.kill_check == 1 :
             return
 
@@ -422,6 +417,7 @@ class ProcessingThread(QtCore.QThread):
         self.scale_log_path = os.path.join(self.configOb.meta_path,str(sf)+"_scale.log")
         self.session_scale = open(self.scale_log_path, 'w+')
 
+        print "pixel check"
         # Gets the new pixel numbers for the scaled stack name (see in imagej macro)
         if (self.configOb.recon_pixel_size) and sf != "Pixel":
             new_pixel = float(self.configOb.recon_pixel_size)*float(sf)
@@ -443,6 +439,7 @@ class ProcessingThread(QtCore.QThread):
         # Get the scaling factor in decimal
         dec_sf = round((1/sf),4)
 
+        print "ij path check"
         # ij path if run from executable
         ijpath = os.path.join('..','..','ImageJ', 'ij.jar')
         if not os.path.exists(ijpath):
@@ -457,37 +454,34 @@ class ProcessingThread(QtCore.QThread):
         # Macro path if run from exectutable
         ij_macro_path = os.path.join('..','..', "siah_scale.txt")
         if not os.path.exists(ij_macro_path):
-            #macro path if ran from script
             ij_macro_path = os.path.join(self.dir, "siah_scale.txt")
 
+        ij_macro_path_low_mem1 = os.path.join('..','..', "siah_scale_low_mem1.txt")
+        if not os.path.exists(ij_macro_path_low_mem1):
+            ij_macro_path_low_mem1 = os.path.join(self.dir, "siah_scale_low_mem1.txt")
+
+        ij_macro_path_low_mem2 = os.path.join(self.dir, "siah_scale_low_mem2.txt")
+        if not os.path.exists(ij_macro_path_low_mem2):
+            ij_macro_path_low_mem2 = os.path.join('..','..', "siah_scale_low_mem2.txt")
+
         if not os.path.exists(ij_macro_path):
-            self.emit( QtCore.SIGNAL('update(QString)'), "Error: Can't find Imagej macro scrip" )
+            self.emit( QtCore.SIGNAL('update(QString)'), "error: Can't find Imagej macro script" )
             self.kill_check =  1
             return
 
-        # detail what is happening
+        # detail scaling in log
         self.session_log.write("Scale by factor:\n")
         self.session_log.write(str(sf))
         self.emit( QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)) )
 
-        # Make an array of the names to be masked
+        print "norm scaling"
+        # file name
         file_name = os.path.join(self.configOb.scale_path,self.configOb.full_name+"_scaled_"+str(sf)+"_pixel_"+new_pixel+".tif")
-        self.scale_array.append(file_name)
-
-        if mem:
-            # Subprocess call for imagej macro
-            print "low mem version"
-            process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", ij_macro_path,
+        # Subprocess call for imagej macro
+        process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", ij_macro_path,
                                     self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name],
                                    stdout=self.session_scale,stderr=self.session_scale)
-
-        else:
-            # Subprocess call for imagej macro
-            process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", ij_macro_path,
-                                    self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name],
-                                   stdout=self.session_scale,stderr=self.session_scale)
-
-        # record a process ID incase we need to kill imagej
+        #record a process ID incase we need to kill imagej
         self.imagej_pid = str(process.pid)
 
         #NOTE: process.communicate catches when processing is finished
@@ -495,11 +489,62 @@ class ProcessingThread(QtCore.QThread):
         out, err = process.communicate()
 
         print process.returncode
-        # Scale log file is now closed for writing
-        self.session_scale.close()
+
+        # check if there was a memory problem then repeat as low memory version
+        result = self.scale_error_check("norm",sf)
+
+        # If a non-memory error occured call it a day for this one
+        if self.scale_error == True:
+            return
+
+        if result == "repeat":
+            self.emit( QtCore.SIGNAL('update(QString)'), "Performing low memory scaling ({})".format(str(sf)) )
+            # reset the scaling log
+            self.session_scale.close()
+            self.session_scale = open(self.scale_log_path, 'w+')
+            print "low mem version"
+            # Subprocess call for imagej macro
+            # First x and y scaling and save a temp stack
+            temp_folder = os.path.join(self.configOb.scale_path,"tmp")
+            if not os.path.exists(temp_folder):
+                os.mkdir(temp_folder)
+
+            process = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", ij_macro_path_low_mem1,
+                                    self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + temp_folder+os.sep + "^"],
+                                   stdout=self.session_scale,stderr=self.session_scale)
+            # record a pid so we can kill
+            self.imagej_pid = str(process.pid)
+            # recognises when the process has finished and then continues with script
+            out, err = process.communicate()
+            # check if any erros occured
+            print "done first part"
+            self.scale_error_check("low",sf)
+            if self.scale_error == True:
+                print "error"
+                shutil.rmtree(temp_folder)
+                return
+
+            print "second part of scaling"
+            file_name = os.path.join(self.configOb.scale_path,self.configOb.full_name+"_scaled_"+str(sf)+"_pixel_"+new_pixel+".tif")
+
+            process2 = subprocess.Popen(["java", "-Xmx"+str(self.memory_4_imageJ)+"m", "-jar", ijpath, "-batch", ij_macro_path_low_mem2,
+                                    temp_folder+os.sep + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name + "^" + str(self.num_files) + "^"],
+                                   stdout=self.session_scale,stderr=self.session_scale)
+
+            self.imagej_pid = str(process2.pid)
+            # recognises when the process has finished and then continues with script
+            out, err = process2.communicate()
+            # check if any erros occured
+            self.scale_error_check("low",sf)
+            shutil.rmtree(temp_folder)
+            self.session_scale.close()
+
+
+
+    def scale_error_check(self,mem_opt,sf):
 
         # But we reopen for just reading, also goes back to the start
-        self.session_scale = open(self.scale_log_path, "r")
+        self.session_scale_check = open(self.scale_log_path, "r")
 
         # reset processing ID, as processing has finished.
         self.imagej_pid = ""
@@ -510,8 +555,9 @@ class ProcessingThread(QtCore.QThread):
         out_of_memory = None
         other_ij_problem = None
 
+        print "check mem prob"
         # First check for memory problems
-        for line in self.session_scale:
+        for line in self.session_scale_check:
             # "chomp" the line endings off
             line = line.rstrip()
             # if the line matches the regex print the (\w+.\w+) part of regex
@@ -520,8 +566,9 @@ class ProcessingThread(QtCore.QThread):
                 out_of_memory = True
                 break
 
+        print "check other probs"
         # Then check for any other problems.
-        for line in self.session_scale:
+        for line in self.session_scale_check:
             # "chomp" the line endings off
             line = line.rstrip()
             # if the line matches the regex print the (\w+.\w+) part of regex
@@ -530,21 +577,27 @@ class ProcessingThread(QtCore.QThread):
                 other_ij_problem  = True
                 break
 
-        self.session_scale.close()
 
-        if out_of_memory:
+        if out_of_memory and mem_opt=="norm":
             # Dont use the word "error" in the signal message. If "error" is used HARP might skip any further processing for this
             # HARP processing list.
+            self.emit( QtCore.SIGNAL('update(QString)'),
+                       "Problem in scaling. Not enough memory will try low memory version\n" )
+            self.session_scale.write("Error in scaling will try low memory version\n")
+            # return "repeat" so processing starts again with low memory
+            return "repeat"
+
+        elif out_of_memory and mem_opt== "low":
             self.emit( QtCore.SIGNAL('update(QString)'), "Problem in scaling. Not enough memory\n" )
             self.session_log.write("Error in scaling\n")
-            fail_file_name = os.path.join(self.configOb.scale_path,"not_enough_memory_to_scale_by_"+str(sf))
+            fail_file_name = os.path.join(self.configOb.scale_path,"insufficient_memory_for_scaling_"+str(sf))
             fail_file = open(fail_file_name, 'w+')
             fail_file.close()
             self.scale_error = True
 
         elif other_ij_problem:
             self.emit( QtCore.SIGNAL('update(QString)'), "Problem in scaling. Check log file\n" )
-            self.session_log.write("Error in scaling\n")
+            self.session_scale.write("Error in scaling\n")
             fail_file_name = os.path.join(self.configOb.scale_path,"error_performing_scaling_by_"+str(sf))
             fail_file = open(fail_file_name, 'w+')
             fail_file.close()
@@ -576,8 +629,6 @@ class ProcessingThread(QtCore.QThread):
         masking: todo
         '''
         print "masking"
-
-
 
 
     def copying(self):

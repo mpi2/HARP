@@ -114,14 +114,12 @@ def get_channels(self):
         # if the line matches the base_name but is not the same as the input file. The folder is probably another
         # channel
 
-        # Check if it is a folder with recons etc for the other channels
-        if error_check_chn(os.path.join(path,line)) == 1:
-            continue
-
         m = re.search(base_name,line)
         if m and (not line == folder_name):
-            chan_full.append(line)
-            chan_short.append(m.group(0))
+            # Check if it is a folder with recons etc for the other channels
+            if error_check_chn(os.path.join(path,line)) == 1:
+                chan_full.append(line)
+                chan_short.append(m.group(0))
 
     count = 0
 
@@ -182,8 +180,10 @@ def error_check_chn(inputFolder):
         return 1
 
     #Check if folder is empty
+    print "inputfolder check", inputFolder
     if os.listdir(inputFolder) == []:
-        return 1
+            return 1
+
 
     #Check if input folder contains any image files
     prog = re.compile("(.*).(bmp|tif|jpg|jpeg)",re.IGNORECASE)
