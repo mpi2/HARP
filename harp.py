@@ -10,6 +10,7 @@
 #=============================================================================
 
 # Import PyQT module
+
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import pyqtSlot,SIGNAL,SLOT
 import datetime
@@ -185,7 +186,7 @@ class MainWindow(QtGui.QMainWindow):
     def dropEvent(self, event):
         volList = [str(v.toLocalFile()) for v in event.mimeData().urls()]
         vol1 = volList[0]
-        self.ui.lineEditInput.setText(os.path.abspath(vol1))
+        self.ui.lineEditInput.setText(os.path.abspath(str(vol1)))
         self.reset_inputs()
         self.autofill_pipe()
 
@@ -254,7 +255,7 @@ class MainWindow(QtGui.QMainWindow):
         folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
         # Check if folder variable is defined (if it not the user has pressed cancel)
         if not folder == "":
-            self.ui.lineEditOutput.setText(os.path.abspath(folder))
+            self.ui.lineEditOutput.setText(os.path.abspath(str(folder)))
 
     def select_file_in(self):
         """ User selects the folder to be processed and some auto-fill methods are carried out """
@@ -273,7 +274,8 @@ class MainWindow(QtGui.QMainWindow):
             # Reset the inputs incase this is not the first time someone has selected a file
             self.reset_inputs()
             # Set the input folder
-            self.ui.lineEditInput.setText(os.path.abspath(folder))
+            folder = os.path.abspath(str(folder))
+            self.ui.lineEditInput.setText(folder)
             # run all the autofill functions
             self.autofill_pipe()
 
@@ -443,7 +445,7 @@ class MainWindow(QtGui.QMainWindow):
         if not file == "":
             try:
                 self.ui.lineEditCTRecon.setText(file)
-                self.recon_log_path = os.path.abspath(file)
+                self.recon_log_path = os.path.abspath(str(file))
 
                 # Open the log file as read onlypyt
                 recon_log_file = open(self.recon_log_path, 'r')
@@ -669,7 +671,7 @@ class MainWindow(QtGui.QMainWindow):
                 crop_option = "man"
 
             self.stop_chn_for_loop = False
-
+            print "start channel loop"
             # go through list and get the channel names
             for name in self.chan_full:
                 if self.stop_chn_for_loop == True:
@@ -682,15 +684,22 @@ class MainWindow(QtGui.QMainWindow):
                 chan_short = chan_short.replace("/", "")
                 in_dir_short = in_dir.replace("\\", "")
                 in_dir_short = in_dir_short.replace("/", "")
+
+                print in_dir_short
+                print chan_short
                 if chan_short != in_dir_short:
+                    print "does not match"
                     self.ui.lineEditInput.setText(chan_path)
                     self.reset_inputs()
                     self.autofill_pipe(suppress=True)
 
-                #need to setup the output folder based on original folder used for output
-                path_out,old_folder_name = os.path.split(str(out_dir_original))
-                output_folder = os.path.join(path_out,name)
-                self.ui.lineEditOutput.setText(os.path.abspath(output_folder))
+                if len(self.chan_full)>1:
+                    #need to setup the output folder based on original folder used for output. Only required for
+                    #multiple channels
+                    path_out,old_folder_name = os.path.split(str(out_dir_original))
+                    output_folder = os.path.join(path_out,name)
+                    self.ui.lineEditOutput.setText(os.path.abspath(output_folder))
+
 
                 self.add_to_list_action()
 

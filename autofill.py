@@ -61,7 +61,6 @@ def check_if_on_list(self,alt_name):
             return False
         if re.search(alt_name, name_on_list.text()):
             # this row has the OPT channel ID meaning a cropbox will be ready when this is ran
-            print "on list"
             return True
         count += 1
 
@@ -101,7 +100,7 @@ def get_channels(self):
     chan_full.append(folder_name)
     chan_short.append(chn_init)
 
-    self.chan_full = chan_full
+
     if not os.path.exists(path):
         return
 
@@ -110,15 +109,15 @@ def get_channels(self):
         line =str(line)
         # if the line matches the base_name but is not the same as the input file. The folder is probably another
         # channel
-
         m = re.search(base_name,line)
         if m and (not line == folder_name):
             # Check if it is a folder with recons etc for the other channels
-            if error_check_chn(os.path.join(path,line)) == 1:
+            if error_check_chn(os.path.join(path,line)) != 1:
                 chan_full.append(line)
                 chan_short.append(m.group(0))
 
     count = 0
+    self.chan_full = chan_full
 
     # Save the the opt channels to the opt channel table
     for alt_name in chan_full:
@@ -129,7 +128,6 @@ def get_channels(self):
             chn = l[6]
         except IndexError:
             chn = "NA"
-
         # Make the current channel highlighted
         chn_item = QtGui.QTableWidgetItem()
         self.ui.tableWidgetOPT.setItem(count, 0, chn_item)
