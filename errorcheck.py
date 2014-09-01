@@ -126,7 +126,7 @@ def errorCheck(self):
         count = count+1
 
     # Check if a crop folder is available if UseOldCrop is used
-    if self.ui.radioButtonUseOldCrop.isChecked():
+    if self.ui.radioButtonUseOldCrop.isChecked() and self.ui.checkBoxCropYes.isChecked():
         if not os.path.exists(os.path.join(str(self.ui.lineEditOutput.text()),"cropped")):
             self.stop = True
             QtGui.QMessageBox.warning(self,'Message','Warning: Use old crop option selected. '

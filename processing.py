@@ -352,6 +352,9 @@ class ProcessingThread(QtCore.QThread):
         if self.configOb.crop_option == "No_crop" :
             crop_folder_size_mb = float(self.configOb.recon_folder_size)*1024.0
             print "Recon folder size to downsize (mb)",crop_folder_size_mb
+
+            num_files = len([name for name in os.listdir(self.configOb.input_folder) if os.path.isfile(name)])
+
         else :
 
             prog = re.compile("(.*)_rec\d+\.(bmp|tif|jpg|jpeg)",re.IGNORECASE)
