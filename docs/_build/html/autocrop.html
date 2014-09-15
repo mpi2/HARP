@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>autocrop module &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-autocrop">
+<span id="autocrop-module"></span><h1>autocrop module<a class="headerlink" href="#module-autocrop" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="autocrop.Autocrop">
+<em class="property">class </em><tt class="descclassname">autocrop.</tt><tt class="descname">Autocrop</tt><big>(</big><em>in_dir</em>, <em>out_dir</em>, <em>callback</em>, <em>num_proc=None</em>, <em>def_crop=None</em>, <em>repeat_crop=None</em><big>)</big><a class="headerlink" href="#autocrop.Autocrop" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="autocrop.Autocrop.calc_auto_crop">
+<tt class="descname">calc_auto_crop</tt><big>(</big><em>padding=0</em><big>)</big><a class="headerlink" href="#autocrop.Autocrop.calc_auto_crop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.calc_manual_crop">
+<tt class="descname">calc_manual_crop</tt><big>(</big><big>)</big><a class="headerlink" href="#autocrop.Autocrop.calc_manual_crop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.convertDistFromEdgesToCoords">
+<tt class="descname">convertDistFromEdgesToCoords</tt><big>(</big><em>distances</em><big>)</big><a class="headerlink" href="#autocrop.Autocrop.convertDistFromEdgesToCoords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert distances from sides(which comes from auto detection) sides into x,y,w,h
+PIL uses actual coords not width height</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.convertXYWH_ToCoords">
+<tt class="descname">convertXYWH_ToCoords</tt><big>(</big><em>xywh</em><big>)</big><a class="headerlink" href="#autocrop.Autocrop.convertXYWH_ToCoords" title="Permalink to this definition">¶</a></dt>
+<dd><p>The input dimensions from the GUI needs converting for PIL</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.entropy">
+<tt class="descname">entropy</tt><big>(</big><em>array</em><big>)</big><a class="headerlink" href="#autocrop.Autocrop.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>not currently used</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.getFileList">
+<tt class="descname">getFileList</tt><big>(</big><em>dir</em>, <em>skip</em><big>)</big><a class="headerlink" href="#autocrop.Autocrop.getFileList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the list of files from dir. Exclude known non slice files</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.get_cropping_box">
+<tt class="descname">get_cropping_box</tt><big>(</big><em>side</em>, <em>rev=False</em><big>)</big><a class="headerlink" href="#autocrop.Autocrop.get_cropping_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the metrics for each row x and y coordinate, calculate the point to crop given a threshold value
+&#64;param slices dict: two keys x and y with metrics for respective dimensions
+&#64;param side str: x or y
+&#64;param threshold int:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.init_cropping">
+<tt class="descname">init_cropping</tt><big>(</big><em>msg_q</em><big>)</big><a class="headerlink" href="#autocrop.Autocrop.init_cropping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.lowvals">
+<tt class="descname">lowvals</tt><big>(</big><em>array</em>, <em>value=15</em><big>)</big><a class="headerlink" href="#autocrop.Autocrop.lowvals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Values lower than value, set to zero</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.metricFinder">
+<tt class="descname">metricFinder</tt><big>(</big><big>)</big><a class="headerlink" href="#autocrop.Autocrop.metricFinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes each image file individually
+Implements __call__() so it can be used in multithreading by</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.round_down">
+<tt class="descname">round_down</tt><big>(</big><em>array</em>, <em>divisor</em><big>)</big><a class="headerlink" href="#autocrop.Autocrop.round_down" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#autocrop.Autocrop.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.run_crop_process">
+<tt class="descname">run_crop_process</tt><big>(</big><big>)</big><a class="headerlink" href="#autocrop.Autocrop.run_crop_process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="autocrop.Autocrop.yield_python">
+<tt class="descname">yield_python</tt><big>(</big><em>seconds=0</em><big>)</big><a class="headerlink" href="#autocrop.Autocrop.yield_python" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="autocrop.cli_run">
+<tt class="descclassname">autocrop.</tt><tt class="descname">cli_run</tt><big>(</big><big>)</big><a class="headerlink" href="#autocrop.cli_run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the arguments</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="autocrop.dummy_callback">
+<tt class="descclassname">autocrop.</tt><tt class="descname">dummy_callback</tt><big>(</big><em>msg</em><big>)</big><a class="headerlink" href="#autocrop.dummy_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>use for cli running</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="autocrop.init_cropping_win">
+<tt class="descclassname">autocrop.</tt><tt class="descname">init_cropping_win</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#autocrop.init_cropping_win" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="autocrop.terminate">
+<tt class="descclassname">autocrop.</tt><tt class="descname">terminate</tt><big>(</big><big>)</big><a class="headerlink" href="#autocrop.terminate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/autocrop.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>autofill module &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-autofill">
+<span id="autofill-module"></span><h1>autofill module<a class="headerlink" href="#module-autofill" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="autofill.auto_file_out">
+<tt class="descclassname">autofill.</tt><tt class="descname">auto_file_out</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#autofill.auto_file_out" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auto fill to make output folder name. Just replaces &#8216;recons&#8217; to &#8216;processed recons&#8217; if possible</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="autofill.auto_get_SPR">
+<tt class="descclassname">autofill.</tt><tt class="descname">auto_get_SPR</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#autofill.auto_get_SPR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds any SPR files. This might be a bit redundant as the SPR files are not essential and are copied over with any other
+file regardless</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="autofill.auto_get_derived">
+<tt class="descclassname">autofill.</tt><tt class="descname">auto_get_derived</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#autofill.auto_get_derived" title="Permalink to this definition">¶</a></dt>
+<dd><p>While loop through OPT list. See if one of them is either processed or on list. if they are set the derived crop box
+settings
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="autofill.auto_get_scan">
+<tt class="descclassname">autofill.</tt><tt class="descname">auto_get_scan</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#autofill.auto_get_scan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auto find scan folder. Just replaces &#8216;recons&#8217; to &#8216;processed recons&#8217; if possible</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="autofill.check_if_on_list">
+<tt class="descclassname">autofill.</tt><tt class="descname">check_if_on_list</tt><big>(</big><em>self</em>, <em>alt_name</em><big>)</big><a class="headerlink" href="#autofill.check_if_on_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="autofill.error_check_chn">
+<tt class="descclassname">autofill.</tt><tt class="descname">error_check_chn</tt><big>(</big><em>inputFolder</em><big>)</big><a class="headerlink" href="#autofill.error_check_chn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="autofill.folder_size_approx">
+<tt class="descclassname">autofill.</tt><tt class="descname">folder_size_approx</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#autofill.folder_size_approx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the approx folder size of the original recon folder and updates the main window with
+this information. Calculating the folder size by going through each file takes a while on janus. This
+function just checks the first recon file and then multiples this by the number of recon files.</p>
+<p>Creates self.f_size_out_gb: The file size in gb</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="autofill.get_channels">
+<tt class="descclassname">autofill.</tt><tt class="descname">get_channels</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#autofill.get_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if OPT is selected
+look up recon parent folder and search for other available
+Then checks if are there similar named folders in the input directory
+Go through the folders identified and put in table
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="autofill.get_crop_box">
+<tt class="descclassname">autofill.</tt><tt class="descname">get_crop_box</tt><big>(</big><em>self</em>, <em>alt_name</em><big>)</big><a class="headerlink" href="#autofill.get_crop_box" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="autofill.get_name">
+<tt class="descclassname">autofill.</tt><tt class="descname">get_name</tt><big>(</big><em>self</em>, <em>name</em>, <em>suppress=False</em><big>)</big><a class="headerlink" href="#autofill.get_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the id from the folder name. Then fills out the text boxes on the main window with the relevant information</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="autofill.get_recon_log">
+<tt class="descclassname">autofill.</tt><tt class="descname">get_recon_log</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#autofill.get_recon_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the recon log from the original recon folder and gets the pixel size information</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="autofill.opt_uCT_check">
+<tt class="descclassname">autofill.</tt><tt class="descname">opt_uCT_check</tt><big>(</big><em>self</em>, <em>suppress=False</em><big>)</big><a class="headerlink" href="#autofill.opt_uCT_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether or not folder name contains reference to either opt or microCT</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="autofill.size_cleanup">
+<tt class="descclassname">autofill.</tt><tt class="descname">size_cleanup</tt><big>(</big><em>self</em>, <em>f_size_out</em>, <em>approx_size</em><big>)</big><a class="headerlink" href="#autofill.size_cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used in folderSizeApprox() to format the output. In a separate method Potentially to be used again for more accurate folder size calc.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/autofill.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

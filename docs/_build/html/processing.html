@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>processing module &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-processing">
+<span id="processing-module"></span><h1>processing module<a class="headerlink" href="#module-processing" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="processing.ProcessingThread">
+<em class="property">class </em><tt class="descclassname">processing.</tt><tt class="descname">ProcessingThread</tt><big>(</big><em>configOb</em>, <em>memory</em>, <em>parent=None</em><big>)</big><a class="headerlink" href="#processing.ProcessingThread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyQt4.QtCore.QThread</span></tt></p>
+<dl class="method">
+<dt id="processing.ProcessingThread.autocrop_update_slot">
+<tt class="descname">autocrop_update_slot</tt><big>(</big><em>msg</em><big>)</big><a class="headerlink" href="#processing.ProcessingThread.autocrop_update_slot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Listens to autocrop. If autocrop sends a signal with the message &#8220;success&#8221; then the next steps in the processing
+will occur</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.compression">
+<tt class="descname">compression</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.compression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compression</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.copying">
+<tt class="descname">copying</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.copying" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copying</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.cropping">
+<tt class="descname">cropping</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.cropping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs cropping procedures. If the option &#8220;no crop&#8221; or &#8220;old crop&#8221; was used by the user no cropping will be peformed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.execute_imagej">
+<tt class="descname">execute_imagej</tt><big>(</big><em>sf</em><big>)</big><a class="headerlink" href="#processing.ProcessingThread.execute_imagej" title="Permalink to this definition">¶</a></dt>
+<dd><p>Part of scaling function
+&#64;param: str, scaleFactor for imagej eg &#8220;^0.5^x6&#8221;
+&#64;param: str, sf for calculating new pixel size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.hide_files">
+<tt class="descname">hide_files</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.hide_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.kill_slot">
+<tt class="descname">kill_slot</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.kill_slot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.masking">
+<tt class="descname">masking</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.masking" title="Permalink to this definition">¶</a></dt>
+<dd><p>masking: todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.memory_check">
+<tt class="descname">memory_check</tt><big>(</big><em>scale</em><big>)</big><a class="headerlink" href="#processing.ProcessingThread.memory_check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.movies">
+<tt class="descname">movies</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.movies" title="Permalink to this definition">¶</a></dt>
+<dd><p>movies: todo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.scale_error_check">
+<tt class="descname">scale_error_check</tt><big>(</big><em>mem_opt</em>, <em>sf</em><big>)</big><a class="headerlink" href="#processing.ProcessingThread.scale_error_check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.scaling">
+<tt class="descname">scaling</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.scaling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scaling</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="processing.ProcessingThread.show_files">
+<tt class="descname">show_files</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.show_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="processing.main">
+<tt class="descclassname">processing.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/processing.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
