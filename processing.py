@@ -14,7 +14,7 @@ import copy
 from multiprocessing import freeze_support
 from sys import platform as _platform
 import traceback
-
+import fnmatch
 import autocrop
 from config import ConfigClass
 #from vtkRenderAnimation import Animator
@@ -91,9 +91,12 @@ class ProcessingThread(QtCore.QThread):
 
         if self.configOb.crop_option == "Old_crop" :
             self.emit( QtCore.SIGNAL('update(QString)'), "No Crop carried out" )
-            #print "No crop carried out"
+            # Need to hide non recon files. Puts them in a temp folder until scaling has finished
+            self.hide_files()
             self.session_log.write("No crop carried out\n")
             self.autocrop_update_slot("success")
+
+
             return
 
         # Make new crop directory
@@ -228,6 +231,9 @@ class ProcessingThread(QtCore.QThread):
             #===============================================
             if not self.configOb.crop_option == "No_crop" or  self.configOb.crop_option == "Old_crop" :
                 self.copying()
+
+            if self.configOb.crop_option == "Old_crop":
+                self.show_files()
 
             #===============================================
             # Compression
@@ -417,7 +423,6 @@ class ProcessingThread(QtCore.QThread):
         @param: str, scaleFactor for imagej eg "^0.5^x6"
         @param: str, sf for calculating new pixel size
         '''
-        print "kill check"
         if self.kill_check == 1 :
             return
 
@@ -425,7 +430,6 @@ class ProcessingThread(QtCore.QThread):
         self.scale_log_path = os.path.join(self.configOb.meta_path,str(sf)+"_scale.log")
         self.session_scale = open(self.scale_log_path, 'w+')
 
-        print "pixel check"
         # Gets the new pixel numbers for the scaled stack name (see in imagej macro)
         if (self.configOb.recon_pixel_size) and sf != "Pixel":
             new_pixel = float(self.configOb.recon_pixel_size)*float(sf)
@@ -447,7 +451,6 @@ class ProcessingThread(QtCore.QThread):
         # Get the scaling factor in decimal
         dec_sf = round((1/sf),4)
 
-        print "ij path check"
         # ij path if run from executable
         ijpath = os.path.join('..','..','ImageJ', 'ij.jar')
         if not os.path.exists(ijpath):
@@ -611,6 +614,66 @@ class ProcessingThread(QtCore.QThread):
             self.scale_error = True
         else:
             self.session_log.write("Finished scaling\n")
+
+    def hide_files(self):
+        # mv non recon image files into a temp folder
+        print "hide files"
+
+        crop_path = self.configOb.cropped_path
+        # Make a temp folder
+        tmp_crop = os.path.join(crop_path, "tmp")
+
+        # Probably need to put error catching for this
+        try:
+            # check if tmp folder is there. If it is, then remove.
+            if os.path.isdir(tmp_crop):
+                shutil.rmtree(tmp_crop)
+            #(if a tmp file is there remove as well)
+            if os.path.exists(tmp_crop):
+                os.remove(tmp_crop)
+
+            print "make temp folder"
+            os.makedirs(tmp_crop)
+
+        except OSError as e:
+            print "OSError Problem making temp folder", e
+            return
+
+        non_image_suffix = ('spr.bmp', 'spr.tif','spr.tiff', 'spr.jpg','spr.jpeg', '.txt','.text','.log','.crv')
+        image_list = ('*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.tiff', '*rec*.jpg', '*rec*.jpeg')
+
+        # loop through crop path
+        for fn in os.listdir(crop_path):
+            print fn
+            fnlc = fn.lower()
+            full_fn = os.path.join(crop_path,fn)
+            # Known non image files
+            if any(fnlc.endswith(x) for x in non_image_suffix):
+                shutil.move(full_fn,tmp_crop)
+                continue
+            # Check if known image file
+            if any(fnmatch.fnmatch(fnlc, x) for x in image_list):
+                # a standard image file so ignore
+                continue
+            else:
+                # Not in the the known non image files but also not a standard image file. Presume not wanted and move
+                # to tmp folder
+                shutil.move(full_fn,tmp_crop)
+                # Not standard image file will be copied over to temp folder
+
+    def show_files(self):
+        # move the non image files, and non-recon image files out of the cropped temp folder
+        crop_path = self.configOb.cropped_path
+        tmp_crop = os.path.join(crop_path, "tmp")
+
+        # for loop through list of temp files
+        for line in os.listdir(tmp_crop):
+            # copy files back to cropped path
+            shutil.copy(os.path.join(tmp_crop,line),crop_path)
+
+        # remove temp folder
+        shutil.rmtree(tmp_crop)
+
 
 
     def movies(self):
