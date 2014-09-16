@@ -21,20 +21,48 @@ from config import ConfigClass
 #from Segmentation import watershed_filter
 
 class ProcessingThread(QtCore.QThread):
-    def __init__(self,configOb,memory, parent=None):
+    """  Class to provide the processing end of HARP
+
+    Performs all processing on QThread.
+
+    **Summary:**
+    Based on a config file containing all the parameter/configuration details to perform the processing here. e.g.
+    if manual crop required, if compression required etc.
+
+    The following processing is performed
+
+    * Cropping
+    * Scaling
+    * Compression
+
+    QT Designer automatically uses mixed case for its class object names e.g radioButton. This format is not PEP8 but
+    has not been changed.
+    """
+    def __init__(self, config_path, memory, parent=None):
+        """ **Constructor**: Gets the pickle config file and
+
+        :param str memory: Path to where config file is. Contains all the parameter information.
+        :param obj parent: This is a way to pass the "self" object to the processing thread.
+        :param str config_path: Path to where config file is. Contains all the parameter information.
+        :ivar obj self.configOb: Not strictly a variable... This is an object containing all the parameters.
+                                    Setup at _init_ here from the config file path given.
+        :ivar int self.kill_check: Switch for the kill signal. Initialised at 0, when switched to 1 processing killed.
+        :ivar float self.memory: Taken from the memory param. Saved as instance variable to be used later
+        """
         QtCore.QThread.__init__(self, parent)
-        #self.exec_() #need thos for self.quit() to work
-        filehandler = open(configOb, 'r')
+        filehandler = open(config_path, 'r')
         self.configOb = copy.deepcopy(pickle.load(filehandler))
-        self.memory = copy.deepcopy(memory)
-        self.scale_array = []
+        self.memory = memory
         self.kill_check = 0
-        self.imagej_pid = ""
 
     def __del__(self):
         print "Processing stopped"
 
     def run(self):
+        """
+
+
+        """
         #===============================================
         # Start processing!
         #===============================================
