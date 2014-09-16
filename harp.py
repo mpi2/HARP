@@ -47,15 +47,15 @@ class MainWindow(QtGui.QMainWindow):
         """ **Constructor**: Checks the buttons which have been pressed and responds accordingly.
 
         :param object app:
-        :ivar str modality: Changes based on the modality chosen. Value should be either 'MicroCT' or 'OPT'
-        :ivar boolean stop: If True HARP stops pre-processing steps. Wont let the user go process the recon
-        :ivar int stop_pro_switch: If value 1 HARP stops processes due to user pressing stop
-        :ivar int count_in: Count used for processing table. Initialized at 0
-        :ivar int current_row: Row for processing table. Initialized at 0
-        :ivar str scan_folder: Scan path. Initialized as 'NA' to indicate no data
-        :ivar str recon_log_path: Recon log path. Initialized as 'NA' to indicate no data
-        :ivar str f_size_out_gb: File size (in GB). Initialized as '' to indicate no data
-        :ivar str pixel_size: Pixel size. Initialized as '' to indicate no data
+        :ivar str self.modality: Changes based on the modality chosen. Value should be either 'MicroCT' or 'OPT'
+        :ivar boolean self.stop: If True HARP stops pre-processing steps. Wont let the user go process the recon
+        :ivar int self.stop_pro_switch: If value 1 HARP stops processes due to user pressing stop
+        :ivar int self.count_in: Count used for processing table. Initialized at 0
+        :ivar int self.current_row: Row for processing table. Initialized at 0
+        :ivar str self.scan_folder: Scan path. Initialized as 'NA' to indicate no data
+        :ivar str self.recon_log_path: Recon log path. Initialized as 'NA' to indicate no data
+        :ivar str self.f_size_out_gb: File size (in GB). Initialized as '' to indicate no data
+        :ivar str self.pixel_size: Pixel size. Initialized as '' to indicate no data
         """
         # Standard setup of class from qt designer Ui class
         super(MainWindow, self).__init__()
@@ -362,7 +362,7 @@ class MainWindow(QtGui.QMainWindow):
         Uses the methods in the autofill module.
 
         :param boolean suppress: True if suppression of popup dialog box warnings is required
-        :ivar boolean crop_box_use: True if a derived croping box is to be used
+        :ivar boolean self.crop_box_use: True if a derived croping box is to be used
 
         .. seealso::
             :func:`autofill.opt_uCT_check()`,
@@ -434,7 +434,7 @@ class MainWindow(QtGui.QMainWindow):
         Updates the instance variable *input_folder* when the line edit box lineEditInput text has changed
 
         :param str text: The text from lineEditInput after the text has been changed
-        :ivar str input_folder: input folder as text
+        :ivar str self.input_folder: input folder as text
         """
         self.input_folder = text
 
@@ -447,7 +447,7 @@ class MainWindow(QtGui.QMainWindow):
         Updates the instance variable *output_folder* when the line edit box lineEditInput text has changed
 
         :param str text: The text from lineEditInput after the text has been changed
-        :ivar str output_folder: output folder as text
+        :ivar str self.output_folder: output folder as text
         """
         self.output_folder = text
 
@@ -526,7 +526,7 @@ class MainWindow(QtGui.QMainWindow):
 
         Used by radio button: radioButtonOPT. Updates instance variable *modality*.
 
-        :ivar str modality: Should be "OPT" or "MicroCT". Sets to "OPT" here.
+        :ivar str self.modality: Should be "OPT" or "MicroCT". Sets to "OPT" here.
 
         .. seealso::
             :func:`autofill.get_recon_log()`,
@@ -550,7 +550,7 @@ class MainWindow(QtGui.QMainWindow):
 
         Used by radio button: radioButtonuCT. Updates instance variable *modality*.
 
-        :ivar str modality: Should be "OPT" or "MicroCT". Sets to "MicroCT" here.
+        :ivar str self.modality: Should be "OPT" or "MicroCT". Sets to "MicroCT" here.
 
         .. seealso::
             :func:`autofill.get_recon_log()`,
@@ -587,31 +587,39 @@ class MainWindow(QtGui.QMainWindow):
         # Now update with self.full_name an instance variable created during autofill.get_name. 
         self.ui.lineEditOutput.setText(os.path.abspath(os.path.join(path, self.full_name)))
 
+
     def get_recon_man(self):
         """ Get the recon folder manually.
 
+        Lets the user select a recon log file manually and then attempts to get the pixel size from the file given.
 
         Used by the push button: pushButtonCTRecon
 
-        """
-        self.file_dialog = QtGui.QFileDialog(self)
-        file = self.file_dialog.getOpenFileName()
+        :ivar str self.recon_log_path: Path of recon log, used again in the pickle file for documentation purposes
+        :ivar str self.pixel: Path of recon log, used again in the pickle file for documentation purposes
+        :raises TypeError: If self.pixel_size cannot be dsiplayed on the GUI due to incorrect type
+        :raises IOError: If file user selected does not exist
 
+        .. seealso::
+            :func:`autofill.get_pixel()`,
+        """
+        # Get the information from the dialog box
+        file_dialog = QtGui.QFileDialog(self)
+        file = file_dialog.getOpenFileName()
+
+        # If a file was chosen get pixel size and update paramaters
         if file:
             try:
+                # Set the text on the recon file box on the GUI
                 self.ui.lineEditCTRecon.setText(file)
+                # Check it is an actual path (prob not required)
                 self.recon_log_path = os.path.abspath(str(file))
-
-                # Open the log file as read onlypyt
+                # Open the log file as read only
                 recon_log_file = open(self.recon_log_path, 'r')
-
                 # Get pixel size from log file
-                print "get pixel size"
                 self.pixel_size = autofill.get_pixel(self.modality, recon_log_file)
-
                 # Display the number on the lcd display
                 self.ui.lcdNumberPixel.display(self.pixel_size)
-
                 # Set recon log text
                 self.ui.lineEditCTRecon.setText(str(self.recon_log_path))
             except IOError as e:
@@ -620,6 +628,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.pixel_size = ""
                 self.ui.lcdNumberPixel.display(self.pixel_size)
             except TypeError as e:
+                # self.pixel_size cannot be dsiplayed on the GUI due to incorrect type
                 QtGui.QMessageBox.warning(self, 'Message',
                                           'Warning: Could not identify pixel value from recon log')
                 self.pixel_size = ""
@@ -627,79 +636,44 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def get_scan_man(self):
-        """ Get the scan folder manually"""
-        self.file_dialog = QtGui.QFileDialog(self)
-        folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
+        """ Get the scan folder manually. Uses the push button pushButtonScan."""
+        file_dialog = QtGui.QFileDialog(self)
+        folder = fileDialog.getExistingDirectory(self, "Select Directory")
         if not folder == "":
-            self.ui.lineEditScan.setText(folder)  #
+            self.ui.lineEditScan.setText(folder)
+
 
     def get_SPR_man(self):
-        """ Get the SPR file manually"""
+        """ Get the SPR file manually. Uses the pushButtonCTSPR."""
         self.file_dialog = QtGui.QFileDialog(self)
         file = self.fileDialog.getOpenFileName()
         if not file == "":
             self.ui.lineEditCTSPR.setText(file)
 
-    #======================================================================
-    # Functions for get Dimensions (z projection)
-    #======================================================================
-    def get_dimensions(self):
+
+
+
+    def run_crop(self, img_path):
+        """ Creates the a window to display the z projection used to get crop dimensions
+
+        Creates an object from the crop module. Uses a call back method to get the crop dimensions after the user
+        has selected them.
+
+        .. seealso::
+            :func:`crop.Crop()`
+            :func:`crop_call_back()`
         """
-        Perform a z projection which allows user to crop based on z projection.
-        Two important files used. crop.py and zproject.py
-        zproject peforms the zprojection and displays the image. crop.py then gets the dimensions to perform the crop
-        NOTE: The cropping is not actually done here
-        """
-        self.zcheck = 0
-        # Opens MyMainWindow from crop.py
-        input_folder = str(self.ui.lineEditInput.text())
-
-        # Check input folder is defined
-        if not input_folder:
-            QtGui.QMessageBox.warning(self, 'Message', 'Warning: input directory not defined')
-            return
-        # Check input folder exists
-        if not os.path.exists(input_folder):
-            QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not exist')
-            return
-        #Check if folder is empty
-        elif os.listdir(input_folder) == []:
-            QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty')
-            return
-
-        # Get folder to store the zprojection. Stored in a temp folder untill processing is fully completed
-        zproj_path = os.path.join(str(self.tmp_dir), "z_projection")
-        self.stop = None
-
-        # Let the user know what is going on
-        self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
-        #Run the zprojection
-        self.start_z_thread()
-
-    def start_z_thread(self):
-        """ starts a thread to perform all the processing in the background."""
-        input_folder = str(self.ui.lineEditInput.text())
-
-        self.z_thread_pool = []
-        self.z_thread_pool.append(ZProjectThread(input_folder, self.tmp_dir))
-        self.connect(self.z_thread_pool[len(self.z_thread_pool) - 1], QtCore.SIGNAL("update(QString)"),
-                     self.zproject_slot)
-        self.z_thread_pool[len(self.z_thread_pool) - 1].start()
-
-    def zproject_slot(self, message):
-        """
-        This listens to the child process and displays any messages.
-        It has records the start and stop time of the processing and starts a new
-        thread after the processing has finished
-        """
-        self.ui.textEditStatusMessages.setText(message)
-        if message == "Z-projection finished":
-            # Get the crop dimensions and save the file
-            self.run_crop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
+        cropper = crop.Crop(self.crop_call_back, img_path, self)
+        cropper.show()
 
 
     def crop_call_back(self, box):
-        """ Method to get crop dimension text (used in getDimensions)"""
+        """ Method to get crop dimension (crop box) from z projecion image.
+
+        Saves the crop dimensions to the line edit boxes on the GUI.
+
+        :param list box: Crop dimensions (crop box) the user selected
+        """
         self.ui.lineEditX.setText(str(box[0]))
         self.ui.lineEditY.setText(str(box[1]))
         self.ui.lineEditW.setText(str(box[2]))
@@ -707,20 +681,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.textEditStatusMessages.setText("Dimensions selected")
         self.ui.pushButtonGetDimensions.setText("Get Dimensions")
 
-    def run_crop(self, img_path):
-        """ Method to create Crop object (used in getDimensions)"""
-        cropper = crop.Crop(self.crop_call_back, img_path, self)
-        cropper.show()
 
     #======================================================================
-    # Functions for processing
+    # Functions for adding the recon to the list
     #======================================================================
-    def start_processing(self):
-        """ Starts a thread for processing after the user has pressed the 'start button' (GUI click only) """
-        self.ui.pushButtonStart.setEnabled(False)
-        self.ui.pushButtonStop.setEnabled(True)
-        self.start_processing_thread()
-
     def add_to_list_action(self):
         # This adds a recon folder to be processed.
            # Get the directory of the script
@@ -883,43 +847,19 @@ class MainWindow(QtGui.QMainWindow):
                 self.ui.radioButtonMan.setChecked(True)
                 self.man_crop_on()
 
+    def start_processing(self):
+        """ Starts a thread for processing after the user has pressed the 'start button' (GUI click only)
 
-
-
-    def processing_slot(self, message):
+        .. seealso::
+            :func:`start_processing_thread()`
         """
-        This listens to the child process and displays any messages.
-        It has records the start and stop time of the processing and starts a new
-        thread after the processing has finished
-        """
-        if self.stop_pro_switch:
-            return
+        self.ui.pushButtonStart.setEnabled(False)
+        self.ui.pushButtonStop.setEnabled(True)
+        self.start_processing_thread()
 
-        item = QtGui.QTableWidgetItem()
-        self.ui.tableWidget.setItem(self.current_row, 2, item)
-        item = self.ui.tableWidget.item(self.current_row, 2)
-        item.setText(message)
-
-        if message == "Started Processing":
-            item = QtGui.QTableWidgetItem()
-            self.ui.tableWidget.setItem(self.current_row, 3, item)
-            item = self.ui.tableWidget.item(self.current_row, 3)
-            item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        if re.search("Processing finished", message) or re.search("error", message):
-            print message
-            item = QtGui.QTableWidgetItem()
-            self.ui.tableWidget.setItem(self.current_row, 4, item)
-            item = self.ui.tableWidget.item(self.current_row, 4)
-            item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-            # Processing has finished, lets do another one!
-            self.start_processing_thread()
-            # update the opt channels table
-            autofill.get_channels(self)
-
-        self.ui.tableWidget.resizeColumnsToContents()
 
     def start_processing_thread(self):
-        """ starts a thread to perform all the processing in the background.
+        """ Starts a thread to perform all the processing in the background.
         The add function then listens to any messages the thread makes
         """
         self.stop_pro_switch = 0
@@ -962,6 +902,42 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("kill(QString)"), wt.kill_slot)
         self.p_thread_pool.append(wt)
         self.p_thread_pool[len(self.p_thread_pool) - 1].start()
+
+
+
+    def processing_slot(self, message):
+        """
+        This listens to the child process and displays any messages.
+        It has records the start and stop time of the processing and starts a new
+        thread after the processing has finished
+        """
+        if self.stop_pro_switch:
+            return
+
+        item = QtGui.QTableWidgetItem()
+        self.ui.tableWidget.setItem(self.current_row, 2, item)
+        item = self.ui.tableWidget.item(self.current_row, 2)
+        item.setText(message)
+
+        if message == "Started Processing":
+            item = QtGui.QTableWidgetItem()
+            self.ui.tableWidget.setItem(self.current_row, 3, item)
+            item = self.ui.tableWidget.item(self.current_row, 3)
+            item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        if re.search("Processing finished", message) or re.search("error", message):
+            print message
+            item = QtGui.QTableWidgetItem()
+            self.ui.tableWidget.setItem(self.current_row, 4, item)
+            item = self.ui.tableWidget.item(self.current_row, 4)
+            item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            # Processing has finished, lets do another one!
+            self.start_processing_thread()
+            # update the opt channels table
+            autofill.get_channels(self)
+
+        self.ui.tableWidget.resizeColumnsToContents()
+
+
 
     def add_more(self):
         """
