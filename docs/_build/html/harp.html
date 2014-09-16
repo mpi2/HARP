@@ -56,20 +56,29 @@
 tab.</p>
 <p>QT Designer automatically uses mixed case for its class object names e.g radioButton. This format is not PEP8 but
 has not been changed.</p>
-<p>Constructor: Checks the buttons which have been pressed and responds accordingly.</p>
-<p>NOTE: Sphinx does not process variables and parameters nicely for _init_ functions. Not clear how to show this
-info in documentation page.</p>
-<p>:param app
-:ivar ui: ui_class
-:ivar modality: str - Changes based on the modality chosen. Value should be either &#8216;MicroCT&#8217; or &#8216;OPT&#8217;
-:ivar stop: boolean - If True HARP stops pre-processing steps. Wont let the user go process the recon
-:ivar stop_pro_switch: int - If value 1 HARP stops processes due to user pressing stop
-:ivar count_in: int - Count used for processing table. Initialized at 0
-:ivar current_row: int - Row for processing table. Initialized at 0
-:ivar scan_folder: str - Scan path. Initialized as &#8216;&#8217; to indicate no data
-:ivar recon_log_path: str - Recon log path. Initialized as &#8216;&#8217; to indicate no data
-:ivar f_size_out_gb: str - File size (in GB). Initialized as &#8216;&#8217; to indicate no data
-:ivar pixel_size: str - Pixel size. Initialized as &#8216;&#8217; to indicate no data</p>
+<p><strong>Constructor</strong>: Checks the buttons which have been pressed and responds accordingly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>app</strong> (<em>object</em>) &#8211; </p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>modality</strong> (<em>str</em>) &#8211; Changes based on the modality chosen. Value should be either &#8216;MicroCT&#8217; or &#8216;OPT&#8217;</li>
+<li><strong>stop</strong> (<em>boolean</em>) &#8211; If True HARP stops pre-processing steps. Wont let the user go process the recon</li>
+<li><strong>stop_pro_switch</strong> (<em>int</em>) &#8211; If value 1 HARP stops processes due to user pressing stop</li>
+<li><strong>count_in</strong> (<em>int</em>) &#8211; Count used for processing table. Initialized at 0</li>
+<li><strong>current_row</strong> (<em>int</em>) &#8211; Row for processing table. Initialized at 0</li>
+<li><strong>scan_folder</strong> (<em>str</em>) &#8211; Scan path. Initialized as &#8216;NA&#8217; to indicate no data</li>
+<li><strong>recon_log_path</strong> (<em>str</em>) &#8211; Recon log path. Initialized as &#8216;NA&#8217; to indicate no data</li>
+<li><strong>f_size_out_gb</strong> (<em>str</em>) &#8211; File size (in GB). Initialized as &#8216;&#8217; to indicate no data</li>
+<li><strong>pixel_size</strong> (<em>str</em>) &#8211; Pixel size. Initialized as &#8216;&#8217; to indicate no data</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="harp.MainWindow.about_message">
 <tt class="descname">about_message</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.about_message" title="Permalink to this definition">¶</a></dt>
@@ -96,7 +105,30 @@ info in documentation page.</p>
 <dl class="method">
 <dt id="harp.MainWindow.autofill_pipe">
 <tt class="descname">autofill_pipe</tt><big>(</big><em>suppress=False</em><big>)</big><a class="headerlink" href="#harp.MainWindow.autofill_pipe" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Performs a series of methods to automatically update parameters</p>
+<p>Uses the methods in the autofill module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>suppress</strong> (<em>boolean</em>) &#8211; True if suppression of popup dialog box warnings is required</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><strong>crop_box_use</strong> (<em>boolean</em>) &#8211; True if a derived croping box is to be used</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="autofill.html#autofill.opt_uCT_check" title="autofill.opt_uCT_check"><tt class="xref py py-func docutils literal"><span class="pre">autofill.opt_uCT_check()</span></tt></a>,
+<a class="reference internal" href="autofill.html#autofill.get_name" title="autofill.get_name"><tt class="xref py py-func docutils literal"><span class="pre">autofill.get_name()</span></tt></a>,
+<a class="reference internal" href="autofill.html#autofill.get_recon_log" title="autofill.get_recon_log"><tt class="xref py py-func docutils literal"><span class="pre">autofill.get_recon_log()</span></tt></a>,
+<a class="reference internal" href="autofill.html#autofill.auto_file_out" title="autofill.auto_file_out"><tt class="xref py py-func docutils literal"><span class="pre">autofill.auto_file_out()</span></tt></a>,
+<a class="reference internal" href="autofill.html#autofill.get_channels" title="autofill.get_channels"><tt class="xref py py-func docutils literal"><span class="pre">autofill.get_channels()</span></tt></a>,
+<a class="reference internal" href="autofill.html#autofill.auto_get_derived" title="autofill.auto_get_derived"><tt class="xref py py-func docutils literal"><span class="pre">autofill.auto_get_derived()</span></tt></a>,
+<a class="reference internal" href="autofill.html#autofill.auto_get_scan" title="autofill.auto_get_scan"><tt class="xref py py-func docutils literal"><span class="pre">autofill.auto_get_scan()</span></tt></a>,
+<a class="reference internal" href="autofill.html#autofill.folder_size_approx" title="autofill.folder_size_approx"><tt class="xref py py-func docutils literal"><span class="pre">autofill.folder_size_approx()</span></tt></a></p>
+</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="harp.MainWindow.change_opt_chn">
@@ -127,7 +159,8 @@ Performs a loop through the item list and checks if any process still running</p
 <dl class="method">
 <dt id="harp.MainWindow.crop_switch">
 <tt class="descname">crop_switch</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.crop_switch" title="Permalink to this definition">¶</a></dt>
-<dd><p>turns crop options on or off depending on the status of the check</p>
+<dd><p>Turns crop options on or off</p>
+<p>Options enabled and disabled are based on the imaging modality and the current cropping option selected</p>
 </dd></dl>
 
 <dl class="method">
@@ -139,7 +172,8 @@ Performs a loop through the item list and checks if any process still running</p
 <dl class="method">
 <dt id="harp.MainWindow.derive_on">
 <tt class="descname">derive_on</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.derive_on" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Enables options for derived crop. Used by the radio button: radioButtonDerived.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="harp.MainWindow.dragEnterEvent">
@@ -151,7 +185,7 @@ Required for drag and drop.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; qt drag event)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>object</strong> (<em>event</em>) &#8211; qt drag event</td>
 </tr>
 </tbody>
 </table>
@@ -172,7 +206,7 @@ Resets the inputs and auto-fills in the relevant parameter information.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; qt drop event)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> (<em>object</em>) &#8211; qt drop event</td>
 </tr>
 </tbody>
 </table>
@@ -186,13 +220,27 @@ Resets the inputs and auto-fills in the relevant parameter information.</p>
 <dl class="method">
 <dt id="harp.MainWindow.example_data">
 <tt class="descname">example_data</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.example_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>loads in data for tesing purposes</p>
+<dd><p>TESTING PURPOSES ONLY: Loads in example data</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="harp.MainWindow.get_OPT_only">
 <tt class="descname">get_OPT_only</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.get_OPT_only" title="Permalink to this definition">¶</a></dt>
-<dd><p>edits self.modality</p>
+<dd><p>Updates parameters options to be OPT only and updates OPT specific autofill operations.</p>
+<p>Used by radio button: radioButtonOPT. Updates instance variable <em>modality</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>modality</strong> (<em>str</em>) &#8211; Should be &#8220;OPT&#8221; or &#8220;MicroCT&#8221;. Sets to &#8220;OPT&#8221; here.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="autofill.html#autofill.get_recon_log" title="autofill.get_recon_log"><tt class="xref py py-func docutils literal"><span class="pre">autofill.get_recon_log()</span></tt></a>,
+<a class="reference internal" href="autofill.html#autofill.get_channels" title="autofill.get_channels"><tt class="xref py py-func docutils literal"><span class="pre">autofill.get_channels()</span></tt></a>,</p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -213,7 +261,8 @@ NOTE: The cropping is not actually done here</p>
 <dl class="method">
 <dt id="harp.MainWindow.get_recon_man">
 <tt class="descname">get_recon_man</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.get_recon_man" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the recon folder manually</p>
+<dd><p>Get the recon folder manually.</p>
+<p>Used by the push button: pushButtonCTRecon</p>
 </dd></dl>
 
 <dl class="method">
@@ -225,13 +274,39 @@ NOTE: The cropping is not actually done here</p>
 <dl class="method">
 <dt id="harp.MainWindow.get_uCT_only">
 <tt class="descname">get_uCT_only</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.get_uCT_only" title="Permalink to this definition">¶</a></dt>
-<dd><p>edits self.modality</p>
+<dd><p>Updates parameters options to be uCT only and updates uCT specific autofill operations.</p>
+<p>Used by radio button: radioButtonuCT. Updates instance variable <em>modality</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>modality</strong> (<em>str</em>) &#8211; Should be &#8220;OPT&#8221; or &#8220;MicroCT&#8221;. Sets to &#8220;MicroCT&#8221; here.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="autofill.html#autofill.get_recon_log" title="autofill.get_recon_log"><tt class="xref py py-func docutils literal"><span class="pre">autofill.get_recon_log()</span></tt></a>,</p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="harp.MainWindow.input_folder_changed">
 <tt class="descname">input_folder_changed</tt><big>(</big><em>text</em><big>)</big><a class="headerlink" href="#harp.MainWindow.input_folder_changed" title="Permalink to this definition">¶</a></dt>
-<dd><p>When user changes the name of the folder manually</p>
+<dd><p>When user changes the name of the folder manually
+This functions is <strong>deprecated</strong> as the the code almost always takes the input folder directly from the
+line edit box &#8220;lineEditInput&#8221; anyway.</p>
+<p>Updates the instance variable <em>input_folder</em> when the line edit box lineEditInput text has changed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<em>str</em>) &#8211; The text from lineEditInput after the text has been changed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><strong>input_folder</strong> (<em>str</em>) &#8211; input folder as text</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -243,19 +318,32 @@ NOTE: The cropping is not actually done here</p>
 <dl class="method">
 <dt id="harp.MainWindow.man_crop_off">
 <tt class="descname">man_crop_off</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.man_crop_off" title="Permalink to this definition">¶</a></dt>
-<dd><p>disables boxes for cropping manually</p>
+<dd><p>Disables boxes for cropping manually. Used by the radio buttons: radioButtonAuto, radioButtonUseOldCrop.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="harp.MainWindow.man_crop_on">
 <tt class="descname">man_crop_on</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.man_crop_on" title="Permalink to this definition">¶</a></dt>
-<dd><p>enables boxes for cropping manually</p>
+<dd><p>Enables boxes for cropping manually.  Used by the radio button: radioButtonMan.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="harp.MainWindow.output_folder_changed">
 <tt class="descname">output_folder_changed</tt><big>(</big><em>text</em><big>)</big><a class="headerlink" href="#harp.MainWindow.output_folder_changed" title="Permalink to this definition">¶</a></dt>
-<dd><p>When user changes the name of the folder manually</p>
+<dd><p>When user changes the name of the folder manually
+This functions is <strong>deprecated</strong> as the the code almost always takes the input folder directly from the
+line edit box &#8220;lineEditOutput&#8221; anyway.</p>
+<p>Updates the instance variable <em>output_folder</em> when the line edit box lineEditInput text has changed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<em>str</em>) &#8211; The text from lineEditInput after the text has been changed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><strong>output_folder</strong> (<em>str</em>) &#8211; output folder as text</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -269,7 +357,7 @@ thread after the processing has finished</p>
 <dl class="method">
 <dt id="harp.MainWindow.reset_inputs">
 <tt class="descname">reset_inputs</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.reset_inputs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reset the inputs to blank</p>
+<dd><p>Reset the parameter inputs to blank</p>
 </dd></dl>
 
 <dl class="method">
@@ -293,19 +381,32 @@ thread after the processing has finished</p>
 <dl class="method">
 <dt id="harp.MainWindow.scale_by_pixel_on">
 <tt class="descname">scale_by_pixel_on</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.scale_by_pixel_on" title="Permalink to this definition">¶</a></dt>
-<dd><p>enables boxes for scaling by pixel</p>
+<dd><p>Enables boxes for scaling by pixel</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="harp.MainWindow.select_file_in">
 <tt class="descname">select_file_in</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.select_file_in" title="Permalink to this definition">¶</a></dt>
-<dd><p>User selects the folder to be processed and some auto-fill methods are carried out</p>
+<dd><p>Selects input folder manually and some parameters are auto-filled if possible</p>
+<p>If the the input folder is defined the parameters are reset, the <em>ui.lineEditInput</em> is updated and
+the <em>autofill_pipe()</em> method is performed which updates various parameters.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#harp.MainWindow.reset_inputs" title="harp.MainWindow.reset_inputs"><tt class="xref py py-func docutils literal"><span class="pre">reset_inputs()</span></tt></a>,
+<a class="reference internal" href="#harp.MainWindow.autofill_pipe" title="harp.MainWindow.autofill_pipe"><tt class="xref py py-func docutils literal"><span class="pre">autofill_pipe()</span></tt></a></p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="harp.MainWindow.select_file_out">
 <tt class="descname">select_file_out</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.select_file_out" title="Permalink to this definition">¶</a></dt>
-<dd><p>Select output folder</p>
+<dd><p>Selects output folder manually</p>
+<p>Updates the line edit box <em>ui.lineEditOutput</em></p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#harp.MainWindow.choose_channel_for_crop" title="harp.MainWindow.choose_channel_for_crop"><tt class="xref py py-func docutils literal"><span class="pre">choose_channel_for_crop()</span></tt></a>,
+<a class="reference internal" href="#harp.MainWindow.delete_rows" title="harp.MainWindow.delete_rows"><tt class="xref py py-func docutils literal"><span class="pre">delete_rows()</span></tt></a></p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -351,13 +452,21 @@ The add function then listens to any messages the thread makes</p>
 <dl class="method">
 <dt id="harp.MainWindow.update_name">
 <tt class="descname">update_name</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.update_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to update the name of the file and folder</p>
+<dd><p>Update the name of the file and folder if the user has changed the name in the &#8220;identification&#8221; section</p>
+<p>Used by push button: pushButtonUpdate.</p>
+<p>Updates the output name by setting the text directly and updates the &#8220;identification&#8221; section using the
+autofill.get_name function.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="autofill.html#autofill.get_name" title="autofill.get_name"><tt class="xref py py-func docutils literal"><span class="pre">autofill.get_name()</span></tt></a>,</p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="harp.MainWindow.user_guide">
 <tt class="descname">user_guide</tt><big>(</big><big>)</big><a class="headerlink" href="#harp.MainWindow.user_guide" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads up pdf help file</p>
+<p>For windows computers uses <em>os.startfile</em>. For linux requires <em>Evince</em> installed to view the pdf.</p>
 </dd></dl>
 
 <dl class="method">

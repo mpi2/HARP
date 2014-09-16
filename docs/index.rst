@@ -8,8 +8,21 @@
 Welcome to HARP's documentation!
 ================================
 
-Contents:
+HARP v1.0.1: Harwell Automated Recon Processor
 
+Tool to crop, scale and compress reconstructed images from microCT  or OPT data
+
+Content
+-------------------------------
+
+* GUI functions
+	* Main GUI
+	* Autofill
+	* Errocheck
+	*  
+* Processing
+	* autocrop
+	*  
 .. toctree::
    :maxdepth: 2
 

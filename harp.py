@@ -3,7 +3,7 @@
 # description     :Runs the HARP GUI
 # author          :SIG
 # date            :2014-08-14
-# version         :1.0.0 (OPT update)
+# version         :1.0.1
 # usage           :python harp.py or if using executable in windows .\harp.exe or clicking on the harp.exe icon.
 # formatting      :PEP8 format is used where possible. QT classes in C++ standard format.
 # python_version  :2.7
@@ -44,22 +44,18 @@ class MainWindow(QtGui.QMainWindow):
     """
 
     def __init__(self, app):
-        """ Constructor: Checks the buttons which have been pressed and responds accordingly.
+        """ **Constructor**: Checks the buttons which have been pressed and responds accordingly.
 
-        NOTE: Sphinx does not process variables and parameters nicely for _init_ functions. Not clear how to show this
-        info in documentation page.
-
-        :param app
-        :ivar ui: ui_class
-        :ivar modality: str - Changes based on the modality chosen. Value should be either 'MicroCT' or 'OPT'
-        :ivar stop: boolean - If True HARP stops pre-processing steps. Wont let the user go process the recon
-        :ivar stop_pro_switch: int - If value 1 HARP stops processes due to user pressing stop
-        :ivar count_in: int - Count used for processing table. Initialized at 0
-        :ivar current_row: int - Row for processing table. Initialized at 0
-        :ivar scan_folder: str - Scan path. Initialized as '' to indicate no data
-        :ivar recon_log_path: str - Recon log path. Initialized as '' to indicate no data
-        :ivar f_size_out_gb: str - File size (in GB). Initialized as '' to indicate no data
-        :ivar pixel_size: str - Pixel size. Initialized as '' to indicate no data
+        :param object app:
+        :ivar str modality: Changes based on the modality chosen. Value should be either 'MicroCT' or 'OPT'
+        :ivar boolean stop: If True HARP stops pre-processing steps. Wont let the user go process the recon
+        :ivar int stop_pro_switch: If value 1 HARP stops processes due to user pressing stop
+        :ivar int count_in: Count used for processing table. Initialized at 0
+        :ivar int current_row: Row for processing table. Initialized at 0
+        :ivar str scan_folder: Scan path. Initialized as 'NA' to indicate no data
+        :ivar str recon_log_path: Recon log path. Initialized as 'NA' to indicate no data
+        :ivar str f_size_out_gb: File size (in GB). Initialized as '' to indicate no data
+        :ivar str pixel_size: Pixel size. Initialized as '' to indicate no data
         """
         # Standard setup of class from qt designer Ui class
         super(MainWindow, self).__init__()
@@ -77,9 +73,10 @@ class MainWindow(QtGui.QMainWindow):
         self.count_in = 0
         self.current_row = 0
 
-        # Set to '' so that HARP knows there is no data for these parameters
-        self.scan_folder = ""
-        self.recon_log_path = ""
+        # Set to "" or NA so that HARP can record in the log and GUI there is no data for these parameters. Will be
+        # updated later if parameters are identified.
+        self.scan_folder = "NA"
+        self.recon_log_path = "NA"
         self.f_size_out_gb = ""
         self.pixel_size = ""
         # Initalize the pixel size view to blank
@@ -189,6 +186,7 @@ class MainWindow(QtGui.QMainWindow):
         # to make the window visible
         self.show()
 
+
     def dropEvent(self, event):
         """ Handles *drop* section for drag and drop of folders.
 
@@ -197,7 +195,7 @@ class MainWindow(QtGui.QMainWindow):
 
         Requires dragEnterEvent method.
 
-        :param event: qt drop event)
+        :param object event: qt drop event
 
         .. seealso::
             :func:`reset_inputs()`,
@@ -221,7 +219,7 @@ class MainWindow(QtGui.QMainWindow):
         Overrides dragEnterEvent method from the QMainWindow.
         Required for drag and drop.
 
-        :param event: qt drag event
+        :param event object: qt drag event
 
         .. seealso::
             :func:`dropEvent()`
@@ -246,7 +244,7 @@ class MainWindow(QtGui.QMainWindow):
         # Update OPT Channel list. As something may have changed on the processing list
         autofill.get_channels(self)
 
-        # if tab
+        # Check tab status
         if self.ui.tabWidget.currentIndex() == 0:
             # if on tab 0 (parameters) the keyPressEvent is required for choosing
             # the crop channel for OPT. i.e. key press is linked to the function choose_channel_for_crop()
@@ -256,11 +254,13 @@ class MainWindow(QtGui.QMainWindow):
             # i.e. key press is linked to the function delete_rows()
             self.ui.tableWidget.__class__.keyPressEvent = self.delete_rows
 
+
     def example_data(self):
         """ TESTING PURPOSES ONLY: Loads in example data """
         self.ui.lineEditInput.setText(os.path.join("D:", "fakedata", "recons", "20140408_RCAS_17_18.4e_wt_rec"))
         self.reset_inputs()
         self.autofill_pipe()
+
 
     def about_message(self):
         """ Short description about what HARP is and its version"""
@@ -268,10 +268,11 @@ class MainWindow(QtGui.QMainWindow):
             'HARP v1.0.1: Harwell Automated Recon Processor\n\n'
             'Crop, scale and compress reconstructed images from microCT  or OPT data.\n'))
 
+
     def user_guide(self):
         """ Loads up pdf help file
 
-        For windows computers uses *os.startfile*. For linux requires Evince is installed to view the pdf.
+        For windows computers uses *os.startfile*. For linux requires *Evince* installed to view the pdf.
         """
         user_man = os.path.join(self.dir, "HARP_user_guide.pdf")
 
@@ -284,91 +285,132 @@ class MainWindow(QtGui.QMainWindow):
             opener = "evince"
             subprocess.call([opener, user_man])
 
+
     def resize_screen(self):
         """ Resize screen for smaller monitors"""
         self.resize(1280, 488)
         self.ui.scrollArea.setFixedSize(1255, 400)
+
 
     def reset_screen(self):
         """ Reset screen back to default"""
         self.resize(1305, 924)
         self.ui.scrollArea.setFixedSize(1281, 831)
 
+
     def select_file_out(self):
-        """ Select output folder"""
+        """ Selects output folder manually
+
+        Updates the line edit box *ui.lineEditOutput*
+
+        .. seealso::
+            :func:`choose_channel_for_crop()`,
+            :func:`delete_rows()`
+        """
+        # Get output folder if already defined
         output_folder = str(self.ui.lineEditOutput.text())
 
-        # Check input and output folders assigned
+        # Check output folders assigned. If assigned open the dialog box in that folder
         if output_folder:
-            self.fileDialog = QtGui.QFileDialog(self, 'Open File', output_folder)
+            file_dialog = QtGui.QFileDialog(self, 'Open File', output_folder)
         else:
-            self.fileDialog = QtGui.QFileDialog(self, 'Open File')
+            file_dialog = QtGui.QFileDialog(self, 'Open File')
 
-        folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
-        # Check if folder variable is defined (if it not the user has pressed cancel)
-        if not folder == "":
+        # get the folder the user selected
+        folder = file_dialog.getExistingDirectory(self, "Select Directory")
+        # Check if folder variable is defined and update the line edit box (if it not the user has pressed cancel)
+        if folder:
             self.ui.lineEditOutput.setText(os.path.abspath(str(folder)))
 
+
     def select_file_in(self):
-        """ User selects the folder to be processed and some auto-fill methods are carried out """
+        """ Selects input folder manually and some parameters are auto-filled if possible
+
+        If the the input folder is defined the parameters are reset, the *ui.lineEditInput* is updated and
+        the *autofill_pipe()* method is performed which updates various parameters.
+
+        .. seealso::
+            :func:`reset_inputs()`,
+            :func:`autofill_pipe()`
+        """
+        # Get input folder if already defined
         input_folder = str(self.ui.lineEditInput.text())
 
-        # Check input and output folders assigned
+        # Check input folders assigned. If assigned open the dialog box in that folder
         if input_folder:
-            self.fileDialog = QtGui.QFileDialog(self, 'Open File', input_folder)
+            file_dialog = QtGui.QFileDialog(self, 'Open File', input_folder)
         else:
-            self.fileDialog = QtGui.QFileDialog(self, 'Open File')
+            file_dialog = QtGui.QFileDialog(self, 'Open File')
 
-        folder = self.fileDialog.getExistingDirectory(self, "Select Directory")
+        # get the folder the user selected
+        folder = file_dialog.getExistingDirectory(self, "Select Directory")
 
-        # if folder is not defined user has pressed cancel
-        if not folder == "":
-            # Reset the inputs incase this is not the first time someone has selected a file
+        # if folder is not defined user has pressed cancel. If defined
+        if folder:
+            # Reset the inputs in-case this is not the first time someone has selected a file
             self.reset_inputs()
             # Set the input folder
             folder = os.path.abspath(str(folder))
             self.ui.lineEditInput.setText(folder)
-            # run all the autofill functions
+            # run all the autofill methods
             self.autofill_pipe()
 
 
-
     def autofill_pipe(self,suppress=False):
+        """ Performs a series of methods to automatically update parameters
 
+        Uses the methods in the autofill module.
+
+        :param boolean suppress: True if suppression of popup dialog box warnings is required
+        :ivar boolean crop_box_use: True if a derived croping box is to be used
+
+        .. seealso::
+            :func:`autofill.opt_uCT_check()`,
+            :func:`autofill.get_name()`,
+            :func:`autofill.get_recon_log()`,
+            :func:`autofill.auto_file_out()`,
+            :func:`autofill.get_channels()`,
+            :func:`autofill.auto_get_derived()`,
+            :func:`autofill.auto_get_scan()`,
+            :func:`autofill.folder_size_approx()`
+        """
+        ####################################################
+        # Reset parameters settings and instance variables
+        ####################################################
         # Remove the contents of the OPT table
         self.ui.tableWidgetOPT.clearContents()
+        # Resets the crop_box_use instance variable
         self.crop_box_use = False
+        # Set the crop option back to auto
         self.ui.radioButtonAuto.setChecked(True)
+        # Reset the channel name for OPT
         self.ui.lineEditDerivedChnName.setText("")
 
+        ####################################################
+        # Perform autofill of parameter settings
+        ####################################################
         # check if uCT or opt data
         autofill.opt_uCT_check(self,suppress)
-
         # Autocomplete the name
         autofill.get_name(self, str(self.ui.lineEditInput.text()),suppress)
-
         # Get the reconLog and associated pixel size
         autofill.get_recon_log(self)
-
         # Get the output folder location
         autofill.auto_file_out(self)
-
         # See what OPT channels are available
         if self.modality == "OPT":
             autofill.get_channels(self)
             autofill.auto_get_derived(self)
-
         # Automatically identify scan folder
         autofill.auto_get_scan(self)
-
         # Automatically get SPR file
         autofill.auto_get_SPR(self)
-
         # Determine size of input folder
         autofill.folder_size_approx(self)
 
+
     def reset_inputs(self):
-        """ Reset the inputs to blank"""
+        """ Reset the parameter inputs to blank"""
         self.ui.lineEditDate.setText("")
         self.ui.lineEditGroup.setText("")
         self.ui.lineEditAge.setText("")
@@ -383,31 +425,57 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lcdNumberFile.display(0.0)
         self.ui.lcdNumberPixel.display(0.0)
 
+
     def input_folder_changed(self, text):
-        """ When user changes the name of the folder manually"""
+        """ When user changes the name of the folder manually
+        This functions is **deprecated** as the the code almost always takes the input folder directly from the
+        line edit box "lineEditInput" anyway.
+
+        Updates the instance variable *input_folder* when the line edit box lineEditInput text has changed
+
+        :param str text: The text from lineEditInput after the text has been changed
+        :ivar str input_folder: input folder as text
+        """
         self.input_folder = text
 
+
     def output_folder_changed(self, text):
-        """ When user changes the name of the folder manually"""
+        """ When user changes the name of the folder manually
+        This functions is **deprecated** as the the code almost always takes the input folder directly from the
+        line edit box "lineEditOutput" anyway.
+
+        Updates the instance variable *output_folder* when the line edit box lineEditInput text has changed
+
+        :param str text: The text from lineEditInput after the text has been changed
+        :ivar str output_folder: output folder as text
+        """
         self.output_folder = text
 
     def scale_by_pixel_on(self):
-        """ enables boxes for scaling by pixel"""
+        """ Enables boxes for scaling by pixel"""
         if self.ui.checkBoxPixel.isChecked():
             self.ui.lineEditPixel.setEnabled(True)
         else:
             self.ui.lineEditPixel.setEnabled(False)
 
+
     def crop_switch(self):
-        """ turns crop options on or off depending on the status of the check """
+        """ Turns crop options on or off
+
+        Options enabled and disabled are based on the imaging modality and the current cropping option selected
+        """
+        # Check if cropping is to occur
         if self.ui.checkBoxCropYes.isChecked():
             self.ui.radioButtonAuto.setEnabled(True)
             self.ui.radioButtonMan.setEnabled(True)
             self.ui.radioButtonUseOldCrop.setEnabled(True)
+            # Check if OPT modality is selected
             if self.ui.radioButtonOPT.isChecked():
                 self.ui.radioButtonDerived.setEnabled(True)
+                # Check if derived dimensions is selected
                 if self.ui.radioButtonDerived.isChecked():
                     self.ui.lineEditDerivedChnName.setEnabled(True)
+            # Check if manual crop is selected
             if self.ui.radioButtonMan.isChecked():
                 self.ui.lineEditX.setEnabled(True)
                 self.ui.lineEditY.setEnabled(True)
@@ -415,6 +483,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.ui.lineEditH.setEnabled(True)
                 self.ui.pushButtonGetDimensions.setEnabled(True)
         else:
+            # No cropping is required
             self.ui.radioButtonAuto.setEnabled(False)
             self.ui.radioButtonMan.setEnabled(False)
             self.ui.radioButtonUseOldCrop.setEnabled(False)
@@ -428,7 +497,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def man_crop_off(self):
-        """ disables boxes for cropping manually """
+        """ Disables boxes for cropping manually. Used by the radio buttons: radioButtonAuto, radioButtonUseOldCrop."""
         self.ui.lineEditX.setEnabled(False)
         self.ui.lineEditY.setEnabled(False)
         self.ui.lineEditW.setEnabled(False)
@@ -436,8 +505,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.pushButtonGetDimensions.setEnabled(False)
         self.ui.lineEditDerivedChnName.setEnabled(False)
 
+
     def man_crop_on(self):
-        """ enables boxes for cropping manually """
+        """ Enables boxes for cropping manually.  Used by the radio button: radioButtonMan."""
         self.ui.lineEditX.setEnabled(True)
         self.ui.lineEditY.setEnabled(True)
         self.ui.lineEditW.setEnabled(True)
@@ -445,11 +515,23 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.pushButtonGetDimensions.setEnabled(True)
         self.ui.lineEditDerivedChnName.setEnabled(False)
 
+
     def derive_on(self):
+        """ Enables options for derived crop. Used by the radio button: radioButtonDerived.
+        """
         self.ui.lineEditDerivedChnName.setEnabled(True)
 
     def get_OPT_only(self):
-        """ edits self.modality """
+        """ Updates parameters options to be OPT only and updates OPT specific autofill operations.
+
+        Used by radio button: radioButtonOPT. Updates instance variable *modality*.
+
+        :ivar str modality: Should be "OPT" or "MicroCT". Sets to "OPT" here.
+
+        .. seealso::
+            :func:`autofill.get_recon_log()`,
+            :func:`autofill.get_channels()`,
+        """
         self.modality = "OPT"
         self.ui.lineEditChannel.setEnabled(True)
         self.ui.labelChannel.setEnabled(True)
@@ -458,14 +540,21 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.checkBoxInd.setEnabled(True)
         if self.ui.radioButtonDerived.isChecked():
             self.ui.lineEditDerivedChnName.setEnabled(True)
+        # Autofill operations that OPT modality effects
         autofill.get_recon_log(self)
         autofill.get_channels(self)
 
 
-
-
     def get_uCT_only(self):
-        """ edits self.modality """
+        """ Updates parameters options to be uCT only and updates uCT specific autofill operations.
+
+        Used by radio button: radioButtonuCT. Updates instance variable *modality*.
+
+        :ivar str modality: Should be "OPT" or "MicroCT". Sets to "MicroCT" here.
+
+        .. seealso::
+            :func:`autofill.get_recon_log()`,
+        """
         self.modality = "MicroCT"
         self.ui.lineEditChannel.setEnabled(False)
         self.ui.labelChannel.setEnabled(False)
@@ -473,28 +562,42 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.radioButtonDerived.setEnabled(False)
         self.ui.lineEditDerivedChnName.setEnabled(False)
         self.ui.checkBoxInd.setEnabled(False)
+        # Autofill operations that uCT modality effects
         autofill.get_recon_log(self)
 
 
     def update_name(self):
-        """ Function to update the name of the file and folder"""
-        self.full_name = str(self.ui.lineEditName.text())
+        """ Update the name of the file and folder if the user has changed the name in the "identification" section
 
-        autofill.get_name(self, self.full_name)
+        Used by push button: pushButtonUpdate.
 
+        Updates the output name by setting the text directly and updates the "identification" section using the
+        autofill.get_name function.
+
+        .. seealso::
+            :func:`autofill.get_name()`,
+        """
+        # Get the input name with directory
+        name = str(self.ui.lineEditName.text())
+        # Run the get_name method which updates the identification section
+        autofill.get_name(self, name)
         # Get output folder name, to start off with this will just be the input name
         output = str(self.ui.lineEditOutput.text())
         path, output_folder_name = os.path.split(output)
-
+        # Now update with self.full_name an instance variable created during autofill.get_name. 
         self.ui.lineEditOutput.setText(os.path.abspath(os.path.join(path, self.full_name)))
 
     def get_recon_man(self):
-        """ Get the recon folder manually"""
+        """ Get the recon folder manually.
+
+
+        Used by the push button: pushButtonCTRecon
+
+        """
         self.file_dialog = QtGui.QFileDialog(self)
         file = self.file_dialog.getOpenFileName()
-        self.pixel_size = ""
-        self.ui.lcdNumberPixel.display(self.pixel_size)
-        if not file == "":
+
+        if file:
             try:
                 self.ui.lineEditCTRecon.setText(file)
                 self.recon_log_path = os.path.abspath(str(file))
@@ -502,22 +605,9 @@ class MainWindow(QtGui.QMainWindow):
                 # Open the log file as read onlypyt
                 recon_log_file = open(self.recon_log_path, 'r')
 
-                # create a regex to pixel size
-                # We want the pixel size where it starts with Pixel. This is the pixel size with the most amount of decimal places
-                if self.modality == "OPT":
-                    prog = re.compile("^Image Pixel Size \(um\)=(\w+.\w+)")
-                else:
-                    prog = re.compile("^Pixel Size \(um\)=(\w+.\w+)")
-
-                # for loop to go through the recon log file
-                for line in recon_log_file:
-                    # "chomp" the line endings off
-                    line = line.rstrip()
-                    # if the line matches the regex print the (\w+.\w+) part of regex
-                    if prog.match(line):
-                        # Grab the pixel size with with .group(1)
-                        self.pixel_size = prog.match(line).group(1)
-                        break
+                # Get pixel size from log file
+                print "get pixel size"
+                self.pixel_size = autofill.get_pixel(self.modality, recon_log_file)
 
                 # Display the number on the lcd display
                 self.ui.lcdNumberPixel.display(self.pixel_size)
@@ -527,6 +617,13 @@ class MainWindow(QtGui.QMainWindow):
             except IOError as e:
                 # Python standard exception identifies recon file not found
                 self.ui.lineEditCTRecon.setText("Error identifying recon file")
+                self.pixel_size = ""
+                self.ui.lcdNumberPixel.display(self.pixel_size)
+            except TypeError as e:
+                QtGui.QMessageBox.warning(self, 'Message',
+                                          'Warning: Could not identify pixel value from recon log')
+                self.pixel_size = ""
+                self.ui.lcdNumberPixel.display(self.pixel_size)
 
 
     def get_scan_man(self):

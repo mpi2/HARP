@@ -249,29 +249,13 @@ def get_recon_log(self):
             recon_log_path = os.path.join(path,folder_name,folder_name+"_rec.log")
         else :
             raise Exception('No log file')
-        # To make sure the path is in the correct format (probab not necessary..)
+        # To make sure the path is in the correct format (prob not necessary..)
         self.recon_log_path = os.path.abspath(recon_log_path)
 
         # Open the log file as read only
         recon_log_file = open(self.recon_log_path, 'r')
 
-        # create a regex to pixel size
-        # We want the pixel size where it starts with Pixel. This is the pixel size with the most amount of decimal
-        # places for uCT. For OPT this is the "image pixel size"
-        if self.modality == "OPT":
-            prog = re.compile("^Image Pixel Size \(um\)=(\w+.\w+)")
-        else:
-            prog = re.compile("^Pixel Size \(um\)\=(\w+.\w+)")
-
-        # for loop to go through the recon log file
-        for line in recon_log_file:
-            # "chomp" the line endings off
-            line = line.rstrip()
-            # if the line matches the regex print the (\w+.\w+) part of regex
-            if prog.match(line) :
-                # Grab the pixel size with with .group(1)
-                self.pixel_size = prog.match(line).group(1)
-                break
+        self.pixel_size = get_pixel(self.modality, recon_log_file)
 
         # Display the number on the lcd display
         self.ui.lcdNumberPixel.display(self.pixel_size)
@@ -293,10 +277,28 @@ def get_recon_log(self):
     except:
         self.pixel_size = ""
         self.ui.lcdNumberPixel.display(self.pixel_size)
-        message = QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error getting recon log file',sys.exc_info()[0])
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error getting recon log file',sys.exc_info()[0])
         self.ui.lineEditCTRecon.setText("Not found")
 
+def get_pixel(modality,recon_log_file):
+    # create a regex to pixel size
+    # We want the pixel size where it starts with Pixel. This is the pixel size with the most amount of decimal
+    # places for uCT. For OPT this is the "image pixel size"
+    if modality == "OPT":
+        prog = re.compile("^Image Pixel Size \(um\)=(\w+.\w+)")
+    else:
+        prog = re.compile("^Pixel Size \(um\)\=(\w+.\w+)")
 
+    # for loop to go through the recon log file
+    for line in recon_log_file:
+        # "chomp" the line endings off
+        line = line.rstrip()
+        # if the line matches the regex print the (\w+.\w+) part of regex
+        if prog.match(line) :
+            # Grab the pixel size with with .group(1)
+            pixel_size = prog.match(line).group(1)
+            return pixel_size
+            break
 
 def get_name(self,name,suppress=False):
     '''
