@@ -1,23 +1,93 @@
+"""
+**Summary:**
+
+The following functions are used to add the recon folders to the processing list and save the config file.
+
+When a recon folder is added to the processing list a config file is saved in the output folder location. This is
+done in the **add_to_list_action()** method.
+
+For microCT data this is straight forward but for OPT data it is more complicated as multiple channels are added
+to the list. This method **start()** is used to handle the different way folders are added to the list.
+
+NOTE:
+The methods here are not technically part of the HARP class but can be used as if they are. They are seperated from
+the harp.py file just for convenience. To run a method from this module in harp.py the following notation can be
+used start(self) rather than self.start().
+
+--------------
+"""
 from PyQt4 import QtGui
 import os
 import errorcheck
 import getpickle
 
-#======================================================================
-# Functions for adding the recon to the list
-#======================================================================
 def start(self):
+    """ Function to start the process of adding recon folders onto the processing list
+
+    Uses the **add_to_list_action()** method to add folders onto the processing list and save a config file in the
+    output folder location.
+
+    For microCT data this is straight forward but for OPT data it is more complicated as multiple channels are added
+    to the list.
+
+    **For multi-channel OPT data:**
+    Multi-channel OPT data can either be handled individually or together. The default is to handle together.
+
+    This is achieved by a for loop which goes through the OPT channels list. For each OPT channel the following occurs
+    in the for loop:
+    * Recon folder is added to the input folder line edit box
+    * Autofill operations are carried out (automatically determining the parameters).
+    * If the autofill operation completes successfully the channel is then added to the processing list
+    * A config file is saved in the relevant output folder location
+    * Then parameters tab is also reset to its original view
+
+    NOTE:
+    The methods here are not technically part of the HARP class but can be used as if they are. They are seperated from
+    the harp.py file just for convenience. To run a method from this module in harp.py the following notation can be
+    used start(self) rather than self.start().
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    :ivar str self.modality: Either MicroCT or OPT. Used here but not modified.
+    :ivar boolean self.stop_chn_for_loop: Stops the for group OPT channel for loop.
+        Used and modified in both methods here
+    :ivar list self.chan_full: List of all the OPT channels HARP can find, created in autofill. Not modified here.
+    :ivar str self.derived_output_name: Derived output name when processing group OPT channels.
+        Initialised in this method
+
+    .. seealso::
+            :func:`add_to_list_action()`,
+            :func:`harp.MainWindow.reset_inputs()`,
+            :func:`harp.MainWindow.autofill_pipe()`,
+            :func:`harp.MainWindow.man_crop_off()`,
+            :func:`harp.MainWindow.man_crop_off()`,
+            :func:`harp.MainWindow.man_crop_on()`
+    """
+
+    # Modality check
+    # If MicroCT or individual OPT run, just add to the processing list
+    # If group OPT run, go through the for loop of OPT channels
+    # First reset this instance variable (used later)
+    self.derived_output_name = None
+
+    # get folder names
     in_dir = str(self.ui.lineEditInput.text())
     path,folder_name = os.path.split(in_dir)
-    # Check if multiple channels will be added to the list at the same time
-    # Standard microCT run
+
+    # Check if microCT, individual OPT or Batch OPT
     if self.modality == "MicroCT":
+        # Standard microCT run
         add_to_list_action(self)
-    # Individual OPT run
+
     elif self.ui.checkBoxInd.isChecked():
+        # Individual OPT run
         add_to_list_action(self)
+
+    #======================================================================
     # Batch OPT run
+    #======================================================================
     else:
+        ######## Save parameter settings ###########
         # Save the initial settings to be displayed again after all processing has been added
         # Recon log
         recon_log = self.ui.lineEditCTRecon.text()
@@ -41,39 +111,53 @@ def start(self):
         elif self.ui.radioButtonMan.isChecked():
             crop_option = "man"
 
+        ######## Channel loop ###########
+        # Make sure stop switch is turned off
         self.stop_chn_for_loop = False
-        print "start channel loop"
         # go through list and get the channel names
         for name in self.chan_full:
-            if self.stop_chn_for_loop == True:
+            # if off switch is True then stop loop
+            if self.stop_chn_for_loop:
                 break
 
+            # Get full path of the input folder for channel
             chan_path = os.path.join(path,name)
-            # Check if the input director is already set the channel in the loop
-            # if the current channel is not the same as the loop then perform autofill before adding to the list
+
+            # backslash and forward slash should not be a problem but just incase we remove them here
             chan_short = chan_path.replace("\\", "")
             chan_short = chan_short.replace("/", "")
             in_dir_short = in_dir.replace("\\", "")
             in_dir_short = in_dir_short.replace("/", "")
 
-            print in_dir_short
-            print chan_short
-            if chan_short != in_dir_short:
-                print "does not match"
+            # Check if the input directory is already set to the current channel in the loop
+            # If the current channel is not the same as the loop then perform autofill before adding to the list
+            # If it is the same
+            if chan_short == in_dir_short:
+                # In case the output folder name is different to input folder name. Need to save what will be used
+                # as the derived folder
+                self.derived_output_name = self.ui.lineEditOutput.text()
+                # add to the list
+                add_to_list_action(self)
+                # go to next iteration
+                continue
+            else:
+                # Not the original channel so autofill the paramters tab
                 self.ui.lineEditInput.setText(chan_path)
+                # reset inputs
                 self.reset_inputs()
                 self.autofill_pipe(suppress=True)
 
+            #need to setup the output folder based on original folder.
+            #multiple channels (onl)
             if len(self.chan_full)>1:
-                #need to setup the output folder based on original folder used for output. Only required for
-                #multiple channels
-                path_out,old_folder_name = os.path.split(str(out_dir_original))
+                path_out, old_folder_name = os.path.split(str(out_dir_original))
                 output_folder = os.path.join(path_out,name)
                 self.ui.lineEditOutput.setText(os.path.abspath(output_folder))
 
-
+            # Add to list!
             add_to_list_action(self)
 
+        ######## Reset parameter settings ###########
         # reset the parameters tab back to what originally was for the user.
         # Save the initial settings to be displayed again after all processing has been added
         # Input folder
@@ -107,9 +191,22 @@ def start(self):
 
 
 def add_to_list_action(self):
-    # This adds a recon folder to be processed.
-    # Get the directory of the script
-    dir = os.path.dirname(os.path.abspath(__file__))
+    """ Adds recon to processing list, creates pickle file and does error checks
+
+    1. First perform error checks using the errorcheck module
+    2. Then creates a pickle file of the parameters using the getpickle module and saves in the output folder
+    3. the currently selected recon (based on the parameters tab) onto the processing list
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    :ivar str self.modality: Either MicroCT or OPT. Used here but not modified.
+    :ivar str self.stop: Modified with errorcheck module. If True
+    :return: Returns early if processing group OPT channels and an invalid channel chosen to derive dimensions from
+
+    .. seealso::
+        :func:`errorcheck.errorCheck()`,
+        :func:`getpickle.get_pickle()`
+    """
 
     # get the input name for table
     input_name = str(self.ui.lineEditInput.text())
@@ -129,7 +226,7 @@ def add_to_list_action(self):
     errorcheck.errorCheck(self)
 
     # If an error has occured self.stop will be defined. if None then no error.
-    if self.stop is None:
+    if not self.stop:
         # Get the parameters needed for processing
         getpickle.get_pickle(self)
 

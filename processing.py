@@ -1,3 +1,20 @@
+"""
+**Summary:**
+
+Performs the following processing:
+
+    * Cropping
+    * Scaling
+    * Compression
+
+Performs all processing on QThread. All analysis is based on a config file generated using harp.py and other
+associated modules.
+
+NOTE: QT Designer automatically uses mixed case for its class object names e.g radioButton. This format is not PEP8 but
+has not been changed.
+
+-------------------------------------------------------
+"""
 from PyQt4 import QtGui, QtCore
 import sys
 import subprocess
@@ -20,26 +37,17 @@ from config import ConfigClass
 #from vtkRenderAnimation import Animator
 #from Segmentation import watershed_filter
 
+
 class ProcessingThread(QtCore.QThread):
     """  Class to provide the processing end of HARP
 
-    Performs all processing on QThread.
+    When class is initialised and run is called a Qthread iss started. All the main processing is performed
+    on this QThread.
 
-    **Summary:**
-    Based on a config file containing all the parameter/configuration details to perform the processing here. e.g.
-    if manual crop required, if compression required etc.
-
-    The following processing is performed
-
-    * Cropping
-    * Scaling
-    * Compression
-
-    QT Designer automatically uses mixed case for its class object names e.g radioButton. This format is not PEP8 but
-    has not been changed.
     """
+
     def __init__(self, config_path, memory, parent=None):
-        """ **Constructor**: Gets the pickle config file and
+        """ **Constructor**: Gets the pickle config file and initialises some instance variables
 
         :param str memory: Path to where config file is. Contains all the parameter information.
         :param obj parent: This is a way to pass the "self" object to the processing thread.
@@ -59,14 +67,15 @@ class ProcessingThread(QtCore.QThread):
         print "Processing stopped"
 
     def run(self):
-        """
+        """ Starts the QThread, processing then performed. Overrides the run method in QThread
 
+        This sets up the
 
         """
         #===============================================
         # Start processing!
         #===============================================
-        self.emit( QtCore.SIGNAL('update(QString)'), "Started Processing" )
+        self.emit( QtCore.SIGNAL('update(QString)'), "Started Processing")
         # Get the directory of the script
         if getattr(sys, 'frozen', False):
             self.dir = os.path.dirname(sys.executable)
@@ -93,6 +102,8 @@ class ProcessingThread(QtCore.QThread):
         # Cropping
         #===============================================
         self.cropping()
+
+        print "test test test"
 
         # scaling, compression file copying is then done after the cropping finished signal is
         # caught in the function "autocrop_update_slot"
@@ -268,7 +279,6 @@ class ProcessingThread(QtCore.QThread):
             #===============================================
             self.compression()
 
-
             if self.scale_error:
                 self.emit( QtCore.SIGNAL('update(QString)'),
                            "Processing finished (problems creating some of the scaled stacks, see log file)" )
@@ -345,28 +355,28 @@ class ProcessingThread(QtCore.QThread):
 
 
         # Perform scaling as subprocess with Popen
-        if self.configOb.SF2 == "yes" :
+        if self.configOb.SF2 == "yes":
             memory_result = self.memory_check(2)
             if memory_result:
                 print "scale by 2 norm"
                 self.execute_imagej(2.0)
 
-        if self.configOb.SF3 == "yes" :
+        if self.configOb.SF3 == "yes":
             memory_result = self.memory_check(3)
             if memory_result:
                 self.execute_imagej(3.0)
 
-        if self.configOb.SF4 == "yes" :
+        if self.configOb.SF4 == "yes":
             memory_result = self.memory_check(4)
             if memory_result:
                 self.execute_imagej(4.0)
 
-        if self.configOb.SF5 == "yes" :
+        if self.configOb.SF5 == "yes":
             memory_result = self.memory_check(5)
             if memory_result:
                 self.execute_imagej(5.0)
 
-        if self.configOb.SF6 == "yes" :
+        if self.configOb.SF6 == "yes":
             memory_result = self.memory_check(6)
             if memory_result:
                 self.execute_imagej(6.0)
@@ -424,7 +434,8 @@ class ProcessingThread(QtCore.QThread):
         # will be divided by 0.5, 0.5 and 0.5
         memory_for_scale = crop_folder_size_mb*(scale_div*scale_div*scale_div)
 
-        # Based on a very approximate estimate I have said it will take imagej 4x that of the memory of the approx scaled stack
+        # Based on a very approximate estimate I have said it will take imagej 4x that of the memory of
+        # the approx scaled stack
         memory_for_scale = memory_for_scale*4
 
         self.num_files = num_files

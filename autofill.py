@@ -46,7 +46,7 @@ def get_crop_box(self,alt_name):
     path_out,folder_name = os.path.split(out_dir)
 
     # go through all the folders indentified to see if one has a cropbox pickle file. If it does save the
-    cropbox_path = os.path.join(path_out, alt_name,"Metadata","cropbox.txt")
+    cropbox_path = os.path.join(path_out, alt_name, "Metadata","cropbox.txt")
     if os.path.exists(cropbox_path):
         return True
 

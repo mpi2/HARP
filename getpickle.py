@@ -60,7 +60,12 @@ def get_pickle(self):
     elif self.ui.radioButtonDerived.isChecked() and self.ui.radioButtonOPT.isChecked:
         self.configOb.crop_manual = "Not_applicable"
         self.configOb.crop_option = "Derived"
-        self.crop_pickle_path = os.path.join(path_out, str(self.ui.lineEditDerivedChnName.text()),"Metadata","cropbox.txt")
+        if self.derived_output_name:
+            print "TESTTTTTTTTTT"
+            d_path = os.path.join(path_out, str(self.derived_output_name),"Metadata","cropbox.txt")
+        else:
+            d_path =os.path.join(path_out, str(self.ui.lineEditDerivedChnName.text()),"Metadata","cropbox.txt")
+        self.crop_pickle_path = d_path
         self.configOb.cropbox_path = self.crop_pickle_path
 
     ##### Get Scaling factors ####
