@@ -23,7 +23,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="HARP 1 documentation" href="index.html" /> 
+    <link rel="top" title="HARP 1 documentation" href="index.html" />
+    <link rel="next" title="autocrop module" href="autocrop.html" />
+    <link rel="prev" title="getdimensions module" href="getdimensions.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,6 +37,12 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="autocrop.html" title="autocrop module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="getdimensions.html" title="getdimensions module"
+             accesskey="P">previous</a> |</li>
         <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -46,96 +54,375 @@
             
   <div class="section" id="module-processing">
 <span id="processing-module"></span><h1>processing module<a class="headerlink" href="#module-processing" title="Permalink to this headline">¶</a></h1>
+<p><strong>Summary:</strong></p>
+<p>Performs the following processing:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Cropping</li>
+<li>Scaling</li>
+<li>Compression</li>
+</ul>
+</div></blockquote>
+<p>Performs all processing on QThread. All analysis is based on a config file generated using harp.py and other
+associated modules.</p>
+<p>NOTE: QT Designer automatically uses mixed case for its class object names e.g radioButton. This format is not PEP8 but
+has not been changed.</p>
+<hr class="docutils" />
 <dl class="class">
 <dt id="processing.ProcessingThread">
-<em class="property">class </em><tt class="descclassname">processing.</tt><tt class="descname">ProcessingThread</tt><big>(</big><em>configOb</em>, <em>memory</em>, <em>parent=None</em><big>)</big><a class="headerlink" href="#processing.ProcessingThread" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">processing.</tt><tt class="descname">ProcessingThread</tt><big>(</big><em>config_path</em>, <em>memory</em>, <em>parent=None</em><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyQt4.QtCore.QThread</span></tt></p>
+<p>Class to provide the processing end of HARP</p>
+<p>When class is initialised and run is called a Qthread iss started. All the main processing is performed
+on this QThread.</p>
+<p><strong>Constructor</strong>: Gets the pickle config file and initialises some instance variables</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>memory</strong> (<em>str</em>) &#8211; Path to where config file is. Contains all the parameter information.</li>
+<li><strong>parent</strong> (<em>obj</em>) &#8211; This is a way to pass the &#8220;self&#8221; object to the processing thread.</li>
+<li><strong>config_path</strong> (<em>str</em>) &#8211; Path to where config file is. Contains all the parameter information.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>self.configOb</strong> (<em>obj</em>) &#8211; Not strictly a variable... This is an object containing all the parameters.
+Setup at _init_ here from the config file path given.</li>
+<li><strong>self.kill_check</strong> (<em>int</em>) &#8211; Switch for the kill signal. Initialised at 0, when switched to 1 processing killed.</li>
+<li><strong>self.memory</strong> (<em>float</em>) &#8211; Taken from the memory param. Saved as instance variable to be used later</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="processing.ProcessingThread.autocrop_update_slot">
-<tt class="descname">autocrop_update_slot</tt><big>(</big><em>msg</em><big>)</big><a class="headerlink" href="#processing.ProcessingThread.autocrop_update_slot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Listens to autocrop. If autocrop sends a signal with the message &#8220;success&#8221; then the next steps in the processing
-will occur</p>
+<tt class="descname">autocrop_update_slot</tt><big>(</big><em>msg</em><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.autocrop_update_slot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.autocrop_update_slot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Listens to autocrop.</p>
+<p>If autocrop sends a signal with the message &#8220;success&#8221; then the next steps in the processing
+will occur.</p>
+<p>Importantly also displays the messages on the GUI processing tab using self.emit</p>
+<p>Also takes the cropping box used by the autocrop and saves it as a pickle file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>msg</strong> (<em>str/tuple</em>) &#8211; A message sent back from the autocrop. Will either be a string or a tuple (the crop box)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>self.session_log</strong> (<em>obj</em>) &#8211; python file object. Used to record the log of what has happened.</li>
+<li><strong>self.crop_status</strong> (<em>str</em>) &#8211; The crop status used to assess whether any more processing should occur.</li>
+<li><strong>self.configOb</strong> (<em>obj</em>) &#8211; Simple Object which contains all the parameter information. Not modified.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.compression">
-<tt class="descname">compression</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.compression" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compression</p>
+<tt class="descname">compression</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.compression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.compression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compresses either scans and the original recons or the cropped folder</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>self.kill_check</strong> (<em>int</em>) &#8211; if 1 it means HARP has been stopped via the GUI. Not modified here.</li>
+<li><strong>self.configOb</strong> (<em>obj</em>) &#8211; Simple object which contains all the parameter information. Not modified here.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.copying">
-<tt class="descname">copying</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.copying" title="Permalink to this definition">¶</a></dt>
-<dd><p>Copying</p>
+<tt class="descname">copying</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.copying"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.copying" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copys the non-image and non-valid images files from the original recon and places them into the cropped
+folder</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>self.kill_check</strong> (<em>int</em>) &#8211; if 1 it means HARP has been stopped via the GUI. Not modified here.</li>
+<li><strong>self.configOb</strong> (<em>obj</em>) &#8211; Simple Object which contains all the parameter information. Not modified here.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.cropping">
-<tt class="descname">cropping</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.cropping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Performs cropping procedures. If the option &#8220;no crop&#8221; or &#8220;old crop&#8221; was used by the user no cropping will be peformed</p>
+<tt class="descname">cropping</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.cropping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.cropping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs cropping procedures. Decides what and how to crop based on the paramters in the config file</p>
+<p>The majority of this method is to determine what parameters are in the config file and setup the autocrop
+accordingly.</p>
+<p>Once the cropping is setup the autocrop.py module is called and a callback autocrop_update_slot method
+is used to monitor progress</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>self.session_log</strong> (<em>obj</em>) &#8211; python file object. Used to record the log of what has happened.</li>
+<li><strong>self.configOb</strong> (<em>obj</em>) &#8211; Simple Object which contains all the parameter information. Not modified.</li>
+<li><strong>self.folder_for_scaling</strong> (<em>str</em>) &#8211; Updated here, depending on the cropping option this will change.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#processing.ProcessingThread.hide_files" title="processing.ProcessingThread.hide_files"><tt class="xref py py-func docutils literal"><span class="pre">hide_files()</span></tt></a>,
+<a class="reference internal" href="#processing.ProcessingThread.autocrop_update_slot" title="processing.ProcessingThread.autocrop_update_slot"><tt class="xref py py-func docutils literal"><span class="pre">autocrop_update_slot()</span></tt></a>,
+<a class="reference internal" href="autocrop.html#autocrop.Autocrop" title="autocrop.Autocrop"><tt class="xref py py-func docutils literal"><span class="pre">autocrop.Autocrop()</span></tt></a>,
+<tt class="xref py py-func docutils literal"><span class="pre">autocrop.run()</span></tt></p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.execute_imagej">
-<tt class="descname">execute_imagej</tt><big>(</big><em>sf</em><big>)</big><a class="headerlink" href="#processing.ProcessingThread.execute_imagej" title="Permalink to this definition">¶</a></dt>
-<dd><p>Part of scaling function
-&#64;param: str, scaleFactor for imagej eg &#8220;^0.5^x6&#8221;
-&#64;param: str, sf for calculating new pixel size</p>
+<tt class="descname">execute_imagej</tt><big>(</big><em>sf</em><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.execute_imagej"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.execute_imagej" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the imagej scaling using a subprocess call</p>
+<p>The method does the following:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p class="first">Setup: Deterimines some settings used in imagej (e.g. interpolation)</p>
+</li>
+<li><p class="first">Normal scaling: Performs scaling as per the imagej macro siah_scale.txt</p>
+</li>
+<li><dl class="first docutils">
+<dt>Low memory scaling: If the the normal scaling failed due to memory reasons. The scaling is repeated</dt>
+<dd><p class="first last">using a low memory imagej macro</p>
+</dd>
+</dl>
+</li>
+</ol>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>sf</strong> (<em>float</em>) &#8211; Scaling factor chosen by the user</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>self.scale_log_path</strong> (<em>str</em>) &#8211; Path to scale log</li>
+<li><strong>self.session_scale</strong> (<em>str</em>) &#8211; python file object. Used to record the log of what has happened for scaling.</li>
+<li><strong>self.configOb</strong> (<em>obj</em>) &#8211; Simple Object which contains all the parameter information. Not modified.</li>
+<li><strong>memory_4_imageJ</strong> (<em>int</em>) &#8211; Use 90% of available memory for imageJ. Calculated as 0.9*self.memory</li>
+<li><strong>self.kill_check</strong> (<em>int</em>) &#8211; if 1 it means HARP has been stopped via the GUI</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#processing.ProcessingThread.scale_error_check" title="processing.ProcessingThread.scale_error_check"><tt class="xref py py-func docutils literal"><span class="pre">scale_error_check()</span></tt></a>,</p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.hide_files">
-<tt class="descname">hide_files</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.hide_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descname">hide_files</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.hide_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.hide_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Puts non-image files non-valid image files into a temp folder so will be ignored for scaling</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>self.configOb</strong> (<em>obj</em>) &#8211; Simple Object which contains all the parameter information. Not modified.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises OSError:</th><td class="field-body">Raised if the temp folder can&#8217;t be made</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.kill_slot">
-<tt class="descname">kill_slot</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.kill_slot" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descname">kill_slot</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.kill_slot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.kill_slot" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called every time a user presses stop</p>
+<p>This slot is connected to the emission command self.emit(QtCore.SIGNAL(&#8216;kill(QString)&#8217;), &#8220;kill&#8221;) when called
+in harp.py</p>
+<p>See harp.kill_em_all() and harp.processing_thread() for how the kill slot was setup.</p>
+<p>It should kill any python processes by changing switches which are checked regularly in the methods used.</p>
+<p>Calls a method autocrop.terminate() which sends stop signals to stop the multithreaded processing running
+for the autocrop</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.masking">
-<tt class="descname">masking</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.masking" title="Permalink to this definition">¶</a></dt>
-<dd><p>masking: todo</p>
+<tt class="descname">masking</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.masking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.masking" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.memory_check">
-<tt class="descname">memory_check</tt><big>(</big><em>scale</em><big>)</big><a class="headerlink" href="#processing.ProcessingThread.memory_check" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descname">memory_check</tt><big>(</big><em>scale</em><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.memory_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.memory_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rough attempt to see how much memory to use for ImageJ</p>
+<dl class="docutils">
+<dt>2 Outcomes:</dt>
+<dd><ul class="first last simple">
+<li>Enough memory to perform as standard</li>
+<li>Not enough memory: No scaling will occur</li>
+</ul>
+</dd>
+</dl>
+<p>The approximate amount of memory required is 4x that of the memory of the approx scaled stack</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>scale</strong> (<em>int</em>) &#8211; The scaling factor used.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first simple">
+<li><strong>self.session_log</strong> (<em>obj</em>) &#8211; python file object. Used to record the log of what has happened.</li>
+<li><strong>self.configOb</strong> (<em>obj</em>) &#8211; Simple Object which contains all the parameter information. Not modified.</li>
+<li><strong>memory_4_imageJ</strong> (<em>int</em>) &#8211; Use 90% of available memory for imageJ. Calculated as 0.9*self.memory</li>
+<li><strong>self.kill_check</strong> (<em>int</em>) &#8211; if 1 it means HARP has been stopped via the GUI</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return boolean:</th><td class="field-body"><p class="first last">True if memory is sufficient, False if not sufficient and scaling wont occur</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.movies">
-<tt class="descname">movies</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.movies" title="Permalink to this definition">¶</a></dt>
-<dd><p>movies: todo</p>
+<tt class="descname">movies</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.movies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.movies" title="Permalink to this definition">¶</a></dt>
+<dd><p>todo</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.run">
-<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.run" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts the QThread, processing then performed.</p>
+<p>Performs the following:</p>
+<ul>
+<li><p class="first">makes the session log file (saved in the metadata folder)</p>
+</li>
+<li><dl class="first docutils">
+<dt>Calls the following methods for the processing tasks</dt>
+<dd><ul class="first last simple">
+<li>Cropping</li>
+<li>Scaling</li>
+<li>copying</li>
+<li>compression</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Overrides the run method in QThread
+:param obj self:</p>
+<blockquote>
+<div>Although not technically part of the class, can still use this method as if it was part of the HARP class.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>self.session_log</strong> (<em>obj</em>) &#8211; python file object. Used to record the log of what has happened.</li>
+<li><strong>self.scale_error</strong> (<em>boolean</em>) &#8211; Initialised scale_error to none here. If an error will be True</li>
+<li><strong>self.crop_status</strong> (<em>str</em>) &#8211; The crop status modified in the autocrop_update_slot.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#processing.ProcessingThread.cropping" title="processing.ProcessingThread.cropping"><tt class="xref py py-func docutils literal"><span class="pre">cropping()</span></tt></a>,
+<a class="reference internal" href="#processing.ProcessingThread.scaling" title="processing.ProcessingThread.scaling"><tt class="xref py py-func docutils literal"><span class="pre">scaling()</span></tt></a>,
+<a class="reference internal" href="#processing.ProcessingThread.copying" title="processing.ProcessingThread.copying"><tt class="xref py py-func docutils literal"><span class="pre">copying()</span></tt></a>,
+<a class="reference internal" href="#processing.ProcessingThread.show_files" title="processing.ProcessingThread.show_files"><tt class="xref py py-func docutils literal"><span class="pre">show_files()</span></tt></a>,
+<a class="reference internal" href="#processing.ProcessingThread.compression" title="processing.ProcessingThread.compression"><tt class="xref py py-func docutils literal"><span class="pre">compression()</span></tt></a>,</p>
+</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.scale_error_check">
-<tt class="descname">scale_error_check</tt><big>(</big><em>mem_opt</em>, <em>sf</em><big>)</big><a class="headerlink" href="#processing.ProcessingThread.scale_error_check" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descname">scale_error_check</tt><big>(</big><em>mem_opt</em>, <em>sf</em><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.scale_error_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.scale_error_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the session log from imagej scaling</p>
+<p>Used by execute_imagej() to check if a low memory repeat is to be performed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mem_opt</strong> (<em>str</em>) &#8211; What memory option was used &#8220;norm&#8221; or &#8220;low&#8221; memory version.</li>
+<li><strong>sf</strong> (<em>float</em>) &#8211; Used for logging purposes</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return str:</th><td class="field-body"><p class="first last">Will return the string &#8220;repeat&#8221; if a memory problem has occured</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.scaling">
-<tt class="descname">scaling</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.scaling" title="Permalink to this definition">¶</a></dt>
-<dd><p>Scaling</p>
+<tt class="descname">scaling</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.scaling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.scaling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets up a series of scaling methods depending on memory and scaling options.</p>
+<p>Scaling perform using <strong>execute_imagej()</strong> and memory check performed using <strong>memory_check()</strong>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>self.session_log</strong> (<em>obj</em>) &#8211; python file object. Used to record the log of what has happened.</li>
+<li><strong>self.configOb</strong> (<em>obj</em>) &#8211; Simple Object which contains all the parameter information. Not modified.</li>
+<li><strong>self.memory</strong> (<em>int</em>) &#8211; Memory calculated before processing started</li>
+<li><strong>self.memory_4_imageJ</strong> (<em>int</em>) &#8211; Use 90% of available memory for imageJ. Calculated as 0.9*self.memory</li>
+<li><strong>self.kill_check</strong> (<em>int</em>) &#8211; if 1 it means HARP has been stopped via the GUI</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#processing.ProcessingThread.execute_imagej" title="processing.ProcessingThread.execute_imagej"><tt class="xref py py-func docutils literal"><span class="pre">execute_imagej()</span></tt></a>,
+<a class="reference internal" href="#processing.ProcessingThread.memory_check" title="processing.ProcessingThread.memory_check"><tt class="xref py py-func docutils literal"><span class="pre">memory_check()</span></tt></a>,</p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="processing.ProcessingThread.show_files">
-<tt class="descname">show_files</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.ProcessingThread.show_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descname">show_files</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/processing.html#ProcessingThread.show_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.ProcessingThread.show_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the non-image files, and non-valid image files out of the cropped temp folder</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>self.configOb</strong> (<em>obj</em>) &#8211; Simple Object which contains all the parameter information. Not modified here.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="function">
 <dt id="processing.main">
-<tt class="descclassname">processing.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="headerlink" href="#processing.main" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">processing.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/processing.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#processing.main" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -146,6 +433,12 @@ will occur</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="getdimensions.html"
+                        title="previous chapter">getdimensions module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="autocrop.html"
+                        title="next chapter">autocrop module</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/processing.txt"
@@ -177,6 +470,12 @@ will occur</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="autocrop.html" title="autocrop module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="getdimensions.html" title="getdimensions module"
+             >previous</a> |</li>
         <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
       </ul>
     </div>

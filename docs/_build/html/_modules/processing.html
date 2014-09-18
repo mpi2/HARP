@@ -1,0 +1,1092 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>processing &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for processing</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">**Summary:**</span>
+
+<span class="sd">Performs the following processing:</span>
+
+<span class="sd">    * Cropping</span>
+<span class="sd">    * Scaling</span>
+<span class="sd">    * Compression</span>
+
+<span class="sd">Performs all processing on QThread. All analysis is based on a config file generated using harp.py and other</span>
+<span class="sd">associated modules.</span>
+
+<span class="sd">NOTE: QT Designer automatically uses mixed case for its class object names e.g radioButton. This format is not PEP8 but</span>
+<span class="sd">has not been changed.</span>
+
+<span class="sd">-------------------------------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">tarfile</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">freeze_support</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">platform</span> <span class="k">as</span> <span class="n">_platform</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">import</span> <span class="nn">autocrop</span>
+<span class="kn">from</span> <span class="nn">config</span> <span class="kn">import</span> <span class="n">ConfigClass</span>
+<span class="c"># from vtkRenderAnimation import Animator</span>
+<span class="c">#from Segmentation import watershed_filter</span>
+
+
+<div class="viewcode-block" id="ProcessingThread"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread">[docs]</a><span class="k">class</span> <span class="nc">ProcessingThread</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;  Class to provide the processing end of HARP</span>
+
+<span class="sd">    When class is initialised and run is called a Qthread iss started. All the main processing is performed</span>
+<span class="sd">    on this QThread.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">memory</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; **Constructor**: Gets the pickle config file and initialises some instance variables</span>
+
+<span class="sd">        :param str memory: Path to where config file is. Contains all the parameter information.</span>
+<span class="sd">        :param obj parent: This is a way to pass the &quot;self&quot; object to the processing thread.</span>
+<span class="sd">        :param str config_path: Path to where config file is. Contains all the parameter information.</span>
+<span class="sd">        :ivar obj self.configOb: Not strictly a variable... This is an object containing all the parameters.</span>
+<span class="sd">                                    Setup at _init_ here from the config file path given.</span>
+<span class="sd">        :ivar int self.kill_check: Switch for the kill signal. Initialised at 0, when switched to 1 processing killed.</span>
+<span class="sd">        :ivar float self.memory: Taken from the memory param. Saved as instance variable to be used later</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">filehandler</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filehandler</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory</span> <span class="o">=</span> <span class="n">memory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kill_check</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imagej_pid</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&quot;Processing stopped&quot;</span>
+
+<div class="viewcode-block" id="ProcessingThread.run"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Starts the QThread, processing then performed.</span>
+
+<span class="sd">        Performs the following:</span>
+
+<span class="sd">        * makes the session log file (saved in the metadata folder)</span>
+<span class="sd">        * Calls the following methods for the processing tasks</span>
+<span class="sd">            * Cropping</span>
+<span class="sd">            * Scaling</span>
+<span class="sd">            * copying</span>
+<span class="sd">            * compression</span>
+
+<span class="sd">        Overrides the run method in QThread</span>
+<span class="sd">        :param obj self:</span>
+<span class="sd">            Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">        :ivar obj self.session_log: python file object. Used to record the log of what has happened.</span>
+<span class="sd">        :ivar boolean self.scale_error: Initialised scale_error to none here. If an error will be True</span>
+<span class="sd">        :ivar str self.crop_status: The crop status modified in the autocrop_update_slot.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`cropping()`,</span>
+<span class="sd">            :func:`scaling()`,</span>
+<span class="sd">            :func:`copying()`,</span>
+<span class="sd">            :func:`show_files()`,</span>
+<span class="sd">            :func:`compression()`,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#===============================================</span>
+        <span class="c"># Start processing!</span>
+        <span class="c">#===============================================</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Started Processing&quot;</span><span class="p">)</span>
+        <span class="c"># Get the directory of the script</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s">&#39;frozen&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">__file__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span>
+
+        <span class="c">#===============================================</span>
+        <span class="c"># Setup logging files</span>
+        <span class="c">#===============================================</span>
+        <span class="n">session_log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">meta_path</span><span class="p">,</span> <span class="s">&quot;session.log&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">session_log_path</span><span class="p">,</span> <span class="s">&#39;w+&#39;</span><span class="p">)</span>
+
+        <span class="c">#logging if there is an error with scaling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_error</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;########################################</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;### HARP Session Log                 ###</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;########################################</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="c"># start time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="c">#===============================================</span>
+        <span class="c"># Cropping</span>
+        <span class="c">#===============================================</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cropping</span><span class="p">()</span>
+        <span class="c"># A callback function is used to monitor if autocrop was run sucessfully. This modifies the self.crop_status</span>
+        <span class="c"># instance variable. Has to be success to continue</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crop_status</span> <span class="o">!=</span> <span class="s">&quot;success&quot;</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c">#===============================================</span>
+        <span class="c"># Scaling</span>
+        <span class="c">#===============================================</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaling</span><span class="p">()</span>
+
+        <span class="c">#===============================================</span>
+        <span class="c"># Space for other methods e.g. masking or movies</span>
+        <span class="c">#===============================================</span>
+        <span class="c">#self.masking()</span>
+
+        <span class="c">#===============================================</span>
+        <span class="c"># Copying</span>
+        <span class="c">#===============================================</span>
+        <span class="c"># Cropping function only copies over image files. Need to copy over other files now scaling and cropping</span>
+        <span class="c"># finished</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;Automatic&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;Manual&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">copying</span><span class="p">()</span>
+
+        <span class="c"># If the old crop was used the non valid image files will have been hid in self.cropping. Now scaling and</span>
+        <span class="c"># cropping finished, files can be shown again (taken out of temp folder).</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;Old_crop&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_files</span><span class="p">()</span>
+
+        <span class="c">#===============================================</span>
+        <span class="c"># Compression</span>
+        <span class="c">#===============================================</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compression</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span>
+                      <span class="s">&quot;Processing finished (problems creating some of the scaled stacks, see log file)&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Processing finished&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Processing finished</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;########################################</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c">#===============================================</span>
+        <span class="c"># Finished!!</span>
+        <span class="c">#===============================================</span>
+        <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="ProcessingThread.cropping"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.cropping">[docs]</a>    <span class="k">def</span> <span class="nf">cropping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Performs cropping procedures. Decides what and how to crop based on the paramters in the config file</span>
+
+<span class="sd">        The majority of this method is to determine what parameters are in the config file and setup the autocrop</span>
+<span class="sd">        accordingly.</span>
+
+<span class="sd">        Once the cropping is setup the autocrop.py module is called and a callback autocrop_update_slot method</span>
+<span class="sd">        is used to monitor progress</span>
+
+<span class="sd">        :ivar obj self.session_log: python file object. Used to record the log of what has happened.</span>
+<span class="sd">        :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.</span>
+<span class="sd">        :ivar str self.folder_for_scaling: Updated here, depending on the cropping option this will change.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`hide_files()`,</span>
+<span class="sd">            :func:`autocrop_update_slot()`,</span>
+<span class="sd">            :func:`autocrop.Autocrop`,</span>
+<span class="sd">            :func:`autocrop.run()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># document in log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;*****Performing cropping******</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="c">#===============================================</span>
+        <span class="c"># Cropping setup</span>
+        <span class="c">#===============================================</span>
+        <span class="c"># Also setup the scaling folder here as well. Defaulted to the cropped folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">folder_for_scaling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span>
+
+        <span class="c"># Cropping option: NO CROP</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;No_crop&quot;</span><span class="p">:</span>
+            <span class="c"># Do not perform any crop as user specified</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;No Crop carried out&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;No crop carried out</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autocrop_update_slot</span><span class="p">(</span><span class="s">&quot;success&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">folder_for_scaling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">input_folder</span>
+            <span class="k">return</span>
+
+        <span class="c"># Cropping option: OLD CROP</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;Old_crop&quot;</span><span class="p">:</span>
+            <span class="c"># Use a previous folder already ran through HARP. No cropping needed here.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;No Crop carried out&quot;</span><span class="p">)</span>
+            <span class="c"># Need to hide non recon files. Puts them in a temp folder until scaling has finished</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hide_files</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;No crop carried out</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autocrop_update_slot</span><span class="p">(</span><span class="s">&quot;success&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c"># Make new crop directory</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span><span class="p">)</span>
+
+        <span class="c"># Cropping option: MANUAL CROP</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;Manual&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;manual crop</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Performing manual crop&quot;</span><span class="p">)</span>
+            <span class="c"># Get the dimensions from the config object</span>
+            <span class="n">dimensions_tuple</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">xcrop</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">ycrop</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">wcrop</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">hcrop</span><span class="p">))</span>
+            <span class="c"># The cropbox is not derived so should be None when given to the autocrop</span>
+            <span class="n">derived_cropbox</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Setup for automatic</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;Automatic&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;autocrop</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Performing autocrop&quot;</span><span class="p">)</span>
+            <span class="c"># cropbox is not derived and dimensions will be determined in autocrop</span>
+            <span class="n">dimensions_tuple</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">derived_cropbox</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># setup for derived crop</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;Derived&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Derived crop</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Performing crop from derived cropbox&quot;</span><span class="p">)</span>
+            <span class="n">dimensions_tuple</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c"># Cropbox dimensions are stored as pickle object. So need to extact</span>
+                <span class="n">filehandler</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropbox_path</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+                <span class="n">cropbox_object</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filehandler</span><span class="p">))</span>
+                <span class="n">derived_cropbox</span> <span class="o">=</span> <span class="n">cropbox_object</span><span class="o">.</span><span class="n">cropbox</span>
+            <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;error: Cropbox not available for derived dimension crop:</span><span class="se">\n</span><span class="s">&quot;</span>
+                                       <span class="o">+</span> <span class="s">&quot;Exception traceback:&quot;</span> <span class="o">+</span>
+                                       <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;error: Could not open cropbox dimension file for &quot;</span>
+                                                            <span class="s">&quot;derived dimension crop: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;error: Unknown exception trying to get derived dimension:</span><span class="se">\n</span><span class="s">&quot;</span>
+                                       <span class="o">+</span> <span class="s">&quot;Exception traceback:&quot;</span> <span class="o">+</span>
+                                       <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;error: Unknown exception trying to get derived dimension&quot;</span>
+                                                            <span class="s">&quot; (see log): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+        <span class="c">#===============================================</span>
+        <span class="c"># Perform the crop!</span>
+        <span class="c">#===============================================</span>
+        <span class="c"># Can now finally perform the crop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Crop started</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="c"># make autocrop object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auto_crop</span> <span class="o">=</span> <span class="n">autocrop</span><span class="o">.</span><span class="n">Autocrop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">input_folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span><span class="p">,</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">autocrop_update_slot</span><span class="p">,</span> <span class="n">def_crop</span><span class="o">=</span><span class="n">dimensions_tuple</span><span class="p">,</span>
+                                           <span class="n">repeat_crop</span><span class="o">=</span><span class="n">derived_cropbox</span><span class="p">)</span>
+
+        <span class="c"># WindowsError is an execption only available on Windows need to make a fake WindowsError exception for linux</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">__builtins__</span><span class="p">,</span> <span class="s">&quot;WindowsError&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">class</span> <span class="nc">WindowsError</span><span class="p">(</span><span class="ne">OSError</span><span class="p">):</span> <span class="k">pass</span>
+
+        <span class="c"># Catch all the potential errors which may come</span>
+        <span class="c"># It may be better to add the execptions closer to the event as these can catch a broad range</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># Run autocrop and catch errors</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auto_crop</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">WindowsError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;error: HARP can&#39;t find the folder, maybe a temporary problem connecting to the &quot;</span>
+                                   <span class="s">&quot;network. Exception message:</span><span class="se">\n</span><span class="s"> Exception traceback:&quot;</span> <span class="o">+</span>
+                                   <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;error: HARP can&#39;t find the folder, see log file&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c"># This is referring to an error in either the functions run_crop_process or init_cropping. P</span>
+            <span class="c"># ossibly the exception would be more beneficial placed directly in autocrop....</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;error: HARP most likely can&#39;t find the folder, maybe a temporary problem connecting&quot;</span>
+                                   <span class="s">&quot; to the network. Exception message:</span><span class="se">\n</span><span class="s"> Exception traceback:&quot;</span> <span class="o">+</span>
+                                   <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;error: HARP can&#39;t find the files, see log file&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;error: Unknown exception. Exception message:</span><span class="se">\n</span><span class="s">&quot;</span>
+                                   <span class="o">+</span> <span class="s">&quot;Exception traceback:&quot;</span> <span class="o">+</span>
+                                   <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;error: Unknown exception (see log): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="ProcessingThread.autocrop_update_slot"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.autocrop_update_slot">[docs]</a>    <span class="k">def</span> <span class="nf">autocrop_update_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Listens to autocrop.</span>
+
+<span class="sd">        If autocrop sends a signal with the message &quot;success&quot; then the next steps in the processing</span>
+<span class="sd">        will occur.</span>
+
+<span class="sd">        Importantly also displays the messages on the GUI processing tab using self.emit</span>
+
+<span class="sd">        Also takes the cropping box used by the autocrop and saves it as a pickle file.</span>
+
+<span class="sd">        :param str/tuple msg: A message sent back from the autocrop. Will either be a string or a tuple (the crop box)</span>
+<span class="sd">        :ivar obj self.session_log: python file object. Used to record the log of what has happened.</span>
+<span class="sd">        :ivar str self.crop_status: The crop status used to assess whether any more processing should occur.</span>
+<span class="sd">        :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if a tuple. If it is a tuple it means that the crop box has been sen from the autocrop. Then make</span>
+        <span class="c"># a pickle object of the object so it can be used again if derived crop option is used</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">:</span>
+            <span class="c"># create our generic class for pickles</span>
+            <span class="n">crop_box_ob</span> <span class="o">=</span> <span class="n">ConfigClass</span><span class="p">()</span>
+
+            <span class="c"># get path</span>
+            <span class="n">crop_box_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">meta_path</span><span class="p">,</span> <span class="s">&quot;cropbox.txt&quot;</span><span class="p">)</span>
+
+            <span class="c"># save cropbox tuple to cropbox object</span>
+            <span class="n">crop_box_ob</span><span class="o">.</span><span class="n">cropbox</span> <span class="o">=</span> <span class="n">msg</span>
+
+            <span class="c"># save the pickle</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">crop_box_path</span><span class="p">,</span> <span class="s">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">config</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">crop_box_ob</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+            <span class="c"># that&#39;s the end of this callback</span>
+            <span class="k">return</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Message not a tuple so send a message to display on the HARP</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="c"># Check what the message says</span>
+        <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s">&quot;success&quot;</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;crop finished&quot;</span>
+            <span class="k">print</span> <span class="n">msg</span>
+            <span class="c"># The run() checks crop_status variable, if &quot;success&quot; lets other processing occur</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">crop_status</span> <span class="o">=</span> <span class="s">&quot;success&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Crop finished</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+            <span class="c"># Somethings gone wrong, don&#39;t let any other processing occur.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Error in cropping see below:</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">crop_status</span> <span class="o">=</span> <span class="s">&quot;error&quot;</span>
+        <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;Cancelled&quot;</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">crop_status</span> <span class="o">=</span> <span class="s">&quot;error&quot;</span>
+</div>
+<div class="viewcode-block" id="ProcessingThread.scaling"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.scaling">[docs]</a>    <span class="k">def</span> <span class="nf">scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;  Sets up a series of scaling methods depending on memory and scaling options.</span>
+
+<span class="sd">        Scaling perform using **execute_imagej()** and memory check performed using **memory_check()**.</span>
+
+<span class="sd">        :ivar obj self.session_log: python file object. Used to record the log of what has happened.</span>
+<span class="sd">        :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.</span>
+<span class="sd">        :ivar int self.memory: Memory calculated before processing started</span>
+<span class="sd">        :ivar int self.memory_4_imageJ: Use 90% of available memory for imageJ. Calculated as 0.9*self.memory</span>
+<span class="sd">        :ivar int self.kill_check: if 1 it means HARP has been stopped via the GUI</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`execute_imagej()`,</span>
+<span class="sd">            :func:`memory_check()`,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Check if HARP has been stopped</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kill_check</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c"># Record started</span>
+        <span class="k">print</span> <span class="s">&quot;Scaling started&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;*****Performing scaling******</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="c"># First make subfolder for scaled stacks</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scale_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scale_path</span><span class="p">)</span>
+
+        <span class="c"># Memory of computer being used will depend on how much memory will be used in imageJ</span>
+        <span class="c"># e.g 80% total memory of the computer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory_4_imageJ</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory</span><span class="p">)</span> <span class="o">*</span> <span class="o">.</span><span class="mi">9</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory_4_imageJ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_4_imageJ</span> <span class="o">*</span> <span class="mf">0.00000095367</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory_4_imageJ</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_4_imageJ</span><span class="p">)</span>
+        <span class="n">memory_mb</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.00000095367</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Total Memory of Computer(mb):&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">memory_mb</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Memory for ImageJ(mb):&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_4_imageJ</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="c"># Perform scaling for all options used. Do a memory check before performing scaling.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF2</span> <span class="o">==</span> <span class="s">&quot;yes&quot;</span><span class="p">:</span>
+            <span class="n">memory_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_check</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">memory_result</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">execute_imagej</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF3</span> <span class="o">==</span> <span class="s">&quot;yes&quot;</span><span class="p">:</span>
+            <span class="n">memory_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_check</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">memory_result</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">execute_imagej</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF4</span> <span class="o">==</span> <span class="s">&quot;yes&quot;</span><span class="p">:</span>
+            <span class="n">memory_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_check</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">memory_result</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">execute_imagej</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF5</span> <span class="o">==</span> <span class="s">&quot;yes&quot;</span><span class="p">:</span>
+            <span class="n">memory_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_check</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">memory_result</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">execute_imagej</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF6</span> <span class="o">==</span> <span class="s">&quot;yes&quot;</span><span class="p">:</span>
+            <span class="n">memory_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_check</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">memory_result</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">execute_imagej</span><span class="p">(</span><span class="mf">6.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">pixel_option</span> <span class="o">==</span> <span class="s">&quot;yes&quot;</span><span class="p">:</span>
+            <span class="n">memory_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_check</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SFX_pixel</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">memory_result</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">execute_imagej</span><span class="p">(</span><span class="s">&quot;Pixel&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProcessingThread.memory_check"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.memory_check">[docs]</a>    <span class="k">def</span> <span class="nf">memory_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Rough attempt to see how much memory to use for ImageJ</span>
+
+<span class="sd">        2 Outcomes:</span>
+<span class="sd">            * Enough memory to perform as standard</span>
+<span class="sd">            * Not enough memory: No scaling will occur</span>
+
+<span class="sd">        The approximate amount of memory required is 4x that of the memory of the approx scaled stack</span>
+
+<span class="sd">        :param int scale: The scaling factor used.</span>
+<span class="sd">        :ivar obj self.session_log: python file object. Used to record the log of what has happened.</span>
+<span class="sd">        :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.</span>
+<span class="sd">        :ivar int memory_4_imageJ: Use 90% of available memory for imageJ. Calculated as 0.9*self.memory</span>
+<span class="sd">        :ivar int self.kill_check: if 1 it means HARP has been stopped via the GUI</span>
+
+<span class="sd">        :return boolean: True if memory is sufficient, False if not sufficient and scaling wont occur</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Get the scale in decimal equivalent</span>
+        <span class="n">scale_div</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">scale</span><span class="p">)</span>
+
+        <span class="c"># If no crop option the memory check is done using data extrapolated from the original recon folder</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;No_crop&quot;</span><span class="p">:</span>
+            <span class="n">crop_folder_size_mb</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">recon_folder_size</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1024.0</span>
+            <span class="k">print</span> <span class="s">&quot;Recon folder size to downsize (mb)&quot;</span><span class="p">,</span> <span class="n">crop_folder_size_mb</span>
+            <span class="n">num_files</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">input_folder</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">name</span><span class="p">)])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;(.*)_rec\d+\.(bmp|tif|jpg|jpeg)&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="c"># for loop to go through the directory</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder_for_scaling</span><span class="p">):</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="c">#print line+&quot;\n&quot;</span>
+                <span class="c"># if the line matches the regex break</span>
+                <span class="k">if</span> <span class="n">prog</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+                    <span class="n">filename</span> <span class="o">=</span> <span class="n">line</span>
+                    <span class="k">break</span>
+
+            <span class="c"># get the number of files, ignore any non recon files</span>
+            <span class="n">num_files</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span><span class="p">)</span> <span class="k">if</span>
+                             <span class="p">((</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.bmp&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.tif&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.jpg&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.jpeg&quot;</span><span class="p">)</span> <span class="ow">or</span>
+                              <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.BMP&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.TIF&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.JPG&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.JPEG&quot;</span><span class="p">)</span> <span class="ow">and</span>
+                              <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.bmp&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.tif&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.jpg&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                                 <span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.jpeg&quot;</span><span class="p">)</span> <span class="ow">and</span>
+                              <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.BMP&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.TIF&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.JPG&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                                 <span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.JPEG&quot;</span><span class="p">))])</span>
+
+            <span class="c"># get the size of the file matched previously</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder_for_scaling</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="n">file1_size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+            <span class="c"># approx folder size</span>
+            <span class="n">approx_size</span> <span class="o">=</span> <span class="n">num_files</span> <span class="o">*</span> <span class="n">file1_size</span>
+
+            <span class="c"># convert to mb</span>
+            <span class="n">crop_folder_size_mb</span> <span class="o">=</span> <span class="p">(</span><span class="n">approx_size</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mf">1024.0</span><span class="p">))</span>
+
+
+        <span class="c"># Get the approx size of the statck by dividing by x,y ans z of the folder size. e.g. for scaling by 2</span>
+        <span class="c"># will be divided by 0.5, 0.5 and 0.5</span>
+        <span class="n">memory_for_scale</span> <span class="o">=</span> <span class="n">crop_folder_size_mb</span> <span class="o">*</span> <span class="p">(</span><span class="n">scale_div</span> <span class="o">*</span> <span class="n">scale_div</span> <span class="o">*</span> <span class="n">scale_div</span><span class="p">)</span>
+
+        <span class="c"># Based on a very approximate estimate I have said it will take imagej 4x that of the memory of</span>
+        <span class="c"># the approx scaled stack</span>
+        <span class="n">memory_for_scale</span> <span class="o">=</span> <span class="n">memory_for_scale</span> <span class="o">*</span> <span class="mi">4</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_files</span> <span class="o">=</span> <span class="n">num_files</span>
+
+        <span class="c"># Check if there is enough memory  available.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_4_imageJ</span> <span class="o">&lt;</span> <span class="n">memory_for_scale</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;not enough memory&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Not enough memory for this scaling</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Not enough memory for scaling</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="n">fail_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scale_path</span><span class="p">,</span> <span class="s">&quot;insufficient_memory_for_scaling_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">scale</span><span class="p">))</span>
+            <span class="n">fail_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fail_file_name</span><span class="p">,</span> <span class="s">&#39;w+&#39;</span><span class="p">)</span>
+            <span class="n">fail_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_error</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># enough memory</span>
+            <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="ProcessingThread.execute_imagej"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.execute_imagej">[docs]</a>    <span class="k">def</span> <span class="nf">execute_imagej</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sf</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Runs the imagej scaling using a subprocess call</span>
+
+<span class="sd">        The method does the following:</span>
+
+<span class="sd">            1. Setup: Deterimines some settings used in imagej (e.g. interpolation)</span>
+<span class="sd">            2. Normal scaling: Performs scaling as per the imagej macro siah_scale.txt</span>
+<span class="sd">            3. Low memory scaling: If the the normal scaling failed due to memory reasons. The scaling is repeated</span>
+<span class="sd">                using a low memory imagej macro</span>
+
+<span class="sd">        :param float sf: Scaling factor chosen by the user</span>
+<span class="sd">        :ivar str self.scale_log_path: Path to scale log</span>
+<span class="sd">        :ivar str self.session_scale: python file object. Used to record the log of what has happened for scaling.</span>
+<span class="sd">        :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.</span>
+<span class="sd">        :ivar int memory_4_imageJ: Use 90% of available memory for imageJ. Calculated as 0.9*self.memory</span>
+<span class="sd">        :ivar int self.kill_check: if 1 it means HARP has been stopped via the GUI</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`scale_error_check()`,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kill_check</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c">#===============================================================================</span>
+        <span class="c"># Setup</span>
+        <span class="c">#===============================================================================</span>
+        <span class="c"># Setup a logging file specifically for this scaling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">meta_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sf</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_scale.log&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_log_path</span><span class="p">,</span> <span class="s">&#39;w+&#39;</span><span class="p">)</span>
+
+        <span class="c"># Gets the new pixel numbers for the scaled stack name (see in imagej macro)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">recon_pixel_size</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sf</span> <span class="o">!=</span> <span class="s">&quot;Pixel&quot;</span><span class="p">:</span>
+            <span class="n">new_pixel</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">recon_pixel_size</span><span class="p">)</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">sf</span><span class="p">)</span>
+            <span class="n">new_pixel</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">new_pixel</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+            <span class="n">interpolation</span> <span class="o">=</span> <span class="s">&quot;default&quot;</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">pixel_option</span> <span class="o">==</span> <span class="s">&quot;yes&quot;</span><span class="p">:</span>
+            <span class="n">sf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SFX_pixel</span>
+            <span class="n">new_pixel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">user_specified_pixel</span>
+
+            <span class="n">interpolation</span> <span class="o">=</span> <span class="s">&quot;yes&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_pixel</span> <span class="o">=</span> <span class="s">&quot;NA&quot;</span>
+            <span class="n">interpolation</span> <span class="o">=</span> <span class="s">&quot;default&quot;</span>
+
+        <span class="c"># Get the scaling factor in decimal</span>
+        <span class="n">dec_sf</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="mi">1</span> <span class="o">/</span> <span class="n">sf</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+
+        <span class="c"># ij path if run from executable</span>
+        <span class="n">ijpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;ImageJ&#39;</span><span class="p">,</span> <span class="s">&#39;ij.jar&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ijpath</span><span class="p">):</span>
+            <span class="c">#ij path if ran from script</span>
+            <span class="n">ijpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="p">,</span> <span class="s">&#39;ImageJ&#39;</span><span class="p">,</span> <span class="s">&#39;ij.jar&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ijpath</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Error: Can&#39;t find Imagej&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kill_check</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="k">return</span>
+
+        <span class="c"># Setup macro path</span>
+        <span class="c"># If run run as an executable the path will be different</span>
+        <span class="n">ij_macro_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&quot;siah_scale.txt&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ij_macro_path</span><span class="p">):</span>
+            <span class="n">ij_macro_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="p">,</span> <span class="s">&quot;siah_scale.txt&quot;</span><span class="p">)</span>
+
+        <span class="n">ij_macro_path_low_mem1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&quot;siah_scale_low_mem1.txt&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ij_macro_path_low_mem1</span><span class="p">):</span>
+            <span class="n">ij_macro_path_low_mem1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="p">,</span> <span class="s">&quot;siah_scale_low_mem1.txt&quot;</span><span class="p">)</span>
+
+        <span class="n">ij_macro_path_low_mem2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="p">,</span> <span class="s">&quot;siah_scale_low_mem2.txt&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ij_macro_path_low_mem2</span><span class="p">):</span>
+            <span class="n">ij_macro_path_low_mem2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="s">&quot;siah_scale_low_mem2.txt&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ij_macro_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;error: Can&#39;t find Imagej macro script&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kill_check</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="k">return</span>
+
+        <span class="c"># detail scaling in log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Scale by factor:</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sf</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Performing scaling ({})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sf</span><span class="p">)))</span>
+
+        <span class="c">#===============================================================================</span>
+        <span class="c"># Normal scaling</span>
+        <span class="c">#===============================================================================</span>
+        <span class="k">print</span> <span class="s">&quot;norm scaling&quot;</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scale_path</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">full_name</span> <span class="o">+</span> <span class="s">&quot;_scaled_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sf</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_pixel_&quot;</span> <span class="o">+</span> <span class="n">new_pixel</span> <span class="o">+</span> <span class="s">&quot;.tif&quot;</span><span class="p">)</span>
+
+        <span class="c"># Subprocess call for imagej macro</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="s">&quot;-Xmx&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_4_imageJ</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;m&quot;</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">ijpath</span><span class="p">,</span> <span class="s">&quot;-batch&quot;</span><span class="p">,</span> <span class="n">ij_macro_path</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">imageJ</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dec_sf</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span> <span class="o">+</span> <span class="n">interpolation</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span> <span class="o">+</span> <span class="n">file_name</span><span class="p">],</span>
+            <span class="n">stdout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span><span class="p">)</span>
+
+        <span class="c">#record a process ID incase we need to kill imagej</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imagej_pid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+        <span class="c">#NOTE: process.communicate catches when processing is finished</span>
+        <span class="c"># I dont think the out and error variables work here as we already assigned stderr and stdout in the</span>
+        <span class="c"># subprocess call</span>
+        <span class="n">out</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="k">print</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span>
+
+        <span class="c"># check if there was a memory problem then repeat as low memory version</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_error_check</span><span class="p">(</span><span class="s">&quot;norm&quot;</span><span class="p">,</span> <span class="n">sf</span><span class="p">)</span>
+
+        <span class="c"># If a non-memory error occured call it a day for this one</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_error</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="s">&quot;repeat&quot;</span><span class="p">:</span>
+            <span class="c">#===============================================</span>
+            <span class="c"># Low memory scaling</span>
+            <span class="c">#===============================================</span>
+            <span class="c"># Low memory version splits the processing done in imagej into two parts.</span>
+            <span class="c"># The first part scales by x and y, and does this in batch mode (slice by slice). This saves the output</span>
+            <span class="c"># as an image sequence. The image sequence is stored in a temp folder.</span>
+            <span class="c"># The second part does the z scale (has to load in the whole stack for this)</span>
+            <span class="c"># The temp folder is then deleted</span>
+            <span class="k">print</span> <span class="s">&quot;low mem version&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Performing low memory scaling ({})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sf</span><span class="p">)))</span>
+
+            <span class="c"># reset the scaling log</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_log_path</span><span class="p">,</span> <span class="s">&#39;w+&#39;</span><span class="p">)</span>
+
+            <span class="c"># Subprocess call for imagej macro</span>
+            <span class="c"># First x and y scaling and save a temp stack</span>
+            <span class="n">temp_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scale_path</span><span class="p">,</span> <span class="s">&quot;tmp&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">temp_folder</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">temp_folder</span><span class="p">)</span>
+
+            <span class="c"># Subprocess call to do the x and y scaling</span>
+            <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="s">&quot;-Xmx&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_4_imageJ</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;m&quot;</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">ijpath</span><span class="p">,</span> <span class="s">&quot;-batch&quot;</span><span class="p">,</span> <span class="n">ij_macro_path_low_mem1</span><span class="p">,</span>
+                 <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">imageJ</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dec_sf</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span> <span class="o">+</span> <span class="n">interpolation</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span> <span class="o">+</span> <span class="n">temp_folder</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span><span class="p">],</span>
+                <span class="n">stdout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span><span class="p">)</span>
+
+            <span class="c"># record a pid so we can kill</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">imagej_pid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+            <span class="c"># recognises when the process has finished and then continues with script</span>
+            <span class="n">out</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
+            <span class="c"># check if any errors occured.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_error_check</span><span class="p">(</span><span class="s">&quot;low&quot;</span><span class="p">,</span> <span class="n">sf</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_error</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;error&quot;</span>
+                <span class="c"># Remove the temp folder</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">temp_folder</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="k">print</span> <span class="s">&quot;second part of scaling&quot;</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scale_path</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">full_name</span> <span class="o">+</span> <span class="s">&quot;_scaled_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sf</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_pixel_&quot;</span> <span class="o">+</span> <span class="n">new_pixel</span> <span class="o">+</span> <span class="s">&quot;.tif&quot;</span><span class="p">)</span>
+
+            <span class="c"># Subprocess call to do the z scaling</span>
+            <span class="n">process2</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="s">&quot;-Xmx&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_4_imageJ</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;m&quot;</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">ijpath</span><span class="p">,</span> <span class="s">&quot;-batch&quot;</span><span class="p">,</span> <span class="n">ij_macro_path_low_mem2</span><span class="p">,</span>
+                 <span class="n">temp_folder</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dec_sf</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span> <span class="o">+</span> <span class="n">interpolation</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span> <span class="o">+</span> <span class="n">file_name</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">num_files</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;^&quot;</span><span class="p">],</span>
+                <span class="n">stdout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">imagej_pid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">process2</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="c"># recognises when the process has finished and then continues with script</span>
+            <span class="n">out</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">process2</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+            <span class="c"># check if any errors occured</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_error_check</span><span class="p">(</span><span class="s">&quot;low&quot;</span><span class="p">,</span> <span class="n">sf</span><span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">temp_folder</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ProcessingThread.scale_error_check"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.scale_error_check">[docs]</a>    <span class="k">def</span> <span class="nf">scale_error_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mem_opt</span><span class="p">,</span> <span class="n">sf</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Check the session log from imagej scaling</span>
+
+<span class="sd">        Used by execute_imagej() to check if a low memory repeat is to be performed.</span>
+
+<span class="sd">        :param str mem_opt: What memory option was used &quot;norm&quot; or &quot;low&quot; memory version.</span>
+<span class="sd">        :param float sf: Used for logging purposes</span>
+<span class="sd">        :return str: Will return the string &quot;repeat&quot; if a memory problem has occured</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_scale_check</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_log_path</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+
+        <span class="c"># reset processing ID, as processing has finished.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imagej_pid</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+        <span class="c"># Check the self.session_scale file for memory or any other problem messages</span>
+        <span class="n">prog1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;&lt;Out of memory&gt;&quot;</span><span class="p">)</span>
+        <span class="n">prog2</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&quot;</span><span class="p">)</span>
+        <span class="n">out_of_memory</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">other_ij_problem</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># First check for memory problems</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">session_scale_check</span><span class="p">:</span>
+            <span class="c"># &quot;chomp&quot; the line endings off</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="c"># if the line matches the regex print the (\w+.\w+) part of regex</span>
+            <span class="k">if</span> <span class="n">prog1</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+                <span class="c"># Grab the pixel size with with .group(1)</span>
+                <span class="n">out_of_memory</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">break</span>
+
+        <span class="c"># Then check for any other problems.</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">session_scale_check</span><span class="p">:</span>
+            <span class="c"># &quot;chomp&quot; the line endings off</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="c"># if the line matches the regex print the (\w+.\w+) part of regex</span>
+            <span class="k">if</span> <span class="n">prog2</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+                <span class="c"># Grab the pixel size with with .group(1)</span>
+                <span class="n">other_ij_problem</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">out_of_memory</span> <span class="ow">and</span> <span class="n">mem_opt</span> <span class="o">==</span> <span class="s">&quot;norm&quot;</span><span class="p">:</span>
+            <span class="c"># Dont use the word &quot;error&quot; in the signal message. If &quot;error&quot; is used HARP might skip any further</span>
+            <span class="c"># processing for this HARP processing list.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span>
+                      <span class="s">&quot;Problem in scaling. Not enough memory will try low memory version</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Error in scaling will try low memory version</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="c"># return &quot;repeat&quot; so processing starts again with low memory</span>
+            <span class="k">return</span> <span class="s">&quot;repeat&quot;</span>
+
+        <span class="k">elif</span> <span class="n">out_of_memory</span> <span class="ow">and</span> <span class="n">mem_opt</span> <span class="o">==</span> <span class="s">&quot;low&quot;</span><span class="p">:</span>
+            <span class="c"># Out of memory BUT already attempted to repeat using low memory imagej macro.</span>
+            <span class="c"># Can&#39;t do anythin else!</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Problem in scaling. Not enough memory</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Error in scaling</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="n">fail_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scale_path</span><span class="p">,</span> <span class="s">&quot;insufficient_memory_for_scaling_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sf</span><span class="p">))</span>
+            <span class="n">fail_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fail_file_name</span><span class="p">,</span> <span class="s">&#39;w+&#39;</span><span class="p">)</span>
+            <span class="n">fail_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_error</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">elif</span> <span class="n">other_ij_problem</span><span class="p">:</span>
+            <span class="c"># other problem we can&#39;t do anythin about...</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Problem in scaling. Check log file</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_scale</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Error in scaling</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="n">fail_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scale_path</span><span class="p">,</span> <span class="s">&quot;error_performing_scaling_by_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sf</span><span class="p">))</span>
+            <span class="n">fail_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fail_file_name</span><span class="p">,</span> <span class="s">&#39;w+&#39;</span><span class="p">)</span>
+            <span class="n">fail_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_error</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Finished scaling</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProcessingThread.hide_files"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.hide_files">[docs]</a>    <span class="k">def</span> <span class="nf">hide_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Puts non-image files non-valid image files into a temp folder so will be ignored for scaling</span>
+
+<span class="sd">        :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.</span>
+<span class="sd">        :raises OSError: Raised if the temp folder can&#39;t be made</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># mv non recon image files into a temp folder</span>
+        <span class="k">print</span> <span class="s">&quot;hide files&quot;</span>
+
+        <span class="n">crop_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span>
+        <span class="c"># Make a temp folder</span>
+        <span class="n">tmp_crop</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">crop_path</span><span class="p">,</span> <span class="s">&quot;tmp&quot;</span><span class="p">)</span>
+
+        <span class="c"># Probably need to put error catching for this</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># check if tmp folder is there. If it is, then remove.</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">tmp_crop</span><span class="p">):</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">tmp_crop</span><span class="p">)</span>
+            <span class="c">#(if a tmp file is there remove as well)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">tmp_crop</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tmp_crop</span><span class="p">)</span>
+
+            <span class="k">print</span> <span class="s">&quot;make temp folder&quot;</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">tmp_crop</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;OSError Problem making temp folder&quot;</span><span class="p">,</span> <span class="n">e</span>
+            <span class="k">return</span>
+
+        <span class="n">non_image_suffix</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;spr.bmp&#39;</span><span class="p">,</span> <span class="s">&#39;spr.tif&#39;</span><span class="p">,</span> <span class="s">&#39;spr.tiff&#39;</span><span class="p">,</span> <span class="s">&#39;spr.jpg&#39;</span><span class="p">,</span> <span class="s">&#39;spr.jpeg&#39;</span><span class="p">,</span> <span class="s">&#39;.txt&#39;</span><span class="p">,</span> <span class="s">&#39;.text&#39;</span><span class="p">,</span> <span class="s">&#39;.log&#39;</span><span class="p">,</span> <span class="s">&#39;.crv&#39;</span><span class="p">)</span>
+        <span class="n">image_list</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;*rec*.bmp&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.BMP&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.tif&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.tiff&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.jpg&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.jpeg&#39;</span><span class="p">)</span>
+
+        <span class="c"># loop through crop path</span>
+        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">crop_path</span><span class="p">):</span>
+            <span class="k">print</span> <span class="n">fn</span>
+            <span class="n">fnlc</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">full_fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">crop_path</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+            <span class="c"># Known non image files</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">fnlc</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">non_image_suffix</span><span class="p">):</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">full_fn</span><span class="p">,</span> <span class="n">tmp_crop</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c"># Check if known image file</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">fnlc</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">image_list</span><span class="p">):</span>
+                <span class="c"># a standard image file so ignore</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Not in the the known non image files but also not a standard image file. Presume not wanted and move</span>
+                <span class="c"># to tmp folder</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">full_fn</span><span class="p">,</span> <span class="n">tmp_crop</span><span class="p">)</span>
+                <span class="c"># Not standard image file will be copied over to temp folder</span>
+</div>
+<div class="viewcode-block" id="ProcessingThread.show_files"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.show_files">[docs]</a>    <span class="k">def</span> <span class="nf">show_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Moves the non-image files, and non-valid image files out of the cropped temp folder</span>
+
+<span class="sd">        :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">crop_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span>
+        <span class="n">tmp_crop</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">crop_path</span><span class="p">,</span> <span class="s">&quot;tmp&quot;</span><span class="p">)</span>
+
+        <span class="c"># for loop through list of temp files</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">tmp_crop</span><span class="p">):</span>
+            <span class="c"># copy files back to cropped path</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_crop</span><span class="p">,</span> <span class="n">line</span><span class="p">),</span> <span class="n">crop_path</span><span class="p">)</span>
+
+        <span class="c"># remove temp folder</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">tmp_crop</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ProcessingThread.movies"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.movies">[docs]</a>    <span class="k">def</span> <span class="nf">movies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; todo</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">movie_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span> <span class="s">&quot;movies&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">movie_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">movie_path</span><span class="p">)</span>
+
+        <span class="k">print</span> <span class="s">&quot;starting movies&quot;</span>
+        <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_array</span><span class="p">)):</span>
+            <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_array</span><span class="p">[</span><span class="nb">file</span><span class="p">]</span>
+            <span class="n">movie</span> <span class="o">=</span> <span class="n">Animator</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">file</span><span class="p">),</span> <span class="n">movie_path</span><span class="p">)</span>
+
+            <span class="c">#self.scale_array.</span>
+            <span class="c">#movie = Animator(self., out_dir)</span>
+</div>
+<div class="viewcode-block" id="ProcessingThread.masking"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.masking">[docs]</a>    <span class="k">def</span> <span class="nf">masking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; todo &quot;&quot;&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;masking&quot;</span>
+
+</div>
+<div class="viewcode-block" id="ProcessingThread.copying"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.copying">[docs]</a>    <span class="k">def</span> <span class="nf">copying</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Copys the non-image and non-valid images files from the original recon and places them into the cropped</span>
+<span class="sd">        folder</span>
+
+<span class="sd">        :ivar int self.kill_check: if 1 it means HARP has been stopped via the GUI. Not modified here.</span>
+<span class="sd">        :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Check if GUI has been stopped</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kill_check</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c"># Tell the GUI what&#39;s going on</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Copying files</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="c"># Record the log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;***Copying other files from original recon***</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="c"># For loop through the input folder</span>
+        <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">input_folder</span><span class="p">):</span>
+
+            <span class="c">#check if folder before copying</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">input_folder</span><span class="p">,</span> <span class="nb">file</span><span class="p">)):</span>
+                <span class="c"># Dont copy the sub directory move to the next itereration</span>
+                <span class="k">continue</span>
+
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span><span class="p">,</span> <span class="nb">file</span><span class="p">)):</span>
+                <span class="c"># File exists so copy it over to the crop folder</span>
+                <span class="c"># Need to get full path of original file though</span>
+                <span class="nb">file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">input_folder</span><span class="p">,</span> <span class="nb">file</span><span class="p">)</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;File copied:&quot;</span> <span class="o">+</span> <span class="nb">file</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ProcessingThread.compression"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.compression">[docs]</a>    <span class="k">def</span> <span class="nf">compression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Compresses either scans and the original recons or the cropped folder</span>
+
+<span class="sd">        :ivar int self.kill_check: if 1 it means HARP has been stopped via the GUI. Not modified here.</span>
+<span class="sd">        :ivar obj self.configOb: Simple object which contains all the parameter information. Not modified here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Check if stop button pressed on GUI</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kill_check</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c"># Record the log</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scans_recon_comp</span> <span class="o">==</span> <span class="s">&quot;yes&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_comp</span> <span class="o">==</span> <span class="s">&quot;yes&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;***Performing Compression***&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scans_recon_comp</span> <span class="o">==</span> <span class="s">&quot;yes&quot;</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scan_folder</span><span class="p">:</span>
+                <span class="c">#============================================</span>
+                <span class="c"># Compression for scan</span>
+                <span class="c">#============================================</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Performing compression of scan folder&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Compression of scan folder&quot;</span><span class="p">)</span>
+                <span class="n">path_scan</span><span class="p">,</span> <span class="n">folder_name_scan</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scan_folder</span><span class="p">)</span>
+
+                <span class="n">out</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scan_folder</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;.tar.bz2&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;w:bz2&#39;</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">path_scan</span><span class="p">,</span> <span class="n">arcname</span><span class="o">=</span><span class="s">&quot;Scan_folder&quot;</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Compression of scan folder finished&quot;</span><span class="p">)</span>
+
+                <span class="c"># Check if stop button pressed on GUI</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kill_check</span><span class="p">:</span>
+                    <span class="k">return</span>
+
+                <span class="c">#============================================</span>
+                <span class="c"># compression for original recon</span>
+                <span class="c">#============================================</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Performing compression of original recon folder&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Compression of original recon folder&quot;</span><span class="p">)</span>
+                <span class="n">path_scan</span><span class="p">,</span> <span class="n">folder_name_scan</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">input_folder</span><span class="p">)</span>
+
+                <span class="n">out</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">input_folder</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;.tar.bz2&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;w:bz2&#39;</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">path_scan</span><span class="p">,</span> <span class="n">arcname</span><span class="o">=</span><span class="s">&quot;Input_folder&quot;</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Compression of recon folder finished&quot;</span><span class="p">)</span>
+
+        <span class="c"># compression for crop folder</span>
+        <span class="c"># Check if stop button pressed on GUI</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kill_check</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_comp</span> <span class="o">==</span> <span class="s">&quot;yes&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">!=</span> <span class="s">&quot;No_crop&quot;</span><span class="p">:</span>
+                <span class="c">#============================================</span>
+                <span class="c"># compression for cropped image sequence</span>
+                <span class="c">#============================================</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Compression of cropped recon started&quot;</span><span class="p">)</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">full_name</span> <span class="o">+</span> <span class="s">&quot;.tar.bz2&quot;</span><span class="p">,</span>
+                                   <span class="n">mode</span><span class="o">=</span><span class="s">&#39;w:bz2&#39;</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span><span class="p">,</span> <span class="n">arcname</span><span class="o">=</span><span class="s">&quot;Cropped&quot;</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ProcessingThread.kill_slot"><a class="viewcode-back" href="../processing.html#processing.ProcessingThread.kill_slot">[docs]</a>    <span class="k">def</span> <span class="nf">kill_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This method is called every time a user presses stop</span>
+
+<span class="sd">        This slot is connected to the emission command self.emit(QtCore.SIGNAL(&#39;kill(QString)&#39;), &quot;kill&quot;) when called</span>
+<span class="sd">        in harp.py</span>
+
+<span class="sd">        See harp.kill_em_all() and harp.processing_thread() for how the kill slot was setup.</span>
+
+<span class="sd">        It should kill any python processes by changing switches which are checked regularly in the methods used.</span>
+
+<span class="sd">        Calls a method autocrop.terminate() which sends stop signals to stop the multithreaded processing running</span>
+<span class="sd">        for the autocrop</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Kill all&quot;</span><span class="p">)</span>
+        <span class="c"># Update the GUI with what has happened</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
+
+        <span class="c"># Kill the processes in autocrop</span>
+        <span class="n">autocrop</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+
+        <span class="c"># Kills any processes in the ProcessingThread.run() method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kill_check</span> <span class="o">==</span> <span class="mi">1</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># If imagej pid is defined, means imagej is still running</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imagej_pid</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Killing imagej&quot;</span>
+
+                <span class="c"># Different kill methods for windows and linux</span>
+                <span class="k">if</span> <span class="n">_platform</span> <span class="o">==</span> <span class="s">&quot;linux&quot;</span> <span class="ow">or</span> <span class="n">_platform</span> <span class="o">==</span> <span class="s">&quot;linux2&quot;</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&quot;Killing&quot;</span>
+                    <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">imagej_pid</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imagej_pid</span><span class="p">),</span> <span class="n">signal</span><span class="o">.</span><span class="n">SIGKILL</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">_platform</span> <span class="o">==</span> <span class="s">&quot;win32&quot;</span> <span class="ow">or</span> <span class="n">_platform</span> <span class="o">==</span> <span class="s">&quot;win64&quot;</span><span class="p">:</span>
+                    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s">&quot;taskkill&quot;</span><span class="p">,</span> <span class="s">&quot;/f&quot;</span><span class="p">,</span> <span class="s">&quot;/t&quot;</span><span class="p">,</span> <span class="s">&quot;/im&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imagej_pid</span><span class="p">)],</span>
+                                            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+                    <span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">out</span><span class="p">:</span>
+                        <span class="k">print</span> <span class="s">&quot;program output:&quot;</span><span class="p">,</span> <span class="n">out</span>
+                    <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="k">print</span> <span class="s">&quot;program error output:&quot;</span><span class="p">,</span> <span class="n">err</span>
+
+                <span class="c"># Update the GUI again just in case it took a while.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;os.kill could not kill process, reason: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+</div></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../processing.html#processing.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">ex</span> <span class="o">=</span> <span class="n">Progress</span><span class="p">(</span><span class="n">configOb</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">freeze_support</span><span class="p">()</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

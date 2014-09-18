@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>addtolist module &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="index.html" />
+    <link rel="next" title="config module" href="config.html" />
+    <link rel="prev" title="getpickle module" href="getpickle.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="config.html" title="config module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="getpickle.html" title="getpickle module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-addtolist">
+<span id="addtolist-module"></span><h1>addtolist module<a class="headerlink" href="#module-addtolist" title="Permalink to this headline">¶</a></h1>
+<p><strong>Summary:</strong></p>
+<p>The following functions are used to add the recon folders to the processing list and save the config file.</p>
+<p>When a recon folder is added to the processing list a config file is saved in the output folder location. This is
+done in the <strong>add_to_list_action()</strong> method.</p>
+<p>For microCT data this is straight forward but for OPT data it is more complicated as multiple channels are added
+to the list. This method <strong>start()</strong> is used to handle the different way folders are added to the list.</p>
+<p>NOTE:
+The methods here are not technically part of the HARP class but can be used as if they are. They are seperated from
+the harp.py file just for convenience. To run a method from this module in harp.py the following notation can be
+used start(self) rather than self.start().</p>
+<hr class="docutils" />
+<dl class="function">
+<dt id="addtolist.add_to_list_action">
+<tt class="descclassname">addtolist.</tt><tt class="descname">add_to_list_action</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="_modules/addtolist.html#add_to_list_action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#addtolist.add_to_list_action" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds recon to processing list, creates pickle file and does error checks</p>
+<ol class="arabic simple">
+<li>First perform error checks using the errorcheck module</li>
+<li>Then creates a pickle file of the parameters using the getpickle module and saves in the output folder</li>
+<li>the currently selected recon (based on the parameters tab) onto the processing list</li>
+</ol>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>self</strong> (<em>obj</em>) &#8211; Although not technically part of the class, can still use this method as if it was part of the HARP class.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first simple">
+<li><strong>self.modality</strong> (<em>str</em>) &#8211; Either MicroCT or OPT. Used here but not modified.</li>
+<li><strong>self.stop</strong> (<em>str</em>) &#8211; Modified with errorcheck module. If True</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Returns early if processing group OPT channels and an invalid channel chosen to derive dimensions from</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="errorcheck.html#errorcheck.errorCheck" title="errorcheck.errorCheck"><tt class="xref py py-func docutils literal"><span class="pre">errorcheck.errorCheck()</span></tt></a>,
+<a class="reference internal" href="getpickle.html#getpickle.get_pickle" title="getpickle.get_pickle"><tt class="xref py py-func docutils literal"><span class="pre">getpickle.get_pickle()</span></tt></a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="addtolist.start">
+<tt class="descclassname">addtolist.</tt><tt class="descname">start</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="_modules/addtolist.html#start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#addtolist.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to start the process of adding recon folders onto the processing list</p>
+<p>Uses the <strong>add_to_list_action()</strong> method to add folders onto the processing list and save a config file in the
+output folder location.</p>
+<p>For microCT data this is straight forward but for OPT data it is more complicated as multiple channels are added
+to the list.</p>
+<p><strong>For multi-channel OPT data:</strong>
+Multi-channel OPT data can either be handled individually or together. The default is to handle together.</p>
+<p>This is achieved by a for loop which goes through the OPT channels list. For each OPT channel the following occurs
+in the for loop:
+* Recon folder is added to the input folder line edit box
+* Autofill operations are carried out (automatically determining the parameters).
+* If the autofill operation completes successfully the channel is then added to the processing list
+* A config file is saved in the relevant output folder location
+* Then parameters tab is also reset to its original view</p>
+<p>NOTE:
+The methods here are not technically part of the HARP class but can be used as if they are. They are seperated from
+the harp.py file just for convenience. To run a method from this module in harp.py the following notation can be
+used start(self) rather than self.start().</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>self</strong> (<em>obj</em>) &#8211; Although not technically part of the class, can still use this method as if it was part of the HARP class.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>self.modality</strong> (<em>str</em>) &#8211; Either MicroCT or OPT. Used here but not modified.</li>
+<li><strong>self.stop_chn_for_loop</strong> (<em>boolean</em>) &#8211; Stops the for group OPT channel for loop.
+Used and modified in both methods here</li>
+<li><strong>self.chan_full</strong> (<em>list</em>) &#8211; List of all the OPT channels HARP can find, created in autofill. Not modified here.</li>
+<li><strong>self.derived_output_name</strong> (<em>str</em>) &#8211; Derived output name when processing group OPT channels.
+Initialised in this method</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#addtolist.add_to_list_action" title="addtolist.add_to_list_action"><tt class="xref py py-func docutils literal"><span class="pre">add_to_list_action()</span></tt></a>,
+<a class="reference internal" href="harp.html#harp.MainWindow.reset_inputs" title="harp.MainWindow.reset_inputs"><tt class="xref py py-func docutils literal"><span class="pre">harp.MainWindow.reset_inputs()</span></tt></a>,
+<a class="reference internal" href="harp.html#harp.MainWindow.autofill_pipe" title="harp.MainWindow.autofill_pipe"><tt class="xref py py-func docutils literal"><span class="pre">harp.MainWindow.autofill_pipe()</span></tt></a>,
+<a class="reference internal" href="harp.html#harp.MainWindow.man_crop_off" title="harp.MainWindow.man_crop_off"><tt class="xref py py-func docutils literal"><span class="pre">harp.MainWindow.man_crop_off()</span></tt></a>,
+<a class="reference internal" href="harp.html#harp.MainWindow.man_crop_off" title="harp.MainWindow.man_crop_off"><tt class="xref py py-func docutils literal"><span class="pre">harp.MainWindow.man_crop_off()</span></tt></a>,
+<a class="reference internal" href="harp.html#harp.MainWindow.man_crop_on" title="harp.MainWindow.man_crop_on"><tt class="xref py py-func docutils literal"><span class="pre">harp.MainWindow.man_crop_on()</span></tt></a></p>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="getpickle.html"
+                        title="previous chapter">getpickle module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="config.html"
+                        title="next chapter">config module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/addtolist.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="config.html" title="config module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="getpickle.html" title="getpickle module"
+             >previous</a> |</li>
+        <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

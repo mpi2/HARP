@@ -1,0 +1,759 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>autofill &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for autofill</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">**Summary:**</span>
+
+<span class="sd">The following functions are used to update the parameters tab based on the input file used.</span>
+
+<span class="sd">NOTE:</span>
+<span class="sd">The methods here are not technically part of the HARP class but can be used as if they are. They are separated from</span>
+<span class="sd">the harp.py file just for convenience. To run a method from this module in harp.py the following notation can be</span>
+<span class="sd">used start(self) rather than self.start().</span>
+
+<span class="sd">--------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+
+<div class="viewcode-block" id="get_recon_log"><a class="viewcode-back" href="../autofill.html#autofill.get_recon_log">[docs]</a><span class="k">def</span> <span class="nf">get_recon_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Gets the recon log from the original recon folder, also gets the pixel size information using **get_pixel()**</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    :ivar str self.pixel_size: Pixel size. Modified here.</span>
+<span class="sd">    :raises IOError: Can&#39;t find recon log</span>
+<span class="sd">    :raises Exception: Custom python exception. Can&#39;t fin recon log</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">        :func:`get_pixel()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">input</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+    <span class="c"># Get the folder name and path name</span>
+    <span class="n">path</span><span class="p">,</span> <span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># I think some times the log file is .txt and sometimes .log, a check for both types and other</span>
+        <span class="c"># old formats of log files is checked as follows:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">folder_name</span><span class="p">,</span><span class="n">folder_name</span><span class="o">+</span><span class="s">&quot;.txt&quot;</span><span class="p">)):</span>
+            <span class="n">recon_log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">folder_name</span><span class="p">,</span><span class="n">folder_name</span><span class="o">+</span><span class="s">&quot;.txt&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">folder_name</span><span class="p">,</span><span class="n">folder_name</span><span class="o">+</span><span class="s">&quot;_rec.txt&quot;</span><span class="p">)):</span>
+            <span class="n">recon_log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">folder_name</span><span class="p">,</span><span class="n">folder_name</span><span class="o">+</span><span class="s">&quot;_rec.txt&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">folder_name</span><span class="p">,</span><span class="n">folder_name</span><span class="o">+</span><span class="s">&quot;.log&quot;</span><span class="p">)):</span>
+            <span class="n">recon_log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">folder_name</span><span class="p">,</span><span class="n">folder_name</span><span class="o">+</span><span class="s">&quot;.log&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">folder_name</span><span class="p">,</span><span class="n">folder_name</span><span class="o">+</span><span class="s">&quot;_rec.log&quot;</span><span class="p">)):</span>
+            <span class="n">recon_log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">folder_name</span><span class="p">,</span><span class="n">folder_name</span><span class="o">+</span><span class="s">&quot;_rec.log&quot;</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;No log file&#39;</span><span class="p">)</span>
+        <span class="c"># To make sure the path is in the correct format (prob not necessary..)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recon_log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">recon_log_path</span><span class="p">)</span>
+
+        <span class="c"># Open the log file as read only</span>
+        <span class="n">recon_log_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recon_log_path</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+
+        <span class="c"># get pixel size from get_pixel method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="n">get_pixel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modality</span><span class="p">,</span> <span class="n">recon_log_file</span><span class="p">)</span>
+
+        <span class="c"># Display the number on the lcd display</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberPixel</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">)</span>
+
+        <span class="c"># Set recon log text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTRecon</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recon_log_path</span><span class="p">))</span>
+
+    <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c"># Python standard exception identifies recon file not found</span>
+        <span class="k">print</span> <span class="s">&quot;exception re&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTRecon</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Not found&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberPixel</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">inst</span><span class="p">:</span>
+        <span class="c"># Custom exception identifies recon file not found</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberPixel</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTRecon</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Not found&quot;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberPixel</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">)</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Warning: Unexpected error getting recon log file&#39;</span><span class="p">,</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTRecon</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Not found&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_pixel"><a class="viewcode-back" href="../autofill.html#autofill.get_pixel">[docs]</a><span class="k">def</span> <span class="nf">get_pixel</span><span class="p">(</span><span class="n">modality</span><span class="p">,</span> <span class="n">recon_log_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Gets the pixel size from the recon log. Different regex required for OPT or uCT</span>
+
+<span class="sd">    :param str modality: OPT or uCT</span>
+<span class="sd">    :param str recon_log_file: recon log file full path</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Regex is different for opt and uct as they have different recon files</span>
+    <span class="k">if</span> <span class="n">modality</span> <span class="o">==</span> <span class="s">&quot;OPT&quot;</span><span class="p">:</span>
+        <span class="n">prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;^Image Pixel Size \(um\)=(\w+.\w+)&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;^Pixel Size \(um\)\=(\w+.\w+)&quot;</span><span class="p">)</span>
+
+    <span class="c"># for loop to go through the recon log file</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">recon_log_file</span><span class="p">:</span>
+        <span class="c"># &quot;chomp&quot; the line endings off</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="c"># if the line matches the regex print the (\w+.\w+) part of regex</span>
+        <span class="k">if</span> <span class="n">prog</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="p">:</span>
+            <span class="c"># Grab the pixel size with with .group(1)</span>
+            <span class="n">pixel_size</span> <span class="o">=</span> <span class="n">prog</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pixel_size</span>
+            <span class="k">break</span>
+</div>
+<div class="viewcode-block" id="get_name"><a class="viewcode-back" href="../autofill.html#autofill.get_name">[docs]</a><span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Gets the id from the folder name. Then fills out the text boxes on the main window with the relevant information</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    :param str name: Full folder name with path</span>
+<span class="sd">    :param boolean suppress: True warning messages are sent. False they are not.</span>
+
+<span class="sd">    :raise IndexError: Missing descriptor completely</span>
+<span class="sd">    :raise ValueError: Incorrect format of descriptor</span>
+
+<span class="sd">    NOTE: Gather error messages from exceptions to display one combined error message at the end</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Get the folder name and path</span>
+    <span class="n">path</span><span class="p">,</span><span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c"># first split the folder into list of identifiers</span>
+    <span class="n">name_list</span> <span class="o">=</span> <span class="n">folder_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">)</span>
+    <span class="c"># the full name will at first just be the folder name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditName</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">folder_name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">full_name</span> <span class="o">=</span> <span class="n">folder_name</span>
+
+    <span class="c"># Need to have exception to catch if the name is not in correct format.</span>
+    <span class="c"># If the name is not in the correct format it should flag to the user that this needs to be sorted</span>
+    <span class="c"># Added additional regex which the user has to check</span>
+    <span class="n">error_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c"># Checking Date</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDate</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">name_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&#39;%Y%m</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;- Date not available&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;- Incorrect date format should be = [YYYYMMDD]&quot;</span><span class="p">)</span>
+
+    <span class="c"># Checking gene name/group</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditGroup</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;- Gene name info not available&quot;</span><span class="p">)</span>
+
+    <span class="c"># Checking age/stage</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditAge</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name_list</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;- Stage/age info not available&quot;</span><span class="p">)</span>
+
+    <span class="c"># Litter</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditLitter</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name_list</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;- Litter info not available&quot;</span><span class="p">)</span>
+
+    <span class="c"># Zygosity</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditZygosity</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name_list</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;HOM|HET|WT|ND|NA&quot;</span><span class="p">,</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">prog</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">name_list</span><span class="p">[</span><span class="mi">4</span><span class="p">]):</span>
+            <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;- Zygosity should be either HOM,HET,WT,ND or NA&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;- Zygosity info not available&quot;</span><span class="p">)</span>
+
+    <span class="c"># Sex</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditSex</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name_list</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+
+        <span class="n">prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;XX|XY|ND&quot;</span><span class="p">,</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">prog</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">name_list</span><span class="p">[</span><span class="mi">5</span><span class="p">]):</span>
+            <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;- Sex should be either XX,XY or ND&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;- Sex info not available&quot;</span><span class="p">)</span>
+
+    <span class="c"># Channel (OPT only)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">==</span> <span class="s">&quot;OPT&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditChannel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name_list</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">name_list</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;rec&quot;</span> <span class="p">:</span>
+                <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;- IMPORTANT: OPT needs to include channel information. e.g. UV&quot;</span><span class="p">)</span>
+
+
+    <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">error_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;- IMPORTANT: OPT needs to include channel information. e.g. UV&quot;</span><span class="p">)</span>
+
+    <span class="c"># Show the user all the error messages together.</span>
+    <span class="k">if</span> <span class="n">error_list</span><span class="p">:</span>
+        <span class="n">error_string</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">error_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress</span><span class="p">:</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Warning (Naming not canonical):&#39;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="o">+</span><span class="n">error_string</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="auto_file_out"><a class="viewcode-back" href="../autofill.html#autofill.auto_file_out">[docs]</a><span class="k">def</span> <span class="nf">auto_file_out</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Auto fill to make output folder name. Just replaces &#39;recons&#39; to &#39;processed recons&#39; if possible</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">input</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;recons&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+            <span class="n">output_path</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&quot;processed recons&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="n">output_full</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">full_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_full</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output_full</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s">&quot;processed recons&quot;</span><span class="p">,</span><span class="n">folder_name</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_full</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Warning: Unexpected getting and auto file out&#39;</span><span class="p">,</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="auto_get_scan"><a class="viewcode-back" href="../autofill.html#autofill.auto_get_scan">[docs]</a><span class="k">def</span> <span class="nf">auto_get_scan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Auto find scan folder. Just replaces &#39;recons&#39; to &#39;processed recons&#39; if possible</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">input</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;recons&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scan_folder</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&quot;scan&quot;</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_folder</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditScan</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_folder</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditScan</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Not found&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scan_folder</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditScan</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Not found&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scan_folder</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</div>
+<div class="viewcode-block" id="auto_get_SPR"><a class="viewcode-back" href="../autofill.html#autofill.auto_get_SPR">[docs]</a><span class="k">def</span> <span class="nf">auto_get_SPR</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;  Finds any SPR files.</span>
+
+<span class="sd">    NOTE: This might be a bit redundant as the SPR files are not essential and are copied over with</span>
+<span class="sd">    any other file regardless</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">input</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="c"># Get the SPR file. Sometimes fiels are saved with upper or lower case file extensions</span>
+    <span class="c"># The following is bit of a stupid way of dealing with this problem but I think it works....</span>
+    <span class="n">SPR_file_bmp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">full_name</span><span class="o">+</span><span class="s">&quot;_spr.bmp&quot;</span><span class="p">)</span>
+    <span class="n">SPR_file_BMP</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">full_name</span><span class="o">+</span><span class="s">&quot;_spr.BMP&quot;</span><span class="p">)</span>
+    <span class="n">SPR_file_tif</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">full_name</span><span class="o">+</span><span class="s">&quot;_spr.tif&quot;</span><span class="p">)</span>
+    <span class="n">SPR_file_TIF</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">full_name</span><span class="o">+</span><span class="s">&quot;_spr.TIF&quot;</span><span class="p">)</span>
+    <span class="n">SPR_file_jpg</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">full_name</span><span class="o">+</span><span class="s">&quot;_spr.jpg&quot;</span><span class="p">)</span>
+    <span class="n">SPR_file_JPG</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">full_name</span><span class="o">+</span><span class="s">&quot;_spr.JPG&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">SPR_file_bmp</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTSPR</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">SPR_file_bmp</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">SPR_file_BMP</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTSPR</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">SPR_file_BMP</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">SPR_file_tif</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTSPR</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">SPR_file_tif</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">SPR_file_TIF</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTSPR</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">SPR_file_TIF</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">SPR_file_jpg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTSPR</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">SPR_file_jpg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">SPR_file_JPG</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTSPR</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">SPR_file_JPG</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTSPR</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Not found&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="folder_size_approx"><a class="viewcode-back" href="../autofill.html#autofill.folder_size_approx">[docs]</a><span class="k">def</span> <span class="nf">folder_size_approx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Gets the approx folder size of the original recon folder and updates the paramters tab with the info.</span>
+
+<span class="sd">    Calculating the folder size by going through each file would take too long. This</span>
+<span class="sd">    function just checks the first recon file and then multiples this by the number of recon files.</span>
+
+<span class="sd">    Output for display for the GUI will be in gb or mb depending on the size of the folder. This is done in</span>
+<span class="sd">    size_cleanup()</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    :ivar str self.f_size_out_gb: The file size in gb. Modified here.</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">        :func:`size_cleanup()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Get the input folder information</span>
+    <span class="nb">input</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+    <span class="c"># create a regex get example recon file</span>
+    <span class="n">prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;(.*)_rec\d+\.(bmp|tif|jpg|jpeg)&quot;</span><span class="p">,</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="c"># for loop to go through the directory</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="c">#print line+&quot;\n&quot;</span>
+            <span class="c"># if the line matches the regex break</span>
+            <span class="k">if</span> <span class="n">prog</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="p">:</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">line</span>
+                <span class="k">break</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">file1_size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">st_size</span>
+
+        <span class="c"># Need to distinguish between the file types. The calculation only includes recon files, as we known they will all be the same size.</span>
+        <span class="c"># This means the figure given in HARP will not be the exact folder size but the size of the recon &quot;stack&quot;</span>
+        <span class="n">num_files</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span> <span class="k">if</span> <span class="p">((</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.bmp&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.tif&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.jpg&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.jpeg&quot;</span><span class="p">)</span> <span class="ow">or</span>
+                          <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.BMP&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.TIF&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.JPG&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&quot;.JPEG&quot;</span><span class="p">)</span> <span class="ow">or</span>
+                          <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.bmp&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.tif&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.jpg&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.jpeg&quot;</span><span class="p">)</span> <span class="ow">or</span>
+                          <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.BMP&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.TIF&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.JPG&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&quot;spr.JPEG&quot;</span><span class="p">))])</span>
+
+        <span class="n">approx_size</span> <span class="o">=</span> <span class="n">num_files</span><span class="o">*</span><span class="n">file1_size</span>
+
+        <span class="c"># convert to gb</span>
+        <span class="n">size_mb</span> <span class="o">=</span>  <span class="p">(</span><span class="n">approx_size</span><span class="o">/</span><span class="p">(</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">))</span>
+        <span class="n">size_gb</span> <span class="o">=</span>  <span class="p">(</span><span class="n">approx_size</span><span class="o">/</span><span class="p">(</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="o">*</span><span class="mf">1024.0</span><span class="p">))</span>
+
+        <span class="c"># Save file size as an object to be used later</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_size_out_gb</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%0.4f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">size_gb</span><span class="p">)</span>
+
+        <span class="c">#Clean up the formatting of gb mb</span>
+        <span class="n">size_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">size_gb</span><span class="p">,</span><span class="n">size_mb</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c"># Should potentially add some other error catching</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Message&quot;</span><span class="p">,</span> <span class="s">&quot;Unexpected error in folder size calc: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+
+</div>
+<div class="viewcode-block" id="size_cleanup"><a class="viewcode-back" href="../autofill.html#autofill.size_cleanup">[docs]</a><span class="k">def</span> <span class="nf">size_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size_gb</span><span class="p">,</span> <span class="n">size_mb</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Used in folderSizeApprox() to format the output.</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    :param float f_size_out:</span>
+<span class="sd">    :param approx_size:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Check if size should be shown as gb or mb</span>
+    <span class="c"># Need to change file size to 2 decimal places</span>
+    <span class="k">if</span> <span class="n">size_gb</span> <span class="o">&lt;</span> <span class="mf">0.05</span> <span class="p">:</span>
+        <span class="c"># make to 2 decimal places</span>
+        <span class="n">size_mb</span> <span class="o">=</span>  <span class="s">&quot;</span><span class="si">%0.2f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">size_mb</span><span class="p">)</span>
+        <span class="c"># change label to show mb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelFile</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Folder size (Mb)&quot;</span><span class="p">)</span>
+        <span class="c"># update lcd display</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberFile</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">size_mb</span><span class="p">)</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="c"># display as gb</span>
+        <span class="c"># make to 2 decimal places</span>
+        <span class="n">size_gb</span> <span class="o">=</span>  <span class="s">&quot;</span><span class="si">%0.2f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">size_gb</span><span class="p">)</span>
+        <span class="c"># change label to show mb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelFile</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Folder size (Gb)&quot;</span><span class="p">)</span>
+        <span class="c"># update lcd display</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberFile</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">size_gb</span><span class="p">)</span>
+
+<span class="c">#==========================================================================</span>
+<span class="c"># All the uCT channel shenanigans</span>
+<span class="c">#==========================================================================</span></div>
+<div class="viewcode-block" id="opt_uCT_check"><a class="viewcode-back" href="../autofill.html#autofill.opt_uCT_check">[docs]</a><span class="k">def</span> <span class="nf">opt_uCT_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">suppress</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Checks whether or not folder name contains reference to either opt or microCT</span>
+
+<span class="sd">    Updates the GUI options based on modality</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    :param boolean suppress: If True warning messages will spit out. If suppressed they won&#39;t</span>
+<span class="sd">    :ivar str self.modality: Changes based on the modality chosen. Value should be either &#39;MicroCT&#39; or &#39;OPT&#39;. Modified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Get in file</span>
+    <span class="n">file_in</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+    <span class="c"># get comilied regex thing</span>
+    <span class="n">p_opt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;OPT&quot;</span><span class="p">,</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+    <span class="n">p_uCT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;MicroCT&quot;</span><span class="p">,</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+    <span class="c"># Check if OPT and enable relevant options</span>
+    <span class="k">if</span> <span class="n">p_opt</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">file_in</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">=</span> <span class="s">&quot;OPT&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonOPT</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditChannel</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelChannel</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxInd</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="c"># Check if uCT and enable relevant options</span>
+    <span class="k">elif</span> <span class="n">p_uCT</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">file_in</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">=</span> <span class="s">&quot;MicroCT&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonuCT</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditChannel</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelChannel</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxInd</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress</span><span class="p">:</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Warning: Cannot automatically determine if uCT or OPT please check&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="get_channels"><a class="viewcode-back" href="../autofill.html#autofill.get_channels">[docs]</a><span class="k">def</span> <span class="nf">get_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Updates the OPT list on the GUI</span>
+
+<span class="sd">    This method does the following:</span>
+<span class="sd">    * Check if OPT is selected</span>
+<span class="sd">    * look up recon parent folder and search for other available OPT channels</span>
+<span class="sd">    * Make a list of these channels</span>
+<span class="sd">    * Loop through this list and each channel to the OPT channel table (the parameters tab)</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">        :func:`error_check_chn()`,</span>
+<span class="sd">        :func:`get_crop_box()`</span>
+<span class="sd">        :func:`check_if_on_list()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># reset the table</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">clearContents</span><span class="p">()</span>
+
+    <span class="c"># Make sure OPT is selected</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">==</span> <span class="s">&quot;OPT&quot;</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="c"># Are there matching folders in the parent directory of the input directory</span>
+    <span class="n">in_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+    <span class="c"># Get the folder name and path name</span>
+    <span class="n">path</span><span class="p">,</span> <span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">in_dir</span><span class="p">)</span>
+
+    <span class="c"># get a list of the names in the folder name</span>
+    <span class="n">l_init</span> <span class="o">=</span> <span class="n">folder_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">)</span>
+
+    <span class="c"># get the name without the channel (only works if name is in the correct format)</span>
+    <span class="n">base_name</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l_init</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+
+    <span class="c"># set the name up for the current channel. Blank if name not set up properly</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">chn_init</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">l_init</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">chn_init</span> <span class="o">=</span> <span class="s">&quot;NA&quot;</span>
+
+    <span class="c"># Initialised tuples</span>
+    <span class="n">chan_full</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">chan_short</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c"># add original current channel to the channel lists.</span>
+    <span class="c"># Full has the path, short does not</span>
+    <span class="n">chan_full</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">folder_name</span><span class="p">)</span>
+    <span class="n">chan_short</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chn_init</span><span class="p">)</span>
+
+    <span class="c">#===========================================================================================</span>
+    <span class="c"># look up recon parent folder and search for other available OPT channels</span>
+    <span class="c">#===========================================================================================</span>
+    <span class="c"># Check parent input folder actually exists</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="c"># for loop to go through the parent input directory</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+
+        <span class="c"># convert to string (had problems in the past with numbers)</span>
+        <span class="n">line</span> <span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="c"># Check if the line matches the base_name but is not the same as the input file. The folder is probably another</span>
+        <span class="c"># channel</span>
+        <span class="c"># Check line matches base name</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="c"># Check if is not the same as the input file</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">line</span> <span class="o">==</span> <span class="n">folder_name</span><span class="p">):</span>
+
+            <span class="c"># Check if it is a folder with recons etc for the other channels</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">error_check_chn</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">line</span><span class="p">)):</span>
+
+                <span class="c"># if it is then add to the channel lists</span>
+                <span class="n">chan_full</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="n">chan_short</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="c">#===========================================================================================</span>
+    <span class="c"># Add channels to OPT table on parameters tab</span>
+    <span class="c">#===========================================================================================</span>
+    <span class="c"># initialise count</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c"># Create instance variable for other methods to use</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chan_full</span> <span class="o">=</span> <span class="n">chan_full</span>
+
+    <span class="c"># for loop through the channel names</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">chan_full</span><span class="p">:</span>
+
+        <span class="c"># split the name into IMPC components</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">)</span>
+
+        <span class="c"># If cant split into IMPC components then can&#39;t set the channel type</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">chn</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">chn</span> <span class="o">=</span> <span class="s">&quot;NA&quot;</span>
+
+        <span class="c"># Make the current channel highlighted</span>
+        <span class="n">chn_item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">chn_item</span><span class="p">)</span>
+        <span class="n">chn_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">chn_item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">chn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">folder_name</span><span class="p">:</span>
+            <span class="n">chn_item</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">220</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="c"># Set up the name of the recon</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c"># Set up whether or not there is a crop box available</span>
+        <span class="c"># The get_crop_box checks if the parent processed folder to see if the channel has previously been analysed</span>
+        <span class="c"># and a cropbox file has been saved</span>
+        <span class="k">if</span> <span class="n">get_crop_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+            <span class="n">crop_status</span> <span class="o">=</span> <span class="s">&quot;Yes&quot;</span>
+        <span class="c"># check_if_on_list method checks if channel is on the processing list</span>
+        <span class="k">elif</span> <span class="n">check_if_on_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="n">crop_status</span> <span class="o">=</span> <span class="s">&quot;On list&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">crop_status</span> <span class="o">=</span> <span class="s">&quot;No&quot;</span>
+
+        <span class="c"># add to the GUI table</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">crop_status</span><span class="p">)</span>
+
+        <span class="c"># count_in is the counter for the row to add data</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c"># Reszie and sort the columns to fit the data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">setSortingEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">sortByColumn</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="get_crop_box"><a class="viewcode-back" href="../autofill.html#autofill.get_crop_box">[docs]</a><span class="k">def</span> <span class="nf">get_crop_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Checks if cropbox file exists for a given recon name</span>
+
+<span class="sd">    Used by get_channels</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    :param str name: Recon name for which the cropbox path is to be checked</span>
+<span class="sd">    :return boolean: True if cropbox path exists</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">==</span> <span class="s">&quot;OPT&quot;</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">path_out</span><span class="p">,</span><span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
+
+    <span class="c"># See if the cropbox file exists</span>
+    <span class="n">cropbox_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_out</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s">&quot;Metadata&quot;</span><span class="p">,</span><span class="s">&quot;cropbox.txt&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cropbox_path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+</div>
+<div class="viewcode-block" id="check_if_on_list"><a class="viewcode-back" href="../autofill.html#autofill.check_if_on_list">[docs]</a><span class="k">def</span> <span class="nf">check_if_on_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;  A while loop is used to go through the processing table see if the channel is on the list</span>
+
+<span class="sd">    Used by get_channels</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    :param name:</span>
+<span class="sd">    :return boolean: True if channel is on list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="c"># This gets the status text</span>
+        <span class="n">name_on_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name_on_list</span><span class="p">:</span>
+            <span class="c"># if not defined it means there are no recons left to process</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name_on_list</span><span class="o">.</span><span class="n">text</span><span class="p">()):</span>
+            <span class="c"># this row has the OPT channel ID meaning a cropbox will be ready when this is ran</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+</div>
+<div class="viewcode-block" id="error_check_chn"><a class="viewcode-back" href="../autofill.html#autofill.error_check_chn">[docs]</a><span class="k">def</span> <span class="nf">error_check_chn</span><span class="p">(</span><span class="n">chn_dir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Checks the channel recon directory to see if it is a valid file</span>
+
+<span class="sd">    Used in get_channels</span>
+
+<span class="sd">    :param str chn_dir: The channel directory to be checked</span>
+<span class="sd">    :return int: 1 if error 0 or nothing if OK</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Check if input folder exists</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">chn_dir</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="c"># Check if a directory</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">chn_dir</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="c">#Check if folder is empty</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">chn_dir</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="c">#Check if input folder contains any image files</span>
+    <span class="n">prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;(.*).(bmp|tif|jpg|jpeg)&quot;</span><span class="p">,</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+    <span class="c"># init file check variable</span>
+    <span class="n">file_check</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c"># for loop to go through the directory</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">chn_dir</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="c">#print line+&quot;\n&quot;</span>
+        <span class="c"># if the line matches the regex break</span>
+        <span class="k">if</span> <span class="n">prog</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">file_check</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">break</span>
+
+    <span class="c"># No valid files return with error</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">file_check</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+</div>
+<div class="viewcode-block" id="auto_get_derived"><a class="viewcode-back" href="../autofill.html#autofill.auto_get_derived">[docs]</a><span class="k">def</span> <span class="nf">auto_get_derived</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Updates the derived crop box line edit box on the GUI</span>
+
+<span class="sd">    NOTE: Only works for IMPC setup folder structure</span>
+
+<span class="sd">    * While loop through OPT list.</span>
+<span class="sd">    * See if one of them is either processed or on list.</span>
+<span class="sd">        * Previously checked if processed or on list in get_channels()</span>
+<span class="sd">    * If one of them is - Set as the derived crop box on the GUI</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Get row count</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+
+    <span class="c"># Get parent output folder</span>
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">path_out</span><span class="p">,</span> <span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
+
+    <span class="c"># For loop through the OPT list</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="c"># Get info from table</span>
+        <span class="n">processed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">processed</span><span class="p">:</span>
+            <span class="c"># check if on processing list</span>
+            <span class="k">if</span> <span class="n">processed</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;On list&quot;</span><span class="p">:</span>
+                    <span class="c"># If it is the current recon don&#39;t use as the derived</span>
+                    <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">folder_name</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+            <span class="c"># Now we can use the channel if it matches the following criteria</span>
+            <span class="k">if</span> <span class="n">processed</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;Yes&quot;</span> <span class="ow">or</span> <span class="n">processed</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;On list&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">crop_box_use</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+                <span class="c"># show name for user</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                <span class="k">break</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

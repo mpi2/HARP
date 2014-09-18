@@ -4,12 +4,13 @@
 .. toctree::
    :maxdepth: 4
 
+   addtolist
    autocrop
-   autocrop_fast_threaded
    autofill
    config
    crop
    errorcheck
+   getdimensions
    getpickle
    harp
    mainwindow

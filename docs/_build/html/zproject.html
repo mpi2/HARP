@@ -23,7 +23,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="HARP 1 documentation" href="index.html" /> 
+    <link rel="top" title="HARP 1 documentation" href="index.html" />
+    <link rel="next" title="crop module" href="crop.html" />
+    <link rel="prev" title="autocrop module" href="autocrop.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,6 +37,12 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="crop.html" title="crop module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="autocrop.html" title="autocrop module"
+             accesskey="P">previous</a> |</li>
         <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -48,36 +56,36 @@
 <span id="zproject-module"></span><h1>zproject module<a class="headerlink" href="#module-zproject" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="zproject.ZProjectThread">
-<em class="property">class </em><tt class="descclassname">zproject.</tt><tt class="descname">ZProjectThread</tt><big>(</big><em>input</em>, <em>tmp_dir</em><big>)</big><a class="headerlink" href="#zproject.ZProjectThread" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">zproject.</tt><tt class="descname">ZProjectThread</tt><big>(</big><em>input</em>, <em>tmp_dir</em><big>)</big><a class="reference internal" href="_modules/zproject.html#ZProjectThread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zproject.ZProjectThread" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyQt4.QtCore.QThread</span></tt></p>
 <dl class="method">
 <dt id="zproject.ZProjectThread.run">
-<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#zproject.ZProjectThread.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/zproject.html#ZProjectThread.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zproject.ZProjectThread.run" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="zproject.ZProjectThread.z_callback">
-<tt class="descname">z_callback</tt><big>(</big><em>msg</em><big>)</big><a class="headerlink" href="#zproject.ZProjectThread.z_callback" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">z_callback</tt><big>(</big><em>msg</em><big>)</big><a class="reference internal" href="_modules/zproject.html#ZProjectThread.z_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zproject.ZProjectThread.z_callback" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="zproject.Zproject">
-<em class="property">class </em><tt class="descclassname">zproject.</tt><tt class="descname">Zproject</tt><big>(</big><em>img_dir</em>, <em>out_dir</em>, <em>callback</em><big>)</big><a class="headerlink" href="#zproject.Zproject" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">zproject.</tt><tt class="descname">Zproject</tt><big>(</big><em>img_dir</em>, <em>out_dir</em>, <em>callback</em><big>)</big><a class="reference internal" href="_modules/zproject.html#Zproject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zproject.Zproject" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="zproject.Zproject.fileReader">
-<tt class="descname">fileReader</tt><big>(</big><big>)</big><a class="headerlink" href="#zproject.Zproject.fileReader" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">fileReader</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/zproject.html#Zproject.fileReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zproject.Zproject.fileReader" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="zproject.Zproject.maxFinder">
-<tt class="descname">maxFinder</tt><big>(</big><big>)</big><a class="headerlink" href="#zproject.Zproject.maxFinder" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">maxFinder</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/zproject.html#Zproject.maxFinder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zproject.Zproject.maxFinder" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="zproject.Zproject.run">
-<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#zproject.Zproject.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/zproject.html#Zproject.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zproject.Zproject.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the Zprojection
 &#64;return in 0 on success
 &#64;return string with error message (TODO)</p>
@@ -87,7 +95,7 @@
 
 <dl class="function">
 <dt id="zproject.dummyCallBack">
-<tt class="descclassname">zproject.</tt><tt class="descname">dummyCallBack</tt><big>(</big><em>msg</em><big>)</big><a class="headerlink" href="#zproject.dummyCallBack" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">zproject.</tt><tt class="descname">dummyCallBack</tt><big>(</big><em>msg</em><big>)</big><a class="reference internal" href="_modules/zproject.html#dummyCallBack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zproject.dummyCallBack" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -98,6 +106,12 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="autocrop.html"
+                        title="previous chapter">autocrop module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="crop.html"
+                        title="next chapter">crop module</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/zproject.txt"
@@ -129,6 +143,12 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="crop.html" title="crop module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="autocrop.html" title="autocrop module"
+             >previous</a> |</li>
         <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
       </ul>
     </div>

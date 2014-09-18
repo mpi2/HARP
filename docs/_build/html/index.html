@@ -23,7 +23,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="HARP 1 documentation" href="#" /> 
+    <link rel="top" title="HARP 1 documentation" href="#" />
+    <link rel="next" title="harp module" href="harp.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,6 +36,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="harp.html" title="harp module"
+             accesskey="N">next</a> |</li>
         <li><a href="#">HARP 1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -48,32 +52,37 @@
 <h1>Welcome to HARP&#8217;s documentation!<a class="headerlink" href="#welcome-to-harp-s-documentation" title="Permalink to this headline">¶</a></h1>
 <p>HARP v1.0.1: Harwell Automated Recon Processor</p>
 <p>Tool to crop, scale and compress reconstructed images from microCT  or OPT data</p>
+<p>Allows the user to setup a parameter file in the first tab. This is saved and added to a processing list. Multiple
+parameter files can be generated and added to the list. The list can then be processed and the status checked
+by looking at the processing tab.</p>
+</div>
 <div class="section" id="content">
-<h2>Content<a class="headerlink" href="#content" title="Permalink to this headline">¶</a></h2>
-<ul>
-<li><dl class="first docutils">
-<dt>GUI functions</dt>
-<dd><ul class="first last simple">
-<li>Main GUI</li>
-<li>Autofill</li>
-<li>Errocheck</li>
-<li></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>Processing</dt>
-<dd><ul class="first last simple">
-<li>autocrop</li>
-<li></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
+<h1>Content<a class="headerlink" href="#content" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="parameter-creating-modules">
+<h2>Parameter creating modules<a class="headerlink" href="#parameter-creating-modules" title="Permalink to this headline">¶</a></h2>
+<p>Modules used to get the parameter file and for GUI interactions.</p>
+<p>The Module <strong>harp</strong> is the main module for the tool.</p>
 <div class="toctree-wrapper compound">
-<ul class="simple">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="harp.html">harp module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autofill.html">autofill module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="errorcheck.html">errorcheck module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getpickle.html">getpickle module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="addtolist.html">addtolist module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">config module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getdimensions.html">getdimensions module</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="processing-modules">
+<h2>Processing modules<a class="headerlink" href="#processing-modules" title="Permalink to this headline">¶</a></h2>
+<p>Modules used to perform the actual processing</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autocrop.html">autocrop module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zproject.html">zproject module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crop.html">crop module</a></li>
 </ul>
 </div>
 </div>
@@ -95,13 +104,18 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to HARP&#8217;s documentation!</a><ul>
-<li><a class="reference internal" href="#content">Content</a></li>
+<li><a class="reference internal" href="#">Welcome to HARP&#8217;s documentation!</a></li>
+<li><a class="reference internal" href="#content">Content</a><ul>
+<li><a class="reference internal" href="#parameter-creating-modules">Parameter creating modules</a></li>
+<li><a class="reference internal" href="#processing-modules">Processing modules</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 
+  <h4>Next topic</h4>
+  <p class="topless"><a href="harp.html"
+                        title="next chapter">harp module</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -133,6 +147,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="harp.html" title="harp module"
+             >next</a> |</li>
         <li><a href="#">HARP 1 documentation</a> &raquo;</li> 
       </ul>
     </div>

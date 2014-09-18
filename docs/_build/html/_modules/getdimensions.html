@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>getdimensions &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for getdimensions</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">zproject</span> <span class="kn">import</span> <span class="n">ZProjectThread</span>
+<span class="kn">import</span> <span class="nn">crop</span>
+
+<span class="c">#======================================================================</span>
+<span class="c">#  Functions for get Dimensions (z projection)</span>
+<span class="c">#======================================================================</span>
+<div class="viewcode-block" id="get_dimensions"><a class="viewcode-back" href="../getdimensions.html#getdimensions.get_dimensions">[docs]</a><span class="k">def</span> <span class="nf">get_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Allow a user to choose crop dimensions by choosing a region based on the z-projection of the image.</span>
+
+<span class="sd">    This z projection is calculated on a seperate thread. Process is as follows:</span>
+
+<span class="sd">    1. **start_z_thread** starts a thread using the module zproject</span>
+<span class="sd">    2. z projection is performed in background giving updates to the &quot;status&quot; section of the GUI</span>
+<span class="sd">    3. The **zproject_slot** catches any signals</span>
+<span class="sd">    4. &quot;Z-projection finished&quot; is called and **run_crop** loads a new window.</span>
+<span class="sd">    5. The user can then select the crop dimensions</span>
+<span class="sd">    6. When the crop dimensions are selected the crop window is closed and the cropbox parameter is saved on the GUI</span>
+
+<span class="sd">    Two important modules used: crop.py and zproject.py</span>
+
+<span class="sd">    * zproject performs the zprojection and displays the image.</span>
+<span class="sd">    * crop.py then gets the dimensions to perform the crop</span>
+
+<span class="sd">    IMPORTANT NOTE: The cropping is not actually done here. This is just to get the dimensions.</span>
+
+<span class="sd">    :ivar boolean self.stop: If True HARP stops pre-processing steps. Set to None before z projection performed</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">        :func:`start_z_thread()`,</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># get the input folder</span>
+    <span class="n">input_folder</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+    <span class="c"># Check input folder is defined</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">input_folder</span><span class="p">:</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Warning: input directory not defined&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="c"># Check input folder exists</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">input_folder</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Warning: input folder does not exist&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="c">#Check if folder is empty</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">input_folder</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Warning: input folder is empty&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c"># Set to None so z_projection doesn&#39;t stop unless cancelled</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c"># Let the user know what is going on</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">textEditStatusMessages</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Z-projection in process, please wait&quot;</span><span class="p">)</span>
+    <span class="c">#Run the zprojection</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">start_z_thread</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="start_z_thread"><a class="viewcode-back" href="../getdimensions.html#getdimensions.start_z_thread">[docs]</a><span class="k">def</span> <span class="nf">start_z_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Starts a thread to perform z projection processing in the background.</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">        :func:`zproject.ZProjectThread()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Get input folder</span>
+    <span class="n">input_folder</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+    <span class="c"># Set thread off</span>
+    <span class="n">z_thread_pool</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_thread_pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ZProjectThread</span><span class="p">(</span><span class="n">input_folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_dir</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_thread_pool</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">z_thread_pool</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;update(QString)&quot;</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">zproject_slot</span><span class="p">)</span>
+    <span class="n">z_thread_pool</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">z_thread_pool</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="zproject_slot"><a class="viewcode-back" href="../getdimensions.html#getdimensions.zproject_slot">[docs]</a><span class="k">def</span> <span class="nf">zproject_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Listens to the z projection child process.</span>
+
+<span class="sd">    Displays all messages to the status section of the parameters tab. Once zprojection is finished opens window</span>
+<span class="sd">    to display zproject for user to get crop dimensions, using *run_crop*</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">        :func:`run_crop()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Update HARP GUI to status of the zprojection</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">textEditStatusMessages</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="c"># Check if z projection finished</span>
+    <span class="k">if</span> <span class="n">message</span> <span class="o">==</span> <span class="s">&quot;Z-projection finished&quot;</span><span class="p">:</span>
+        <span class="c"># Get the crop dimensions and save the file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_crop</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s">&quot;max_intensity_z.tif&quot;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="run_crop"><a class="viewcode-back" href="../getdimensions.html#getdimensions.run_crop">[docs]</a><span class="k">def</span> <span class="nf">run_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Creates the a window to display the z projection used to get crop dimensions</span>
+
+<span class="sd">    Creates an object from the crop module. Uses a call back method to get the crop dimensions after the user</span>
+<span class="sd">    has selected them.</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">        :func:`crop.Crop()`</span>
+<span class="sd">        :func:`crop_call_back()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cropper</span> <span class="o">=</span> <span class="n">crop</span><span class="o">.</span><span class="n">Crop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_call_back</span><span class="p">,</span> <span class="n">img_path</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="n">cropper</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="crop_call_back"><a class="viewcode-back" href="../getdimensions.html#getdimensions.crop_call_back">[docs]</a><span class="k">def</span> <span class="nf">crop_call_back</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Method to get crop dimension (crop box) from z projecion image.</span>
+
+<span class="sd">    Saves the crop dimensions to the line edit boxes on the GUI.</span>
+
+<span class="sd">    :param list box: Crop dimensions (crop box) the user selected</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditX</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditY</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditW</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditH</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">textEditStatusMessages</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Dimensions selected&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonGetDimensions</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Get Dimensions&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

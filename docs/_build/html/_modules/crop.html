@@ -1,0 +1,363 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>crop &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for crop</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Crop.py open an image (probably a max intensity z-projection)</span>
+<span class="sd">User draws a cropping box. returns the coordinates</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="Crop"><a class="viewcode-back" href="../crop.html#crop.Crop">[docs]</a><span class="k">class</span> <span class="nc">Crop</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Crop</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s">&quot;Manual cropping&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">MainWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">950</span><span class="p">,</span> <span class="mi">950</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="c">#Do not allow resizing for now as the rubber band does not move in proportion with the image</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))</span>
+
+        <span class="c">#Menu bar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menubar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">menuBar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;&amp;close&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closeMenuAction</span><span class="p">)</span>
+        <span class="n">fileMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">menubar</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s">&#39;&amp;file&#39;</span><span class="p">)</span>
+        <span class="n">fileMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closeAction</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s">&quot;&amp;crop (right click)&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cropMenuAction</span><span class="p">)</span>
+        <span class="n">cropMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">menubar</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s">&#39;&amp;crop&#39;</span><span class="p">)</span>
+        <span class="n">cropMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
+
+
+
+
+
+<div class="viewcode-block" id="Crop.cropMenuAction"><a class="viewcode-back" href="../crop.html#crop.Crop.cropMenuAction">[docs]</a>    <span class="k">def</span> <span class="nf">cropMenuAction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">doTheCrop</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Crop.closeMenuAction"><a class="viewcode-back" href="../crop.html#crop.Crop.closeMenuAction">[docs]</a>    <span class="k">def</span> <span class="nf">closeMenuAction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c">#sys.exit(app.exec_())</span>
+    <span class="c">#self.widget.close()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+
+</div></div>
+<div class="viewcode-block" id="MainWidget"><a class="viewcode-back" href="../crop.html#crop.MainWidget">[docs]</a><span class="k">class</span> <span class="nc">MainWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MainWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsScene</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">setSceneRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">950</span><span class="p">,</span> <span class="mi">950</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">setSceneRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">950</span><span class="p">,</span> <span class="mi">950</span><span class="p">)</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        <span class="c">#Scale the largest dimension to 950 pixs. Use same scaling for the other dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orig_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orig_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="n">max_dimen</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_width</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_height</span><span class="p">)])</span>
+        <span class="k">print</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_width</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_height</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;crop: dim&quot;</span><span class="p">,</span> <span class="n">max_dimen</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaleFact</span> <span class="o">=</span> <span class="mf">950.00</span> <span class="o">/</span> <span class="n">max_dimen</span>
+        <span class="c">#print &quot;jhg &quot;, self.scaleFact</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_width</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaleFact</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_height</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaleFact</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsPixmapItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">scaled</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">mousePressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePress</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">mouseMoveEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouseMove</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">mouseReleaseEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouseRelease</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">click_positions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawing</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cropBox</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cornerSet</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c">#Hack. Mouse events give me position of mouse relative to image</span>
+        <span class="c">#TODO: set this dynamically</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">img_dist_top</span> <span class="o">=</span> <span class="mi">15</span> <span class="c">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">img_dist_left</span> <span class="o">=</span> <span class="mi">15</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QRubberBand</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QRubberBand</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span><span class="p">);</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span><span class="o">.</span><span class="n">updatesEnabled</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="MainWidget.doTheCrop"><a class="viewcode-back" href="../crop.html#crop.MainWidget.doTheCrop">[docs]</a>    <span class="k">def</span> <span class="nf">doTheCrop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#Get the coords of the rubber band</span>
+        <span class="n">small_box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span><span class="o">.</span><span class="n">getCoords</span><span class="p">()</span>
+        <span class="c">#Convert this to the dimensions of the unscaled image</span>
+        <span class="n">large_box</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">scaleFact</span><span class="p">)</span><span class="o">*</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">small_box</span><span class="p">]</span>
+
+        <span class="c">#To get the ruuber band to fit on the pixmap I added self.distance from x + y</span>
+        <span class="c"># So need to remove that * the scaling factor of the image (yscale = xscale)</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">large_box</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_dist_left</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaleFact</span> <span class="p">))</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">large_box</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_dist_top</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaleFact</span><span class="p">))</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">large_box</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">large_box</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">large_box</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">large_box</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c">#x2 = self.orig_width - (int(large_box[2] - (self.img_dist_left / self.scaleFact )))</span>
+        <span class="c">#y2 = self.orig_height - (int(large_box[3] - (self.img_dist_top / self.scaleFact)))</span>
+
+        <span class="n">ijCropBox</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;ImageJ friendly cropbox: makeRectangle({0})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ijCropBox</span><span class="p">))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;ImageJ friendly cropbox: makeRectangle({0})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ijCropBox</span><span class="p">)))</span>
+        <span class="n">cropBox</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">cropBox</span><span class="p">)</span>
+        <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">cropBox</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="MainWidget.mouseMove"><a class="viewcode-back" href="../crop.html#crop.MainWidget.mouseMove">[docs]</a>    <span class="k">def</span> <span class="nf">mouseMove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Called when mouse is moved with button pressed</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c">#print &quot;frame &quot;, self.parent.geometry().width()</span>
+        <span class="c">#print &quot;widget &quot;, self.geometry().width()</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_dist_left</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_dist_top</span><span class="p">)</span>
+        <span class="c">#print(pos)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cornerSet</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cornerSet</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="c">#print &quot;corner: &quot;,self.x, &quot; &quot;, self.y</span>
+            <span class="k">return</span>
+
+        <span class="c">#print &quot;event: &quot;, pos</span>
+        <span class="c">#print pos</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawing</span><span class="p">:</span>
+            <span class="c">#print self.x, &quot;:&quot;, self.y</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span><span class="c">#Band has been drawn, bow resize it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resizeRect</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="MainWidget.mousePress"><a class="viewcode-back" href="../crop.html#crop.MainWidget.mousePress">[docs]</a>    <span class="k">def</span> <span class="nf">mousePress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">button</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">button</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c">#self.pixmap_item.rubberBand.setGeometry(1, 1, 200, 200)</span>
+            <span class="c">#self.setCorner(event) #</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">button</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">doTheCrop</span><span class="p">()</span> <span class="c">#self.drawing = True #maybe clear the box and start over</span>
+
+
+<span class="c">#     def setCorner(self, event):</span>
+<span class="c">#         #if self.drawing:</span>
+<span class="c">#         pass</span>
+
+</div>
+<div class="viewcode-block" id="MainWidget.resizeRect"><a class="viewcode-back" href="../crop.html#crop.MainWidget.resizeRect">[docs]</a>    <span class="k">def</span> <span class="nf">resizeRect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Find the nearest side of the rubber band and drag it</span>
+<span class="sd">        @param event Qt mouse event</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c">#Fet the current mouse pos</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_dist_left</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_dist_top</span><span class="p">)</span>
+        <span class="c">#print pos</span>
+        <span class="c">#Get ccords of current rubber band</span>
+        <span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span><span class="o">.</span><span class="n">getCoords</span><span class="p">()</span>
+
+        <span class="n">topLx</span> <span class="o">=</span> <span class="n">rect</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">topLy</span> <span class="o">=</span> <span class="n">rect</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">botRx</span><span class="o">=</span> <span class="n">rect</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">botRy</span> <span class="o">=</span> <span class="n">rect</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="c">#find closest corder to mouse with Pythagoras</span>
+        <span class="n">dists</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">topLx</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>  <span class="o">+</span> <span class="p">(</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">topLy</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="p">),</span>
+                 <span class="mi">2</span><span class="p">:</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">botRx</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>  <span class="o">+</span> <span class="p">(</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">topLy</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="p">),</span>
+                 <span class="mi">3</span><span class="p">:</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">botRx</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>  <span class="o">+</span> <span class="p">(</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">botRy</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="p">),</span>
+                 <span class="mi">4</span><span class="p">:</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">topLx</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>  <span class="o">+</span> <span class="p">(</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">botRy</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="p">)}</span>
+
+        <span class="n">corner</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">dists</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c">#get the corner. Corner numbered 1-4 clockwise from top-left</span>
+        <span class="n">side</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">corner</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">topLy</span><span class="p">),</span>
+               <span class="mi">4</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">topLx</span><span class="p">)}</span>
+            <span class="n">side</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">corner</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">botRx</span><span class="p">),</span>
+               <span class="mi">1</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">topLy</span><span class="p">)}</span>
+            <span class="n">side</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">corner</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">botRx</span><span class="p">),</span>
+               <span class="mi">3</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">botRy</span><span class="p">)}</span>
+            <span class="n">side</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">corner</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="p">{</span><span class="mi">4</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">topLx</span><span class="p">),</span>
+               <span class="mi">3</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">botRy</span><span class="p">)}</span>
+            <span class="n">side</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span>
+
+        <span class="c">#Get the nearest side. Sides numbered 1-4 clockwise from top</span>
+        <span class="c">#print &quot;corner:&quot; , corner, &quot; side:&quot;, side</span>
+        <span class="k">if</span> <span class="n">side</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">setTop</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+            <span class="c">#print r.getRect()</span>
+        <span class="k">if</span> <span class="n">side</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">setRight</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">side</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">setBottom</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+            <span class="c">#print r.getRect()</span>
+        <span class="k">if</span> <span class="n">side</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">setLeft</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pixmap_item</span><span class="o">.</span><span class="n">rubberBand</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+
+        <span class="k">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="MainWidget.mouseRelease"><a class="viewcode-back" href="../crop.html#crop.MainWidget.mouseRelease">[docs]</a>    <span class="k">def</span> <span class="nf">mouseRelease</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        On first mouse release, prevent further drawing of rubberbands</span>
+<span class="sd">        So that box can be resized</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawing</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drawing</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+
+</div></div>
+<div class="viewcode-block" id="run_from_cli"><a class="viewcode-back" href="../crop.html#crop.run_from_cli">[docs]</a><span class="k">def</span> <span class="nf">run_from_cli</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
+    <span class="c">#Need access to app to be able to exit gracefully from cli</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">Crop</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span>
+    <span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="run"><a class="viewcode-back" href="../crop.html#crop.run">[docs]</a><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">Crop</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span>
+    <span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="dummyCallback"><a class="viewcode-back" href="../crop.html#crop.dummyCallback">[docs]</a><span class="k">def</span> <span class="nf">dummyCallback</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
+    <span class="k">print</span> <span class="n">output</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">run_from_cli</span><span class="p">(</span><span class="n">dummyCallback</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span> <span class="c">#create def for printing box</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

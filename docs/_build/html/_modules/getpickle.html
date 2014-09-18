@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>getpickle &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for getpickle</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="kn">from</span> <span class="nn">config</span> <span class="kn">import</span> <span class="n">ConfigClass</span>
+
+
+<div class="viewcode-block" id="get_pickle"><a class="viewcode-back" href="../getpickle.html#getpickle.get_pickle">[docs]</a><span class="k">def</span> <span class="nf">get_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Creates the python pickle config file for future processing. Also creates a more readable text file of the</span>
+<span class="sd">    same information.</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Get input and output folders (As the text is always from the text box it will hopefully keep track of</span>
+    <span class="c">#any changes the user might have made</span>
+    <span class="n">inputFolder</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">outputFolder</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">path_out</span><span class="p">,</span><span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">outputFolder</span><span class="p">)</span>
+
+    <span class="c">#### Write to config file ####</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span> <span class="o">=</span> <span class="n">ConfigClass</span><span class="p">()</span>
+
+    <span class="c"># Create a folder for the metadata</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">meta_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outputFolder</span><span class="p">,</span><span class="s">&quot;Metadata&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_path</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_path</span><span class="p">)</span>
+
+    <span class="c"># OS path used for compatibility issues between Linux and windows directory spacing</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_path</span><span class="p">,</span><span class="s">&quot;configobject.txt&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_path</span><span class="p">,</span><span class="s">&quot;config4user.log&quot;</span><span class="p">)</span>
+
+    <span class="c"># Create config file and log file</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_path</span><span class="p">,</span> <span class="s">&#39;w+&#39;</span><span class="p">)</span>
+
+    <span class="c">#========================================================================================</span>
+    <span class="c"># Create config object</span>
+    <span class="c">#========================================================================================</span>
+    <span class="c"># Get cropping options</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxCropYes</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropbox_path</span> <span class="o">=</span> <span class="s">&quot;Not_applicable&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_manual</span> <span class="o">=</span> <span class="s">&quot;Not_applicable&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">=</span> <span class="s">&quot;No_crop&quot;</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonMan</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">xcrop</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditX</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">ycrop</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditY</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">wcrop</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditW</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">hcrop</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditH</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">=</span> <span class="s">&quot;Manual&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_manual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">xcrop</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">ycrop</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">wcrop</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">hcrop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropbox_path</span> <span class="o">=</span> <span class="s">&quot;Not_applicable&quot;</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonAuto</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropbox_path</span> <span class="o">=</span> <span class="s">&quot;Not_applicable&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_manual</span> <span class="o">=</span> <span class="s">&quot;Not_applicable&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">=</span> <span class="s">&quot;Automatic&quot;</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonUseOldCrop</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_manual</span> <span class="o">=</span> <span class="s">&quot;Not_applicable&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">=</span> <span class="s">&quot;Old_crop&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropbox_path</span> <span class="o">=</span> <span class="s">&quot;Not_applicable&quot;</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonOPT</span><span class="o">.</span><span class="n">isChecked</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_manual</span> <span class="o">=</span> <span class="s">&quot;Not_applicable&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">=</span> <span class="s">&quot;Derived&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">derived_output_name</span><span class="p">:</span>
+            <span class="n">d_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_out</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">derived_output_name</span><span class="p">),</span><span class="s">&quot;Metadata&quot;</span><span class="p">,</span><span class="s">&quot;cropbox.txt&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">d_path</span> <span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_out</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span><span class="s">&quot;Metadata&quot;</span><span class="p">,</span><span class="s">&quot;cropbox.txt&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crop_pickle_path</span> <span class="o">=</span> <span class="n">d_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropbox_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crop_pickle_path</span>
+
+    <span class="c">##### Get Scaling factors ####</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxSF2</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF2</span> <span class="o">=</span> <span class="s">&quot;yes&quot;</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF2</span> <span class="o">=</span> <span class="s">&quot;no&quot;</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxSF3</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF3</span> <span class="o">=</span> <span class="s">&quot;yes&quot;</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF3</span> <span class="o">=</span> <span class="s">&quot;no&quot;</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxSF4</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF4</span> <span class="o">=</span> <span class="s">&quot;yes&quot;</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF4</span> <span class="o">=</span> <span class="s">&quot;no&quot;</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxSF5</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF5</span> <span class="o">=</span> <span class="s">&quot;yes&quot;</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF5</span> <span class="o">=</span> <span class="s">&quot;no&quot;</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxSF6</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF6</span> <span class="o">=</span> <span class="s">&quot;yes&quot;</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF6</span> <span class="o">=</span> <span class="s">&quot;no&quot;</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxPixel</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">pixel_option</span> <span class="o">=</span> <span class="s">&quot;yes&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">user_specified_pixel</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditPixel</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF_pixel</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditPixel</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF_pixel</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF_pixel</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SFX_pixel</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditPixel</span><span class="o">.</span><span class="n">text</span><span class="p">())</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SFX_pixel</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SFX_pixel</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">user_specified_pixel</span> <span class="o">=</span> <span class="s">&quot;Not applicable&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">pixel_option</span> <span class="o">=</span> <span class="s">&quot;no&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF_pixel</span> <span class="o">=</span> <span class="s">&quot;Not applicable&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SFX_pixel</span> <span class="o">=</span> <span class="s">&quot;Not applicable&quot;</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxScansReconComp</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scans_recon_comp</span> <span class="o">=</span> <span class="s">&quot;yes&quot;</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scans_recon_comp</span> <span class="o">=</span> <span class="s">&quot;No&quot;</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxCropComp</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_comp</span> <span class="o">=</span> <span class="s">&quot;yes&quot;</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_comp</span>  <span class="o">=</span> <span class="s">&quot;No&quot;</span>
+
+    <span class="c"># ID for session</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">unique_ID</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_ID</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">config_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">tmp_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_dir</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">full_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">input_folder</span> <span class="o">=</span> <span class="n">inputFolder</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">output_folder</span> <span class="o">=</span> <span class="n">outputFolder</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scan_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan_folder</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">meta_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_path</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">recon_log_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recon_log_path</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">recon_folder_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_size_out_gb</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">recon_pixel_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span>
+
+    <span class="c"># If using windows it is important to put \ at the end of folder name</span>
+    <span class="c"># Combining scaling and SF into input for imageJ macro</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span><span class="s">&quot;cropped&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scale_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span><span class="s">&quot;scaled_stacks&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;No_crop&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">imageJ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">input_folder</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&#39;^&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scale_path</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&#39;^&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">full_name</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">imageJ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&#39;^&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scale_path</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&#39;^&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">full_name</span>
+
+    <span class="c">#========================================================================================</span>
+    <span class="c"># Write the config more readable version</span>
+    <span class="c">#========================================================================================</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Session_ID    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">unique_ID</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;full_name    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">full_name</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Input_folder    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">input_folder</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Output_folder    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">output_folder</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Scan_folder    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scan_folder</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Crop_option    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Crop_manual    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_manual</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Crop_folder    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropped_path</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Cropbox_location &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">cropbox_path</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Downsize_by_factor_2?    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF2</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Downsize_by_factor_3?    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF3</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Downsize_by_factor_4?    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF4</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Downsize_by_factor_5?    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF5</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Downsize_by_factor_6?    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF6</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Downsize_by_pixel?    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">pixel_option</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;User_specified_pixel_size?    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">user_specified_pixel</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Downsize_value_for_pixel    &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">SF_pixel</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Compression_of_scans_and_original_recon?    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">scans_recon_comp</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Compression_of_cropped_recon?    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_comp</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;ImageJconfig    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">imageJ</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Recon_log_file    &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">recon_log_file</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Recon_folder_size   &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">recon_folder_size</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Recon_pixel_size  &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">recon_pixel_size</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="c"># Pickle the class to a file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">,</span> <span class="s">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">config</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="c"># Copy temp files</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;Manual&quot;</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">tmp_dir</span><span class="p">,</span><span class="s">&quot;max_intensity_z.tif&quot;</span><span class="p">)):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">tmp_dir</span><span class="p">,</span><span class="s">&quot;max_intensity_z.tif&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">meta_path</span><span class="p">,</span><span class="s">&quot;max_intensity_z.tif&quot;</span><span class="p">))</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

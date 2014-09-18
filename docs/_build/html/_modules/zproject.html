@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>zproject &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for zproject</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">cpu_count</span><span class="p">,</span> <span class="n">Value</span><span class="p">,</span><span class="n">freeze_support</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">Queue</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+
+<span class="c"># For QThread class</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">platform</span> <span class="k">as</span> <span class="n">_platform</span>
+
+<div class="viewcode-block" id="Zproject"><a class="viewcode-back" href="../zproject.html#zproject.Zproject">[docs]</a><span class="k">class</span> <span class="nc">Zproject</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_dir</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">img_dir</span> <span class="o">=</span> <span class="n">img_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">=</span> <span class="n">out_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shared_z_count</span> <span class="o">=</span> <span class="n">Value</span><span class="p">(</span><span class="s">&quot;i&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">im_array_queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxintensity_queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Zproject.run"><a class="viewcode-back" href="../zproject.html#zproject.Zproject.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Run the Zprojection</span>
+<span class="sd">        @return in 0 on success</span>
+<span class="sd">        @return string with error message (TODO)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_dir</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s">&#39;spr.bmp&#39;</span><span class="p">,</span> <span class="s">&#39;spr.BMP&#39;</span><span class="p">,</span><span class="s">&#39;spr.tif&#39;</span><span class="p">,</span><span class="s">&#39;spr.TIF&#39;</span><span class="p">,</span><span class="s">&#39;spr.jpg&#39;</span><span class="p">,</span><span class="s">&#39;spr.JPG&#39;</span><span class="p">,</span><span class="s">&#39;spr.jpeg&#39;</span><span class="p">,</span><span class="s">&#39;spr.JPEG&#39;</span><span class="p">)):</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s">&#39;.bmp&#39;</span><span class="p">,</span> <span class="s">&#39;.BMP&#39;</span><span class="p">,</span> <span class="s">&#39;.tif&#39;</span><span class="p">,</span> <span class="s">&#39;.TIF&#39;</span><span class="p">,</span><span class="s">&#39;.jpg&#39;</span><span class="p">,</span><span class="s">&#39;.JPG&#39;</span><span class="p">,</span><span class="s">&#39;jpeg&#39;</span><span class="p">,</span><span class="s">&#39;JPEG&#39;</span><span class="p">)):</span>
+                <span class="n">prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;rec&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">prog</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+                    <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_dir</span><span class="p">,</span> <span class="n">fn</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="s">&quot;no image files found in&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_dir</span><span class="p">)</span>
+
+        <span class="n">im</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CV_LOAD_IMAGE_GRAYSCALE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imdims</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c">#make a new list by removing every nth image</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skip_num</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="bp">self</span><span class="o">.</span><span class="n">skip_num</span><span class="p">]</span>
+
+        <span class="c">#Start the file reader</span>
+        <span class="n">read_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fileReader</span><span class="p">)</span>
+        <span class="n">read_thread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">read_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c">#Start the thread to determine max intensities</span>
+        <span class="n">max_threads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_max_threads</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_max_threads</span><span class="p">):</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxFinder</span><span class="p">)</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">max_threads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">th</span> <span class="ow">in</span> <span class="n">max_threads</span><span class="p">:</span>
+            <span class="n">th</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;maxes done&quot;</span><span class="p">)</span>
+
+        <span class="n">max_arrays</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">max_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxintensity_queue</span><span class="o">.</span><span class="n">get_nowait</span><span class="p">())</span>
+            <span class="k">except</span> <span class="n">Queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="c">#Process the max intensities from the separate threads</span>
+        <span class="n">maxi</span> <span class="o">=</span> <span class="nb">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">,</span> <span class="n">max_arrays</span><span class="p">)</span>
+
+        <span class="c">#something wrong with image creation</span>
+        <span class="k">if</span> <span class="n">maxi</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span><span class="p">(</span><span class="s">&quot;something went wrong creating the Z-projection from {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_dir</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="s">&quot;max_intensity_z.tif&quot;</span><span class="p">),</span> <span class="n">maxi</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Zproject.fileReader"><a class="viewcode-back" href="../zproject.html#zproject.Zproject.fileReader">[docs]</a>    <span class="k">def</span> <span class="nf">fileReader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">file_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>
+            <span class="n">im_array</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CV_LOAD_IMAGE_GRAYSCALE</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shared_z_count</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_num</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">im_array_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">im_array</span><span class="p">)</span>
+        <span class="c">#Insert sentinels to signal end of list</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_max_threads</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">im_array_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Zproject.maxFinder"><a class="viewcode-back" href="../zproject.html#zproject.Zproject.maxFinder">[docs]</a>    <span class="k">def</span> <span class="nf">maxFinder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">max_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imdims</span><span class="p">)</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c">#print(self.im_array_queue.qsize())</span>
+                <span class="n">im_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">im_array_queue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="c">#print(&quot;write queue size:&quot;, self.write_file_queue.qsize())</span>
+            <span class="k">except</span> <span class="n">Queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">im_array_queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">im_array</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">max_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">max_</span><span class="p">,</span> <span class="n">im_array</span><span class="p">[:][:])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_z_count</span><span class="o">.</span><span class="n">value</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;Z project: {0} images&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_z_count</span><span class="o">.</span><span class="n">value</span><span class="p">)))</span>
+                <span class="c">#self.maxintensity_queue.put(max_)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxintensity_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">max_</span><span class="p">)</span>
+        <span class="k">return</span>
+</div></div>
+<div class="viewcode-block" id="dummyCallBack"><a class="viewcode-back" href="../zproject.html#zproject.dummyCallBack">[docs]</a><span class="k">def</span> <span class="nf">dummyCallBack</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ZProjectThread"><a class="viewcode-back" href="../zproject.html#zproject.ZProjectThread">[docs]</a><span class="k">class</span> <span class="nc">ZProjectThread</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">input</span><span class="p">,</span><span class="n">tmp_dir</span><span class="p">):</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span> <span class="o">=</span> <span class="nb">input</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tmp_dir</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ZProjectThread.run"><a class="viewcode-back" href="../zproject.html#zproject.ZProjectThread.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># Get the directory of the script</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s">&#39;frozen&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">__file__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span>
+
+        <span class="c"># Set up a zproject object</span>
+        <span class="n">zp</span> <span class="o">=</span> <span class="n">Zproject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_callback</span><span class="p">)</span>
+        <span class="c"># run the object</span>
+        <span class="n">zp_result</span> <span class="o">=</span> <span class="n">zp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="c"># An error has happened. The error message will be shown on the status section</span>
+        <span class="k">if</span> <span class="n">zp_result</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">zp_result</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="c"># let the user know what&#39;s happened</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;Z-projection finished&quot;</span> <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ZProjectThread.z_callback"><a class="viewcode-back" href="../zproject.html#zproject.ZProjectThread.z_callback">[docs]</a>    <span class="k">def</span> <span class="nf">z_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="n">msg</span> <span class="p">)</span>
+
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">Zproject</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">dummyCallBack</span><span class="p">)</span>
+    <span class="n">zp_img</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

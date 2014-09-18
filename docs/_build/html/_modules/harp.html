@@ -1,0 +1,1193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>harp &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for harp</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">**Summary:**</span>
+
+<span class="sd">This is the starting file for HARP. It also extends the QMainWindow and acts as the main control of the GUI.</span>
+
+<span class="sd">Allows the user to setup a config file in the first tab. This is then saved and added to a processing list. Multiple</span>
+<span class="sd">config files can be generated and added to the list. The list can then be processed and the status checked</span>
+<span class="sd">by looking at the processing tab.</span>
+
+<span class="sd">USAGE: python harp.py or if using executable in windows .\harp.exe or clicking on the harp.exe icon.</span>
+
+<span class="sd">NOTE: QT Designer automatically uses mixed case for its class object names e.g radioButton. This format is not PEP8 but</span>
+<span class="sd">has not been changed.</span>
+
+<span class="sd">-------------------------------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># Import PyQT module</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtCore</span> <span class="kn">import</span> <span class="n">pyqtSlot</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">,</span> <span class="n">SLOT</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">freeze_support</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">import</span> <span class="nn">psutil</span>
+<span class="c"># Harwell modules and classes</span>
+<span class="kn">import</span> <span class="nn">autofill</span>
+<span class="kn">import</span> <span class="nn">addtolist</span>
+<span class="kn">from</span> <span class="nn">mainwindow</span> <span class="kn">import</span> <span class="n">Ui_MainWindow</span>
+<span class="kn">from</span> <span class="nn">processing</span> <span class="kn">import</span> <span class="n">ProcessingThread</span>
+<span class="kn">from</span> <span class="nn">zproject</span> <span class="kn">import</span> <span class="n">ZProjectThread</span>
+<span class="kn">import</span> <span class="nn">crop</span>
+
+
+<div class="viewcode-block" id="MainWindow"><a class="viewcode-back" href="../harp.html#harp.MainWindow">[docs]</a><span class="k">class</span> <span class="nc">MainWindow</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;  Class to provide the GUI end of HARP.</span>
+
+<span class="sd">    Extends the QMainWindow class (from mainwindow.py) generated by QT Designer</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; **Constructor**: Checks the buttons which have been pressed and responds accordingly.</span>
+
+<span class="sd">        :param object app: QtGui.QApplication</span>
+<span class="sd">        :ivar str self.modality: Changes based on the modality chosen. Value should be either &#39;MicroCT&#39; or &#39;OPT&#39;</span>
+<span class="sd">        :ivar boolean self.stop: If True HARP stops pre-processing steps. Wont let the user go process the recon</span>
+<span class="sd">        :ivar int self.stop_pro_switch: If value 1 HARP stops processes due to user pressing stop</span>
+<span class="sd">        :ivar int self.count_in: Count used for processing table. Initialized at 0</span>
+<span class="sd">        :ivar int self.current_row: Row for processing table. Initialized at 0</span>
+<span class="sd">        :ivar str self.scan_folder: Scan path. Initialized as &#39;NA&#39; to indicate no data</span>
+<span class="sd">        :ivar str self.recon_log_path: Recon log path. Initialized as &#39;NA&#39; to indicate no data</span>
+<span class="sd">        :ivar str self.f_size_out_gb: File size (in GB). Initialized as &#39;&#39; to indicate no data</span>
+<span class="sd">        :ivar str self.pixel_size: Pixel size. Initialized as &#39;&#39; to indicate no data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Standard setup of class from qt designer Ui class</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">Ui_MainWindow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+
+        <span class="c"># Make unique ID if this is the first time mainwindow has been called</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_ID</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid1</span><span class="p">()</span>
+
+        <span class="c"># Initialise various switches</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">=</span> <span class="s">&quot;MicroCT&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_pro_switch</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_in</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_row</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># Set to &quot;&quot; or NA so that HARP can record in the log and GUI there is no data for these parameters. Will be</span>
+        <span class="c"># updated later if parameters are identified.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scan_folder</span> <span class="o">=</span> <span class="s">&quot;NA&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recon_log_path</span> <span class="o">=</span> <span class="s">&quot;NA&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_size_out_gb</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="c"># Initalize the pixel size view to blank</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberPixel</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">)</span>
+
+        <span class="c"># Get current directory</span>
+        <span class="c"># Need to check if script is being run from an pyinstaller created executable or just from python</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s">&#39;frozen&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">__file__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span>
+
+        <span class="c"># Temp folder for pre-processing log (if in use) and z-project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+
+        <span class="c"># get input folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonInput</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">select_file_in</span><span class="p">)</span>
+
+        <span class="c"># Get output folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonOutput</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">select_file_out</span><span class="p">)</span>
+
+        <span class="c"># OPT selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonOPT</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_OPT_only</span><span class="p">)</span>
+
+        <span class="c"># uCT selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonuCT</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_uCT_only</span><span class="p">)</span>
+
+        <span class="c"># If Go button is pressed move onto track progress dialog box</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonGo</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_to_list</span><span class="p">)</span>
+
+        <span class="c"># Set cropping options</span>
+        <span class="c"># Auto crop (disable buttons)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonAuto</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">man_crop_off</span><span class="p">)</span>
+
+        <span class="c"># Crop button on</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxCropYes</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_switch</span><span class="p">)</span>
+
+        <span class="c"># Use Old crop (disable buttons)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonUseOldCrop</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">man_crop_off</span><span class="p">)</span>
+
+        <span class="c"># Man crop (enable buttons).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonMan</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">man_crop_on</span><span class="p">)</span>
+
+        <span class="c"># derived crop (enable buttons).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">derive_on</span><span class="p">)</span>
+
+        <span class="c"># If the get dimensions button is pressed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonGetDimensions</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_dimensions</span><span class="p">)</span>
+
+        <span class="c"># Get the output folder name when manually changed in box</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_folder_changed</span><span class="p">)</span>
+
+        <span class="c">#Get the input folder name when manually changed in box</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_folder_changed</span><span class="p">)</span>
+
+        <span class="c"># Get recon file manually</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonCTRecon</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_recon_man</span><span class="p">)</span>
+
+        <span class="c"># Get scan file manually</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonScan</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_scan_man</span><span class="p">)</span>
+
+        <span class="c"># Get SPR file manually</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonCTSPR</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_SPR_man</span><span class="p">)</span>
+
+        <span class="c"># Update name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonUpdate</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_name</span><span class="p">)</span>
+
+        <span class="c"># Get scan file manually</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxPixel</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_by_pixel_on</span><span class="p">)</span>
+
+        <span class="c"># Resize for smaller monitors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">actionResize</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resize_screen</span><span class="p">)</span>
+
+        <span class="c"># Reset screen size to standard</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">actionReset_screen_size</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_screen</span><span class="p">)</span>
+
+        <span class="c"># Start processing recons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonStart</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_processing</span><span class="p">)</span>
+
+        <span class="c"># Stop processing recons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonStop</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_processing</span><span class="p">)</span>
+
+        <span class="c"># Add more recons to the list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonAdd</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_more</span><span class="p">)</span>
+
+        <span class="c"># About HARP message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">actionAbout</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">about_message</span><span class="p">)</span>
+
+        <span class="c"># Documentation PDF</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">actionPDF_user_guide</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_guide</span><span class="p">)</span>
+
+        <span class="c"># Example Data for testing purposes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">actionExample_data</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">example_data</span><span class="p">)</span>
+
+        <span class="c"># need to monitor when the tab is changed as it determines what qtable uses key commands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tabWidget</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;currentChanged(int)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">tab_change</span><span class="p">)</span>
+
+        <span class="c"># Decide which channel to be used for autocrop (this table is on the first tab)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">keyPressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_channel_for_crop</span>
+
+        <span class="c"># When user double clicks on OPT alternative channel open it on the parameter tab</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">doubleClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">change_opt_chn</span><span class="p">)</span>
+
+        <span class="c">#Accept drag and drop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="c"># to make the window visible</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<div class="viewcode-block" id="MainWindow.dropEvent"><a class="viewcode-back" href="../harp.html#harp.MainWindow.dropEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Handles *drop* section for drag and drop of folders.</span>
+
+<span class="sd">        Overrides dropEvent method from the QMainWindow.</span>
+<span class="sd">        Resets the inputs and auto-fills in the relevant parameter information.</span>
+
+<span class="sd">        Requires dragEnterEvent method.</span>
+
+<span class="sd">        :param object event: qt drop event</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`reset_inputs()`,</span>
+<span class="sd">            :func:`autofill_pipe()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># list of all the things dragged and dropped</span>
+        <span class="n">volList</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">toLocalFile</span><span class="p">())</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">urls</span><span class="p">()]</span>
+        <span class="c"># Get the first thing dropped</span>
+        <span class="n">vol1</span> <span class="o">=</span> <span class="n">volList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c"># Update the input line-edit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">vol1</span><span class="p">)))</span>
+        <span class="c"># Reset the inputs (apart from the lineEditInput</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_inputs</span><span class="p">()</span>
+        <span class="c"># autofill parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autofill_pipe</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MainWindow.dragEnterEvent"><a class="viewcode-back" href="../harp.html#harp.MainWindow.dragEnterEvent">[docs]</a>    <span class="k">def</span> <span class="nf">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Handles *drag* section for drag and drop of folders.</span>
+
+<span class="sd">        Overrides dragEnterEvent method from the QMainWindow.</span>
+<span class="sd">        Required for drag and drop.</span>
+
+<span class="sd">        :param event object: qt drag event</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`dropEvent()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MainWindow.tab_change"><a class="viewcode-back" href="../harp.html#harp.MainWindow.tab_change">[docs]</a>    <span class="k">def</span> <span class="nf">tab_change</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Changes the tab view for the user.</span>
+
+<span class="sd">        On tab 0 (parameters) the qt KeyPressEvent is required for choosing the crop channel for OPT. On tab 1</span>
+<span class="sd">        (processing) the KeyPressEvent is used for deleting rows on the processing table.</span>
+
+<span class="sd">        They KeyPressEvent is therefore updated depending on what tab the user is on.</span>
+
+<span class="sd">        Also updates the OPT channels table each tab-change in-case anything has changed.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`choose_channel_for_crop()`,</span>
+<span class="sd">            :func:`delete_rows()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Update OPT Channel list. As something may have changed on the processing list</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">get_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># Check tab status</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># if on tab 0 (parameters) the keyPressEvent is required for choosing</span>
+            <span class="c"># the crop channel for OPT. i.e. key press is linked to the function choose_channel_for_crop()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">keyPressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_channel_for_crop</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c"># if on tab 1 (processing) the keyPressEvent is required for deleting rows</span>
+            <span class="c"># i.e. key press is linked to the function delete_rows()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">keyPressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_rows</span>
+</div>
+<div class="viewcode-block" id="MainWindow.example_data"><a class="viewcode-back" href="../harp.html#harp.MainWindow.example_data">[docs]</a>    <span class="k">def</span> <span class="nf">example_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; TESTING PURPOSES ONLY: Loads in example data &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;D:&quot;</span><span class="p">,</span> <span class="s">&quot;fakedata&quot;</span><span class="p">,</span> <span class="s">&quot;recons&quot;</span><span class="p">,</span> <span class="s">&quot;20140408_RCAS_17_18.4e_wt_rec&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_inputs</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autofill_pipe</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MainWindow.about_message"><a class="viewcode-back" href="../harp.html#harp.MainWindow.about_message">[docs]</a>    <span class="k">def</span> <span class="nf">about_message</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Short description about what HARP is and its version&quot;&quot;&quot;</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s">&#39;HARP v1.0.1: Harwell Automated Recon Processor</span><span class="se">\n\n</span><span class="s">&#39;</span>
+            <span class="s">&#39;Crop, scale and compress reconstructed images from microCT  or OPT data.</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="MainWindow.user_guide"><a class="viewcode-back" href="../harp.html#harp.MainWindow.user_guide">[docs]</a>    <span class="k">def</span> <span class="nf">user_guide</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Loads up pdf help file</span>
+
+<span class="sd">        For windows computers uses *os.startfile*. For linux requires *Evince* installed to view the pdf.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">user_man</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="p">,</span> <span class="s">&quot;HARP_user_guide.pdf&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">&quot;win32&quot;</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">&quot;win64&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">user_man</span><span class="p">):</span>
+                <span class="c"># if HARP run from exe</span>
+                <span class="n">user_man</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;..&quot;</span><span class="p">,</span> <span class="s">&quot;..&quot;</span><span class="p">,</span> <span class="s">&quot;HARP_user_guide.pdf&quot;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">startfile</span><span class="p">(</span><span class="n">user_man</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">opener</span> <span class="o">=</span> <span class="s">&quot;evince&quot;</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="n">opener</span><span class="p">,</span> <span class="n">user_man</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="MainWindow.resize_screen"><a class="viewcode-back" href="../harp.html#harp.MainWindow.resize_screen">[docs]</a>    <span class="k">def</span> <span class="nf">resize_screen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Resize screen for smaller monitors&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">1280</span><span class="p">,</span> <span class="mi">488</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">1255</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.reset_screen"><a class="viewcode-back" href="../harp.html#harp.MainWindow.reset_screen">[docs]</a>    <span class="k">def</span> <span class="nf">reset_screen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reset screen back to default&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">1305</span><span class="p">,</span> <span class="mi">924</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">1281</span><span class="p">,</span> <span class="mi">831</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.select_file_out"><a class="viewcode-back" href="../harp.html#harp.MainWindow.select_file_out">[docs]</a>    <span class="k">def</span> <span class="nf">select_file_out</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Selects output folder manually</span>
+
+<span class="sd">        Updates the line edit box *ui.lineEditOutput*</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`choose_channel_for_crop()`,</span>
+<span class="sd">            :func:`delete_rows()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Get output folder if already defined</span>
+        <span class="n">output_folder</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+        <span class="c"># Check output folders assigned. If assigned open the dialog box in that folder</span>
+        <span class="k">if</span> <span class="n">output_folder</span><span class="p">:</span>
+            <span class="n">file_dialog</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Open File&#39;</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_dialog</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Open File&#39;</span><span class="p">)</span>
+
+        <span class="c"># get the folder the user selected</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">file_dialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Select Directory&quot;</span><span class="p">)</span>
+        <span class="c"># Check if folder variable is defined and update the line edit box (if it not the user has pressed cancel)</span>
+        <span class="k">if</span> <span class="n">folder</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="MainWindow.select_file_in"><a class="viewcode-back" href="../harp.html#harp.MainWindow.select_file_in">[docs]</a>    <span class="k">def</span> <span class="nf">select_file_in</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Selects input folder manually and some parameters are auto-filled if possible</span>
+
+<span class="sd">        If the the input folder is defined the parameters are reset, the *ui.lineEditInput* is updated and</span>
+<span class="sd">        the *autofill_pipe()* method is performed which updates various parameters.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`reset_inputs()`,</span>
+<span class="sd">            :func:`autofill_pipe()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Get input folder if already defined</span>
+        <span class="n">input_folder</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+        <span class="c"># Check input folders assigned. If assigned open the dialog box in that folder</span>
+        <span class="k">if</span> <span class="n">input_folder</span><span class="p">:</span>
+            <span class="n">file_dialog</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Open File&#39;</span><span class="p">,</span> <span class="n">input_folder</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_dialog</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Open File&#39;</span><span class="p">)</span>
+
+        <span class="c"># get the folder the user selected</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">file_dialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Select Directory&quot;</span><span class="p">)</span>
+
+        <span class="c"># if folder is not defined user has pressed cancel. If defined</span>
+        <span class="k">if</span> <span class="n">folder</span><span class="p">:</span>
+            <span class="c"># Reset the inputs in-case this is not the first time someone has selected a file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset_inputs</span><span class="p">()</span>
+            <span class="c"># Set the input folder</span>
+            <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+            <span class="c"># run all the autofill methods</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autofill_pipe</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MainWindow.autofill_pipe"><a class="viewcode-back" href="../harp.html#harp.MainWindow.autofill_pipe">[docs]</a>    <span class="k">def</span> <span class="nf">autofill_pipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Performs a series of methods to automatically update parameters</span>
+
+<span class="sd">        Uses the methods in the autofill module.</span>
+
+<span class="sd">        :param boolean suppress: True if suppression of popup dialog box warnings is required</span>
+<span class="sd">        :ivar boolean self.crop_box_use: True if a derived croping box is to be used</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`autofill.opt_uCT_check()`,</span>
+<span class="sd">            :func:`autofill.get_name()`,</span>
+<span class="sd">            :func:`autofill.get_recon_log()`,</span>
+<span class="sd">            :func:`autofill.auto_file_out()`,</span>
+<span class="sd">            :func:`autofill.get_channels()`,</span>
+<span class="sd">            :func:`autofill.auto_get_derived()`,</span>
+<span class="sd">            :func:`autofill.auto_get_scan()`,</span>
+<span class="sd">            :func:`autofill.folder_size_approx()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># ###################################################</span>
+        <span class="c"># Reset parameters settings and instance variables</span>
+        <span class="c">####################################################</span>
+        <span class="c"># Remove the contents of the OPT table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">clearContents</span><span class="p">()</span>
+        <span class="c"># Resets the crop_box_use instance variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crop_box_use</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="c"># Set the crop option back to auto</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonAuto</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c"># Reset the channel name for OPT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c">####################################################</span>
+        <span class="c"># Perform autofill of parameter settings</span>
+        <span class="c">####################################################</span>
+        <span class="c"># check if uCT or opt data</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">opt_uCT_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suppress</span><span class="p">)</span>
+        <span class="c"># Autocomplete the name</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span> <span class="n">suppress</span><span class="p">)</span>
+        <span class="c"># Get the reconLog and associated pixel size</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">get_recon_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c"># Get the output folder location</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">auto_file_out</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c"># See what OPT channels are available</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">==</span> <span class="s">&quot;OPT&quot;</span><span class="p">:</span>
+            <span class="n">autofill</span><span class="o">.</span><span class="n">get_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">autofill</span><span class="o">.</span><span class="n">auto_get_derived</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c"># Automatically identify scan folder</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">auto_get_scan</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c"># Automatically get SPR file</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">auto_get_SPR</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c"># Determine size of input folder</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">folder_size_approx</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.reset_inputs"><a class="viewcode-back" href="../harp.html#harp.MainWindow.reset_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">reset_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reset the parameter inputs to blank&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDate</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditGroup</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditAge</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditLitter</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditZygosity</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditSex</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditName</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTRecon</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTSPR</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditScan</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberFile</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberPixel</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.input_folder_changed"><a class="viewcode-back" href="../harp.html#harp.MainWindow.input_folder_changed">[docs]</a>    <span class="k">def</span> <span class="nf">input_folder_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; When user changes the name of the folder manually</span>
+<span class="sd">        This functions is **deprecated** as the the code almost always takes the input folder directly from the</span>
+<span class="sd">        line edit box &quot;lineEditInput&quot; anyway.</span>
+
+<span class="sd">        Updates the instance variable *input_folder* when the line edit box lineEditInput text has changed</span>
+
+<span class="sd">        :param str text: The text from lineEditInput after the text has been changed</span>
+<span class="sd">        :ivar str self.input_folder: input folder as text</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span> <span class="o">=</span> <span class="n">text</span>
+</div>
+<div class="viewcode-block" id="MainWindow.output_folder_changed"><a class="viewcode-back" href="../harp.html#harp.MainWindow.output_folder_changed">[docs]</a>    <span class="k">def</span> <span class="nf">output_folder_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; When user changes the name of the folder manually</span>
+<span class="sd">        This functions is **deprecated** as the the code almost always takes the input folder directly from the</span>
+<span class="sd">        line edit box &quot;lineEditOutput&quot; anyway.</span>
+
+<span class="sd">        Updates the instance variable *output_folder* when the line edit box lineEditInput text has changed</span>
+
+<span class="sd">        :param str text: The text from lineEditInput after the text has been changed</span>
+<span class="sd">        :ivar str self.output_folder: output folder as text</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span> <span class="o">=</span> <span class="n">text</span>
+</div>
+<div class="viewcode-block" id="MainWindow.scale_by_pixel_on"><a class="viewcode-back" href="../harp.html#harp.MainWindow.scale_by_pixel_on">[docs]</a>    <span class="k">def</span> <span class="nf">scale_by_pixel_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Enables boxes for scaling by pixel&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxPixel</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditPixel</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditPixel</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.crop_switch"><a class="viewcode-back" href="../harp.html#harp.MainWindow.crop_switch">[docs]</a>    <span class="k">def</span> <span class="nf">crop_switch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Turns crop options on or off</span>
+
+<span class="sd">        Options enabled and disabled are based on the imaging modality and the current cropping option selected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Check if cropping is to occur</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxCropYes</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonAuto</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonMan</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonUseOldCrop</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="c"># Check if OPT modality is selected</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonOPT</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="c"># Check if derived dimensions is selected</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="c"># Check if manual crop is selected</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonMan</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditX</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditY</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditW</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditH</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonGetDimensions</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># No cropping is required</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonAuto</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonMan</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonUseOldCrop</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditX</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditY</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditW</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditH</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonGetDimensions</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.man_crop_off"><a class="viewcode-back" href="../harp.html#harp.MainWindow.man_crop_off">[docs]</a>    <span class="k">def</span> <span class="nf">man_crop_off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Disables boxes for cropping manually. Used by the radio buttons: radioButtonAuto, radioButtonUseOldCrop.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditX</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditY</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditW</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditH</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonGetDimensions</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.man_crop_on"><a class="viewcode-back" href="../harp.html#harp.MainWindow.man_crop_on">[docs]</a>    <span class="k">def</span> <span class="nf">man_crop_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Enables boxes for cropping manually.  Used by the radio button: radioButtonMan.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditX</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditY</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditW</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditH</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonGetDimensions</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.derive_on"><a class="viewcode-back" href="../harp.html#harp.MainWindow.derive_on">[docs]</a>    <span class="k">def</span> <span class="nf">derive_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Enables options for derived crop. Used by the radio button: radioButtonDerived.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.get_OPT_only"><a class="viewcode-back" href="../harp.html#harp.MainWindow.get_OPT_only">[docs]</a>    <span class="k">def</span> <span class="nf">get_OPT_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Updates parameters options to be OPT only and updates OPT specific autofill operations.</span>
+
+<span class="sd">        Used by radio button: radioButtonOPT. Updates instance variable *modality*.</span>
+
+<span class="sd">        :ivar str self.modality: Should be &quot;OPT&quot; or &quot;MicroCT&quot;. Sets to &quot;OPT&quot; here.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`autofill.get_recon_log()`,</span>
+<span class="sd">            :func:`autofill.get_channels()`,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">=</span> <span class="s">&quot;OPT&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditChannel</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelChannel</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxInd</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c"># Autofill operations that OPT modality effects</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">get_recon_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">get_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.get_uCT_only"><a class="viewcode-back" href="../harp.html#harp.MainWindow.get_uCT_only">[docs]</a>    <span class="k">def</span> <span class="nf">get_uCT_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Updates parameters options to be uCT only and updates uCT specific autofill operations.</span>
+
+<span class="sd">        Used by radio button: radioButtonuCT. Updates instance variable *modality*.</span>
+
+<span class="sd">        :ivar str self.modality: Should be &quot;OPT&quot; or &quot;MicroCT&quot;. Sets to &quot;MicroCT&quot; here.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`autofill.get_recon_log()`,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">=</span> <span class="s">&quot;MicroCT&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditChannel</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">labelChannel</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxInd</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="c"># Autofill operations that uCT modality effects</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">get_recon_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.update_name"><a class="viewcode-back" href="../harp.html#harp.MainWindow.update_name">[docs]</a>    <span class="k">def</span> <span class="nf">update_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update the name of the file and folder if the user has changed the name in the &quot;identification&quot; section</span>
+
+<span class="sd">        Used by push button: pushButtonUpdate.</span>
+
+<span class="sd">        Updates the output name by setting the text directly and updates the &quot;identification&quot; section using the</span>
+<span class="sd">        autofill.get_name function.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`autofill.get_name()`,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Get the input name with directory</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditName</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="c"># Run the get_name method which updates the identification section</span>
+        <span class="n">autofill</span><span class="o">.</span><span class="n">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="c"># Get output folder name, to start off with this will just be the input name</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">output_folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        <span class="c"># Now update with self.full_name an instance variable created during autofill.get_name. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_name</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="MainWindow.get_recon_man"><a class="viewcode-back" href="../harp.html#harp.MainWindow.get_recon_man">[docs]</a>    <span class="k">def</span> <span class="nf">get_recon_man</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the recon folder manually.</span>
+
+<span class="sd">        Lets the user select a recon log file manually and then attempts to get the pixel size from the file given.</span>
+
+<span class="sd">        Used by the push button: pushButtonCTRecon</span>
+
+<span class="sd">        :ivar str self.recon_log_path: Path of recon log, used again in the pickle file for documentation purposes</span>
+<span class="sd">        :ivar str self.pixel: Path of recon log, used again in the pickle file for documentation purposes</span>
+<span class="sd">        :raises TypeError: If self.pixel_size cannot be displayed on the GUI due to incorrect type</span>
+<span class="sd">        :raises IOError: If file user selected does not exist</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`autofill.get_pixel()`,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Get the information from the dialog box</span>
+        <span class="n">file_dialog</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="n">file_dialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">()</span>
+
+        <span class="c"># If a file was chosen get pixel size and update paramaters</span>
+        <span class="k">if</span> <span class="nb">file</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c"># Set the text on the recon file box on the GUI</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTRecon</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
+                <span class="c"># Check it is an actual path (prob not required)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">recon_log_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">file</span><span class="p">))</span>
+                <span class="c"># Open the log file as read only</span>
+                <span class="n">recon_log_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recon_log_path</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+                <span class="c"># Get pixel size from log file</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="n">autofill</span><span class="o">.</span><span class="n">get_pixel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modality</span><span class="p">,</span> <span class="n">recon_log_file</span><span class="p">)</span>
+                <span class="c"># Display the number on the lcd display</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberPixel</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">)</span>
+                <span class="c"># Set recon log text</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTRecon</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recon_log_path</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c"># Python standard exception identifies recon file not found</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTRecon</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Error identifying recon file&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberPixel</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c"># self.pixel_size cannot be dsiplayed on the GUI due to incorrect type</span>
+                <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span>
+                                          <span class="s">&#39;Warning: Could not identify pixel value from recon log&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lcdNumberPixel</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.get_scan_man"><a class="viewcode-back" href="../harp.html#harp.MainWindow.get_scan_man">[docs]</a>    <span class="k">def</span> <span class="nf">get_scan_man</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the scan folder manually. Uses the push button pushButtonScan.&quot;&quot;&quot;</span>
+        <span class="n">file_dialog</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">fileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Select Directory&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">folder</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditScan</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.get_SPR_man"><a class="viewcode-back" href="../harp.html#harp.MainWindow.get_SPR_man">[docs]</a>    <span class="k">def</span> <span class="nf">get_SPR_man</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the SPR file manually. Uses the pushButtonCTSPR.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_dialog</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">file</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTSPR</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
+
+    <span class="c">#======================================================================</span>
+    <span class="c"># User keyboard options for OPT channels</span>
+    <span class="c">#======================================================================</span></div>
+<div class="viewcode-block" id="MainWindow.choose_channel_for_crop"><a class="viewcode-back" href="../harp.html#harp.MainWindow.choose_channel_for_crop">[docs]</a>    <span class="k">def</span> <span class="nf">choose_channel_for_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Allows the user to select which channel to use to determine crop dimensions</span>
+
+<span class="sd">        If the return button is pressed on a certain row of the opt list this recon will be used for the automatic crop</span>
+
+<span class="sd">        :param qt_event event: qt event to be processed for opt channel select</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Return</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;key pressed&quot;</span>
+            <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">currentRow</span><span class="p">()</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">selected</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c"># check if anything on the OPT list</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Selected a row with no opt info&quot;</span>
+
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonOPT</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+
+                <span class="n">pro</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">selected</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">pro</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;No&quot;</span><span class="p">:</span>
+                    <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span>
+                                              <span class="s">&#39;Warning: Chosen channel to derive dimensions (cropbox) has either</span><span class="se">\n</span><span class="s">&#39;</span>
+                                              <span class="s">&#39;not been analysed or has not been added onto the processing list&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">pro</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;On list&quot;</span><span class="p">:</span>
+                    <span class="n">in_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">in_dir</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">folder_name</span><span class="p">:</span>
+                        <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span>
+                                                  <span class="s">&#39;Warning: Chosen channel to derive dimensions (cropbox) cannot be</span><span class="se">\n</span><span class="s">&#39;</span>
+                                                  <span class="s">&#39;the current channel unless already processed&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span>
+                                          <span class="s">&quot;Warning: Derived dimension options has not been chosen&quot;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MainWindow.change_opt_chn"><a class="viewcode-back" href="../harp.html#harp.MainWindow.change_opt_chn">[docs]</a>    <span class="k">def</span> <span class="nf">change_opt_chn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Allows user to change the current opt channel by double click.</span>
+
+<span class="sd">        Autofills some paramers as if the channel folder had been manually selected.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`autofill.reset_inputs()`,</span>
+<span class="sd">            :func:`autofill_pipe()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">in_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="n">path_out</span><span class="p">,</span> <span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">in_dir</span><span class="p">)</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">currentRow</span><span class="p">()</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">selected</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c"># check if anythin on the OPT list</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Selected a row with no opt info&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_out</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">text</span><span class="p">()))))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset_inputs</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autofill_pipe</span><span class="p">()</span>
+
+    <span class="c"># ======================================================================</span>
+    <span class="c"># Functions for get Dimensions (z projection)</span>
+    <span class="c">#======================================================================</span></div>
+<div class="viewcode-block" id="MainWindow.get_dimensions"><a class="viewcode-back" href="../harp.html#harp.MainWindow.get_dimensions">[docs]</a>    <span class="k">def</span> <span class="nf">get_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Allow a user to choose crop dimensions by choosing a region based on the z-projection of the image.</span>
+
+<span class="sd">        This z projection is calculated on a seperate thread. Process is as follows:</span>
+
+<span class="sd">        1. **start_z_thread** starts a thread using the module zproject</span>
+<span class="sd">        2. z projection is performed in background giving updates to the &quot;status&quot; section of the GUI</span>
+<span class="sd">        3. The **zproject_slot** catches any signals</span>
+<span class="sd">        4. &quot;Z-projection finished&quot; is called and **run_crop** loads a new window.</span>
+<span class="sd">        5. The user can then select the crop dimensions</span>
+<span class="sd">        6. When the crop dimensions are selected the crop window is closed and the cropbox parameter is saved on the GUI</span>
+
+<span class="sd">        Two important modules used: crop.py and zproject.py</span>
+
+<span class="sd">        * zproject performs the zprojection and displays the image.</span>
+<span class="sd">        * crop.py then gets the dimensions to perform the crop</span>
+
+<span class="sd">        IMPORTANT NOTE: The cropping is not actually done here. This is just to get the dimensions.</span>
+
+<span class="sd">        :ivar boolean self.stop: If True HARP stops pre-processing steps. Set to None before z projection performed</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`start_z_thread()`,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># get the input folder</span>
+        <span class="n">input_folder</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+        <span class="c"># Check input folder is defined</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">input_folder</span><span class="p">:</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Warning: input directory not defined&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="c"># Check input folder exists</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">input_folder</span><span class="p">):</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Warning: input folder does not exist&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="c">#Check if folder is empty</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">input_folder</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Warning: input folder is empty&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c"># Set to None so z_projection doesn&#39;t stop unless cancelled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c"># Let the user know what is going on</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">textEditStatusMessages</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Z-projection in process, please wait&quot;</span><span class="p">)</span>
+        <span class="c">#Run the zprojection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_z_thread</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MainWindow.start_z_thread"><a class="viewcode-back" href="../harp.html#harp.MainWindow.start_z_thread">[docs]</a>    <span class="k">def</span> <span class="nf">start_z_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Starts a thread to perform z projection processing in the background.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`zproject.ZProjectThread()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Get input folder</span>
+        <span class="n">input_folder</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+        <span class="c"># Set thread off</span>
+        <span class="n">z_thread_pool</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">z_thread_pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ZProjectThread</span><span class="p">(</span><span class="n">input_folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_dir</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z_thread_pool</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">z_thread_pool</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;update(QString)&quot;</span><span class="p">),</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">zproject_slot</span><span class="p">)</span>
+        <span class="n">z_thread_pool</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">z_thread_pool</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MainWindow.zproject_slot"><a class="viewcode-back" href="../harp.html#harp.MainWindow.zproject_slot">[docs]</a>    <span class="k">def</span> <span class="nf">zproject_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Listens to the z projection child process.</span>
+
+<span class="sd">        Displays all messages to the status section of the parameters tab. Once zprojection is finished opens window</span>
+<span class="sd">        to display zproject for user to get crop dimensions, using *run_crop*</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`run_crop()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Update HARP GUI to status of the zprojection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">textEditStatusMessages</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+        <span class="c"># Check if z projection finished</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="o">==</span> <span class="s">&quot;Z-projection finished&quot;</span><span class="p">:</span>
+            <span class="c"># Get the crop dimensions and save the file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_crop</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s">&quot;max_intensity_z.tif&quot;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="MainWindow.run_crop"><a class="viewcode-back" href="../harp.html#harp.MainWindow.run_crop">[docs]</a>    <span class="k">def</span> <span class="nf">run_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates the a window to display the z projection used to get crop dimensions</span>
+
+<span class="sd">        Creates an object from the crop module. Uses a call back method to get the crop dimensions after the user</span>
+<span class="sd">        has selected them.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`crop.Crop()`</span>
+<span class="sd">            :func:`crop_call_back()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cropper</span> <span class="o">=</span> <span class="n">crop</span><span class="o">.</span><span class="n">Crop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_call_back</span><span class="p">,</span> <span class="n">img_path</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">cropper</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MainWindow.crop_call_back"><a class="viewcode-back" href="../harp.html#harp.MainWindow.crop_call_back">[docs]</a>    <span class="k">def</span> <span class="nf">crop_call_back</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Method to get crop dimension (crop box) from z projecion image.</span>
+
+<span class="sd">        Saves the crop dimensions to the line edit boxes on the GUI.</span>
+
+<span class="sd">        :param list box: Crop dimensions (crop box) the user selected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditX</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditY</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditW</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditH</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">box</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">textEditStatusMessages</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Dimensions selected&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonGetDimensions</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Get Dimensions&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.add_to_list"><a class="viewcode-back" href="../harp.html#harp.MainWindow.add_to_list">[docs]</a>    <span class="k">def</span> <span class="nf">add_to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This adds the recon information onto the &quot;processing tab&quot; also saves a pickle file which includes all the</span>
+<span class="sd">        parameter information.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`addtolist.start()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">addtolist</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MainWindow.start_processing"><a class="viewcode-back" href="../harp.html#harp.MainWindow.start_processing">[docs]</a>    <span class="k">def</span> <span class="nf">start_processing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Starts a thread for processing after the user has pressed the &#39;start button&#39; (GUI click only)</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`start_processing_thread()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonStart</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonStop</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_processing_thread</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MainWindow.start_processing_thread"><a class="viewcode-back" href="../harp.html#harp.MainWindow.start_processing_thread">[docs]</a>    <span class="k">def</span> <span class="nf">start_processing_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Starts a thread to perform all the processing in the background.</span>
+
+<span class="sd">        This monitors what recon folder we are processing based on the processing list on the processing tab.</span>
+
+<span class="sd">        Summary of steps:</span>
+
+<span class="sd">        1. Check what the total memory is on the computer. And save as instance variable</span>
+<span class="sd">        2. Go through a while loop to see what is the first recon folder on the list that needs processing</span>
+<span class="sd">        3. Get the location of the relevant config object (config file)</span>
+<span class="sd">        4. Setup a new thread using **ProcessingThread** to perform the processing in the background.</span>
+<span class="sd">        5. When the processing signals are caught by the method **processing_slot**</span>
+<span class="sd">        6. When the signal is sent to say processing is finished for specific recon folder. This method</span>
+<span class="sd">           (*start_processing_thread**) is run again processing the next recon on the list.</span>
+
+<span class="sd">        :ivar tuple self.p_thread_pool:</span>
+<span class="sd">            A tuple of the threads used. (Should only use 1 and then reset when we start again)</span>
+<span class="sd">            NOTE: Potentially this should just be a class variable (i.e. not self) so would not need to be reset</span>
+<span class="sd">        :ivar int self.stop_pro_switch: If value 1 HARP stops processes due to user pressing stop. Set at 0 at start.</span>
+<span class="sd">        :ivar int self.current_row: The current row of processing. Set in the while loop of this method</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`processing.ProcessingThread()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Reset instance variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_pro_switch</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_thread_pool</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c"># Get memory of the computer (can&#39;t seem to do this in the thread)</span>
+        <span class="n">mem_summary</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()</span>
+        <span class="n">prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;total=(\d+)&quot;</span><span class="p">)</span>
+        <span class="n">memory</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">mem_summary</span><span class="p">))</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c"># A while loop is used to go through the processing table and decides which file to process</span>
+        <span class="c"># The count refers to the row of the table</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c"># This gets the status text</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="c"># Check if the status column has any info</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">status</span><span class="p">:</span>
+                <span class="c"># if not defined it means there are no recons left to process.</span>
+                <span class="c"># Disable and enable buttons which should not be pressed.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonStart</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonStop</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="c"># check if the status identifies this recon folder is done with</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;Processing finished&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">())</span> <span class="ow">or</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;Processing Cancelled!&quot;</span> <span class="ow">or</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+                    <span class="s">&quot;error&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">()):</span>
+                <span class="c"># this row has finished, move on</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="c"># if the status is pending means we can process this recon folder</span>
+            <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;Pending&quot;</span><span class="p">:</span>
+                <span class="c"># this row needs processing, record the row and break out</span>
+                <span class="n">folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">folder_from_list</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_row</span> <span class="o">=</span> <span class="n">count</span>
+                <span class="k">break</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c"># Get the configobject for the row which has been identified from the previous while loop</span>
+        <span class="n">configOb_path_from_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_from_list</span><span class="p">,</span> <span class="s">&quot;Metadata&quot;</span><span class="p">,</span> <span class="s">&quot;configobject.txt&quot;</span><span class="p">)</span>
+
+        <span class="c"># Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)</span>
+        <span class="n">wt</span> <span class="o">=</span> <span class="n">ProcessingThread</span><span class="p">(</span><span class="n">configOb_path_from_list</span><span class="p">,</span> <span class="n">memory</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="c"># the update(QString) SENDS signals from the processing thread (wt) to the processing_slot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">wt</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;update(QString)&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">processing_slot</span><span class="p">)</span>
+        <span class="c"># The kill(Qstring) SENDS signals from the GUI to the function &quot;kill_slot&quot; in the the processing thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&quot;kill(QString)&quot;</span><span class="p">),</span> <span class="n">wt</span><span class="o">.</span><span class="n">kill_slot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_thread_pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_thread_pool</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p_thread_pool</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MainWindow.processing_slot"><a class="viewcode-back" href="../harp.html#harp.MainWindow.processing_slot">[docs]</a>    <span class="k">def</span> <span class="nf">processing_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; listens to the child process and displays any messages.</span>
+
+<span class="sd">        Importantly it also recognises when processing is finished for a recon folder and instigates the setup of</span>
+<span class="sd">        the processing of next recon folder on the list (using **start_processing_thread**)</span>
+
+<span class="sd">        Also updates the OPT channels table so it shows if one of the channels is processed.</span>
+
+<span class="sd">        :param str message: The message sent from the processing thread</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`processing.ProcessingThread()`,</span>
+<span class="sd">            :func:`autofill.get_channels()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_pro_switch</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c"># Update the current row</span>
+        <span class="c"># First get the item from the table to change (status column)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_row</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_row</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c"># Then set the text of this item</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+        <span class="c"># Set the time of the start of processing</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="o">==</span> <span class="s">&quot;Started Processing&quot;</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_row</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_row</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s"> %H:%M:%S&#39;</span><span class="p">))</span>
+        <span class="c"># If finished, initiate the processing of the next folder on the list</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;Processing finished&quot;</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span> <span class="ow">or</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+            <span class="k">print</span> <span class="n">message</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_row</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_row</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s"> %H:%M:%S&#39;</span><span class="p">))</span>
+            <span class="c"># Processing has finished, lets do another one!</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_processing_thread</span><span class="p">()</span>
+            <span class="c"># update the opt channels table</span>
+            <span class="n">autofill</span><span class="o">.</span><span class="n">get_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># Depending on the name of files and status update columns may need to be resized</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MainWindow.add_more"><a class="viewcode-back" href="../harp.html#harp.MainWindow.add_more">[docs]</a>    <span class="k">def</span> <span class="nf">add_more</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; When the add more button is pressed should switch back to the first tab</span>
+
+<span class="sd">        Uses the radio button pushButtonAdd</span>
+
+<span class="sd">        If there are other OPT channels available tell the user if they want to analyse them as well. If they do</span>
+<span class="sd">        the GUI is updated as if this channel has been manually selected.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`reset_inputs()`,</span>
+<span class="sd">            :func:`autofill_pipe()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># change tab</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c"># The first and second tab have different key handling so this is updated</span>
+        <span class="c"># - opt table to handle key press events</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">keyPressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_channel_for_crop</span>
+
+        <span class="c"># Get directory names</span>
+        <span class="n">in_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="n">path_in</span><span class="p">,</span> <span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">in_dir</span><span class="p">)</span>
+
+        <span class="c">#Check if user wants to use the next opt channel available (OPT only)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">==</span> <span class="s">&quot;OPT&quot;</span><span class="p">:</span>
+            <span class="c"># check if a channel which has not been analysed</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">processed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="c"># Check if OPT channel not processed</span>
+                <span class="k">if</span> <span class="n">processed</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;No&quot;</span><span class="p">:</span>
+                    <span class="c"># See if user wants the channel to be processed</span>
+                    <span class="n">reply</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">question</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Would you like to setup the next &#39;</span>
+                                                                        <span class="s">&#39;OPT Channel?&#39;</span><span class="p">,</span>
+                                                       <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">,</span>
+                                                       <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">)</span>
+                    <span class="c"># If yes add to list</span>
+                    <span class="k">if</span> <span class="n">reply</span> <span class="o">==</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">:</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidgetOPT</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_in</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">text</span><span class="p">()))))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">reset_inputs</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">autofill_pipe</span><span class="p">()</span>
+                        <span class="k">return</span>
+                    <span class="c"># if no, do nothing.</span>
+                    <span class="k">if</span> <span class="n">reply</span> <span class="o">==</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">:</span>
+                        <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="MainWindow.stop_processing"><a class="viewcode-back" href="../harp.html#harp.MainWindow.stop_processing">[docs]</a>    <span class="k">def</span> <span class="nf">stop_processing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; kills the current process</span>
+
+<span class="sd">        :ivar tuple self.p_thread_pool: A tuple of the threads used. Reset here before the next process.</span>
+<span class="sd">        :ivar int self.stop_pro_switch: If value 1 HARP stops processes due to user pressing stop. Set at 1 here.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :func:`kill_em_all()`,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;Stop!!&quot;</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_row</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_row</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kill_em_all</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonStart</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonStop</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_thread_pool</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_pro_switch</span> <span class="o">=</span> <span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="MainWindow.delete_rows"><a class="viewcode-back" href="../harp.html#harp.MainWindow.delete_rows">[docs]</a>    <span class="k">def</span> <span class="nf">delete_rows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Deletes a row from the processing list on the processing tab</span>
+
+<span class="sd">        If the delete button is pressed on a certain row the recon is taken off the list to be processed</span>
+
+<span class="sd">        :param qt_event event: Key press event</span>
+<span class="sd">        :ivar int self.count_in: Used to monitor the number of rows in use (used in the addtolist module)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Check if key event is the delete key</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Delete</span><span class="p">:</span>
+            <span class="c"># Gets the current selected row</span>
+            <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">currentRow</span><span class="p">()</span>
+            <span class="c"># Get the status of that row</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">selected</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+                <span class="c"># check if processing has finished or not started</span>
+                <span class="k">print</span> <span class="s">&quot;status&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;Pending&quot;</span> <span class="ow">or</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;Processing finished&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                    <span class="ow">or</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;Processing Cancelled!&quot;</span> <span class="ow">or</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">())):</span>
+
+                    <span class="k">print</span> <span class="s">&quot;Deleted row&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span>
+                    <span class="c"># The count_in will now be one less (i think...)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">count_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">count_in</span> <span class="o">-</span> <span class="mi">1</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span>
+                                              <span class="s">&#39;Warning: Can</span><span class="se">\&#39;</span><span class="s">t delete a row that is currently being processed.&#39;</span>
+                                              <span class="s">&#39;</span><span class="se">\n</span><span class="s">Select &quot;Stop&quot;, then remove&#39;</span><span class="p">)</span>
+
+    <span class="c">#======================================================================</span>
+    <span class="c"># Kill HARP functions</span>
+    <span class="c">#======================================================================</span></div>
+<div class="viewcode-block" id="MainWindow.closeEvent"><a class="viewcode-back" href="../harp.html#harp.MainWindow.closeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Overides QMainWindow closeEvent</span>
+
+<span class="sd">        NOTE: Function name has to be mixed case format as it is from qt</span>
+
+<span class="sd">        Performs a loop through the item list and checks if any process still running</span>
+<span class="sd">        :param qt_event event: qt close event (when HARP is closed)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;Close event&quot;</span>
+        <span class="c"># First check if a process still running by looking through the processing table and checking the status</span>
+        <span class="c"># column. The switch variable records whether processing is live or dead.</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c"># This gets the status text</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">status</span><span class="p">:</span>
+                <span class="n">switch</span> <span class="o">=</span> <span class="s">&quot;dead&quot;</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&quot;Pending&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;Processing finished&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                    <span class="ow">and</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&quot;Processing Cancelled!&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">text</span><span class="p">())):</span>
+                    <span class="n">switch</span> <span class="o">=</span> <span class="s">&quot;live&quot;</span>
+                    <span class="k">break</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c"># if processing switch live, dont shutdown</span>
+        <span class="k">if</span> <span class="n">switch</span> <span class="o">==</span> <span class="s">&quot;live&quot;</span><span class="p">:</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span>
+                                      <span class="s">&#39;Warning: Processing still running.</span><span class="se">\n</span><span class="s">Stop processing and then close down&#39;</span><span class="p">)</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+        <span class="c"># Processing dead so ask user if they want to quit.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">reply</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">question</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Message&#39;</span><span class="p">,</span> <span class="s">&#39;Are you sure to quit?&#39;</span><span class="p">,</span>
+                                               <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span> <span class="o">|</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">)</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">reply</span> <span class="o">==</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">:</span>
+                <span class="c"># Kill_em_all class to try and kill any processes</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">kill_em_all</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MainWindow.kill_em_all"><a class="viewcode-back" href="../harp.html#harp.MainWindow.kill_em_all">[docs]</a>    <span class="k">def</span> <span class="nf">kill_em_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Function to kill all processes</span>
+<span class="sd">        Emits a kill signal to the processing.py method kill_slot(. This is possible as the connection was</span>
+<span class="sd">        setup in the method **processing_thread()**</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;starting kill em all&quot;</span>
+        <span class="c"># Emits a kill signal to the processing kill slot set in the processing_thread()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;kill(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;kill&quot;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../harp.html#harp.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">ex</span> <span class="o">=</span> <span class="n">MainWindow</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">freeze_support</span><span class="p">()</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

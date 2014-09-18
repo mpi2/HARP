@@ -1,0 +1,463 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>autocrop &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for autocrop</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+
+<span class="c"># Comment for neil_test branch</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">platform</span> <span class="k">as</span> <span class="n">_platform</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="c">#from matplotlib import pyplot as plt</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="kn">as</span> <span class="nn">mp</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+
+<span class="n">shared_terminate</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s">&quot;i&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">msg_q</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Autocrop"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop">[docs]</a><span class="k">class</span> <span class="nc">Autocrop</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dir</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">num_proc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">def_crop</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">repeat_crop</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c"># freeze support (windows only)</span>
+        <span class="k">if</span> <span class="n">_platform</span> <span class="o">==</span> <span class="s">&quot;win32&quot;</span> <span class="ow">or</span> <span class="n">_platform</span> <span class="o">==</span> <span class="s">&quot;win64&quot;</span><span class="p">:</span>
+            <span class="n">mp</span><span class="o">.</span><span class="n">freeze_support</span><span class="p">()</span>
+
+        <span class="c">#call the super</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_dir</span> <span class="o">=</span> <span class="n">in_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">=</span> <span class="n">out_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shared_auto_count</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s">&quot;i&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shared_crop_count</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s">&quot;i&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imdims</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">def_crop</span> <span class="o">=</span> <span class="n">def_crop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_proc</span> <span class="o">=</span> <span class="n">num_proc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_crop</span> <span class="o">=</span> <span class="n">repeat_crop</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric_file_queue</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crop_metric_queue</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skip_num</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c">#read evey n files for determining cropping box</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c">#Threshold for cropping metric</span>
+        <span class="n">shared_terminate</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<div class="viewcode-block" id="Autocrop.metricFinder"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.metricFinder">[docs]</a>    <span class="k">def</span> <span class="nf">metricFinder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Processes each image file individually</span>
+<span class="sd">		Implements __call__() so it can be used in multithreading by &#39;&#39;&#39;</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		@param: filename path of an image to process</span>
+<span class="sd">		@returns: tuple of bounding box coords</span>
+
+<span class="sd">		Reads image into array. Flips it around each time</span>
+<span class="sd">		with column/row of interest as the top top row</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+        <span class="k">global</span> <span class="n">shared_terminate</span>
+
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">shared_terminate</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
+                    <span class="k">return</span>
+
+                <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_file_queue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">yield_python</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">matrix</span> <span class="o">==</span> <span class="s">&#39;STOP&#39;</span><span class="p">:</span>  <span class="c">#Found a sentinel</span>
+                    <span class="k">break</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&quot;metric queue error:&quot;</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">#matrix = np.array(im)</span>
+                <span class="n">crops</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">crops</span><span class="p">[</span><span class="s">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">crops</span><span class="p">[</span><span class="s">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">crop_metric_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">crops</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">yield_python</span><span class="p">()</span>
+            <span class="c">#self.metric_file_queue.task_done()</span>
+
+</div>
+<div class="viewcode-block" id="Autocrop.calc_auto_crop"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.calc_auto_crop">[docs]</a>    <span class="k">def</span> <span class="nf">calc_auto_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+        <span class="c">#Distances of cropping boxes from their respective sides</span>
+        <span class="n">ldist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cropping_box</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">)</span>
+        <span class="n">tdist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cropping_box</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">)</span>
+        <span class="n">rdist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cropping_box</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">bdist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cropping_box</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">crop_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertDistFromEdgesToCoords</span><span class="p">((</span><span class="n">ldist</span><span class="p">,</span> <span class="n">tdist</span><span class="p">,</span> <span class="n">rdist</span><span class="p">,</span> <span class="n">bdist</span><span class="p">))</span>
+
+        <span class="c">#Get the distances of the box sides from the sides of the image</span>
+        <span class="n">lcrop</span> <span class="o">=</span> <span class="n">crop_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">padding</span>
+        <span class="k">if</span> <span class="n">lcrop</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">lcrop</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">tcrop</span> <span class="o">=</span> <span class="n">crop_vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">padding</span>
+        <span class="k">if</span> <span class="n">tcrop</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">tcrop</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">rcrop</span> <span class="o">=</span> <span class="n">crop_vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">padding</span>
+        <span class="k">if</span> <span class="n">rcrop</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">imdims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span> <span class="n">rcrop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">imdims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">bcrop</span> <span class="o">=</span> <span class="n">crop_vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">padding</span>
+        <span class="k">if</span> <span class="n">bcrop</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">imdims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span> <span class="n">bcrop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">imdims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;cropping with the following box x1, y1, x2, y2 ({0},{1},{2},{3});&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">lcrop</span><span class="p">,</span> <span class="n">tcrop</span><span class="p">,</span> <span class="n">rcrop</span><span class="p">,</span> <span class="n">bcrop</span><span class="p">))</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Imagej: makeRectangle({0},{1},{2},{3});&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">lcrop</span><span class="p">,</span> <span class="n">tcrop</span><span class="p">,</span> <span class="n">rcrop</span> <span class="o">-</span> <span class="n">lcrop</span><span class="p">,</span> <span class="n">bcrop</span> <span class="o">-</span> <span class="n">tcrop</span><span class="p">))</span>
+        <span class="k">print</span> <span class="n">lcrop</span><span class="p">,</span> <span class="n">tcrop</span><span class="p">,</span> <span class="n">rcrop</span><span class="p">,</span> <span class="n">bcrop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span> <span class="o">=</span> <span class="p">(</span><span class="n">lcrop</span><span class="p">,</span> <span class="n">tcrop</span><span class="p">,</span> <span class="n">rcrop</span><span class="p">,</span> <span class="n">bcrop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yield_python</span><span class="p">()</span>
+
+        <span class="c"># do the cropping in cv2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_crop_process</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Autocrop.calc_manual_crop"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.calc_manual_crop">[docs]</a>    <span class="k">def</span> <span class="nf">calc_manual_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># Repeat crop variable is for when an autocrop has already been performed for a channel of OPT and the user</span>
+        <span class="c"># wants to use the same cropping box</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeat_crop</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeat_crop</span>
+        <span class="c"># self.def_crop is the crop box manually selected by the user</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">def_crop</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertXYWH_ToCoords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">def_crop</span><span class="p">)</span>
+            <span class="c"># Will save the manual crop box here as well as it will be in the correct coordinate system</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">)</span>
+        <span class="c"># If no crop box has been manually selected something has gone wrong</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_crop_process</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Autocrop.run_crop_process"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.run_crop_process">[docs]</a>    <span class="k">def</span> <span class="nf">run_crop_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">shared_terminate</span>
+        <span class="c"># Perform the cropping using cv2</span>
+        <span class="k">for</span> <span class="n">file_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">shared_terminate</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CV_LOAD_IMAGE_GRAYSCALE</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shared_crop_count</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_crop_count</span><span class="o">.</span><span class="n">value</span> <span class="o">%</span> <span class="mi">20</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
+                    <span class="s">&quot;Cropping: {0}/{1} images&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_crop_count</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">))))</span>
+
+            <span class="n">imcrop</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
+            <span class="n">crop_out</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">crop_out</span><span class="p">,</span> <span class="n">imcrop</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yield_python</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;cropping finished&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Autocrop.init_cropping"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.init_cropping">[docs]</a>    <span class="k">def</span> <span class="nf">init_cropping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg_q</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">file_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">shared_terminate</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CV_LOAD_IMAGE_GRAYSCALE</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shared_crop_count</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_crop_count</span><span class="o">.</span><span class="n">value</span> <span class="o">%</span> <span class="mi">20</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">msg_q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s">&quot;Cropping: {0}/{1} images&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_crop_count</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">))))</span>
+
+            <span class="n">imcrop</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
+            <span class="n">crop_out</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">crop_out</span><span class="p">,</span> <span class="n">imcrop</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yield_python</span><span class="p">()</span>
+        <span class="n">msg_q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s">&quot;STOP&quot;</span><span class="p">)</span>  <span class="c">#sentinel</span>
+
+</div>
+<div class="viewcode-block" id="Autocrop.get_cropping_box"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.get_cropping_box">[docs]</a>    <span class="k">def</span> <span class="nf">get_cropping_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="n">rev</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Given the metrics for each row x and y coordinate, calculate the point to crop given a threshold value</span>
+<span class="sd">		@param slices dict: two keys x and y with metrics for respective dimensions</span>
+<span class="sd">		@param side str: x or y</span>
+<span class="sd">		@param threshold int:</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+        <span class="c">#print metric_slices</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lowvals</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">side</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_slices</span><span class="p">]</span>
+
+        <span class="c">#filterout low values</span>
+        <span class="n">means</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entropy</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">))</span>
+        <span class="c">#For testing the threshold</span>
+        <span class="c">#plt.plot(means)</span>
+        <span class="c">#plt.show()</span>
+        <span class="k">if</span> <span class="n">rev</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">next</span><span class="p">((</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">means</span><span class="p">))</span> <span class="k">if</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">next</span><span class="p">((</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">means</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">yield_python</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Autocrop.entropy"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		not currently used</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+        <span class="n">p</span><span class="p">,</span> <span class="n">lns</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">round_down</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">))</span>
+        <span class="k">return</span> <span class="o">-</span><span class="nb">sum</span><span class="p">(</span><span class="n">count</span> <span class="o">/</span> <span class="n">lns</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">count</span> <span class="o">/</span> <span class="n">lns</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="Autocrop.round_down"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.round_down">[docs]</a>    <span class="k">def</span> <span class="nf">round_down</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">divisor</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">array</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">n</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span> <span class="o">%</span> <span class="n">divisor</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Autocrop.lowvals"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.lowvals">[docs]</a>    <span class="k">def</span> <span class="nf">lowvals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Values lower than value, set to zero</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+        <span class="n">low_values_indices</span> <span class="o">=</span> <span class="n">array</span> <span class="o">&lt;</span> <span class="n">value</span>
+        <span class="n">array</span><span class="p">[</span><span class="n">low_values_indices</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">array</span>
+
+</div>
+<div class="viewcode-block" id="Autocrop.run"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+        <span class="c">#get a subset of files to work with to speed it up</span>
+
+        <span class="n">sparse_files</span><span class="p">,</span> <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFileList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_num</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">files</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sparse_files</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="s">&quot;no image files found in &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_dir</span><span class="p">)</span>
+
+        <span class="c">#get image dimensions from first file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imdims</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">sparse_files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CV_LOAD_IMAGE_GRAYSCALE</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">padding</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imdims</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.025</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">def_crop</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calc_manual_crop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">shared_terminate</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;success&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Doing autocrop&quot;</span><span class="p">)</span>
+            <span class="n">pool_num</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">mThreads</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pool_num</span><span class="p">):</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metricFinder</span><span class="p">)</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">mThreads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="c">#setup the file queue for finding metric</span>
+            <span class="k">for</span> <span class="n">file_</span> <span class="ow">in</span> <span class="n">sparse_files</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">shared_terminate</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
+                    <span class="k">return</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">shared_auto_count</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_num</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_auto_count</span><span class="o">.</span><span class="n">value</span> <span class="o">%</span> <span class="mi">40</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;Getting crop box: {0}/{1} images&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_auto_count</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+                                                                            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">))))</span>
+                <span class="n">im</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CV_LOAD_IMAGE_GRAYSCALE</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metric_file_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">yield_python</span><span class="p">()</span>
+
+            <span class="c">#Add some sentinels and block until threads finish</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pool_num</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metric_file_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s">&#39;STOP&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">mThreads</span><span class="p">:</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;cropping box determined&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">crop_metric_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s">&#39;STOP&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metric_slices</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_metric_queue</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="s">&#39;STOP&#39;</span><span class="p">)]</span>
+
+
+            <span class="c">#Die if signalled from gui</span>
+            <span class="k">if</span> <span class="n">shared_terminate</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="c"># Perform the actuall cropping</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calc_auto_crop</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">shared_terminate</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;success&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="Autocrop.getFileList"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.getFileList">[docs]</a>    <span class="k">def</span> <span class="nf">getFileList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">,</span> <span class="n">skip</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Get the list of files from dir. Exclude known non slice files</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="nb">dir</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>
+                   <span class="p">(</span><span class="s">&#39;spr.bmp&#39;</span><span class="p">,</span> <span class="s">&#39;spr.BMP&#39;</span><span class="p">,</span> <span class="s">&#39;spr.tif&#39;</span><span class="p">,</span> <span class="s">&#39;spr.TIF&#39;</span><span class="p">,</span> <span class="s">&#39;spr.jpg&#39;</span><span class="p">,</span> <span class="s">&#39;spr.JPG&#39;</span><span class="p">,</span> <span class="s">&#39;*spr.jpeg&#39;</span><span class="p">,</span> <span class="s">&#39;spr.JPEG&#39;</span><span class="p">)):</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span>
+                    <span class="s">&#39;*rec*.bmp&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.BMP&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.tif&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.TIF&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.jpg&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.JPG&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.jpeg&#39;</span><span class="p">,</span> <span class="s">&#39;*rec*.JPEG&#39;</span> <span class="p">)):</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_dir</span><span class="p">,</span> <span class="n">fn</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="n">skip</span><span class="p">]),</span> <span class="n">files</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Autocrop.convertDistFromEdgesToCoords"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.convertDistFromEdgesToCoords">[docs]</a>    <span class="k">def</span> <span class="nf">convertDistFromEdgesToCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distances</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Convert distances from sides(which comes from auto detection) sides into x,y,w,h</span>
+<span class="sd">		PIL uses actual coords not width height</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">imdims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">distances</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">imdims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">distances</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">distances</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">distances</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="Autocrop.convertXYWH_ToCoords"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.convertXYWH_ToCoords">[docs]</a>    <span class="k">def</span> <span class="nf">convertXYWH_ToCoords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xywh</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		The input dimensions from the GUI needs converting for PIL</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">xywh</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xywh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">xywh</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xywh</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">xywh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xywh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Autocrop.yield_python"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.yield_python">[docs]</a>    <span class="k">def</span> <span class="nf">yield_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="terminate"><a class="viewcode-back" href="../autocrop.html#autocrop.terminate">[docs]</a><span class="k">def</span> <span class="nf">terminate</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">shared_terminate</span>
+    <span class="n">shared_terminate</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">1</span>
+
+</div>
+<div class="viewcode-block" id="init_cropping_win"><a class="viewcode-back" href="../autocrop.html#autocrop.init_cropping_win">[docs]</a><span class="k">def</span> <span class="nf">init_cropping_win</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">msg_q</span>
+    <span class="k">print</span> <span class="s">&quot;init crop win&quot;</span>
+    <span class="k">for</span> <span class="n">file_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">shared_terminate</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CV_LOAD_IMAGE_GRAYSCALE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shared_crop_count</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_crop_count</span><span class="o">.</span><span class="n">value</span> <span class="o">%</span> <span class="mi">20</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Cropping: {0}/{1} images&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_crop_count</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">)))</span>
+            <span class="n">msg_q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s">&quot;Cropping: {0}/{1} images&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_crop_count</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">))))</span>
+
+        <span class="n">imcrop</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">crop_box</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
+        <span class="n">crop_out</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">crop_out</span><span class="p">,</span> <span class="n">imcrop</span><span class="p">)</span>
+    <span class="n">msg_q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s">&quot;STOP&quot;</span><span class="p">)</span>  <span class="c">#sentinel</span>
+
+</div>
+<div class="viewcode-block" id="dummy_callback"><a class="viewcode-back" href="../autocrop.html#autocrop.dummy_callback">[docs]</a><span class="k">def</span> <span class="nf">dummy_callback</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;use for cli running&#39;&#39;&#39;</span>
+    <span class="k">print</span> <span class="n">msg</span>
+
+</div>
+<div class="viewcode-block" id="cli_run"><a class="viewcode-back" href="../autocrop.html#autocrop.cli_run">[docs]</a><span class="k">def</span> <span class="nf">cli_run</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Parse the arguments</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s">&#39;crop a stack of bitmaps&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-i&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;in_dir&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;dir with bmps to crop&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-o&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;out_dir&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;destination for cropped images&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;file_type&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;tif or bmp&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;bmp&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-d&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;def_crop&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;set defined boundaries for crop x,y,w,h&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;num_proc&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;number of processors to use&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">ac</span> <span class="o">=</span> <span class="n">Autocrop</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">in_dir</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">num_proc</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">def_crop</span><span class="p">)</span>
+    <span class="n">ac</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="c">#sys.exit()</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">mp</span><span class="o">.</span><span class="n">freeze_support</span><span class="p">()</span>
+    <span class="n">cli_run</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

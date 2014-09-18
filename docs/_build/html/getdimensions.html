@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>getdimensions module &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="index.html" />
+    <link rel="next" title="processing module" href="processing.html" />
+    <link rel="prev" title="config module" href="config.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="processing.html" title="processing module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="config.html" title="config module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-getdimensions">
+<span id="getdimensions-module"></span><h1>getdimensions module<a class="headerlink" href="#module-getdimensions" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="getdimensions.crop_call_back">
+<tt class="descclassname">getdimensions.</tt><tt class="descname">crop_call_back</tt><big>(</big><em>self</em>, <em>box</em><big>)</big><a class="reference internal" href="_modules/getdimensions.html#crop_call_back"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#getdimensions.crop_call_back" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get crop dimension (crop box) from z projecion image.</p>
+<p>Saves the crop dimensions to the line edit boxes on the GUI.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>box</strong> (<em>list</em>) &#8211; Crop dimensions (crop box) the user selected</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="getdimensions.get_dimensions">
+<tt class="descclassname">getdimensions.</tt><tt class="descname">get_dimensions</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="_modules/getdimensions.html#get_dimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#getdimensions.get_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allow a user to choose crop dimensions by choosing a region based on the z-projection of the image.</p>
+<p>This z projection is calculated on a seperate thread. Process is as follows:</p>
+<ol class="arabic simple">
+<li><strong>start_z_thread</strong> starts a thread using the module zproject</li>
+<li>z projection is performed in background giving updates to the &#8220;status&#8221; section of the GUI</li>
+<li>The <strong>zproject_slot</strong> catches any signals</li>
+<li>&#8220;Z-projection finished&#8221; is called and <strong>run_crop</strong> loads a new window.</li>
+<li>The user can then select the crop dimensions</li>
+<li>When the crop dimensions are selected the crop window is closed and the cropbox parameter is saved on the GUI</li>
+</ol>
+<p>Two important modules used: crop.py and zproject.py</p>
+<ul class="simple">
+<li>zproject performs the zprojection and displays the image.</li>
+<li>crop.py then gets the dimensions to perform the crop</li>
+</ul>
+<p>IMPORTANT NOTE: The cropping is not actually done here. This is just to get the dimensions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>self.stop</strong> (<em>boolean</em>) &#8211; If True HARP stops pre-processing steps. Set to None before z projection performed</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#getdimensions.start_z_thread" title="getdimensions.start_z_thread"><tt class="xref py py-func docutils literal"><span class="pre">start_z_thread()</span></tt></a>,</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="getdimensions.run_crop">
+<tt class="descclassname">getdimensions.</tt><tt class="descname">run_crop</tt><big>(</big><em>self</em>, <em>img_path</em><big>)</big><a class="reference internal" href="_modules/getdimensions.html#run_crop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#getdimensions.run_crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the a window to display the z projection used to get crop dimensions</p>
+<p>Creates an object from the crop module. Uses a call back method to get the crop dimensions after the user
+has selected them.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="crop.html#crop.Crop" title="crop.Crop"><tt class="xref py py-func docutils literal"><span class="pre">crop.Crop()</span></tt></a>
+<a class="reference internal" href="#getdimensions.crop_call_back" title="getdimensions.crop_call_back"><tt class="xref py py-func docutils literal"><span class="pre">crop_call_back()</span></tt></a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="getdimensions.start_z_thread">
+<tt class="descclassname">getdimensions.</tt><tt class="descname">start_z_thread</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="_modules/getdimensions.html#start_z_thread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#getdimensions.start_z_thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts a thread to perform z projection processing in the background.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="zproject.html#zproject.ZProjectThread" title="zproject.ZProjectThread"><tt class="xref py py-func docutils literal"><span class="pre">zproject.ZProjectThread()</span></tt></a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="getdimensions.zproject_slot">
+<tt class="descclassname">getdimensions.</tt><tt class="descname">zproject_slot</tt><big>(</big><em>self</em>, <em>message</em><big>)</big><a class="reference internal" href="_modules/getdimensions.html#zproject_slot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#getdimensions.zproject_slot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Listens to the z projection child process.</p>
+<p>Displays all messages to the status section of the parameters tab. Once zprojection is finished opens window
+to display zproject for user to get crop dimensions, using <em>run_crop</em></p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#getdimensions.run_crop" title="getdimensions.run_crop"><tt class="xref py py-func docutils literal"><span class="pre">run_crop()</span></tt></a></p>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="config.html"
+                        title="previous chapter">config module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="processing.html"
+                        title="next chapter">processing module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/getdimensions.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="processing.html" title="processing module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="config.html" title="config module"
+             >previous</a> |</li>
+        <li><a href="index.html">HARP 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>addtolist &mdash; HARP 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="HARP 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for addtolist</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">**Summary:**</span>
+
+<span class="sd">The following functions are used to add the recon folders to the processing list and save the config file.</span>
+
+<span class="sd">When a recon folder is added to the processing list a config file is saved in the output folder location. This is</span>
+<span class="sd">done in the **add_to_list_action()** method.</span>
+
+<span class="sd">For microCT data this is straight forward but for OPT data it is more complicated as multiple channels are added</span>
+<span class="sd">to the list. This method **start()** is used to handle the different way folders are added to the list.</span>
+
+<span class="sd">NOTE:</span>
+<span class="sd">The methods here are not technically part of the HARP class but can be used as if they are. They are seperated from</span>
+<span class="sd">the harp.py file just for convenience. To run a method from this module in harp.py the following notation can be</span>
+<span class="sd">used start(self) rather than self.start().</span>
+
+<span class="sd">--------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">errorcheck</span>
+<span class="kn">import</span> <span class="nn">getpickle</span>
+
+<div class="viewcode-block" id="start"><a class="viewcode-back" href="../addtolist.html#addtolist.start">[docs]</a><span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Function to start the process of adding recon folders onto the processing list</span>
+
+<span class="sd">    Uses the **add_to_list_action()** method to add folders onto the processing list and save a config file in the</span>
+<span class="sd">    output folder location.</span>
+
+<span class="sd">    For microCT data this is straight forward but for OPT data it is more complicated as multiple channels are added</span>
+<span class="sd">    to the list.</span>
+
+<span class="sd">    **For multi-channel OPT data:**</span>
+<span class="sd">    Multi-channel OPT data can either be handled individually or together. The default is to handle together.</span>
+
+<span class="sd">    This is achieved by a for loop which goes through the OPT channels list. For each OPT channel the following occurs</span>
+<span class="sd">    in the for loop:</span>
+<span class="sd">    * Recon folder is added to the input folder line edit box</span>
+<span class="sd">    * Autofill operations are carried out (automatically determining the parameters).</span>
+<span class="sd">    * If the autofill operation completes successfully the channel is then added to the processing list</span>
+<span class="sd">    * A config file is saved in the relevant output folder location</span>
+<span class="sd">    * Then parameters tab is also reset to its original view</span>
+
+<span class="sd">    NOTE:</span>
+<span class="sd">    The methods here are not technically part of the HARP class but can be used as if they are. They are seperated from</span>
+<span class="sd">    the harp.py file just for convenience. To run a method from this module in harp.py the following notation can be</span>
+<span class="sd">    used start(self) rather than self.start().</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    :ivar str self.modality: Either MicroCT or OPT. Used here but not modified.</span>
+<span class="sd">    :ivar boolean self.stop_chn_for_loop: Stops the for group OPT channel for loop.</span>
+<span class="sd">        Used and modified in both methods here</span>
+<span class="sd">    :ivar list self.chan_full: List of all the OPT channels HARP can find, created in autofill. Not modified here.</span>
+<span class="sd">    :ivar str self.derived_output_name: Derived output name when processing group OPT channels.</span>
+<span class="sd">        Initialised in this method</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">            :func:`add_to_list_action()`,</span>
+<span class="sd">            :func:`harp.MainWindow.reset_inputs()`,</span>
+<span class="sd">            :func:`harp.MainWindow.autofill_pipe()`,</span>
+<span class="sd">            :func:`harp.MainWindow.man_crop_off()`,</span>
+<span class="sd">            :func:`harp.MainWindow.man_crop_off()`,</span>
+<span class="sd">            :func:`harp.MainWindow.man_crop_on()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Modality check</span>
+    <span class="c"># If MicroCT or individual OPT run, just add to the processing list</span>
+    <span class="c"># If group OPT run, go through the for loop of OPT channels</span>
+    <span class="c"># First reset this instance variable (used later)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">derived_output_name</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c"># get folder names</span>
+    <span class="n">in_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">path</span><span class="p">,</span><span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">in_dir</span><span class="p">)</span>
+
+    <span class="c"># Check if microCT, individual OPT or Batch OPT</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">==</span> <span class="s">&quot;MicroCT&quot;</span><span class="p">:</span>
+        <span class="c"># Standard microCT run</span>
+        <span class="n">add_to_list_action</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxInd</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="c"># Individual OPT run</span>
+        <span class="n">add_to_list_action</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c">#======================================================================</span>
+    <span class="c"># Batch OPT run</span>
+    <span class="c">#======================================================================</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c">######## Save parameter settings ###########</span>
+        <span class="c"># Save the initial settings to be displayed again after all processing has been added</span>
+        <span class="c"># Recon log</span>
+        <span class="n">recon_log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTRecon</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="c"># SPR (should prob get rid of this</span>
+        <span class="n">spr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTSPR</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="c"># Scan folder</span>
+        <span class="n">scan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditScan</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="c"># Output folder</span>
+        <span class="n">out_dir_original</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="c"># Input folder</span>
+        <span class="n">in_dir_orignal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="c"># derived name</span>
+        <span class="n">derive</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="c"># crop option</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonAuto</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="n">crop_option</span> <span class="o">=</span> <span class="s">&quot;auto&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="n">crop_option</span> <span class="o">=</span> <span class="s">&quot;derived&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonUseOldCrop</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="n">crop_option</span> <span class="o">=</span> <span class="s">&quot;old&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonMan</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="n">crop_option</span> <span class="o">=</span> <span class="s">&quot;man&quot;</span>
+
+        <span class="c">######## Channel loop ###########</span>
+        <span class="c"># Make sure stop switch is turned off</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_chn_for_loop</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="c"># go through list and get the channel names</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chan_full</span><span class="p">:</span>
+            <span class="c"># if off switch is True then stop loop</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_chn_for_loop</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c"># Get full path of the input folder for channel</span>
+            <span class="n">chan_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="c"># backslash and forward slash should not be a problem but just incase we remove them here</span>
+            <span class="n">chan_short</span> <span class="o">=</span> <span class="n">chan_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">chan_short</span> <span class="o">=</span> <span class="n">chan_short</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">in_dir_short</span> <span class="o">=</span> <span class="n">in_dir</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">in_dir_short</span> <span class="o">=</span> <span class="n">in_dir_short</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c"># Check if the input directory is already set to the current channel in the loop</span>
+            <span class="c"># If the current channel is not the same as the loop then perform autofill before adding to the list</span>
+            <span class="c"># If it is the same</span>
+            <span class="k">if</span> <span class="n">chan_short</span> <span class="o">==</span> <span class="n">in_dir_short</span><span class="p">:</span>
+                <span class="c"># In case the output folder name is different to input folder name. Need to save what will be used</span>
+                <span class="c"># as the derived folder</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">derived_output_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+                <span class="c"># add to the list</span>
+                <span class="n">add_to_list_action</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="c"># go to next iteration</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Not the original channel so autofill the paramters tab</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">chan_path</span><span class="p">)</span>
+                <span class="c"># reset inputs</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset_inputs</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">autofill_pipe</span><span class="p">(</span><span class="n">suppress</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="c">#need to setup the output folder based on original folder.</span>
+            <span class="c">#multiple channels (onl)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chan_full</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">path_out</span><span class="p">,</span> <span class="n">old_folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">out_dir_original</span><span class="p">))</span>
+                <span class="n">output_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_out</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_folder</span><span class="p">))</span>
+
+            <span class="c"># Add to list!</span>
+            <span class="n">add_to_list_action</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c">######## Reset parameter settings ###########</span>
+        <span class="c"># reset the parameters tab back to what originally was for the user.</span>
+        <span class="c"># Save the initial settings to be displayed again after all processing has been added</span>
+        <span class="c"># Input folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">in_dir_orignal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autofill_pipe</span><span class="p">(</span><span class="n">suppress</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="c"># The following may have been changed from the user so have to be changed after the autofill</span>
+        <span class="c"># Recon log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTRecon</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">recon_log</span><span class="p">)</span>
+        <span class="c"># SPR (should prob get rid of this</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditCTSPR</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">spr</span><span class="p">)</span>
+        <span class="c"># Scan folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditScan</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">scan</span><span class="p">)</span>
+        <span class="c"># Output folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">out_dir_original</span><span class="p">)</span>
+        <span class="c"># derived name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">derive</span><span class="p">)</span>
+        <span class="c"># crop option</span>
+        <span class="k">if</span> <span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonAuto</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">man_crop_off</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;derived&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">derive_on</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;old&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonUseOldCrop</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">man_crop_on</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">crop_option</span> <span class="o">==</span> <span class="s">&quot;man&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonMan</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">man_crop_on</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="add_to_list_action"><a class="viewcode-back" href="../addtolist.html#addtolist.add_to_list_action">[docs]</a><span class="k">def</span> <span class="nf">add_to_list_action</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Adds recon to processing list, creates pickle file and does error checks</span>
+
+<span class="sd">    1. First perform error checks using the errorcheck module</span>
+<span class="sd">    2. Then creates a pickle file of the parameters using the getpickle module and saves in the output folder</span>
+<span class="sd">    3. the currently selected recon (based on the parameters tab) onto the processing list</span>
+
+<span class="sd">    :param obj self:</span>
+<span class="sd">        Although not technically part of the class, can still use this method as if it was part of the HARP class.</span>
+<span class="sd">    :ivar str self.modality: Either MicroCT or OPT. Used here but not modified.</span>
+<span class="sd">    :ivar str self.stop: Modified with errorcheck module. If True</span>
+<span class="sd">    :return: Returns early if processing group OPT channels and an invalid channel chosen to derive dimensions from</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">        :func:`errorcheck.errorCheck()`,</span>
+<span class="sd">        :func:`getpickle.get_pickle()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># get the input name for table</span>
+    <span class="n">input_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditInput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+    <span class="c"># Error check for multiple channel for loop</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modality</span> <span class="o">==</span> <span class="s">&quot;OPT&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">radioButtonDerived</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> \
+            <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditDerivedChnName</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_chn_for_loop</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;Message&#39;</span><span class="p">,</span><span class="s">&#39;Warning: Derived dimensions for autocrop option selected.&#39;</span>
+                                                    <span class="s">&#39; This requires a valid channel to be used to get the crop &#39;</span>
+                                                    <span class="s">&#39;dimensions from&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c"># Perform some checks before any processing is carried out</span>
+    <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditOutput</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">errorcheck</span><span class="o">.</span><span class="n">errorCheck</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c"># If an error has occured self.stop will be defined. if None then no error.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span>
+        <span class="c"># Get the parameters needed for processing</span>
+        <span class="n">getpickle</span><span class="o">.</span><span class="n">get_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># Set up the table. 300 rows should be enough!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setRowCount</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
+
+        <span class="c"># Set the data for an individual row</span>
+        <span class="c"># Set up the name data cell</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count_in</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count_in</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">input_name</span><span class="p">)</span>
+
+        <span class="c"># Set up the output folder cell</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count_in</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count_in</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configOb</span><span class="o">.</span><span class="n">output_folder</span><span class="p">)</span>
+
+        <span class="c"># Set up the status cell</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count_in</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count_in</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c"># Status is pending untill processing has started</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Pending&quot;</span><span class="p">)</span>
+
+        <span class="c"># count_in is the counter for the row to add data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_in</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c"># Reszie the columns to fit the data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span>
+
+        <span class="c"># Go to second tab</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">HARP 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, TL.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
