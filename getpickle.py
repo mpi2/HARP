@@ -9,9 +9,12 @@ from config import ConfigClass
 
 
 def get_pickle(self):
-    '''
-    Creates the config file for future processing
-    '''
+    """ Creates the python pickle config file for future processing. Also creates a more readable text file of the
+    same information.
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    """
     # Get input and output folders (As the text is always from the text box it will hopefully keep track of
     #any changes the user might have made
     inputFolder = str(self.ui.lineEditInput.text())
@@ -33,9 +36,9 @@ def get_pickle(self):
     # Create config file and log file
     log = open(self.log_path, 'w+')
 
-    #######################################
-    # Create config object                #
-    #######################################
+    #========================================================================================
+    # Create config object
+    #========================================================================================
     # Get cropping options
     if not self.ui.checkBoxCropYes.isChecked() :
         self.configOb.cropbox_path = "Not_applicable"
@@ -61,7 +64,6 @@ def get_pickle(self):
         self.configOb.crop_manual = "Not_applicable"
         self.configOb.crop_option = "Derived"
         if self.derived_output_name:
-            print "TESTTTTTTTTTT"
             d_path = os.path.join(path_out, str(self.derived_output_name),"Metadata","cropbox.txt")
         else:
             d_path =os.path.join(path_out, str(self.ui.lineEditDerivedChnName.text()),"Metadata","cropbox.txt")
@@ -69,32 +71,32 @@ def get_pickle(self):
         self.configOb.cropbox_path = self.crop_pickle_path
 
     ##### Get Scaling factors ####
-    if self.ui.checkBoxSF2.isChecked() :
+    if self.ui.checkBoxSF2.isChecked():
         self.configOb.SF2 = "yes"
     else :
         self.configOb.SF2 = "no"
 
-    if self.ui.checkBoxSF3.isChecked() :
+    if self.ui.checkBoxSF3.isChecked():
         self.configOb.SF3 = "yes"
     else :
         self.configOb.SF3 = "no"
 
-    if self.ui.checkBoxSF4.isChecked() :
+    if self.ui.checkBoxSF4.isChecked():
         self.configOb.SF4 = "yes"
     else :
         self.configOb.SF4 = "no"
 
-    if self.ui.checkBoxSF5.isChecked() :
+    if self.ui.checkBoxSF5.isChecked():
         self.configOb.SF5 = "yes"
     else :
         self.configOb.SF5 = "no"
 
-    if self.ui.checkBoxSF6.isChecked() :
+    if self.ui.checkBoxSF6.isChecked():
         self.configOb.SF6 = "yes"
     else :
         self.configOb.SF6 = "no"
 
-    if self.ui.checkBoxPixel.isChecked() :
+    if self.ui.checkBoxPixel.isChecked():
         self.configOb.pixel_option = "yes"
         self.configOb.user_specified_pixel = str(self.ui.lineEditPixel.text())
         self.configOb.SF_pixel = float(self.pixel_size) / float(self.ui.lineEditPixel.text())
@@ -139,7 +141,9 @@ def get_pickle(self):
     else :
         self.configOb.imageJ = self.configOb.cropped_path+os.sep+'^'+self.configOb.scale_path+os.sep+'^'+self.configOb.full_name
 
-    # write the config information into an easily readable log file
+    #========================================================================================
+    # Write the config more readable version
+    #========================================================================================
     log.write("Session_ID    "+self.configOb.unique_ID+"\n")
     log.write("full_name    "+self.configOb.full_name+"\n")
     log.write("Input_folder    "+self.configOb.input_folder+"\n")

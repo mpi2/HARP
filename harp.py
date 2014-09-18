@@ -576,7 +576,7 @@ class MainWindow(QtGui.QMainWindow):
 
         :ivar str self.recon_log_path: Path of recon log, used again in the pickle file for documentation purposes
         :ivar str self.pixel: Path of recon log, used again in the pickle file for documentation purposes
-        :raises TypeError: If self.pixel_size cannot be dsiplayed on the GUI due to incorrect type
+        :raises TypeError: If self.pixel_size cannot be displayed on the GUI due to incorrect type
         :raises IOError: If file user selected does not exist
 
         .. seealso::
@@ -684,7 +684,6 @@ class MainWindow(QtGui.QMainWindow):
         if not name:
             print "Selected a row with no opt info"
         else:
-            print "change channel"
             self.ui.lineEditInput.setText(os.path.abspath(os.path.join(path_out, str(name.text()))))
             self.reset_inputs()
             self.autofill_pipe()
@@ -884,7 +883,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
         wt = ProcessingThread(configOb_path_from_list, memory, self)
+        # the update(QString) SENDS signals from the processing thread (wt) to the processing_slot
         self.connect(wt, QtCore.SIGNAL("update(QString)"), self.processing_slot)
+        # The kill(Qstring) SENDS signals from the GUI to the function "kill_slot" in the the processing thread
         self.connect(self, QtCore.SIGNAL("kill(QString)"), wt.kill_slot)
         self.p_thread_pool.append(wt)
         self.p_thread_pool[len(self.p_thread_pool) - 1].start()
@@ -1075,16 +1076,17 @@ class MainWindow(QtGui.QMainWindow):
             event.accept()
             if reply == QtGui.QMessageBox.Yes:
                 # Kill_em_all class to try and kill any processes
-                self.kill_em_all
+                self.kill_em_all()
             else:
                 event.ignore()
 
     def kill_em_all(self):
         """ Function to kill all processes
-        Sends a kill signal to the processing thread
+        Emits a kill signal to the processing.py method kill_slot(. This is possible as the connection was
+        setup in the method **processing_thread()**
         """
         print "starting kill em all"
-        # First kill the thread and autocrop
+        # Emits a kill signal to the processing kill slot set in the processing_thread()
         self.emit(QtCore.SIGNAL('kill(QString)'), "kill")
 
 

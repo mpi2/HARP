@@ -1,240 +1,38 @@
+"""
+**Summary:**
+
+The following functions are used to update the parameters tab based on the input file used.
+
+NOTE:
+The methods here are not technically part of the HARP class but can be used as if they are. They are separated from
+the harp.py file just for convenience. To run a method from this module in harp.py the following notation can be
+used start(self) rather than self.start().
+
+--------------
+"""
+
 from PyQt4 import QtCore, QtGui
 import sys
 import os
 import re
 import datetime
 
-def opt_uCT_check(self,suppress=False):
-    '''
-    Checks whether or not folder name contains reference to either opt or microCT
-    '''
-    print "doing opt_uct check"
-    file_in = str(self.ui.lineEditInput.text())
-    print file_in
-    p_opt = re.compile("OPT",re.IGNORECASE)
-    p_uCT = re.compile("MicroCT",re.IGNORECASE)
-    if p_opt.search(file_in):
-        self.modality = "OPT"
-        self.ui.radioButtonOPT.setChecked(True)
-        self.ui.lineEditChannel.setEnabled(True)
-        self.ui.labelChannel.setEnabled(True)
-        self.ui.tableWidgetOPT.setEnabled(True)
-        self.ui.radioButtonDerived.setEnabled(True)
-        if self.ui.radioButtonDerived.isChecked():
-            self.ui.lineEditDerivedChnName.setEnabled(True)
-        self.ui.checkBoxInd.setEnabled(True)
-    elif p_uCT.search(file_in):
-        self.modality = "MicroCT"
-        self.ui.radioButtonuCT.setChecked(True)
-        self.ui.lineEditChannel.setEnabled(False)
-        self.ui.labelChannel.setEnabled(False)
-        self.ui.tableWidgetOPT.setEnabled(False)
-        self.ui.radioButtonDerived.setEnabled(False)
-        self.ui.lineEditDerivedChnName.setEnabled(False)
-        self.ui.checkBoxInd.setEnabled(False)
-    else:
-        if not suppress:
-            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Cannot automatically determine if uCT or OPT please check')
-
-def get_crop_box(self,alt_name):
-    """
-
-    """
-    if not self.modality == "OPT":
-        return
-    out_dir = str(self.ui.lineEditOutput.text())
-    path_out,folder_name = os.path.split(out_dir)
-
-    # go through all the folders indentified to see if one has a cropbox pickle file. If it does save the
-    cropbox_path = os.path.join(path_out, alt_name, "Metadata","cropbox.txt")
-    if os.path.exists(cropbox_path):
-        return True
-
-def check_if_on_list(self,alt_name):
-    # A while loop is used to go through the processing table see if the alternative channel is on the list already
-    count = 0
-    while True:
-        # This gets the status text
-        name_on_list = self.ui.tableWidget.item(count, 0)
-        if not name_on_list:
-            # if not defined it means there are no recons left to process
-            return False
-        if re.search(alt_name, name_on_list.text()):
-            # this row has the OPT channel ID meaning a cropbox will be ready when this is ran
-            return True
-        count += 1
-
-def get_channels(self):
-    """
-    Check if OPT is selected
-    look up recon parent folder and search for other available
-    Then checks if are there similar named folders in the input directory
-    Go through the folders identified and put in table
-    :return:
-    """
-    # reset the table
-    self.ui.tableWidgetOPT.clearContents()
-
-    if not self.modality == "OPT":
-        return
-
-    # Are there matching folders in the parent directory of the input directory
-    in_dir = str(self.ui.lineEditInput.text())
-    # Get the folder name and path name
-    path,folder_name = os.path.split(in_dir)
-    # get a list of the names in the folder name
-    l_init = folder_name.split("_")
-    # get the name without the channel (only works if name is in the correct format)
-    base_name = '_'.join(l_init[0:6])
-
-    # set the name up for the current channel. Blank if name not set up properly
-    try:
-        chn_init = str(l_init[6])
-    except IndexError:
-        chn_init = "NA"
-
-    chan_full = []
-    chan_short = []
-
-    # add current to channel list
-    chan_full.append(folder_name)
-    chan_short.append(chn_init)
-
-
-    if not os.path.exists(path):
-        return
-
-    # for loop to go through the parent input directory
-    for line in os.listdir(path) :
-        line =str(line)
-        # if the line matches the base_name but is not the same as the input file. The folder is probably another
-        # channel
-        m = re.search(base_name,line)
-        if m and (not line == folder_name):
-            # Check if it is a folder with recons etc for the other channels
-            if error_check_chn(os.path.join(path,line)) != 1:
-                chan_full.append(line)
-                chan_short.append(m.group(0))
-
-    count = 0
-    self.chan_full = chan_full
-
-    # Save the the opt channels to the opt channel table
-    for alt_name in chan_full:
-        # Set the data for an individual row
-        # Set up the channel type
-        l = alt_name.split("_")
-        try:
-            chn = l[6]
-        except IndexError:
-            chn = "NA"
-        # Make the current channel highlighted
-        chn_item = QtGui.QTableWidgetItem()
-        self.ui.tableWidgetOPT.setItem(count, 0, chn_item)
-        chn_item = self.ui.tableWidgetOPT.item(count, 0)
-        chn_item.setText(chn)
-        if alt_name == folder_name:#
-            chn_item.setBackground(QtGui.QColor(220, 0, 0))
-
-        # Set up the name of the recon
-        item = QtGui.QTableWidgetItem()
-        self.ui.tableWidgetOPT.setItem(count, 1, item)
-        item = self.ui.tableWidgetOPT.item(count, 1)
-        item.setText(alt_name)
-
-        # Set up whether or not there is a crop box available
-        if get_crop_box(self,alt_name):
-            crop_status = "Yes"
-        elif check_if_on_list(self,alt_name):
-            crop_status = "On list"
-        else:
-            crop_status = "No"
-
-        item = QtGui.QTableWidgetItem()
-        self.ui.tableWidgetOPT.setItem(count, 2, item)
-        item = self.ui.tableWidgetOPT.item(count, 2)
-        # Status is pending untill processing has started
-        item.setText(crop_status)
-
-        # count_in is the counter for the row to add data
-        count += 1
-
-        # Reszie the columns to fit the data
-        self.ui.tableWidgetOPT.resizeColumnsToContents()
-
-        self.ui.tableWidgetOPT.setSortingEnabled(True)
-        self.ui.tableWidgetOPT.sortByColumn(0)
-
-def error_check_chn(inputFolder):
-    # Check if input folder exists
-    if not os.path.exists(inputFolder):
-        return 1
-
-    # Check if a directory
-    if not os.path.isdir(inputFolder):
-        return 1
-
-    #Check if folder is empty
-    if os.listdir(inputFolder) == []:
-            return 1
-
-    #Check if input folder contains any image files
-    prog = re.compile("(.*).(bmp|tif|jpg|jpeg)",re.IGNORECASE)
-
-    file_check = None
-    # for loop to go through the directory
-    for line in os.listdir(inputFolder) :
-        line =str(line)
-        #print line+"\n"
-        # if the line matches the regex break
-        if prog.match(line) :
-            file_check = True
-            break
-
-    if not file_check:
-        return 1
-
-
-def auto_get_derived(self):
-    """
-    While loop through OPT list. See if one of them is either processed or on list. if they are set the derived crop box
-    settings
-    :return:
-    """
-    n = self.ui.tableWidgetOPT.rowCount()
-    out_dir = str(self.ui.lineEditOutput.text())
-    path_out,folder_name = os.path.split(out_dir)
-
-    for i in range(n):
-        print i
-        processed = self.ui.tableWidgetOPT.item(i, 2)
-        name = self.ui.tableWidgetOPT.item(i,1)
-        if processed:
-            print processed.text()
-            if processed.text() == "On list":
-                    if name.text() == folder_name:
-                        continue
-            if processed.text() == "Yes" or processed.text() == "On list":
-                print "use dirived crop box"
-                self.crop_box_use = True
-                self.ui.radioButtonDerived.setEnabled(True)
-                self.ui.radioButtonDerived.setChecked(True)
-                self.ui.lineEditDerivedChnName.setEnabled(True)
-
-                # show name for user
-
-                self.ui.lineEditDerivedChnName.setText(name.text())
-                break
-
-
 def get_recon_log(self):
-    '''
-    Gets the recon log from the original recon folder and gets the pixel size information
-    '''
+    """ Gets the recon log from the original recon folder, also gets the pixel size information using **get_pixel()**
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    :ivar str self.pixel_size: Pixel size. Modified here.
+    :raises IOError: Can't find recon log
+    :raises Exception: Custom python exception. Can't fin recon log
+
+    .. seealso::
+        :func:`get_pixel()`
+    """
     input = str(self.ui.lineEditInput.text())
 
     # Get the folder name and path name
-    path,folder_name = os.path.split(input)
+    path, folder_name = os.path.split(input)
 
     try:
         # I think some times the log file is .txt and sometimes .log, a check for both types and other
@@ -255,6 +53,7 @@ def get_recon_log(self):
         # Open the log file as read only
         recon_log_file = open(self.recon_log_path, 'r')
 
+        # get pixel size from get_pixel method
         self.pixel_size = get_pixel(self.modality, recon_log_file)
 
         # Display the number on the lcd display
@@ -280,10 +79,15 @@ def get_recon_log(self):
         QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected error getting recon log file',sys.exc_info()[0])
         self.ui.lineEditCTRecon.setText("Not found")
 
-def get_pixel(modality,recon_log_file):
-    # create a regex to pixel size
-    # We want the pixel size where it starts with Pixel. This is the pixel size with the most amount of decimal
-    # places for uCT. For OPT this is the "image pixel size"
+
+def get_pixel(modality, recon_log_file):
+    """ Gets the pixel size from the recon log. Different regex required for OPT or uCT
+
+    :param str modality: OPT or uCT
+    :param str recon_log_file: recon log file full path
+    :return:
+    """
+    # Regex is different for opt and uct as they have different recon files
     if modality == "OPT":
         prog = re.compile("^Image Pixel Size \(um\)=(\w+.\w+)")
     else:
@@ -300,10 +104,19 @@ def get_pixel(modality,recon_log_file):
             return pixel_size
             break
 
-def get_name(self,name,suppress=False):
-    '''
-    Gets the id from the folder name. Then fills out the text boxes on the main window with the relevant information
-    '''
+def get_name(self, name, suppress=False):
+    """ Gets the id from the folder name. Then fills out the text boxes on the main window with the relevant information
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    :param str name: Full folder name with path
+    :param boolean suppress: True warning messages are sent. False they are not.
+
+    :raise IndexError: Missing descriptor completely
+    :raise ValueError: Incorrect format of descriptor
+
+    NOTE: Gather error messages from exceptions to display one combined error message at the end
+    """
     # Get the folder name and path
     path,folder_name = os.path.split(name)
 
@@ -316,7 +129,6 @@ def get_name(self,name,suppress=False):
     # Need to have exception to catch if the name is not in correct format.
     # If the name is not in the correct format it should flag to the user that this needs to be sorted
     # Added additional regex which the user has to check
-
     error_list = []
 
     # Checking Date
@@ -378,21 +190,22 @@ def get_name(self,name,suppress=False):
     except IndexError as e:
         error_list.append("- IMPORTANT: OPT needs to include channel information. e.g. UV")
 
+    # Show the user all the error messages together.
     if error_list:
         error_string = os.linesep.join(error_list)
         if not suppress:
             QtGui.QMessageBox.warning(self, 'Message', 'Warning (Naming not canonical):'+os.linesep+error_string)
 
 
-
 def auto_file_out(self):
-    '''
-    Auto fill to make output folder name. Just replaces 'recons' to 'processed recons' if possible
-    '''
-    # Not sure whether to include try and except catch here...
-    try :
+    """ Auto fill to make output folder name. Just replaces 'recons' to 'processed recons' if possible
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    """
+    try:
         input = str(self.ui.lineEditInput.text())
-        path,folder_name = os.path.split(input)
+        path, folder_name = os.path.split(input)
         pattern = re.compile("recons", re.IGNORECASE)
         if re.search(pattern, input):
             output_path = pattern.sub("processed recons", path)
@@ -407,9 +220,11 @@ def auto_file_out(self):
 
 
 def auto_get_scan(self):
-    '''
-    Auto find scan folder. Just replaces 'recons' to 'processed recons' if possible
-    '''
+    """ Auto find scan folder. Just replaces 'recons' to 'processed recons' if possible
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    """
     input = str(self.ui.lineEditInput.text())
     pattern = re.compile("recons", re.IGNORECASE)
     if re.search(pattern, input):
@@ -424,10 +239,11 @@ def auto_get_scan(self):
         self.scan_folder = ""
 
 def auto_get_SPR(self):
-    '''
-    Finds any SPR files. This might be a bit redundant as the SPR files are not essential and are copied over with any other
-    file regardless
-    '''
+    """  Finds any SPR files.
+
+    NOTE: This might be a bit redundant as the SPR files are not essential and are copied over with
+    any other file regardless
+    """
     input = str(self.ui.lineEditInput.text())
     # Get the SPR file. Sometimes fiels are saved with upper or lower case file extensions
     # The following is bit of a stupid way of dealing with this problem but I think it works....
@@ -453,14 +269,23 @@ def auto_get_SPR(self):
     else:
         self.ui.lineEditCTSPR.setText("Not found")
 
+
 def folder_size_approx(self):
-    '''
-    Gets the approx folder size of the original recon folder and updates the main window with
-    this information. Calculating the folder size by going through each file takes a while on janus. This
+    """ Gets the approx folder size of the original recon folder and updates the paramters tab with the info.
+
+    Calculating the folder size by going through each file would take too long. This
     function just checks the first recon file and then multiples this by the number of recon files.
 
-    Creates self.f_size_out_gb: The file size in gb
-    '''
+    Output for display for the GUI will be in gb or mb depending on the size of the folder. This is done in
+    size_cleanup()
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    :ivar str self.f_size_out_gb: The file size in gb. Modified here.
+
+    .. seealso::
+        :func:`size_cleanup()`
+    """
 
     # Get the input folder information
     input = str(self.ui.lineEditInput.text())
@@ -492,39 +317,351 @@ def folder_size_approx(self):
         approx_size = num_files*file1_size
 
         # convert to gb
-        f_size_out =  (approx_size/(1024*1024*1024.0))
+        size_mb =  (approx_size/(1024*1024))
+        size_gb =  (approx_size/(1024*1024*1024.0))
 
         # Save file size as an object to be used later
-        self.f_size_out_gb = "%0.4f" % (f_size_out)
+        self.f_size_out_gb = "%0.4f" % (size_gb)
 
         #Clean up the formatting of gb mb
-        size_cleanup(self,f_size_out,approx_size)
+        size_cleanup(self,size_gb,size_mb)
+
     except Exception as e:
-        # Should pontially add some other error catching
+        # Should potentially add some other error catching
         message = QtGui.QMessageBox.warning(self, "Message", "Unexpected error in folder size calc: {0}".format(e))
 
 
 
-def size_cleanup(self,f_size_out,approx_size):
-    '''
-    Used in folderSizeApprox() to format the output. In a separate method Potentially to be used again for more accurate folder size calc.
-    '''
+def size_cleanup(self, size_gb, size_mb):
+    """ Used in folderSizeApprox() to format the output.
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    :param float f_size_out:
+    :param approx_size:
+    """
     # Check if size should be shown as gb or mb
     # Need to change file size to 2 decimal places
-    if f_size_out < 0.05 :
-        # convert to mb
-        f_size_out =  (approx_size/(1024*1024.0))
+    if size_gb < 0.05 :
         # make to 2 decimal places
-        f_size_out =  "%0.2f" % (f_size_out)
+        size_mb =  "%0.2f" % (size_mb)
         # change label to show mb
         self.ui.labelFile.setText("Folder size (Mb)")
         # update lcd display
-        self.ui.lcdNumberFile.display(f_size_out)
+        self.ui.lcdNumberFile.display(size_mb)
     else :
         # display as gb
         # make to 2 decimal places
-        f_size_out =  "%0.2f" % (f_size_out)
+        size_gb =  "%0.2f" % (size_gb)
         # change label to show mb
         self.ui.labelFile.setText("Folder size (Gb)")
         # update lcd display
-        self.ui.lcdNumberFile.display(f_size_out)
+        self.ui.lcdNumberFile.display(size_gb)
+
+#==========================================================================
+# All the uCT channel shenanigans
+#==========================================================================
+def opt_uCT_check(self,suppress=False):
+    """ Checks whether or not folder name contains reference to either opt or microCT
+
+    Updates the GUI options based on modality
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    :param boolean suppress: If True warning messages will spit out. If suppressed they won't
+    :ivar str self.modality: Changes based on the modality chosen. Value should be either 'MicroCT' or 'OPT'. Modified.
+    """
+    # Get in file
+    file_in = str(self.ui.lineEditInput.text())
+
+    # get comilied regex thing
+    p_opt = re.compile("OPT",re.IGNORECASE)
+    p_uCT = re.compile("MicroCT",re.IGNORECASE)
+
+    # Check if OPT and enable relevant options
+    if p_opt.search(file_in):
+        self.modality = "OPT"
+        self.ui.radioButtonOPT.setChecked(True)
+        self.ui.lineEditChannel.setEnabled(True)
+        self.ui.labelChannel.setEnabled(True)
+        self.ui.tableWidgetOPT.setEnabled(True)
+        self.ui.radioButtonDerived.setEnabled(True)
+        if self.ui.radioButtonDerived.isChecked():
+            self.ui.lineEditDerivedChnName.setEnabled(True)
+        self.ui.checkBoxInd.setEnabled(True)
+
+    # Check if uCT and enable relevant options
+    elif p_uCT.search(file_in):
+        self.modality = "MicroCT"
+        self.ui.radioButtonuCT.setChecked(True)
+        self.ui.lineEditChannel.setEnabled(False)
+        self.ui.labelChannel.setEnabled(False)
+        self.ui.tableWidgetOPT.setEnabled(False)
+        self.ui.radioButtonDerived.setEnabled(False)
+        self.ui.lineEditDerivedChnName.setEnabled(False)
+        self.ui.checkBoxInd.setEnabled(False)
+    else:
+        if not suppress:
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Cannot automatically determine if uCT or OPT please check')
+
+def get_channels(self):
+    """ Updates the OPT list on the GUI
+
+    This method does the following:
+    * Check if OPT is selected
+    * look up recon parent folder and search for other available OPT channels
+    * Make a list of these channels
+    * Loop through this list and each channel to the OPT channel table (the parameters tab)
+
+    .. seealso::
+        :func:`error_check_chn()`,
+        :func:`get_crop_box()`
+        :func:`check_if_on_list()`
+    """
+
+    # reset the table
+    self.ui.tableWidgetOPT.clearContents()
+
+    # Make sure OPT is selected
+    if not self.modality == "OPT":
+        return
+
+    # Are there matching folders in the parent directory of the input directory
+    in_dir = str(self.ui.lineEditInput.text())
+
+    # Get the folder name and path name
+    path, folder_name = os.path.split(in_dir)
+
+    # get a list of the names in the folder name
+    l_init = folder_name.split("_")
+
+    # get the name without the channel (only works if name is in the correct format)
+    base_name = '_'.join(l_init[0:6])
+
+    # set the name up for the current channel. Blank if name not set up properly
+    try:
+        chn_init = str(l_init[6])
+    except IndexError:
+        chn_init = "NA"
+
+    # Initialised tuples
+    chan_full = []
+    chan_short = []
+
+    # add original current channel to the channel lists.
+    # Full has the path, short does not
+    chan_full.append(folder_name)
+    chan_short.append(chn_init)
+
+    #===========================================================================================
+    # look up recon parent folder and search for other available OPT channels
+    #===========================================================================================
+    # Check parent input folder actually exists
+    if not os.path.exists(path):
+        return
+
+    # for loop to go through the parent input directory
+    for line in os.listdir(path):
+
+        # convert to string (had problems in the past with numbers)
+        line =str(line)
+
+        # Check if the line matches the base_name but is not the same as the input file. The folder is probably another
+        # channel
+        # Check line matches base name
+        m = re.search(base_name,line)
+
+        # Check if is not the same as the input file
+        if m and (not line == folder_name):
+
+            # Check if it is a folder with recons etc for the other channels
+            if not error_check_chn(os.path.join(path,line)):
+
+                # if it is then add to the channel lists
+                chan_full.append(line)
+                chan_short.append(m.group(0))
+
+    #===========================================================================================
+    # Add channels to OPT table on parameters tab
+    #===========================================================================================
+    # initialise count
+    count = 0
+
+    # Create instance variable for other methods to use
+    self.chan_full = chan_full
+
+    # for loop through the channel names
+    for name in chan_full:
+
+        # split the name into IMPC components
+        l = name.split("_")
+
+        # If cant split into IMPC components then can't set the channel type
+        try:
+            chn = l[6]
+        except IndexError:
+            chn = "NA"
+
+        # Make the current channel highlighted
+        chn_item = QtGui.QTableWidgetItem()
+        self.ui.tableWidgetOPT.setItem(count, 0, chn_item)
+        chn_item = self.ui.tableWidgetOPT.item(count, 0)
+        chn_item.setText(chn)
+        if name == folder_name:
+            chn_item.setBackground(QtGui.QColor(220, 0, 0))
+
+        # Set up the name of the recon
+        item = QtGui.QTableWidgetItem()
+        self.ui.tableWidgetOPT.setItem(count, 1, item)
+        item = self.ui.tableWidgetOPT.item(count, 1)
+        item.setText(name)
+
+        # Set up whether or not there is a crop box available
+        # The get_crop_box checks if the parent processed folder to see if the channel has previously been analysed
+        # and a cropbox file has been saved
+        if get_crop_box(self,name):
+            crop_status = "Yes"
+        # check_if_on_list method checks if channel is on the processing list
+        elif check_if_on_list(self, name):
+            crop_status = "On list"
+        else:
+            crop_status = "No"
+
+        # add to the GUI table
+        item = QtGui.QTableWidgetItem()
+        self.ui.tableWidgetOPT.setItem(count, 2, item)
+        item = self.ui.tableWidgetOPT.item(count, 2)
+        item.setText(crop_status)
+
+        # count_in is the counter for the row to add data
+        count += 1
+
+        # Reszie and sort the columns to fit the data
+        self.ui.tableWidgetOPT.resizeColumnsToContents()
+        self.ui.tableWidgetOPT.setSortingEnabled(True)
+        self.ui.tableWidgetOPT.sortByColumn(0)
+
+def get_crop_box(self,name):
+    """ Checks if cropbox file exists for a given recon name
+
+    Used by get_channels
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    :param str name: Recon name for which the cropbox path is to be checked
+    :return boolean: True if cropbox path exists
+    """
+    if not self.modality == "OPT":
+        return
+    out_dir = str(self.ui.lineEditOutput.text())
+    path_out,folder_name = os.path.split(out_dir)
+
+    # See if the cropbox file exists
+    cropbox_path = os.path.join(path_out, name, "Metadata","cropbox.txt")
+    if os.path.exists(cropbox_path):
+        return True
+
+
+def check_if_on_list(self, name):
+    """  A while loop is used to go through the processing table see if the channel is on the list
+
+    Used by get_channels
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    :param name:
+    :return boolean: True if channel is on list
+    """
+    count = 0
+    while True:
+        # This gets the status text
+        name_on_list = self.ui.tableWidget.item(count, 0)
+        if not name_on_list:
+            # if not defined it means there are no recons left to process
+            return False
+        if re.search(name, name_on_list.text()):
+            # this row has the OPT channel ID meaning a cropbox will be ready when this is ran
+            return True
+        count += 1
+
+
+def error_check_chn(chn_dir):
+    """ Checks the channel recon directory to see if it is a valid file
+
+    Used in get_channels
+
+    :param str chn_dir: The channel directory to be checked
+    :return int: 1 if error 0 or nothing if OK
+    """
+    # Check if input folder exists
+    if not os.path.exists(chn_dir):
+        return 1
+
+    # Check if a directory
+    if not os.path.isdir(chn_dir):
+        return 1
+
+    #Check if folder is empty
+    if os.listdir(chn_dir) == []:
+            return 1
+
+    #Check if input folder contains any image files
+    prog = re.compile("(.*).(bmp|tif|jpg|jpeg)",re.IGNORECASE)
+
+    # init file check variable
+    file_check = None
+
+    # for loop to go through the directory
+    for line in os.listdir(chn_dir) :
+        line =str(line)
+        #print line+"\n"
+        # if the line matches the regex break
+        if prog.match(line) :
+            file_check = True
+            break
+
+    # No valid files return with error
+    if not file_check:
+        return 1
+
+
+def auto_get_derived(self):
+    """ Updates the derived crop box line edit box on the GUI
+
+    NOTE: Only works for IMPC setup folder structure
+
+    * While loop through OPT list.
+    * See if one of them is either processed or on list.
+        * Previously checked if processed or on list in get_channels()
+    * If one of them is - Set as the derived crop box on the GUI
+    """
+    # Get row count
+    n = self.ui.tableWidgetOPT.rowCount()
+
+    # Get parent output folder
+    out_dir = str(self.ui.lineEditOutput.text())
+    path_out, folder_name = os.path.split(out_dir)
+
+    # For loop through the OPT list
+    for i in range(n):
+        # Get info from table
+        processed = self.ui.tableWidgetOPT.item(i, 2)
+        name = self.ui.tableWidgetOPT.item(i,1)
+
+        if processed:
+            # check if on processing list
+            if processed.text() == "On list":
+                    # If it is the current recon don't use as the derived
+                    if name.text() == folder_name:
+                        continue
+
+            # Now we can use the channel if it matches the following criteria
+            if processed.text() == "Yes" or processed.text() == "On list":
+                self.crop_box_use = True
+                self.ui.radioButtonDerived.setEnabled(True)
+                self.ui.radioButtonDerived.setChecked(True)
+                self.ui.lineEditDerivedChnName.setEnabled(True)
+
+                # show name for user
+                self.ui.lineEditDerivedChnName.setText(name.text())
+                break

@@ -1,16 +1,24 @@
 from PyQt4 import QtGui, QtCore
 import os
-import pickle
 import re
 
+
 def errorCheck(self):
-    ''' To check the required inputs for the processing to be run  '''
+    """ To check the required inputs and parameters. Gives messages for problems encountered
+
+
+    :param obj self:
+        Although not technically part of the class, can still use this method as if it was part of the HARP class.
+    :ivar Boolean self.stop: Switch. True if adding to the processing list should be stopped. None if it is ok
+    """
+
     # Get input and output folders (As the text is always from the text box it will hopefully keep track of
     #any changes the user might have made
     inputFolder = str(self.ui.lineEditInput.text())
     outputFolder = str(self.ui.lineEditOutput.text())
-    self.stop = None
 
+    # reset the stop switch
+    self.stop = None
 
     # Check input and output folders assigned
     if not inputFolder :
@@ -89,13 +97,15 @@ def errorCheck(self):
                 return
 
     # Check user has not selected to scale by pixel without having a recon folder
-    if self.ui.checkBoxPixel.isChecked() and self.pixel_size == "" :
-        QtGui.QMessageBox.warning(self, 'Message', 'Warning: Pixel size could not be obtained from original recon log. Scaling "By Pixel (um) is not possible"')
+    if self.ui.checkBoxPixel.isChecked() and self.pixel_size == "":
+        QtGui.QMessageBox.warning(self, 'Message',
+                                  'Warning: Pixel size could not be obtained from original recon log. Scaling '
+                                  '"By Pixel (um) is not possible"')
         self.stop = True
         return
 
     # Check cropping parameters ok
-    if self.ui.radioButtonMan.isChecked() :
+    if self.ui.radioButtonMan.isChecked():
         try:
             testing = float(self.ui.lineEditX.text())
             testing = float(self.ui.lineEditY.text())
@@ -112,10 +122,10 @@ def errorCheck(self):
         self.stop = True
         return
 
-    # Check if item is already on the list
+    # Check if item is already on the processing list
     count = 0
     while True:
-        twi0 = self.ui.tableWidget.item(count,1)
+        twi0 = self.ui.tableWidget.item(count, 1)
         if not twi0:
             self.stop = None
             break
@@ -139,7 +149,7 @@ def errorCheck(self):
                                                      ' uCT processing')
             return
 
-    # seeing if outpu folder exists
+    # seeing if output folder exists
     if self.ui.checkBoxRF.isChecked():
         # I think it is too dangerous to delete everything in a folder
         # shutil.rmtree(outputFolder)
@@ -150,7 +160,9 @@ def errorCheck(self):
         # Running dialog box to inform user of options
         message = QtGui.QMessageBox.question(self, 'Message',
                                              'Folder already exists for the location:\n{0}\n'
-                                             'Can this folder be overwritten?'.format(outputFolder),
+                                             'Is it OK to overwrite files in this folder?'
+                                             'NOTE: If you are using the "old crop" option you will not overwrite the '
+                                             'original cropped recon'.format(outputFolder),
                                              QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
         if message == QtGui.QMessageBox.Yes:
             self.stop = None
