@@ -160,7 +160,7 @@ def errorCheck(self):
         # Running dialog box to inform user of options
         message = QtGui.QMessageBox.question(self, 'Message',
                                              'Folder already exists for the location:\n{0}\n'
-                                             'Is it OK to overwrite files in this folder?'
+                                             'Is it OK to overwrite files in this folder?\n'
                                              'NOTE: If you are using the "old crop" option you will not overwrite the '
                                              'original cropped recon'.format(outputFolder),
                                              QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)

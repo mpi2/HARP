@@ -64,6 +64,7 @@ class ProcessingThread(QtCore.QThread):
         self.memory = memory
         self.kill_check = 0
         self.imagej_pid = ''
+        self.crop_status = ''
 
     def __del__(self):
         print "Processing stopped"
@@ -126,6 +127,8 @@ class ProcessingThread(QtCore.QThread):
         # A callback function is used to monitor if autocrop was run sucessfully. This modifies the self.crop_status
         # instance variable. Has to be success to continue
         if self.crop_status != "success":
+            print "Cropping failed!"
+            print ""
             return
 
         #===============================================
