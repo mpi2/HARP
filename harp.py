@@ -750,7 +750,7 @@ class MainWindow(QtGui.QMainWindow):
         # Set thread off
         z_thread_pool = []
         z_thread_pool.append(ZProjectThread(input_folder, self.tmp_dir))
-        self.connect(self.z_thread_pool[len(z_thread_pool) - 1], QtCore.SIGNAL("update(QString)"),
+        self.connect(z_thread_pool[len(z_thread_pool) - 1], QtCore.SIGNAL("update(QString)"),
                      self.zproject_slot)
         z_thread_pool[len(z_thread_pool) - 1].start()
 

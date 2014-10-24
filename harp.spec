@@ -1,6 +1,6 @@
 # -*- mode: python -*-
 a = Analysis(['harp.py'],
-             pathex=['D:\\Dropbox\\code\\HARP'],
+             pathex=['C:\\Users\\Tom\\Downloads\\HARP_new\\HARP'],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None)
