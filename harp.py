@@ -181,12 +181,33 @@ class MainWindow(QtGui.QMainWindow):
         # When user double clicks on OPT alternative channel open it on the parameter tab
         self.ui.tableWidgetOPT.doubleClicked.connect(self.change_opt_chn)
 
+        #The IMPC button sets the deafaults for sending data to the DCC
+        self.ui.pushButtonIMPC.clicked.connect(self.slot_IMPC_button)
+
         #Accept drag and drop
         self.setAcceptDrops(True)
 
         # to make the window visible
-        
+
         self.showMaximized()
+
+
+    def slot_IMPC_button(self):
+        """
+        Set the defaults for the IMPC mouse clinics to upload data to the DCC
+
+        :return:
+        """
+
+        # Remove downscaling
+        scale_scheck_boxes = [self.ui.checkBoxSF2, self.ui.checkBoxSF3, self.ui.checkBoxSF4, self.ui.checkBoxSF5,
+                              self.ui.checkBoxSF6]
+        for cb in scale_scheck_boxes:
+            cb.setChecked(False)
+
+        # Set scaling for croppped recon
+        self.ui.checkBoxCropComp.setChecked(True)
+
 
     def dropEvent(self, event):
         """ Handles *drop* section for drag and drop of folders.

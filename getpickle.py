@@ -113,7 +113,6 @@ def get_pickle(self):
 
     if self.ui.checkBoxCropComp.isChecked():
         self.configOb.crop_comp = "yes"
-        print "getpickle.py, compress crop"
     else :
         self.configOb.crop_comp  = "No"
 
