@@ -185,7 +185,8 @@ class MainWindow(QtGui.QMainWindow):
         self.setAcceptDrops(True)
 
         # to make the window visible
-        self.show()
+        
+        self.showMaximized()
 
     def dropEvent(self, event):
         """ Handles *drop* section for drag and drop of folders.

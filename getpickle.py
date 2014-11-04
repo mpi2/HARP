@@ -11,27 +11,24 @@ from config import ConfigClass
 def get_pickle(self):
     """ Creates the python pickle config file for future processing. Also creates a more readable text file of the
     same information.
-
-    :param obj self:
-        Although not technically part of the class, can still use this method as if it was part of the HARP class.
     """
+
     # Get input and output folders (As the text is always from the text box it will hopefully keep track of
     #any changes the user might have made
     inputFolder = str(self.ui.lineEditInput.text())
     outputFolder = str(self.ui.lineEditOutput.text())
-    path_out,folder_name = os.path.split(outputFolder)
+    path_out, folder_name = os.path.split(outputFolder)
 
     #### Write to config file ####
     self.configOb = ConfigClass()
 
     # Create a folder for the metadata
-    self.meta_path = os.path.join(outputFolder,"Metadata")
+    self.meta_path = os.path.join(outputFolder, "Metadata")
     if not os.path.exists(self.meta_path):
         os.makedirs(self.meta_path)
 
-    # OS path used for compatibility issues between Linux and windows directory spacing
-    self.config_path = os.path.join(self.meta_path,"configobject.txt")
-    self.log_path = os.path.join(self.meta_path,"config4user.log")
+    self.config_path = os.path.join(self.meta_path, "configobject.txt")
+    self.log_path = os.path.join(self.meta_path, "config4user.log")
 
     # Create config file and log file
     log = open(self.log_path, 'w+')
@@ -40,7 +37,7 @@ def get_pickle(self):
     # Create config object
     #========================================================================================
     # Get cropping options
-    if not self.ui.checkBoxCropYes.isChecked() :
+    if not self.ui.checkBoxCropYes.isChecked():
         self.configOb.cropbox_path = "Not_applicable"
         self.configOb.crop_manual = "Not_applicable"
         self.configOb.crop_option = "No_crop"
@@ -116,6 +113,7 @@ def get_pickle(self):
 
     if self.ui.checkBoxCropComp.isChecked():
         self.configOb.crop_comp = "yes"
+        print "getpickle.py, compress crop"
     else :
         self.configOb.crop_comp  = "No"
 
