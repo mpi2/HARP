@@ -47,7 +47,7 @@
              <x>0</x>
              <y>0</y>
              <width>1303</width>
-             <height>973</height>
+             <height>936</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_2">
@@ -388,17 +388,6 @@ QGroupBox::title
                </item>
                <item row="1" column="0" rowspan="2" colspan="2">
                 <layout class="QGridLayout" name="gridLayout_4">
-                 <item row="0" column="4">
-                  <widget class="QPushButton" name="pushButtonIMPC">
-                   <property name="styleSheet">
-                    <string notr="true">background-color: orange;
-color:white</string>
-                   </property>
-                   <property name="text">
-                    <string>IMPC</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="16" column="0" colspan="5">
                   <widget class="Line" name="line">
                    <property name="orientation">
@@ -695,21 +684,6 @@ color:white</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="17" column="3" colspan="2">
-                  <widget class="QCheckBox" name="checkBoxCropComp">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>12</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Cropped recon</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="9" column="4">
                   <widget class="QLineEdit" name="lineEditH">
                    <property name="enabled">
@@ -904,6 +878,45 @@ color:white</string>
                   <widget class="Line" name="line_4">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="15" column="3">
+                  <layout class="QHBoxLayout" name="horizontalLayout_5"/>
+                 </item>
+                 <item row="17" column="3">
+                  <widget class="QCheckBox" name="checkBoxCropComp">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>12</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Cropped recon</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="17" column="4">
+                  <widget class="QPushButton" name="pushButtonIMPC">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;IMPC settingd&lt;/span&gt;&lt;/p&gt;&lt;p&gt;For uppload to the DCC, a compressed tiff stack is required. Press here for to get that&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">    color: #020202;
+    background-color: #d7801a;
+    border-style: none;
+    border-radius: 6;
+    padding: 3px;
+    font-size: 12px;
+    padding-left: 5px;
+    padding-right: 5px;
+    outline: none;</string>
+                   </property>
+                   <property name="text">
+                    <string>&lt; IMPC</string>
                    </property>
                   </widget>
                  </item>

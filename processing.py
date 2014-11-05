@@ -35,6 +35,10 @@ import traceback
 import fnmatch
 import autocrop
 from config import ConfigClass
+import numpy as np
+import cv2
+import SimpleITK as sitk
+
 # from vtkRenderAnimation import Animator
 #from Segmentation import watershed_filter
 
@@ -307,6 +311,30 @@ class ProcessingThread(QtCore.QThread):
                                    + "Exception traceback:" +
                                    traceback.format_exc() + "\n")
             self.emit(QtCore.SIGNAL('update(QString)'), "error: Unknown exception (see log): " + str(e))
+
+    def tiffstack_from_slices(self, in_dir, outfile):
+        """
+        Create a tiff stack a directory containing single 2D images
+        :param in_dir, str, directory where single images are
+        :param outfile, str, path to output tiff stack
+        :return:
+        """
+        array_3d = None
+        for file_ in sorted(os.listdir(in_dir)):
+            if file_.endswith(('tiff', 'tif', 'TIFF', 'TIF', 'BMP', 'bmp')):
+                print file_
+                array_2d = cv2.imread(os.path.join(in_dir, file_), cv2.CV_LOAD_IMAGE_GRAYSCALE)
+                if array_3d is None:
+                    array_3d = array_2d
+                    continue
+                array_3d = np.dstack((array_3d, array_2d))
+
+        # Need to do some swapping of axes as cv2/numpy treat them differently to sitk
+        array_3d = np.swapaxes(array_3d, 0, 2)
+        array_3d = np.swapaxes(array_3d, 1, 2)
+
+        image_3d = sitk.GetImageFromArray(array_3d)
+        sitk.WriteImage(image_3d, outfile)
 
 
     def autocrop_update_slot(self, msg):
@@ -936,9 +964,30 @@ class ProcessingThread(QtCore.QThread):
                 # compression for cropped image sequence
                 #============================================
                 self.emit(QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started")
-                out = tarfile.open(self.configOb.cropped_path + "_" + self.configOb.full_name + ".tar.bz2",
-                                   mode='w:bz2')
-                out.add(self.configOb.cropped_path, arcname="Cropped")
+
+                # Create a tiff stack from the individual tiff slices
+                temp_stack_path = os.path.join(self.configOb.tmp_dir, 'tiffstack_temp.tiff')
+                self.tiffstack_from_slices(self.configOb.cropped_path, temp_stack_path)
+
+                #Now compress the tiff and add to the archive
+                out = tarfile.open(os.path.join(self.configOb.output_folder, 'IMPC_{}.tar.bz2'.format(
+                    self.configOb.full_name)), mode='w:bz2')
+
+
+                out.add(temp_stack_path, arcname='{}_cropped.tiff'.format(self.configOb.full_name))
+                # remove the tem tiff stack
+                try:
+                    os.remove(temp_stack_path)
+                except Exception:
+                    pass # Not sure which excption to catch if temp file is gone
+
+                # Add the recon log file
+                log_name = os.path.basename(self.configOb.recon_log_file)
+                try:
+                    out.add(self.configOb.recon_log_file, arcname=log_name)
+                except OSError:
+                    pass  # No recon log available
+
                 out.close()
 
     def kill_slot(self):

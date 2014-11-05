@@ -19,7 +19,7 @@ msg_q = mp.Queue()
 
 
 class Autocrop():
-    def __init__(self, in_dir, out_dir, callback, num_proc=None, def_crop=None,repeat_crop=None):
+    def __init__(self, in_dir, out_dir, callback, num_proc=None, def_crop=None, repeat_crop=None):
         # freeze support (windows only)
         if _platform == "win32" or _platform == "win64":
             mp.freeze_support()

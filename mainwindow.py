@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Tue Nov  4 16:06:24 2014
+# Created: Wed Nov  5 14:51:54 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -40,7 +40,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents_2 = QtGui.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 1303, 973))
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 1303, 936))
         self.scrollAreaWidgetContents_2.setObjectName(_fromUtf8("scrollAreaWidgetContents_2"))
         self.gridLayout_2 = QtGui.QGridLayout(self.scrollAreaWidgetContents_2)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
@@ -217,11 +217,6 @@ class Ui_MainWindow(object):
         self.gridLayout.addItem(spacerItem2, 0, 0, 1, 1)
         self.gridLayout_4 = QtGui.QGridLayout()
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
-        self.pushButtonIMPC = QtGui.QPushButton(self.groupBoxOptions)
-        self.pushButtonIMPC.setStyleSheet(_fromUtf8("background-color: orange;\n"
-"color:white"))
-        self.pushButtonIMPC.setObjectName(_fromUtf8("pushButtonIMPC"))
-        self.gridLayout_4.addWidget(self.pushButtonIMPC, 0, 4, 1, 1)
         self.line = QtGui.QFrame(self.groupBoxOptions)
         self.line.setFrameShape(QtGui.QFrame.HLine)
         self.line.setFrameShadow(QtGui.QFrame.Sunken)
@@ -363,13 +358,6 @@ class Ui_MainWindow(object):
         self.lineEditY.setFont(font)
         self.lineEditY.setObjectName(_fromUtf8("lineEditY"))
         self.gridLayout_4.addWidget(self.lineEditY, 9, 2, 1, 1)
-        self.checkBoxCropComp = QtGui.QCheckBox(self.groupBoxOptions)
-        self.checkBoxCropComp.setEnabled(True)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.checkBoxCropComp.setFont(font)
-        self.checkBoxCropComp.setObjectName(_fromUtf8("checkBoxCropComp"))
-        self.gridLayout_4.addWidget(self.checkBoxCropComp, 17, 3, 1, 2)
         self.lineEditH = QtGui.QLineEdit(self.groupBoxOptions)
         self.lineEditH.setEnabled(False)
         font = QtGui.QFont()
@@ -455,6 +443,28 @@ class Ui_MainWindow(object):
         self.line_4.setFrameShadow(QtGui.QFrame.Sunken)
         self.line_4.setObjectName(_fromUtf8("line_4"))
         self.gridLayout_4.addWidget(self.line_4, 13, 0, 1, 5)
+        self.horizontalLayout_5 = QtGui.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
+        self.gridLayout_4.addLayout(self.horizontalLayout_5, 15, 3, 1, 1)
+        self.checkBoxCropComp = QtGui.QCheckBox(self.groupBoxOptions)
+        self.checkBoxCropComp.setEnabled(True)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.checkBoxCropComp.setFont(font)
+        self.checkBoxCropComp.setObjectName(_fromUtf8("checkBoxCropComp"))
+        self.gridLayout_4.addWidget(self.checkBoxCropComp, 17, 3, 1, 1)
+        self.pushButtonIMPC = QtGui.QPushButton(self.groupBoxOptions)
+        self.pushButtonIMPC.setStyleSheet(_fromUtf8("    color: #020202;\n"
+"    background-color: #d7801a;\n"
+"    border-style: none;\n"
+"    border-radius: 6;\n"
+"    padding: 3px;\n"
+"    font-size: 12px;\n"
+"    padding-left: 5px;\n"
+"    padding-right: 5px;\n"
+"    outline: none;"))
+        self.pushButtonIMPC.setObjectName(_fromUtf8("pushButtonIMPC"))
+        self.gridLayout_4.addWidget(self.pushButtonIMPC, 17, 4, 1, 1)
         self.gridLayout.addLayout(self.gridLayout_4, 1, 0, 2, 2)
         self.gridLayout_2.addWidget(self.groupBoxOptions, 1, 1, 2, 1)
         self.groupBoxID = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
@@ -852,7 +862,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1321, 840))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 102, 102))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.scrollAreaWidgetContents)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
@@ -948,7 +958,6 @@ class Ui_MainWindow(object):
         self.lcdNumberFile.setToolTip(QtGui.QApplication.translate("MainWindow", "This is the approximate folder size of the original recon", None, QtGui.QApplication.UnicodeUTF8))
         self.labelFile.setText(QtGui.QApplication.translate("MainWindow", "Folder size (Mb)", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBoxOptions.setTitle(QtGui.QApplication.translate("MainWindow", "Options", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonIMPC.setText(QtGui.QApplication.translate("MainWindow", "IMPC", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButtonMan.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Manual</span></p><p>In cases where the automatic crop is not capable of determining the crop dimensions the user can either manually enter the dimensiosn or press the &quot;Get Dimensions&quot; button.</p><p>The &quot;Get dimensions&quot; button provides a Z-projected image of the stack and allows the user to select a cropping region. (see the HARP user guide)</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButtonMan.setText(QtGui.QApplication.translate("MainWindow", "Manual", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButtonAuto.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Automatic cropping</span></p><p>The cropping dimensions will be determined automatically. </p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
@@ -970,7 +979,6 @@ class Ui_MainWindow(object):
         self.checkBoxSF6.setText(QtGui.QApplication.translate("MainWindow", "6", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBox.setText(QtGui.QApplication.translate("MainWindow", "Yes", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEditY.setText(QtGui.QApplication.translate("MainWindow", "y", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBoxCropComp.setText(QtGui.QApplication.translate("MainWindow", "Cropped recon", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEditH.setText(QtGui.QApplication.translate("MainWindow", "h", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEditX.setText(QtGui.QApplication.translate("MainWindow", "x", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButtonGetDimensions.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Get dimensions</span></p><p>This button provides a Z-projected image of the stack and allows the user to select a cropping region. (see the HARP user guide) </p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
@@ -985,6 +993,8 @@ class Ui_MainWindow(object):
         self.radioButtonUseOldCrop.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Use old</span></p><p>If HARP has previously been used to perform the cropping of a recon the cropped image can be used to perform additional processes such as downsizing.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButtonUseOldCrop.setText(QtGui.QApplication.translate("MainWindow", "Use old", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEditDerivedChnName.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Derive dimensions (OPT only)</span></p><p>This option provides additional functionality that for most instances should not be required.</p><p>This option allows dimensions for the crop to be derived from a previous processed channel. </p><p>The channel from which the crop dimensions can be derived can be chosen in the OPT channels section. In the OPT channels section the user should select &quot;Return&quot; on the keyboard on the appropiate channel.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBoxCropComp.setText(QtGui.QApplication.translate("MainWindow", "Cropped recon", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonIMPC.setText(QtGui.QApplication.translate("MainWindow", "< IMPC", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBoxID.setTitle(QtGui.QApplication.translate("MainWindow", "Identification", None, QtGui.QApplication.UnicodeUTF8))
         self.labelAge.setText(QtGui.QApplication.translate("MainWindow", "Stage", None, QtGui.QApplication.UnicodeUTF8))
         self.labelDate.setText(QtGui.QApplication.translate("MainWindow", "Date", None, QtGui.QApplication.UnicodeUTF8))
