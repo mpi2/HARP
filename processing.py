@@ -69,6 +69,9 @@ class ProcessingThread(QtCore.QThread):
         self.kill_check = 0
         self.imagej_pid = ''
         self.crop_status = ''
+         # List of file extensions to ignore
+        self.extensions_to_ignore = ('spr.bmp', 'spr.BMP', 'spr.tif', 'spr.TIF',
+                                     'spr.jpg', 'spr.JPG', '*spr.jpeg', 'spr.JPEG')
 
     def __del__(self):
         print "Processing stopped"
@@ -279,8 +282,8 @@ class ProcessingThread(QtCore.QThread):
 
         # make autocrop object
         self.auto_crop = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path,
-                                           self.autocrop_update_slot, def_crop=dimensions_tuple,
-                                           repeat_crop=derived_cropbox)
+                                           self.autocrop_update_slot, self.extensions_to_ignore,
+                                           def_crop=dimensions_tuple, repeat_crop=derived_cropbox)
 
         # WindowsError is an execption only available on Windows need to make a fake WindowsError exception for linux
         if not getattr(__builtins__, "WindowsError", None):
@@ -321,12 +324,16 @@ class ProcessingThread(QtCore.QThread):
         """
         array_3d = None
         for file_ in sorted(os.listdir(in_dir)):
+            if any(file_.endswith(x) for x in self.extensions_to_ignore):
+                continue
             if file_.endswith(('tiff', 'tif', 'TIFF', 'TIF', 'BMP', 'bmp')):
                 print file_
                 array_2d = cv2.imread(os.path.join(in_dir, file_), cv2.CV_LOAD_IMAGE_GRAYSCALE)
                 if array_3d is None:
                     array_3d = array_2d
                     continue
+
+
                 array_3d = np.dstack((array_3d, array_2d))
 
         # Need to do some swapping of axes as cv2/numpy treat them differently to sitk

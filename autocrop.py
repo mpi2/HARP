@@ -19,13 +19,25 @@ msg_q = mp.Queue()
 
 
 class Autocrop():
-    def __init__(self, in_dir, out_dir, callback, num_proc=None, def_crop=None, repeat_crop=None):
+    def __init__(self, in_dir, out_dir, callback, ignore_exts, num_proc=None, def_crop=None, repeat_crop=None):
+        """
+
+        :param in_dir:
+        :param out_dir:
+        :param callback:
+        :param ignore_exts: tuple, file extension names to miss from cropping, such as *.spr.tiff
+        :param num_proc:
+        :param def_crop:
+        :param repeat_crop:
+        :return:
+        """
         # freeze support (windows only)
         if _platform == "win32" or _platform == "win64":
             mp.freeze_support()
 
         #call the super
         self.callback = callback
+        self.ignore_exts = ignore_exts
         self.in_dir = in_dir
         self.out_dir = out_dir
         self.shared_auto_count = mp.Value("i", 0)
@@ -289,8 +301,7 @@ class Autocrop():
 		'''
         files = []
         for fn in os.listdir(dir):
-            if any(fn.endswith(x) for x in
-                   ('spr.bmp', 'spr.BMP', 'spr.tif', 'spr.TIF', 'spr.jpg', 'spr.JPG', '*spr.jpeg', 'spr.JPEG')):
+            if any(fn.endswith(x) for x in self.ignore_exts):
                 continue
             if any(fnmatch.fnmatch(fn, x) for x in (
                     '*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF', '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG' )):
