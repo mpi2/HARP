@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Wed Nov  5 14:51:54 2014
+# Created: Fri Nov  7 08:05:36 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -994,6 +994,7 @@ class Ui_MainWindow(object):
         self.radioButtonUseOldCrop.setText(QtGui.QApplication.translate("MainWindow", "Use old", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEditDerivedChnName.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Derive dimensions (OPT only)</span></p><p>This option provides additional functionality that for most instances should not be required.</p><p>This option allows dimensions for the crop to be derived from a previous processed channel. </p><p>The channel from which the crop dimensions can be derived can be chosen in the OPT channels section. In the OPT channels section the user should select &quot;Return&quot; on the keyboard on the appropiate channel.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBoxCropComp.setText(QtGui.QApplication.translate("MainWindow", "Cropped recon", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButtonIMPC.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">IMPC settings</span></p><p>For uppload to the DCC, a compressed tiff stack is required. Press here for to get that</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButtonIMPC.setText(QtGui.QApplication.translate("MainWindow", "< IMPC", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBoxID.setTitle(QtGui.QApplication.translate("MainWindow", "Identification", None, QtGui.QApplication.UnicodeUTF8))
         self.labelAge.setText(QtGui.QApplication.translate("MainWindow", "Stage", None, QtGui.QApplication.UnicodeUTF8))

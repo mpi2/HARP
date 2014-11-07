@@ -35,6 +35,7 @@ from mainwindow import Ui_MainWindow
 from processing import ProcessingThread
 from zproject import ZProjectThread
 import crop
+from appdata import AppData
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -66,6 +67,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # Make unique ID if this is the first time mainwindow has been called
         self.unique_ID = uuid.uuid1()
+
+        # Store app-specific data such as lasddt directory browsed
+        self.app_data = AppData()
 
         # Initialise various switches
         self.modality = "MicroCT"
@@ -182,7 +186,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidgetOPT.doubleClicked.connect(self.change_opt_chn)
 
         #The IMPC button sets the deafaults for sending data to the DCC
-        self.ui.pushButtonIMPC.clicked.connect(self.slot_IMPC_button)
+        self.ui.pushButtonIMPC.clicked.connect(self.impc_button)
 
         #Accept drag and drop
         self.setAcceptDrops(True)
@@ -192,14 +196,15 @@ class MainWindow(QtGui.QMainWindow):
         self.showMaximized()
 
 
-    def slot_IMPC_button(self):
+    @pyqtSlot()
+    def impc_button(self):
         """
         Set the defaults for the IMPC mouse clinics to upload data to the DCC
 
         :return:
         """
 
-        # Remove downscaling
+        # Uncheck downscaling checkboxes
         scale_scheck_boxes = [self.ui.checkBoxSF2, self.ui.checkBoxSF3, self.ui.checkBoxSF4, self.ui.checkBoxSF5,
                               self.ui.checkBoxSF6]
         for cb in scale_scheck_boxes:
@@ -353,10 +358,13 @@ class MainWindow(QtGui.QMainWindow):
         if input_folder:
             file_dialog = QtGui.QFileDialog(self, 'Open File', input_folder)
         else:
-            file_dialog = QtGui.QFileDialog(self, 'Open File')
+            last_browsed_dir = self.app_data.last_dir_browsed
+            file_dialog = QtGui.QFileDialog(self, 'Open File', last_browsed_dir)
 
         # get the folder the user selected
-        folder = file_dialog.getExistingDirectory(self, "Select Directory")
+        folder = file_dialog.getExistingDirectory(self, "Select Directory", last_browsed_dir)
+
+        self.app_data.last_dir_browsed = str(folder)
 
         # if folder is not defined user has pressed cancel. If defined
         if folder:
@@ -1069,6 +1077,8 @@ class MainWindow(QtGui.QMainWindow):
         Performs a loop through the item list and checks if any process still running
         :param qt_event event: qt close event (when HARP is closed)
         """
+        self.app_data.write_app_data()
+
         print "Close event"
         # First check if a process still running by looking through the processing table and checking the status
         # column. The switch variable records whether processing is live or dead.
