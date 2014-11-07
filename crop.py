@@ -1,19 +1,31 @@
 #!/usr/bin/env python
+
+"""
+Crop.py open an image (probably a max intensity z-projection)
+User draws a cropping box. returns the coordinates
+"""
+
+
 import sys
 import logging
 from PyQt4 import QtCore, QtGui
 import math
 import operator
 import sys
+import os
+import Image
 
-'''
-Crop.py open an image (probably a max intensity z-projection)
-User draws a cropping box. returns the coordinates
-'''
+
 
 class Crop(QtGui.QMainWindow):
 
     def __init__(self, callback, image, parent=None):
+        """
+        :param callback:
+        :param image: str, path to max intensity z projection
+        :param parent:
+        :return:
+        """
 
         super(Crop, self).__init__(parent)
         self.setWindowTitle("Manual cropping")
@@ -33,15 +45,10 @@ class Crop(QtGui.QMainWindow):
         fileMenu = self.menubar.addMenu('&file')
         fileMenu.addAction(self.closeAction)
 
-
         self.action = QtGui.QAction(self.tr("&crop (right click)"), self)
         self.action.triggered.connect(self.cropMenuAction)
         cropMenu = self.menubar.addMenu('&crop')
         cropMenu.addAction(self.action)
-
-
-
-
 
     def cropMenuAction(self):
         self.widget.doTheCrop()
@@ -55,7 +62,13 @@ class Crop(QtGui.QMainWindow):
 
 
 class MainWidget(QtGui.QWidget):
-    def __init__(self, parent, callback, image):
+    def __init__(self, parent, callback, image_path):
+        """
+        :param parent:
+        :param callback:
+        :param image_path: str, path to the zprojection image
+        :return:
+        """
         self.parent = parent
         super(MainWidget, self).__init__()
         self.scene = QtGui.QGraphicsScene()
@@ -69,10 +82,21 @@ class MainWidget(QtGui.QWidget):
         layout.addWidget(self.view)
         self.setLayout(layout)
 
-
-        self.image = QtGui.QPixmap(image)
+        im = QtCore.QString(image_path)
+        img = QtGui.QImage(image_path)
+        #print '============', img.height()
+        self.image = QtGui.QPixmap(img)
+        #Try with PIL
+        # img = Image.open(image_path)
+        # print 'PIL size', img.size
+        if not os.path.isfile:
+            print 'wheres the file'
+        else:
+            print 'found the file {}'.format(image_path)
         #Scale the largest dimension to 950 pixs. Use same scaling for the other dimensions
         self.orig_width = self.image.width()
+        if self.image.isNull():
+            raise ValueError('the pixmap is null!!!!')
         self.orig_height = self.image.height()
         max_dimen = max([float(self.orig_width), float(self.orig_height)])
         print float(self.orig_width), float(self.orig_height)
@@ -98,9 +122,9 @@ class MainWidget(QtGui.QWidget):
 
         #Hack. Mouse events give me position of mouse relative to image
         #TODO: set this dynamically
-        self.img_dist_top = 15 #
+        self.img_dist_top = 15
         self.img_dist_left = 15
-        self.pixmap_item.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self.view);
+        self.pixmap_item.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self.view)
         self.pixmap_item.rubberBand.setGeometry(QtCore.QRect(1, 1, 1, 1))
         self.pixmap_item.rubberBand.updatesEnabled()
         self.pixmap_item.rubberBand.show()

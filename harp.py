@@ -206,7 +206,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Uncheck downscaling checkboxes
         scale_scheck_boxes = [self.ui.checkBoxSF2, self.ui.checkBoxSF3, self.ui.checkBoxSF4, self.ui.checkBoxSF5,
-                              self.ui.checkBoxSF6]
+                              self.ui.checkBoxSF6, self.ui.checkBoxPixel]
         for cb in scale_scheck_boxes:
             cb.setChecked(False)
 
@@ -799,7 +799,7 @@ class MainWindow(QtGui.QMainWindow):
         # Check if z projection finished
         if message == "Z-projection finished":
             # Get the crop dimensions and save the file
-            self.run_crop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
+            self.run_crop(os.path.join(self.tmp_dir, "max_intensity_z.png"))
 
     def run_crop(self, img_path):
         """ Creates the a window to display the z projection used to get crop dimensions

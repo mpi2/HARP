@@ -22,6 +22,7 @@ class Zproject:
         self.callback = callback
         self.im_array_queue = Queue.Queue(maxsize=20)
         self.maxintensity_queue = Queue.Queue()
+        self.max_intensity_file_name = "max_intensity_z.png"  # Qt on windows is funny about tiffs
 
     def run(self):
         '''
@@ -49,7 +50,7 @@ class Zproject:
         self.files = files[0::self.skip_num]
 
         self.num_max_threads = 2
-        
+
         #Start the file reader
         read_thread = threading.Thread(target=self.fileReader)
         read_thread.setDaemon(True)
@@ -80,7 +81,7 @@ class Zproject:
         if maxi.shape == (0,0):
             return("something went wrong creating the Z-projection from {}".format(self.img_dir))
         else:
-            cv2.imwrite(os.path.join(self.out_dir, "max_intensity_z.tif"), maxi)
+            cv2.imwrite(os.path.join(self.out_dir, self.max_intensity_file_name), maxi)
             return(0)
 
     def fileReader(self):
@@ -118,7 +119,7 @@ def dummyCallBack(msg):
     print(msg)
 
 class ZProjectThread(QtCore.QThread):
-    def __init__(self,input,tmp_dir):
+    def __init__(self, input, tmp_dir):
         QtCore.QThread.__init__(self)
         self.input_folder = input
         self.tmp_dir = tmp_dir
@@ -135,7 +136,7 @@ class ZProjectThread(QtCore.QThread):
             self.dir = os.path.dirname(__file__)
 
         # Set up a zproject object
-        zp = Zproject(self.input_folder,self.tmp_dir, self.z_callback)
+        zp = Zproject(self.input_folder, self.tmp_dir, self.z_callback)
         # run the object
         zp_result = zp.run()
 

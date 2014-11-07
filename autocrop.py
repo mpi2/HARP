@@ -147,7 +147,7 @@ class Autocrop():
             if shared_terminate.value == 1:
                 self.callback("Processing Cancelled!")
                 return
-            im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+            im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
             self.shared_crop_count.value += 1
             if self.shared_crop_count.value % 20 == 0:
                 self.callback(
@@ -167,7 +167,7 @@ class Autocrop():
             if shared_terminate.value == 1:
                 self.callback("Processing Cancelled!")
                 return
-            im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+            im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
             self.shared_crop_count.value += 1
             if self.shared_crop_count.value % 20 == 0:
                 msg_q.put("Cropping: {0}/{1} images".format(str(self.shared_crop_count.value), str(len(self.files))))
@@ -351,7 +351,7 @@ def init_cropping_win(self):
         filename = os.path.basename(file_)
         crop_out = os.path.join(self.out_dir, filename)
         cv2.imwrite(crop_out, imcrop)
-    msg_q.put("STOP")  #sentinel
+    msg_q.put("STOP")  #  sentinel
 
 
 def dummy_callback(msg):

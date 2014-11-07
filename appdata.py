@@ -1,7 +1,7 @@
 """Creates a YAMl file in app directory that stores details such as last directory browsed
 
 """
-import appdirs
+from lib import appdirs
 import os
 import yaml
 from os.path import expanduser
