@@ -1772,8 +1772,8 @@ QGroupBox::title
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>102</width>
-             <height>102</height>
+             <width>1321</width>
+             <height>840</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout">

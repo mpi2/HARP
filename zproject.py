@@ -48,6 +48,8 @@ class Zproject:
         self.skip_num = 10
         self.files = files[0::self.skip_num]
 
+        self.num_max_threads = 2
+        
         #Start the file reader
         read_thread = threading.Thread(target=self.fileReader)
         read_thread.setDaemon(True)
@@ -55,7 +57,7 @@ class Zproject:
 
         #Start the thread to determine max intensities
         max_threads = []
-        self.num_max_threads = 2
+
         for i in range(self.num_max_threads):
             t = threading.Thread(target=self.maxFinder)
             t.setDaemon(True)
