@@ -341,7 +341,7 @@ def init_cropping_win(self):
     for file_ in self.files:
         if shared_terminate.value == 1:
             return
-        im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+        im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
         self.shared_crop_count.value += 1
         if self.shared_crop_count.value % 20 == 0:
             print "Cropping: {0}/{1} images".format(str(self.shared_crop_count.value), str(len(self.files)))
