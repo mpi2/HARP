@@ -945,7 +945,7 @@ class MainWindow(QtGui.QMainWindow):
         # First get the item from the table to change (status column)
         item = QtGui.QTableWidgetItem()
         self.ui.tableWidget.setItem(self.current_row, 2, item)
-        item = self.ui.tableWidget.item(self.current_row, 2)
+        item = self.ui.tableWidget.item(self.current_row, 2) # NH. Don't think this is needed. Check!
         # Then set the text of this item
         item.setText(message)
 
@@ -953,7 +953,7 @@ class MainWindow(QtGui.QMainWindow):
         if message == "Started Processing":
             item = QtGui.QTableWidgetItem()
             self.ui.tableWidget.setItem(self.current_row, 3, item)
-            item = self.ui.tableWidget.item(self.current_row, 3)
+            item = self.ui.tableWidget.item(self.current_row, 3) # NH. Don't think this is needed. Check!
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         # If finished, initiate the processing of the next folder on the list
         if re.search("Processing finished", message) or re.search("error", message):
