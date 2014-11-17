@@ -354,15 +354,15 @@ class MainWindow(QtGui.QMainWindow):
         # Get input folder if already defined
         input_folder = str(self.ui.lineEditInput.text())
 
-        # Check input folders assigned. If assigned open the dialog box in that folder
+        # If input folder already in dialog, open the browser there
         if input_folder:
             file_dialog = QtGui.QFileDialog(self, 'Open File', input_folder)
         else:
-            last_browsed_dir = self.app_data.last_dir_browsed
-            file_dialog = QtGui.QFileDialog(self, 'Open File', last_browsed_dir)
+            input_folder = self.app_data.last_dir_browsed
+            file_dialog = QtGui.QFileDialog(self, 'Open File', input_folder)
 
         # get the folder the user selected
-        folder = file_dialog.getExistingDirectory(self, "Select Directory", last_browsed_dir)
+        folder = file_dialog.getExistingDirectory(self, "Select Directory", input_folder)
 
         self.app_data.last_dir_browsed = str(folder)
 
@@ -927,6 +927,8 @@ class MainWindow(QtGui.QMainWindow):
         the processing of next recon folder on the list (using **start_processing_thread**)
 
         Also updates the OPT channels table so it shows if one of the channels is processed.
+        TODO: This function is making the GUI hang under Debian. Adding a return to the top of the method frees it
+        up, but them we lose the update info
 
         :param str message: The message sent from the processing thread
 
@@ -934,6 +936,8 @@ class MainWindow(QtGui.QMainWindow):
             :func:`processing.ProcessingThread()`,
             :func:`autofill.get_channels()`
         """
+        print message
+        return
         if self.stop_pro_switch:
             return
 
@@ -941,7 +945,7 @@ class MainWindow(QtGui.QMainWindow):
         # First get the item from the table to change (status column)
         item = QtGui.QTableWidgetItem()
         self.ui.tableWidget.setItem(self.current_row, 2, item)
-        item = self.ui.tableWidget.item(self.current_row, 2)
+        item = self.ui.tableWidget.item(self.current_row, 2) # NH. Don't think this is needed. Check!
         # Then set the text of this item
         item.setText(message)
 
@@ -949,7 +953,7 @@ class MainWindow(QtGui.QMainWindow):
         if message == "Started Processing":
             item = QtGui.QTableWidgetItem()
             self.ui.tableWidget.setItem(self.current_row, 3, item)
-            item = self.ui.tableWidget.item(self.current_row, 3)
+            item = self.ui.tableWidget.item(self.current_row, 3) # NH. Don't think this is needed. Check!
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         # If finished, initiate the processing of the next folder on the list
         if re.search("Processing finished", message) or re.search("error", message):
