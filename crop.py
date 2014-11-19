@@ -15,7 +15,7 @@ import sys
 import os
 try:
     import Image
-except ImportWarning:
+except ImportError:
     import PIL
 
 
