@@ -13,8 +13,10 @@ import math
 import operator
 import sys
 import os
-import Image
-
+try:
+    import Image
+except ImportWarning:
+    import PIL
 
 
 class Crop(QtGui.QMainWindow):
