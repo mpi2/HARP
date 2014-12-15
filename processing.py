@@ -37,7 +37,7 @@ import autocrop
 from config import ConfigClass
 import numpy as np
 import cv2
-import SimpleITK as sitk
+from SimpleITK import GetImageFromArray, WriteImage
 
 # from vtkRenderAnimation import Animator
 #from Segmentation import watershed_filter
@@ -54,6 +54,7 @@ class ProcessingThread(QtCore.QThread):
     def __init__(self, config_path, memory, parent=None):
         """ **Constructor**: Gets the pickle config file and initialises some instance variables
 
+
         :param str memory: Path to where config file is. Contains all the parameter information.
         :param obj parent: This is a way to pass the "self" object to the processing thread.
         :param str config_path: Path to where config file is. Contains all the parameter information.
@@ -62,6 +63,7 @@ class ProcessingThread(QtCore.QThread):
         :ivar int self.kill_check: Switch for the kill signal. Initialised at 0, when switched to 1 processing killed.
         :ivar float self.memory: Taken from the memory param. Saved as instance variable to be used later
         """
+        print 'new'
         QtCore.QThread.__init__(self, parent)
         filehandler = open(config_path, 'r')
         self.configOb = copy.deepcopy(pickle.load(filehandler))
@@ -340,8 +342,8 @@ class ProcessingThread(QtCore.QThread):
         array_3d = np.swapaxes(array_3d, 0, 2)
         array_3d = np.swapaxes(array_3d, 1, 2)
 
-        image_3d = sitk.GetImageFromArray(array_3d)
-        sitk.WriteImage(image_3d, outfile)
+        image_3d = GetImageFromArray(array_3d)
+        WriteImage(image_3d, outfile)
 
 
     def autocrop_update_slot(self, msg):
@@ -428,10 +430,12 @@ class ProcessingThread(QtCore.QThread):
             os.makedirs(self.configOb.scale_path)
 
         # Memory of computer being used will depend on how much memory will be used in imageJ
-        # e.g 80% total memory of the computer
-        self.memory_4_imageJ = (int(self.memory) * .9)
-        self.memory_4_imageJ = self.memory_4_imageJ * 0.00000095367
-        self.memory_4_imageJ = int(self.memory_4_imageJ)
+        # e.g 50% total memory of the computer
+        self.memory_4_imageJ = 1024
+        #self.memory_4_imageJ = (int(self.memory) * .5)
+        #self.memory_4_imageJ = self.memory_4_imageJ * 0.00000095367
+        #self.memory_4_imageJ = int(self.memory_4_imageJ)
+
         memory_mb = int(int(self.memory) * 0.00000095367)
         self.session_log.write("Total Memory of Computer(mb):" + str(memory_mb) + "\n")
         self.session_log.write("Memory for ImageJ(mb):" + str(self.memory_4_imageJ) + "\n")
@@ -605,6 +609,7 @@ class ProcessingThread(QtCore.QThread):
             ijpath = os.path.join(self.dir, 'ImageJ', 'ij.jar')
 
         if not os.path.exists(ijpath):
+            print 'path to imageJ', ijpath
             self.emit(QtCore.SIGNAL('update(QString)'), "Error: Can't find Imagej")
             self.kill_check == 1
             return
@@ -624,6 +629,7 @@ class ProcessingThread(QtCore.QThread):
             ij_macro_path_low_mem2 = os.path.join('..', '..', "siah_scale_low_mem2.txt")
 
         if not os.path.exists(ij_macro_path):
+            print 'path to imageJ macro', ijpath
             self.emit(QtCore.SIGNAL('update(QString)'), "error: Can't find Imagej macro script")
             self.kill_check == 1
             return
@@ -973,13 +979,12 @@ class ProcessingThread(QtCore.QThread):
                 self.emit(QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started")
 
                 # Create a tiff stack from the individual tiff slices
-                temp_stack_path = os.path.join(self.configOb.tmp_dir, 'tiffstack_temp.tiff')
+                temp_stack_path = os.path.join(self.configOb.tmp_dir, 'tiffstack_temp.nrrd')
                 self.tiffstack_from_slices(self.configOb.cropped_path, temp_stack_path)
 
                 #Now compress the tiff and add to the archive
                 out = tarfile.open(os.path.join(self.configOb.output_folder, 'IMPC_{}.tar.bz2'.format(
                     self.configOb.full_name)), mode='w:bz2')
-
 
                 out.add(temp_stack_path, arcname='{}_cropped.tiff'.format(self.configOb.full_name))
                 # remove the tem tiff stack

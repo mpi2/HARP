@@ -14,6 +14,7 @@ class AppData(object):
         self.using_appdata = True  # Set to false if we weren't able to find a directory to save the appdata
         appname = 'harp'
         appdata_dir = appdirs.user_data_dir(appname)
+        self.app_data = {}
 
         if not os.path.isdir(appdata_dir):
             try:
@@ -35,9 +36,6 @@ class AppData(object):
             if os.path.isfile(self.app_data_file):
                 with open(self.app_data_file, 'r') as fh:
                     self.app_data = yaml.load(fh)
-            else:
-                self.app_data = {}
-
 
     def write_app_data(self):
         if self.using_appdata:
@@ -47,12 +45,15 @@ class AppData(object):
     @property
     def last_dir_browsed(self):
         if self.using_appdata:
-            if not self.app_data.get('last_dir_browsed'):
-                self.app_data['last_dir_browsed'] = expanduser("~")
-            return self.app_data['last_dir_browsed']
+            if self.app_data:
+                if not self.app_data.get('last_dir_browsed'):
+                    self.app_data['last_dir_browsed'] = expanduser("~")
+                return self.app_data['last_dir_browsed']
 
     @last_dir_browsed.setter
     def last_dir_browsed(self, path):
+        if not self.app_data:
+            self.app_data = {}
         if self.using_appdata:
             self.app_data['last_dir_browsed'] = path
 

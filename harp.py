@@ -18,7 +18,6 @@ has not been changed.
 
 # Import PyQT module
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import pyqtSlot, SIGNAL, SLOT
 import datetime
 from multiprocessing import freeze_support
 import os
@@ -27,14 +26,17 @@ import subprocess
 import sys
 import tempfile
 import uuid
+
+from PyQt4.QtCore import pyqtSlot, SIGNAL
 import psutil
+
 # Harwell modules and classes
 import autofill
 import addtolist
-from mainwindow import Ui_MainWindow
+from ui.mainwindow import Ui_MainWindow
 from processing import ProcessingThread
 from zproject import ZProjectThread
-import crop
+import manualcrop
 from appdata import AppData
 
 
@@ -358,8 +360,11 @@ class MainWindow(QtGui.QMainWindow):
         if input_folder:
             file_dialog = QtGui.QFileDialog(self, 'Open File', input_folder)
         else:
-            input_folder = self.app_data.last_dir_browsed
-            file_dialog = QtGui.QFileDialog(self, 'Open File', input_folder)
+            if self.app_data.last_dir_browsed:
+                input_folder = self.app_data.last_dir_browsed
+                file_dialog = QtGui.QFileDialog(self, 'Open File', input_folder)
+            else:
+                file_dialog = QtGui.QFileDialog(self, 'Open File')
 
         # get the folder the user selected
         folder = file_dialog.getExistingDirectory(self, "Select Directory", input_folder)
@@ -733,10 +738,10 @@ class MainWindow(QtGui.QMainWindow):
         5. The user can then select the crop dimensions
         6. When the crop dimensions are selected the crop window is closed and the cropbox parameter is saved on the GUI
 
-        Two important modules used: crop.py and zproject.py
+        Two important modules used: manualcrop.py and zproject.py
 
         * zproject performs the zprojection and displays the image.
-        * crop.py then gets the dimensions to perform the crop
+        * manualcrop.py then gets the dimensions to perform the crop
 
         IMPORTANT NOTE: The cropping is not actually done here. This is just to get the dimensions.
 
@@ -811,7 +816,7 @@ class MainWindow(QtGui.QMainWindow):
             :func:`crop.Crop()`
             :func:`crop_call_back()`
         """
-        cropper = crop.Crop(self.crop_call_back, img_path, self)
+        cropper = manualcrop.Crop(self.crop_call_back, img_path, self)
         cropper.show()
 
     def crop_call_back(self, box):
@@ -937,7 +942,6 @@ class MainWindow(QtGui.QMainWindow):
             :func:`autofill.get_channels()`
         """
         print message
-        return
         if self.stop_pro_switch:
             return
 

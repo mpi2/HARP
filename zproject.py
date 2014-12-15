@@ -75,11 +75,14 @@ class Zproject:
             except Queue.Empty:
                 break
         #Process the max intensities from the separate threads
-        maxi = reduce(np.maximum, max_arrays)
+        try:
+            maxi = reduce(np.maximum, max_arrays)
+        except TypeError as e:
+            return "Can't do the Z-projection. Make sure all image files are of the same dimension"
 
         #something wrong with image creation
         if maxi.shape == (0,0):
-            return("something went wrong creating the Z-projection from {}".format(self.img_dir))
+            return "something went wrong creating the Z-projection from {}".format(self.img_dir)
         else:
             cv2.imwrite(os.path.join(self.out_dir, self.max_intensity_file_name), maxi)
             return(0)

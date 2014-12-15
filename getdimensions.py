@@ -1,7 +1,7 @@
 from PyQt4 import QtCore, QtGui
 import os
 from zproject import ZProjectThread
-import crop
+import manualcrop
 
 #======================================================================
 #  Functions for get Dimensions (z projection)
@@ -18,10 +18,10 @@ def get_dimensions(self):
     5. The user can then select the crop dimensions
     6. When the crop dimensions are selected the crop window is closed and the cropbox parameter is saved on the GUI
 
-    Two important modules used: crop.py and zproject.py
+    Two important modules used: manualcrop.py and zproject.py
 
     * zproject performs the zprojection and displays the image.
-    * crop.py then gets the dimensions to perform the crop
+    * manualcrop.py then gets the dimensions to perform the crop
 
     IMPORTANT NOTE: The cropping is not actually done here. This is just to get the dimensions.
 
@@ -98,7 +98,7 @@ def run_crop(self, img_path):
         :func:`crop.Crop()`
         :func:`crop_call_back()`
     """
-    cropper = crop.Crop(self.crop_call_back, img_path, self)
+    cropper = manualcrop.Crop(self.crop_call_back, img_path, self)
     cropper.show()
 
 
