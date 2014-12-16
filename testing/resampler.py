@@ -12,6 +12,7 @@ import os
 import scipy.ndimage
 import shutil
 import cv2
+from scipy.stats import nanmean as mean
 
 
 class Resampler(object):
@@ -109,10 +110,29 @@ class Resampler(object):
         for unscaled_xy_slice in self.img_path_list:
 
             array = self.get_array_from_image_file(unscaled_xy_slice)
-            scaled_array = scipy.ndimage.zoom(array, 1.0 / scale_factor, order=0)
+
+            #This would do a interpolation of nearest neighbour. Not the same as average subsampling?
+            #scaled_array = scipy.ndimage.zoom(array, 1.0 / scale_factor, order=0)
+
+            #Try to write own function instead
+            scaled_array = self.downsample_2d(array, scale_factor)
+
             img_id = os.path.splitext(os.path.basename(unscaled_xy_slice))[0]
             outpath = os.path.join(self.temp_xy_dir, "{}.tif".format(img_id))
             cv2.imwrite(outpath, scaled_array)  # TODO: Write uncompressed, should be quicker
+
+
+    def downsample_2d(self, arr, factor, estimator=mean):
+        """
+        """
+        ys, xs = arr.shape
+        crarr = arr[:ys-(ys % int(factor)),:xs-(xs % int(factor))]
+        dsarr = estimator( np.concatenate([[crarr[i::factor,j::factor]
+            for i in range(factor)]
+                for j in range(factor)]), axis=0)
+        return dsarr
+
+
 
 
     def scale_z(self, scale_factor):
@@ -147,7 +167,7 @@ class Resampler(object):
             sitk.WriteImage(average_img, os.path.join(self.yscaled_dir, filename_counter + '.tif'))
             out_count += 1
 
-        self.create_volume_file(self.yscaled_dir, self.scaled_vols_dir + "{}.nrrd".format(scale_factor))
+        self.create_volume_file(self.yscaled_dir, os.path.join(self.scaled_vols_dir, "{}.nrrd".format(scale_factor)))
 
         return
         #The code below adds another slice from the remaining slices. But this will result in a non-isotropic last slice
@@ -173,13 +193,24 @@ class Resampler(object):
             sitk.WriteImage(average_img, os.path.join(self.YSCALED_DIR, filename_counter + '.tif'))
 
     def create_volume_file(self, img_dir, fname):
+        """
+        Write a 3d volume given a list of 2D image
+        :param img_dir: Where the input images are
+        :param fname: The output filename
+        :return:
+        """
         print('Writing volume')
-        print fname
         img_list = Resampler.get_img_paths(img_dir)
+        # Sitk reads a list of images and creates a stack
         img_3d = sitk.ReadImage(img_list)
         sitk.WriteImage(img_3d, fname)
 
     def get_array_from_image_file(self, img_path):
+        """
+        We use CV2 to read images as it's much faster than SimpleITK or PIL
+        :param img_path:
+        :return:
+        """
         im = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_GRAYSCALE)
         if im == None:
             raise IOError("CV2 Cannot read file: {}".format(img_path))
