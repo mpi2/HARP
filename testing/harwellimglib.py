@@ -18,7 +18,7 @@ def GetFilePaths(folder, extension_tuple=('.nrrd', '.tiff', '.tif', '.nii', '.bm
         paths = []
         for root, _, files in os.walk(folder):
             for filename in files:
-                if filename.endswith(extension_tuple):
+                if filename.lower().endswith(extension_tuple):
                     if pattern:
                         if pattern and pattern not in filename:
                             continue

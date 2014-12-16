@@ -4,15 +4,17 @@
 In order to try and move away from dependency on ImageJ, we will try to implement the scaling functionality using
 Python/numpy
 """
+from _ast import Raise
 
 import numpy as np
 import SimpleITK as sitk
 import os
 import scipy.ndimage
 import shutil
+import cv2
 
 
-class Rescaler(object):
+class Resampler(object):
     def __init__(self, img_path_list):
         """
 
@@ -21,23 +23,19 @@ class Rescaler(object):
         :return:
         """
         self.img_path_list = sorted(img_path_list)
-        self.TEMP_XY_DIR = 'tempxy'
-        self.YSCALED_DIR = 'y_scaled'
-
-        if os.path.isdir(self.TEMP_XY_DIR):
-            shutil.rmtree(self.TEMP_XY_DIR)
-        os.mkdir(self.TEMP_XY_DIR)
-
-        if os.path.isdir(self.YSCALED_DIR):
-            shutil.rmtree(self.YSCALED_DIR)
-        os.mkdir(self.YSCALED_DIR)
+        self.scaled_vols_dir = self.mkdir_force('scaled_volumes')
 
 
 
     def scale_by_integer_factor(self, scale_factor):
-        self.SCALE_FACTOR = scale_factor
-        self.scale_xy()
-        self.scale_z()
+
+        self.temp_xy_dir = self.mkdir_force('tempxy')
+
+        self.yscaled_dir = self.mkdir_force('y_scaled')
+
+
+        self.scale_xy(scale_factor)
+        self.scale_z(scale_factor)
 
     def scale_by_pixel_size(self, input_voxel_size, output_voxel_size):
         self.INPUT_VOXEL_SIZE = input_voxel_size
@@ -59,7 +57,7 @@ class Rescaler(object):
         for chunk_end in range(divisor, len(self.img_path_list), divisor):
             print divisor, chunk_end
             images_to_read = self.img_path_list[chunk_end - divisor: chunk_end]
-            img_chunk = sitk.ReadImage(images_to_read)
+            img_chunk = self.get_array_from_image_file(sitk.ReadImage(images_to_read))
             arr_chunk = sitk.GetArrayFromImage(img_chunk)
             interpolated_arr_chunk = scipy.ndimage.zoom(arr_chunk, voxel_scale_factor, order=3)
             interpolated_img_chunk = sitk.GetImageFromArray(interpolated_arr_chunk)
@@ -71,7 +69,7 @@ class Rescaler(object):
         self.stitch_chunks(TEMP_CHUNKS_DIR)
 
     def stitch_chunks(self, temp_chunks_dir):
-        chunk_list = sorted(hil.GetFilePaths(temp_chunks_dir))
+        chunk_list = Resampler.get_img_paths(temp_chunks_dir)
         first = True
         for chunk_path in chunk_list:
             arr = self.get_array_from_image_file(chunk_path)
@@ -101,23 +99,23 @@ class Rescaler(object):
 
 
 
-    def scale_xy(self):
+    def scale_xy(self, scale_factor):
         """
         Read in slices one at a time, scale in the XY dimesions. Save to a temporary directory
         :return: xy_dir
         """
         print('doing xy-scaling')
+
         for unscaled_xy_slice in self.img_path_list:
 
             array = self.get_array_from_image_file(unscaled_xy_slice)
-            scaled_array = scipy.ndimage.zoom(array, 1.0 / self.SCALE_FACTOR, order=0)
-            scaled_img = sitk.GetImageFromArray(scaled_array)
+            scaled_array = scipy.ndimage.zoom(array, 1.0 / scale_factor, order=0)
             img_id = os.path.splitext(os.path.basename(unscaled_xy_slice))[0]
-            outpath = os.path.join(self.TEMP_XY_DIR, "{}.tif".format(img_id))
-            sitk.WriteImage(scaled_img, outpath)
+            outpath = os.path.join(self.temp_xy_dir, "{}.tif".format(img_id))
+            cv2.imwrite(outpath, scaled_array)  # TODO: Write uncompressed, should be quicker
 
 
-    def scale_z(self):
+    def scale_z(self, scale_factor):
         """
         :param: xy_scaled_dir, path to directory containing xy-scaled images
         :return:
@@ -125,15 +123,15 @@ class Rescaler(object):
 
         print('doing z-scaling')
 
-        imgpath_list = sorted(hil.GetFilePaths(self.TEMP_XY_DIR))
+        imgpath_list = Resampler.get_img_paths(self.temp_xy_dir)
 
         last_img_index = 0
         out_count = 0  # For naming the outputs
-        for i in range(self.SCALE_FACTOR, len(imgpath_list), self.SCALE_FACTOR):
+        for i in range(scale_factor, len(imgpath_list), scale_factor):
 
             array_list = []
             for j in range(last_img_index, i):
-                array_list.append(self.get_array_from_image_file(imgpath_list[j]))
+                array_list.append(self.get_array_from_image_file((imgpath_list[j])))
 
             last_img_index = i
 
@@ -141,20 +139,21 @@ class Rescaler(object):
             for ar in array_list[1:]:  # Skip the first
                 first_array += ar
 
-            average_slice = (first_array / self.SCALE_FACTOR).astype(np.uint8)  # Should go back to original dtype!
+            average_slice = (first_array / scale_factor).astype(np.uint8)  # Should go back to original dtype!
             average_img = sitk.GetImageFromArray(average_slice)
 
             #Writeout the result
             filename_counter = '0' * (4 - (len(str(out_count)))) + str(out_count)
-            sitk.WriteImage(average_img, os.path.join(self.YSCALED_DIR, filename_counter + '.tif'))
+            sitk.WriteImage(average_img, os.path.join(self.yscaled_dir, filename_counter + '.tif'))
             out_count += 1
 
+        self.create_volume_file(self.yscaled_dir, self.scaled_vols_dir + "{}.nrrd".format(scale_factor))
 
         return
-        #The code below adds another slice from the reamining slices. But this will result in a non-isotropic last slice
+        #The code below adds another slice from the remaining slices. But this will result in a non-isotropic last slice
         # So I've decided to skip that last slice for now
         #Process an extra slice if the filelist is not divisible by scalfactor
-        num_remaining = len(imgpath_list) % self.SCALE_FACTOR
+        num_remaining = len(imgpath_list) % scale_factor
         if num_remaining != 0:
             remaining_files = sorted(imgpath_list[-num_remaining:])
 
@@ -173,17 +172,40 @@ class Rescaler(object):
             filename_counter = '0' * (4 - (len(str(out_count)))) + str(out_count)
             sitk.WriteImage(average_img, os.path.join(self.YSCALED_DIR, filename_counter + '.tif'))
 
+    def create_volume_file(self, img_dir, fname):
+        print('Writing volume')
+        print fname
+        img_list = Resampler.get_img_paths(img_dir)
+        img_3d = sitk.ReadImage(img_list)
+        sitk.WriteImage(img_3d, fname)
 
     def get_array_from_image_file(self, img_path):
+        im = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+        if im == None:
+            raise IOError("CV2 Cannot read file: {}".format(img_path))
+        else:
+            return im
 
-        img = sitk.ReadImage(img_path)
-        arr = sitk.GetArrayFromImage(img)
-        return arr
+    @staticmethod
+    def get_img_paths(folder):
+        """
+        Returns a sorted list of image files found in the gien directory
+        :param folder: str
+        :return: list of image file paths
+        """
+        extensions = ('.tiff', '.tif', '.bmp')
+        return sorted([os.path.join(folder, x) for x in os.listdir(folder) if x.lower().endswith(extensions)])
 
+    def mkdir_force(self, path):
+
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        os.mkdir(path)
+        return path
 
 
 if __name__ == '__main__':
-    import harwellimglib as hil
+
     import argparse
     if __name__ == "__main__":
 
@@ -195,11 +217,10 @@ if __name__ == '__main__':
         parser.add_argument('-op', '--output_voxel_size', dest='output_voxel_size', help='downscaling voxel size (um)')
         args = parser.parse_args()
 
-        img_list = hil.GetFilePaths(args.input_dir)
-
-        rescaler = Rescaler(img_list)
+        img_list = Resampler.get_img_paths(args.input_dir)
+        resampler = Resampler(img_list)
 
         if args.scale_factor:
-            rescaler.scale_by_integer_factor(int(args.scale_factor))
+            resampler.scale_by_integer_factor(int(args.scale_factor))
         elif args.output_voxel_size:
-            rescaler.scale_by_pixel_size(float(args.input_voxel_size), float(args.output_voxel_size))
+            resampler.scale_by_pixel_size(float(args.input_voxel_size), float(args.output_voxel_size))
