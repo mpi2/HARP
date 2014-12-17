@@ -34,6 +34,7 @@ class Resampler(object):
 
         self.yscaled_dir = self.mkdir_force('y_scaled')
 
+
         self.scale_xy(scale_factor)
         self.scale_z(scale_factor)
 
@@ -107,21 +108,18 @@ class Resampler(object):
         for unscaled_xy_slice in self.img_path_list:
 
             array = self.get_array_from_image_file(unscaled_xy_slice)
-            img = sitk.GetImageFromArray(array)
 
             #This would do a interpolation of nearest neighbour. Not the same as average subsampling?
-            scaled_img = sitk.BinShrink(img, (scale_factor, scale_factor, scale_factor))
+            scaled_array = scipy.ndimage.zoom(array, 1.0 / scale_factor, order=0)
 
             #Try to write own function instead
             #scaled_array = self.rebin_factor(array, scale_factor)
 
             img_id = os.path.splitext(os.path.basename(unscaled_xy_slice))[0]
             outpath = os.path.join(self.temp_xy_dir, "{}.tif".format(img_id))
-            out_array = sitk.GetArrayFromImage(scaled_img)
-            cv2.imwrite(outpath, out_array)  # TODO: Write uncompressed, should be quicker
+            cv2.imwrite(outpath, scaled_array)  # TODO: Write uncompressed, should be quicker
 
     def rebin_factor(self, a, factor):
-        return
         '''Rebin an array to a new shape.
         This is trerrible. Looks like two registered images
         '''
@@ -133,6 +131,10 @@ class Resampler(object):
         coordinates = np.mgrid[slices]
         indices = coordinates.astype('i')   #choose the biggest smaller integer index
         return a[tuple(indices)]
+
+
+
+
 
     def scale_z(self, scale_factor):
         """
@@ -159,10 +161,11 @@ class Resampler(object):
                 first_array += ar
 
             average_slice = (first_array / scale_factor).astype(np.uint8)  # Should go back to original dtype!
+            average_img = sitk.GetImageFromArray(average_slice)
 
             #Writeout the result
             filename_counter = '0' * (4 - (len(str(out_count)))) + str(out_count)
-            cv2.imwrite(os.path.join(self.yscaled_dir, filename_counter + '.tif'), average_slice)
+            sitk.WriteImage(average_img, os.path.join(self.yscaled_dir, filename_counter + '.tif'))
             out_count += 1
 
         self.create_volume_file(self.yscaled_dir, os.path.join(self.scaled_vols_dir, "{}.nrrd".format(scale_factor)))
