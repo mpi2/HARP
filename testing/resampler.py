@@ -115,22 +115,28 @@ class Resampler(object):
             #scaled_array = scipy.ndimage.zoom(array, 1.0 / scale_factor, order=0)
 
             #Try to write own function instead
-            scaled_array = self.downsample_2d(array, scale_factor)
+            scaled_array = self.rebin_factor(array, scale_factor)
 
             img_id = os.path.splitext(os.path.basename(unscaled_xy_slice))[0]
             outpath = os.path.join(self.temp_xy_dir, "{}.tif".format(img_id))
             cv2.imwrite(outpath, scaled_array)  # TODO: Write uncompressed, should be quicker
 
 
-    def downsample_2d(self, arr, factor, estimator=mean):
-        """
-        """
-        ys, xs = arr.shape
-        crarr = arr[:ys-(ys % int(factor)),:xs-(xs % int(factor))]
-        dsarr = estimator( np.concatenate([[crarr[i::factor,j::factor]
-            for i in range(factor)]
-                for j in range(factor)]), axis=0)
-        return dsarr
+
+
+    def rebin_factor(self, a, factor):
+        '''Rebin an array to a new shape.
+        newshape must be a factor of a.shape.
+        '''
+        newshape = a.shape[0] / factor, a.shape[1] / factor
+
+        assert len(a.shape) == len(newshape)
+
+        slices = [ slice(0,old, float(old)/new) for old,new in zip(a.shape,newshape) ]
+        coordinates = np.mgrid[slices]
+        indices = coordinates.astype('i')   #choose the biggest smaller integer index
+        return a[tuple(indices)]
+
 
 
 
@@ -147,8 +153,8 @@ class Resampler(object):
 
         last_img_index = 0
         out_count = 0  # For naming the outputs
-        for i in range(scale_factor, len(imgpath_list), scale_factor):
-
+        for i in range(scale_factor, len(imgpath_list) + scale_factor, scale_factor):
+            print i
             array_list = []
             for j in range(last_img_index, i):
                 array_list.append(self.get_array_from_image_file((imgpath_list[j])))
@@ -203,6 +209,9 @@ class Resampler(object):
         img_list = Resampler.get_img_paths(img_dir)
         # Sitk reads a list of images and creates a stack
         img_3d = sitk.ReadImage(img_list)
+        #The origin and spacing is changed sometimes. Reset it. We could set this baed on recon log pixel size?
+        img_3d.SetSpacing((1, 1, 1))
+        img_3d.SetOrigin((0, 0, 0))
         sitk.WriteImage(img_3d, fname)
 
     def get_array_from_image_file(self, img_path):
