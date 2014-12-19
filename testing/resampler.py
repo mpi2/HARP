@@ -30,18 +30,17 @@ class Resampler(object):
 
     def scale_by_integer_factor(self, scale_factor):
 
-        self.temp_xy_dir = self.mkdir_force('tempxy')
-
         self.yscaled_dir = self.mkdir_force('y_scaled')
 
-        self.scale_xy(scale_factor)
-        self.scale_z(scale_factor)
+        self.bin_scale_xy_first(scale_factor)
+        #self.scale_z(scale_factor)
 
     def scale_by_pixel_size(self, input_voxel_size, output_voxel_size):
         self.INPUT_VOXEL_SIZE = input_voxel_size
         self.OUTPUT_VOXEL_SIZE = output_voxel_size
 
         TEMP_CHUNKS_DIR = 'tempChunks_delete'
+        NUM_CHUCKS = 15
 
         if os.path.isdir(TEMP_CHUNKS_DIR):
             shutil.rmtree(TEMP_CHUNKS_DIR)
@@ -50,12 +49,15 @@ class Resampler(object):
         print('scaling to voxel size')
         #find the smallest remainder when divided by these numbers. Use that number to chop up the z-slices into chunks
         # If can't divid fully, if it's a prime for eg, we just ommit one of the bottom slices
-        remainder, divisor = self.get_chunk_size()
-        voxel_scale_factor = self.INPUT_VOXEL_SIZE / self.OUTPUT_VOXEL_SIZE
+
+        voxel_scale_factor = float(self.INPUT_VOXEL_SIZE / self.OUTPUT_VOXEL_SIZE)
+
+        chunksize = len(self.img_path_list) // NUM_CHUCKS
+        last_chunk_size = len(self.img_path_list) % NUM_CHUCKS
 
         chunk_number = 0
-        for chunk_end in range(divisor, len(self.img_path_list), divisor):
-            print divisor, chunk_end
+        for i in range(chunksize, len(self.img_path_list) + chunksize, chunksize):
+            
             images_to_read = self.img_path_list[chunk_end - divisor: chunk_end]
             img_chunk = self.get_array_from_image_file(sitk.ReadImage(images_to_read))
             arr_chunk = sitk.GetArrayFromImage(img_chunk)
@@ -97,98 +99,74 @@ class Resampler(object):
 
         return smallest_chunk_size, divisor
 
-    def scale_xy(self, scale_factor):
+
+
+    def bin_scale_xy_first(self, scale_factor):
+
+        out_path = os.path.join(self.scaled_vols_dir, "{}.nrrd".format(scale_factor))
+        print('doing xy-scaling')
+        first_chunk = True
+        last_img_index = 0
+        z_chuncks = []
+
+        first = True
+        for img_p in self.img_path_list:
+            array = cv2.imread(img_p, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+            img = sitk.GetImageFromArray(array)
+            array =  sitk.GetArrayFromImage(sitk.BinShrink(img, (scale_factor, scale_factor)))
+            if first:
+                assembled = array
+                first = False
+            else:
+                assembled = np.dstack((assembled, array))
+
+
+
+
+
+
+        #Write the image
+        imgout = sitk.GetImageFromArray(assembled)
+        sitk.WriteImage(imgout, out_path)
+
+
+
+    def bin_scale(self, scale_factor):
         """
         Read in slices one at a time, scale in the XY dimesions. Save to a temporary directory
         :return: xy_dir
         """
-        print('doing xy-scaling')
+        print('doing xyz avergae scaling')
 
-        for unscaled_xy_slice in self.img_path_list:
-
-            array = self.get_array_from_image_file(unscaled_xy_slice)
-            img = sitk.GetImageFromArray(array)
-
-            #This would do a interpolation of nearest neighbour. Not the same as average subsampling?
-            scaled_img = sitk.BinShrink(img, (scale_factor, scale_factor, scale_factor))
-
-            #Try to write own function instead
-            #scaled_array = self.rebin_factor(array, scale_factor)
-
-            img_id = os.path.splitext(os.path.basename(unscaled_xy_slice))[0]
-            outpath = os.path.join(self.temp_xy_dir, "{}.tif".format(img_id))
-            out_array = sitk.GetArrayFromImage(scaled_img)
-            cv2.imwrite(outpath, out_array)  # TODO: Write uncompressed, should be quicker
-
-    def rebin_factor(self, a, factor):
-        return
-        '''Rebin an array to a new shape.
-        This is trerrible. Looks like two registered images
-        '''
-        newshape = a.shape[0] / factor, a.shape[1] / factor
-
-        assert len(a.shape) == len(newshape)
-
-        slices = [ slice(0, old, float(old)/new) for old, new in zip(a.shape, newshape) ]
-        coordinates = np.mgrid[slices]
-        indices = coordinates.astype('i')   #choose the biggest smaller integer index
-        return a[tuple(indices)]
-
-    def scale_z(self, scale_factor):
-        """
-        :param: xy_scaled_dir, path to directory containing xy-scaled images
-        :return:
-        """
-
-        print('doing z-scaling')
-
-        imgpath_list = Resampler.get_img_paths(self.temp_xy_dir)
-
+        first = True
         last_img_index = 0
-        out_count = 0  # For naming the outputs
-        for i in range(scale_factor, len(imgpath_list) + scale_factor, scale_factor):
-            print i
-            array_list = []
-            for j in range(last_img_index, i):
-                array_list.append(self.get_array_from_image_file((imgpath_list[j])))
+        for i in range(scale_factor, len(self.img_path_list) + scale_factor, scale_factor):
+
+            # Get the slices for the subsampling
+            img_paths = self.img_path_list[last_img_index:i]
 
             last_img_index = i
 
-            first_array = array_list[0].astype(np.uint16)  # Needs a larger type to do the calculations
-            for ar in array_list[1:]:  # Skip the first
-                first_array += ar
+            img_chunk = sitk.ReadImage(img_paths)
 
-            average_slice = (first_array / scale_factor).astype(np.uint8)  # Should go back to original dtype!
+            # Now we need to determine whether we need to pad in order for the BinShrink filter tow work correctly
+            lower_pad_values = [p % scale_factor for p in img_chunk.GetSize()]
 
-            #Writeout the result
-            filename_counter = '0' * (4 - (len(str(out_count)))) + str(out_count)
-            cv2.imwrite(os.path.join(self.yscaled_dir, filename_counter + '.tif'), average_slice)
-            out_count += 1
+            if lower_pad_values != (0, 0, 0):
+                # Zero pad lower dimensions so that they are all divisible by scale factor. Leave upper sides alone
+                img_chunk = sitk.ConstantPad(img_chunk, (0, 0, 0), lower_pad_values, 0)
 
-        self.create_volume_file(self.yscaled_dir, os.path.join(self.scaled_vols_dir, "{}.nrrd".format(scale_factor)))
+            shrunk_chunk = sitk.BinShrink(img_chunk, (scale_factor, scale_factor, scale_factor))
+            if first:
+                assembled_array = sitk.GetArrayFromImage(shrunk_chunk)
+                first = False
+            else:
+                assembled_array = np.vstack((assembled_array, sitk.GetArrayFromImage(shrunk_chunk)))
 
-        return
-        #The code below adds another slice from the remaining slices. But this will result in a non-isotropic last slice
-        # So I've decided to skip that last slice for now
-        #Process an extra slice if the filelist is not divisible by scalfactor
-        num_remaining = len(imgpath_list) % scale_factor
-        if num_remaining != 0:
-            remaining_files = sorted(imgpath_list[-num_remaining:])
+        # Writeout the final image
+        sitk.WriteImage(sitk.GetImageFromArray(assembled_array),
+                        os.path.join(self.scaled_vols_dir, "{}.nrrd".format(scale_factor)))
 
-            array_list = []
-            for left_over in remaining_files:
-                array_list.append(self.get_array_from_image_file(left_over))
-
-            first_array = array_list[0].astype(np.uint16)  # Needs a larger type to do the calculations
-            for ar in array_list[1:]:  # Skip the first
-                first_array += ar
-
-            average_slice = (first_array / num_remaining).astype(np.uint8)  # Should go back to original dtype!
-            average_img = sitk.GetImageFromArray(average_slice)
-
-            #Writeout the result
-            filename_counter = '0' * (4 - (len(str(out_count)))) + str(out_count)
-            sitk.WriteImage(average_img, os.path.join(self.YSCALED_DIR, filename_counter + '.tif'))
 
     def create_volume_file(self, img_dir, fname):
         """
