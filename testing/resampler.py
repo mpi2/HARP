@@ -32,15 +32,15 @@ class Resampler(object):
 
         self.yscaled_dir = self.mkdir_force('y_scaled')
 
-        self.bin_scale_xy_first(scale_factor)
+        self.bin_shrink(scale_factor)
         #self.scale_z(scale_factor)
 
     def scale_by_pixel_size(self, input_voxel_size, output_voxel_size):
         self.INPUT_VOXEL_SIZE = input_voxel_size
         self.OUTPUT_VOXEL_SIZE = output_voxel_size
 
-        TEMP_CHUNKS_DIR = 'tempChunks_delete'
-        NUM_CHUCKS = 15
+        #TEMP_CHUNKS_DIR = 'tempChunks_delete'
+        num
 
         if os.path.isdir(TEMP_CHUNKS_DIR):
             shutil.rmtree(TEMP_CHUNKS_DIR)
@@ -97,75 +97,43 @@ class Resampler(object):
                 smallest_chunk_size = test
                 divisor = i
 
+        print smallest_chunk_size, divisor
         return smallest_chunk_size, divisor
 
 
 
-    def bin_scale_xy_first(self, scale_factor):
+    def bin_shrink(self, scale_factor):
+        """
+        Shrink the image by an integer factor. Confirmed only on even-dimension images currently. May need to add
+        padding
+        :param scale_factor:
+        :return:
+        """
 
         out_path = os.path.join(self.scaled_vols_dir, "{}.nrrd".format(scale_factor))
-        print('doing xy-scaling')
-        first_chunk = True
+        print('Bin shrinking')
+
         last_img_index = 0
         z_chuncks = []
 
-        first = True
-        for img_p in self.img_path_list:
-            array = cv2.imread(img_p, cv2.CV_LOAD_IMAGE_GRAYSCALE)
-            img = sitk.GetImageFromArray(array)
-            array =  sitk.GetArrayFromImage(sitk.BinShrink(img, (scale_factor, scale_factor)))
-            if first:
+        for i in range(scale_factor, len(self.img_path_list) + scale_factor, scale_factor):
+            slice_paths = [x for x in self.img_path_list[last_img_index: i + 1]]
+            slice_imgs = sitk.ReadImage(slice_paths)
+            z_chuncks.append(sitk.BinShrink(slice_imgs, [scale_factor, scale_factor, scale_factor]))
+            last_img_index = i
+
+        first_chunk = True
+        for j in z_chuncks:
+            array = sitk.GetArrayFromImage(j)
+            if first_chunk:
                 assembled = array
-                first = False
+                first_chunk = False
             else:
-                assembled = np.dstack((assembled, array))
-
-
-
-
-
+                assembled = np.vstack((assembled, array))
 
         #Write the image
         imgout = sitk.GetImageFromArray(assembled)
         sitk.WriteImage(imgout, out_path)
-
-
-
-    def bin_scale(self, scale_factor):
-        """
-        Read in slices one at a time, scale in the XY dimesions. Save to a temporary directory
-        :return: xy_dir
-        """
-        print('doing xyz avergae scaling')
-
-        first = True
-        last_img_index = 0
-        for i in range(scale_factor, len(self.img_path_list) + scale_factor, scale_factor):
-
-            # Get the slices for the subsampling
-            img_paths = self.img_path_list[last_img_index:i]
-
-            last_img_index = i
-
-            img_chunk = sitk.ReadImage(img_paths)
-
-            # Now we need to determine whether we need to pad in order for the BinShrink filter tow work correctly
-            lower_pad_values = [p % scale_factor for p in img_chunk.GetSize()]
-
-            if lower_pad_values != (0, 0, 0):
-                # Zero pad lower dimensions so that they are all divisible by scale factor. Leave upper sides alone
-                img_chunk = sitk.ConstantPad(img_chunk, (0, 0, 0), lower_pad_values, 0)
-
-            shrunk_chunk = sitk.BinShrink(img_chunk, (scale_factor, scale_factor, scale_factor))
-            if first:
-                assembled_array = sitk.GetArrayFromImage(shrunk_chunk)
-                first = False
-            else:
-                assembled_array = np.vstack((assembled_array, sitk.GetArrayFromImage(shrunk_chunk)))
-
-        # Writeout the final image
-        sitk.WriteImage(sitk.GetImageFromArray(assembled_array),
-                        os.path.join(self.scaled_vols_dir, "{}.nrrd".format(scale_factor)))
 
 
     def create_volume_file(self, img_dir, fname):
@@ -221,7 +189,9 @@ if __name__ == '__main__':
 
         parser = argparse.ArgumentParser("Image resampler (downscale)")
         parser.add_argument('-ip', '--input_voxel_size', dest='input_voxel_size', help='Original voxel size')
-        parser.add_argument('-i', '--input_folder', dest='input_dir', help='Input folder')
+
+        parser.add_argument('-if', '--input_folder', dest='input_dir', help='Input folder')
+        parser.add_argument('-ii' '--input_image', det='input_image', help='Input image')  # Not implemented yet
         parser.add_argument('-o', '--output_folder', dest='output_dir', help='Output folder')
         parser.add_argument('-sf', '--scale_factor', dest='scale_factor', help='downscaling factor (int)')
         parser.add_argument('-op', '--output_voxel_size', dest='output_voxel_size', help='downscaling voxel size (um)')
