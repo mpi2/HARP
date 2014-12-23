@@ -39,14 +39,19 @@ class Resampler(object):
         self.INPUT_VOXEL_SIZE = input_voxel_size
         self.OUTPUT_VOXEL_SIZE = output_voxel_size
 
-        #TEMP_CHUNKS_DIR = 'tempChunks_delete'
-        num
 
-        if os.path.isdir(TEMP_CHUNKS_DIR):
-            shutil.rmtree(TEMP_CHUNKS_DIR)
-        os.mkdir(TEMP_CHUNKS_DIR)
+        # Try the memory map
+        self.memory_map()
+        return
+
+        #TEMP_CHUNKS_DIR = 'tempChunks_delete'
 
         print('scaling to voxel size')
+
+        # Save the interpolated chunks here
+        shrunk_chunks = []
+
+
         #find the smallest remainder when divided by these numbers. Use that number to chop up the z-slices into chunks
         # If can't divid fully, if it's a prime for eg, we just ommit one of the bottom slices
 
@@ -69,6 +74,17 @@ class Resampler(object):
             chunk_number += 1
 
         self.stitch_chunks(TEMP_CHUNKS_DIR)
+
+    def memory_map(self):
+
+        temp_memmap = 'tempMemapDelete.raw'
+        np.savez(temp_memmap, *self.array_generator(self.img_path_list))
+
+
+    def array_generator(self, file_list):
+        for impath in file_list:
+            array = cv2.imread(impath, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+            yield array
 
     def stitch_chunks(self, temp_chunks_dir):
         chunk_list = Resampler.get_img_paths(temp_chunks_dir)
@@ -191,10 +207,10 @@ if __name__ == '__main__':
         parser.add_argument('-ip', '--input_voxel_size', dest='input_voxel_size', help='Original voxel size')
 
         parser.add_argument('-if', '--input_folder', dest='input_dir', help='Input folder')
-        parser.add_argument('-ii' '--input_image', det='input_image', help='Input image')  # Not implemented yet
+        parser.add_argument('-ii' '--input_image', dest='input_image', help='Input image')  # Not implemented yet
         parser.add_argument('-o', '--output_folder', dest='output_dir', help='Output folder')
         parser.add_argument('-sf', '--scale_factor', dest='scale_factor', help='downscaling factor (int)')
-        parser.add_argument('-op', '--output_voxel_size', dest='output_voxel_size', help='downscaling voxel size (um)')
+        parser.add_argument('-op', '--output_voxel_size', dest='output_voxel_size', type=float, help='downscaling voxel size (um)')
         args = parser.parse_args()
 
         img_list = Resampler.get_img_paths(args.input_dir)
