@@ -5,6 +5,7 @@ In order to try and move away from dependency on ImageJ, we will try to implemen
 Python/numpy
 """
 from _ast import Raise
+from gtk.gdk import pixbuf_new_from_array
 
 import numpy as np
 import SimpleITK as sitk
@@ -12,6 +13,7 @@ import os
 import scipy.ndimage
 import shutil
 import cv2
+from guppy import hpy
 from scipy.stats import nanmean as mean
 
 
@@ -32,7 +34,7 @@ class Resampler(object):
 
         self.yscaled_dir = self.mkdir_force('y_scaled')
 
-        self.bin_shrink(scale_factor)
+        self.bin_shrink(scale_factor) # This works
         #self.scale_z(scale_factor)
 
     def scale_by_pixel_size(self, input_voxel_size, output_voxel_size):
@@ -40,11 +42,13 @@ class Resampler(object):
         self.OUTPUT_VOXEL_SIZE = output_voxel_size
 
 
-
-        self.shrink_memmap()
+        #self.memory_map()
+        #self.shrink_memmap()
+        #self.shrink_memmap()
+        self.map_coordinates()
         return
         # Try the memory map
-        self.memory_map()
+
 
 
         #TEMP_CHUNKS_DIR = 'tempChunks_delete'
@@ -80,20 +84,81 @@ class Resampler(object):
 
 
     def shrink_memmap(self):
+        """
+        Creates a memory-mapped array from a raw file, and performs scaling on this using scipy zoom.#
+        However it seems to take up just as musch memory as when the array is in memory. -> Around 1,3GB for 150mb stack
+        :return:
+        """
 
-        print 'mem'
-        dims = (1650, 1030, 727)
+        dims = (824, 514, 362)
+        #dims = (329, 205, 144)
 
         raw_file = '/home/neil/work/harp_test_data/out/tempMemapDelete.raw'
-        #mapped_array = np.memmap(raw_file, dtype=np.int8, mode='r', shape=dims)
-        mapped_array = np.fromfile(raw_file, dtype=np.int8).reshape(dims)
+        #mapped_array = np.memmap(raw_file, dtype=np.uint8, mode='r', shape=dims)
+        mapped_array = np.fromfile(raw_file, dtype=np.uint8).reshape(dims)
 
-        shrunk = scipy.ndimage.zoom(mapped_array, 0.2)
-        #sh_img = sitk.GetImageFromArray(shrunk)
-        #sitk.WriteImage(sh_img, '/home/neil/work/harp_test_data/out/shrunk_test.nrrd' )
+        shrunk = scipy.ndimage.zoom(mapped_array, 0.2, order=1)
+        # h = hpy()
+        # heap = h.heap()
+        # import pdb; pdb.set_trace()
+        print shrunk.shape, shrunk.dtype, type(shrunk)
+        sh_img = sitk.GetImageFromArray(shrunk)
+
+        sitk.WriteImage(sh_img, '/home/neil/work/harp_test_data/out/shrunk_test.tiff')
+
+    def map_coordinates(self):
+        """
+        Unfinished. But does not produce satisfactory results as it's very very slow (5s /pixel) and uses loads of RAM
+        1.2GB for 150mb  for 150MB stack
+        :return:
+        """
+        dims = (824, 514, 362)
+        scale_factor = 2
+        new_dimensions = tuple(x//scale_factor for x in dims)
+        raw_file = '/home/neil/work/harp_test_data/out/tempMemapDelete.raw'
+        #mapped_array = np.memmap(raw_file, dtype=np.uint8, mode='r', shape=dims)
+        mapped_array = np.fromfile(raw_file, dtype=np.uint8).reshape(dims)
+        print mapped_array.max()
+        print mapped_array.min()
+        print mapped_array.dtype
+        #return
+
+
+
+        new_array = np.zeros(new_dimensions, dtype=np.uint8)
+        count = 0
+        for z in range(len(mapped_array[0])):
+            # Get the coordinates to interpolate for this z slice
+            x_array = np.linspace(1.0/scale_factor, dims[2] - (1.0/scale_factor), dims[2]/scale_factor)
+            y_array = np.linspace(1.0/scale_factor, dims[1] - (1.0/scale_factor), dims[1]/scale_factor)
+            #x1, y1 = np.meshgrid(x_array, y_array)
+
+            coords = []
+            for y in y_array:
+                for x in x_array:
+                    count += 1
+                    coords.append((z, y, x))
+                coords = zip(*coords)
+
+                interpolated_voxel = scipy.ndimage.interpolation.map_coordinates(mapped_array, coords)
+                print interpolated_voxel
+                #print interpolated_voxel
+                #new_array[0, 0, 0] = int(interpolated_voxel[0])
+        # img_out = sitk.GetImageFromArray(new_array)
+        # sitk.WriteImage(img_out, 'interolated.nrrd')
+
+
+
+
+
+
 
 
     def memory_map(self):
+        """
+        Save the slices as a raw file so it can be memory-mapped by numpy
+        :return:
+        """
 
         temp_memmap = 'tempMemapDelete.raw'
         if os.path.isfile(temp_memmap):
@@ -144,7 +209,7 @@ class Resampler(object):
     def bin_shrink(self, scale_factor):
         """
         Shrink the image by an integer factor. Confirmed only on even-dimension images currently. May need to add
-        padding
+        padding. This is working!
         :param scale_factor:
         :return:
         """
