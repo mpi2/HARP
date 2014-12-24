@@ -40,9 +40,12 @@ class Resampler(object):
         self.OUTPUT_VOXEL_SIZE = output_voxel_size
 
 
+
+        self.shrink_memmap()
+        return
         # Try the memory map
         self.memory_map()
-        return
+
 
         #TEMP_CHUNKS_DIR = 'tempChunks_delete'
 
@@ -75,10 +78,30 @@ class Resampler(object):
 
         self.stitch_chunks(TEMP_CHUNKS_DIR)
 
+
+    def shrink_memmap(self):
+
+        print 'mem'
+        dims = (1650, 1030, 727)
+
+        raw_file = '/home/neil/work/harp_test_data/out/tempMemapDelete.raw'
+        #mapped_array = np.memmap(raw_file, dtype=np.int8, mode='r', shape=dims)
+        mapped_array = np.fromfile(raw_file, dtype=np.int8).reshape(dims)
+
+        shrunk = scipy.ndimage.zoom(mapped_array, 0.2)
+        #sh_img = sitk.GetImageFromArray(shrunk)
+        #sitk.WriteImage(sh_img, '/home/neil/work/harp_test_data/out/shrunk_test.nrrd' )
+
+
     def memory_map(self):
 
         temp_memmap = 'tempMemapDelete.raw'
-        np.savez(temp_memmap, *self.array_generator(self.img_path_list))
+        if os.path.isfile(temp_memmap):
+            os.remove(temp_memmap)
+
+        with open(temp_memmap, 'a') as fh:
+            for a in self.array_generator(self.img_path_list):
+                a.tofile(fh)
 
 
     def array_generator(self, file_list):
