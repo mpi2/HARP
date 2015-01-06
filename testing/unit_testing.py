@@ -7,7 +7,7 @@ from PyQt4.QtGui import QApplication
 from PyQt4.QtTest import QTest
 from PyQt4.QtCore import Qt, QTimer
 import harp
-import processing
+
 
 
 class HARPTestCase(unittest.TestCase):
@@ -22,13 +22,30 @@ class HARPTestCase(unittest.TestCase):
         # Specify test data paths
         if sys.platform == "win32" or sys.platform == "win64":
             self.example_data = "\\\\janus\\groups\\siah\\Example_Data\\test_4_harp\\20130430_oxford_lowres_rec_WT_XX"
+            self.data_name = self.example_data.split("\\")[-1]
         else:
-            self.example_data = "\\media\\sf_siah\\Example_Data\\test_4_harp\\20130430_oxford_lowres_rec_WT_XX"
+            self.example_data = "/home/neil/siah/Example_Data/test_4_harp/20130430_oxford_lowres_rec_WT_XX"
+            self.data_name = self.example_data.split("/")[-1]
 
-        self.data_name = self.example_data.split("\\")[-1]
-        processing.ProcessingThread.update1.connect(self.wait_for_job)
+        self.ex.update1.connect(self.wait_for_job)
 
+
+
+
+    def temp(self):
+
+        print "Testing single run of example data..."
+        self.set_example_data()
+
+        # Add it to processing list and run
+        self.ex.ui.pushButtonGo.click()
+        #self.assertTrue(self.ex.ui.tableWidget.rowCount() > 0)
+
+        # Click the start button
+        self.ex.ui.pushButtonStart.click()
     '''Test autofill'''
+
+
     def test_autofill(self):
 
         print "Testing autofill..."
@@ -54,8 +71,9 @@ class HARPTestCase(unittest.TestCase):
     def test_run_single_job(self):
 
         print "Testing single run of example data..."
-        self.set_example_data()
 
+        # self.set_example_data()
+        self.temp()
         # Add it to processing list and run
         self.ex.ui.pushButtonGo.click()
         self.assertTrue(self.ex.ui.tableWidget.rowCount() > 0)
@@ -87,6 +105,8 @@ class HARPTestCase(unittest.TestCase):
     #     # Are the sizes back as they were?
     #     self.assertEqual(window_size, new_window_size)
     #     self.assertEqual(scroll_size, new_scroll_size)
+
+
 
     def set_example_data(self):
 

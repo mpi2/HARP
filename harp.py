@@ -48,6 +48,8 @@ class MainWindow(QtGui.QMainWindow):
 
     """
 
+    update1 = QtCore.pyqtSignal(str, str)
+
     def __init__(self, app):
         """ **Constructor**: Checks the buttons which have been pressed and responds accordingly.
 
@@ -67,6 +69,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.app = app
+
 
         # Make unique ID if this is the first time mainwindow has been called
         self.unique_ID = uuid.uuid1()
@@ -976,6 +979,7 @@ l
         # If finished, initiate the processing of the next folder on the list
         if re.search("Processing finished", message) or re.search("error", message):
             print message
+            print 'test_finished'
             item = QtGui.QTableWidgetItem()
             self.ui.tableWidget.setItem(self.current_row, 4, item)
             item = self.ui.tableWidget.item(self.current_row, 4)
@@ -989,6 +993,8 @@ l
 
         # Depending on the name of files and status update columns may need to be resized
         self.ui.tableWidget.resizeColumnsToContents()
+
+        self.update1.emit("hello", 'carrots')
 
     def add_more(self):
         """ When the add more button is pressed should switch back to the first tab

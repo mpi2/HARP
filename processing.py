@@ -50,7 +50,7 @@ class ProcessingThread(QtCore.QThread):
     on this QThread.
 
     """
-    update1 = QtCore.pyqtSignal()  #str, name='update1'
+
 
     def __init__(self, config_paths, memory, parent=None):
         """ **Constructor**: Gets the pickle config file and initialises some instance variables
@@ -65,7 +65,8 @@ class ProcessingThread(QtCore.QThread):
         :ivar float self.memory: Taken from the memory param. Saved as instance variable to be used later
         """
         print 'new'
-        QtCore.QThread.__init__(self, parent)
+        #QtCore.QThread.__init__(self, parent)
+        super(ProcessingThread, self).__init__(parent)
         self.config_paths = config_paths
         self.memory = memory
         self.kill_check = 0
@@ -184,8 +185,8 @@ class ProcessingThread(QtCore.QThread):
                 self.emit(QtCore.SIGNAL('update(QString)'),
                           "Processing finished (problems creating some of the scaled stacks, see log file)")
             else:
-                #self.emit(QtCore.SIGNAL('update(QString)'), "Processing finished")
-                self.update1.emit()
+                self.emit(QtCore.SIGNAL('update(QString)'), "Processing finished")
+
 
             self.session_log.write("Processing finished\n")
             self.session_log.write("########################################\n")
