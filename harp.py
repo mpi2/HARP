@@ -33,6 +33,7 @@ import psutil
 # Harwell modules and classes
 import autofill
 import addtolist
+import Queue
 from ui.mainwindow import Ui_MainWindow
 from processing import ProcessingThread
 from zproject import ZProjectThread
@@ -70,7 +71,7 @@ class MainWindow(QtGui.QMainWindow):
         # Make unique ID if this is the first time mainwindow has been called
         self.unique_ID = uuid.uuid1()
 
-        # Store app-specific data such as lasddt directory browsed
+        # Store app-specific data such as last directory browsed
         self.app_data = AppData()
 
         # Initialise various switches
@@ -79,6 +80,7 @@ class MainWindow(QtGui.QMainWindow):
         self.stop_pro_switch = 0
         self.count_in = 0
         self.current_row = 0
+        self.p_thread_pool = []
 
         # Set to "" or NA so that HARP can record in the log and GUI there is no data for these parameters. Will be
         # updated later if parameters are identified.
@@ -136,7 +138,7 @@ class MainWindow(QtGui.QMainWindow):
         # Get the output folder name when manually changed in box
         self.ui.lineEditOutput.textChanged.connect(self.output_folder_changed)
 
-        #Get the input folder name when manually changed in box
+        # Get the input folder name when manually changed in box
         self.ui.lineEditInput.textChanged.connect(self.input_folder_changed)
 
         # Get recon file manually
@@ -187,16 +189,15 @@ class MainWindow(QtGui.QMainWindow):
         # When user double clicks on OPT alternative channel open it on the parameter tab
         self.ui.tableWidgetOPT.doubleClicked.connect(self.change_opt_chn)
 
-        #The IMPC button sets the deafaults for sending data to the DCC
+        # The IMPC button sets the deafaults for sending data to the DCC
         self.ui.pushButtonIMPC.clicked.connect(self.impc_button)
 
-        #Accept drag and drop
+        # Accept drag and drop
         self.setAcceptDrops(True)
 
         # to make the window visible
 
         self.showMaximized()
-
 
     @pyqtSlot()
     def impc_button(self):
@@ -215,10 +216,9 @@ class MainWindow(QtGui.QMainWindow):
         # Set scaling for croppped recon
         self.ui.checkBoxCropComp.setChecked(True)
 
-
     def dropEvent(self, event):
         """ Handles *drop* section for drag and drop of folders.
-
+l
         Overrides dropEvent method from the QMainWindow.
         Resets the inputs and auto-fills in the relevant parameter information.
 
@@ -231,15 +231,18 @@ class MainWindow(QtGui.QMainWindow):
             :func:`autofill_pipe()`
         """
         # list of all the things dragged and dropped
-        volList = [str(v.toLocalFile()) for v in event.mimeData().urls()]
+        volume_list = [str(v.toLocalFile()) for v in event.mimeData().urls()]
         # Get the first thing dropped
-        vol1 = volList[0]
+        vol1 = volume_list[0]
         # Update the input line-edit
         self.ui.lineEditInput.setText(os.path.abspath(str(vol1)))
         # Reset the inputs (apart from the lineEditInput
         self.reset_inputs()
         # autofill parameters
         self.autofill_pipe()
+
+        # JAMES - new feature - switch back to "Parameters" tab if necessary so the user can modify options
+        self.ui.tabWidget.setCurrentIndex(0)
 
     def dragEnterEvent(self, event):
         """ Handles *drag* section for drag and drop of folders.
@@ -291,7 +294,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Short description about what HARP is and its version"""
         QtGui.QMessageBox.information(self, 'Message', (
             'HARP v1.0.1: Harwell Automated Recon Processor\n\n'
-            'Crop, scale and compress reconstructed images from microCT  or OPT data.\n'))
+            'Crop, scale and compress reconstructed images from microCT or OPT data.\n'))
 
     def user_guide(self):
         """ Loads up pdf help file
@@ -357,17 +360,23 @@ class MainWindow(QtGui.QMainWindow):
         input_folder = str(self.ui.lineEditInput.text())
 
         # If input folder already in dialog, open the browser there
+        # JAMES - have replaced the instance creations with static method calls to fix Linux hang
         if input_folder:
-            file_dialog = QtGui.QFileDialog(self, 'Open File', input_folder)
+            folder = QtGui.QFileDialog.getExistingDirectory(self, 'Open File', input_folder,
+                                                            QtGui.QFileDialog.ShowDirsOnly)
+            # file_dialog = QtGui.QFileDialog(self, 'Open File', input_folder)
         else:
             if self.app_data.last_dir_browsed:
                 input_folder = self.app_data.last_dir_browsed
-                file_dialog = QtGui.QFileDialog(self, 'Open File', input_folder)
+                # file_dialog = QtGui.QFileDialog(self, 'Open File', input_folder)
+                folder = QtGui.QFileDialog.getExistingDirectory(self, 'Open File', input_folder,
+                                                                QtGui.QFileDialog.ShowDirsOnly)
             else:
-                file_dialog = QtGui.QFileDialog(self, 'Open File')
-
-        # get the folder the user selected
-        folder = file_dialog.getExistingDirectory(self, "Select Directory", input_folder)
+                # file_dialog = QtGui.QFileDialog(self, 'Open File')
+                folder = QtGui.QFileDialog.getExistingDirectory(self, 'Open File', input_folder,
+                                                                QtGui.QFileDialog.ShowDirsOnly)
+                # get the folder the user selected
+                # folder = file_dialog.getExistingDirectory(self, "Select Directory", input_folder)
 
         self.app_data.last_dir_browsed = str(folder)
 
@@ -401,7 +410,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         # ###################################################
         # Reset parameters settings and instance variables
-        ####################################################
+        # ###################################################
         # Remove the contents of the OPT table
         self.ui.tableWidgetOPT.clearContents()
         # Resets the crop_box_use instance variable
@@ -411,9 +420,9 @@ class MainWindow(QtGui.QMainWindow):
         # Reset the channel name for OPT
         self.ui.lineEditDerivedChnName.setText("")
 
-        ####################################################
+        # ###################################################
         # Perform autofill of parameter settings
-        ####################################################
+        # ###################################################
         # check if uCT or opt data
         autofill.opt_uCT_check(self, suppress)
         # Autocomplete the name
@@ -599,7 +608,7 @@ class MainWindow(QtGui.QMainWindow):
         # Get output folder name, to start off with this will just be the input name
         output = str(self.ui.lineEditOutput.text())
         path, output_folder_name = os.path.split(output)
-        # Now update with self.full_name an instance variable created during autofill.get_name. 
+        # Now update with self.full_name an instance variable created during autofill.get_name.
         self.ui.lineEditOutput.setText(os.path.abspath(os.path.join(path, self.full_name)))
 
     def get_recon_man(self):
@@ -651,20 +660,20 @@ class MainWindow(QtGui.QMainWindow):
     def get_scan_man(self):
         """ Get the scan folder manually. Uses the push button pushButtonScan."""
         file_dialog = QtGui.QFileDialog(self)
-        folder = fileDialog.getExistingDirectory(self, "Select Directory")
+        folder = file_dialog.getExistingDirectory(self, "Select Directory")
         if not folder == "":
             self.ui.lineEditScan.setText(folder)
 
     def get_SPR_man(self):
         """ Get the SPR file manually. Uses the pushButtonCTSPR."""
-        self.file_dialog = QtGui.QFileDialog(self)
-        file = self.fileDialog.getOpenFileName()
+        file_dialog = QtGui.QFileDialog(self)
+        file = self.file_dialog.getOpenFileName()
         if not file == "":
             self.ui.lineEditCTSPR.setText(file)
 
-    #======================================================================
+    # ======================================================================
     # User keyboard options for OPT channels
-    #======================================================================
+    # ======================================================================
     def choose_channel_for_crop(self, event):
         """ Allows the user to select which channel to use to determine crop dimensions
 
@@ -701,6 +710,7 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 QtGui.QMessageBox.warning(self, 'Message',
                                           "Warning: Derived dimension options has not been chosen")
+
     def change_opt_chn(self):
         """ Allows user to change the current opt channel by double click.
 
@@ -725,7 +735,7 @@ class MainWindow(QtGui.QMainWindow):
 
     # ======================================================================
     # Functions for get Dimensions (z projection)
-    #======================================================================
+    # ======================================================================
     def get_dimensions(self):
         """ Allow a user to choose crop dimensions by choosing a region based on the z-projection of the image.
 
@@ -761,7 +771,7 @@ class MainWindow(QtGui.QMainWindow):
         if not os.path.exists(input_folder):
             QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder does not exist')
             return
-        #Check if folder is empty
+        # Check if folder is empty
         elif os.listdir(input_folder) == []:
             QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty')
             return
@@ -770,7 +780,7 @@ class MainWindow(QtGui.QMainWindow):
         self.stop = None
         # Let the user know what is going on
         self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
-        #Run the zprojection
+        # Run the zprojection
         self.start_z_thread()
 
     def start_z_thread(self):
@@ -876,6 +886,41 @@ class MainWindow(QtGui.QMainWindow):
         .. seealso::
             :func:`processing.ProcessingThread()`
         """
+
+        # ######### James - new code #########
+
+        # Create a thread-safe queue for storing jobs
+        job_queue = Queue.Queue()  # infinitely many jobs allowed for now
+
+        # A for-loop is used to go through the processing table and adds unstarted jobs to a queue
+        # The count refers to the row of the table
+        for count in range(0, self.count_in):
+
+            # This gets the status text for this row
+            status = self.ui.tableWidget.item(count, 2)
+
+            # Check if the status column has any info
+            if not status:
+                # if not defined it means there are no recons left to process.
+                # Disable and enable buttons which should not be pressed.
+                self.ui.pushButtonStart.setEnabled(True)
+                self.ui.pushButtonStop.setEnabled(False)
+                return
+            # check if the status identifies this recon folder is done with
+            if re.search("Processing finished", status.text()) or re.search(
+                    "error", status.text()):
+                # this row has finished, move on
+                continue
+            # if the status is pending means we can process this recon folder
+            if status.text() == "Pending" or status.text() == "Processing Cancelled!":
+                # this row needs processing, record the row and add to queue
+                folder = self.ui.tableWidget.item(count, 1)
+                folder_from_list = str(folder.text())
+
+                # Get the configobject for the row which has been identified from the previous while loop
+                configOb_path_from_list = os.path.join(folder_from_list, "Metadata", "configobject.txt")
+                job_queue.put(configOb_path_from_list)
+
         # Reset instance variables
         self.stop_pro_switch = 0
         self.p_thread_pool = []
@@ -885,39 +930,8 @@ class MainWindow(QtGui.QMainWindow):
         prog = re.compile("total=(\d+)")
         memory = re.search(prog, str(mem_summary)).group(1)
 
-        # A while loop is used to go through the processing table and decides which file to process
-        # The count refers to the row of the table
-        count = 0
-        while True:
-            # This gets the status text
-            status = self.ui.tableWidget.item(count, 2)
-            # Check if the status column has any info
-            if not status:
-                # if not defined it means there are no recons left to process.
-                # Disable and enable buttons which should not be pressed.
-                self.ui.pushButtonStart.setEnabled(True)
-                self.ui.pushButtonStop.setEnabled(False)
-                return
-            # check if the status identifies this recon folder is done with
-            if re.search("Processing finished", status.text()) or status.text() == "Processing Cancelled!" or re.search(
-                    "error", status.text()):
-                # this row has finished, move on
-                count += 1
-                continue
-            # if the status is pending means we can process this recon folder
-            if status.text() == "Pending":
-                # this row needs processing, record the row and break out
-                folder = self.ui.tableWidget.item(count, 1)
-                folder_from_list = str(folder.text())
-                self.current_row = count
-                break
-            count += 1
-
-        # Get the configobject for the row which has been identified from the previous while loop
-        configOb_path_from_list = os.path.join(folder_from_list, "Metadata", "configobject.txt")
-
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
-        wt = ProcessingThread(configOb_path_from_list, memory, self)
+        wt = ProcessingThread(job_queue, memory, self)
         # the update(QString) SENDS signals from the processing thread (wt) to the processing_slot
         self.connect(wt, QtCore.SIGNAL("update(QString)"), self.processing_slot)
         # The kill(Qstring) SENDS signals from the GUI to the function "kill_slot" in the the processing thread
@@ -949,7 +963,7 @@ class MainWindow(QtGui.QMainWindow):
         # First get the item from the table to change (status column)
         item = QtGui.QTableWidgetItem()
         self.ui.tableWidget.setItem(self.current_row, 2, item)
-        item = self.ui.tableWidget.item(self.current_row, 2) # NH. Don't think this is needed. Check!
+        item = self.ui.tableWidget.item(self.current_row, 2)  # NH. Don't think this is needed. Check!
         # Then set the text of this item
         item.setText(message)
 
@@ -957,7 +971,7 @@ class MainWindow(QtGui.QMainWindow):
         if message == "Started Processing":
             item = QtGui.QTableWidgetItem()
             self.ui.tableWidget.setItem(self.current_row, 3, item)
-            item = self.ui.tableWidget.item(self.current_row, 3) # NH. Don't think this is needed. Check!
+            item = self.ui.tableWidget.item(self.current_row, 3)  # NH. Don't think this is needed. Check!
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         # If finished, initiate the processing of the next folder on the list
         if re.search("Processing finished", message) or re.search("error", message):
@@ -966,8 +980,10 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.tableWidget.setItem(self.current_row, 4, item)
             item = self.ui.tableWidget.item(self.current_row, 4)
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-            # Processing has finished, lets do another one!
-            self.start_processing_thread()
+            # Processing has finished for this job, so we should have moved onto the next job (if there is one)
+            # self.start_processing_thread()  # JAMES - removed now because the processing thread is still running
+            self.current_row += 1  # we instead need to increment the row count as we're moving onto the next
+
             # update the opt channels table
             autofill.get_channels(self)
 
@@ -996,7 +1012,7 @@ class MainWindow(QtGui.QMainWindow):
         in_dir = str(self.ui.lineEditInput.text())
         path_in, folder_name = os.path.split(in_dir)
 
-        #Check if user wants to use the next opt channel available (OPT only)
+        # Check if user wants to use the next opt channel available (OPT only)
         if self.modality == "OPT":
             # check if a channel which has not been analysed
             n = self.ui.tableWidgetOPT.rowCount()
@@ -1030,10 +1046,13 @@ class MainWindow(QtGui.QMainWindow):
             :func:`kill_em_all()`,
         """
         print "Stop!!"
-        item = QtGui.QTableWidgetItem()
-        self.ui.tableWidget.setItem(self.current_row, 2, item)
-        item = self.ui.tableWidget.item(self.current_row, 2)
-        item.setText("Processing Cancelled!")
+
+        # JAMES EDIT: only set processing cancelled flag if there is actually a job there
+        if self.current_row < self.count_in:
+            item = QtGui.QTableWidgetItem()
+            self.ui.tableWidget.setItem(self.current_row, 2, item)
+            item = self.ui.tableWidget.item(self.current_row, 2)
+            item.setText("Processing Cancelled!")
 
         self.kill_em_all()
 
@@ -1066,15 +1085,17 @@ class MainWindow(QtGui.QMainWindow):
 
                     print "Deleted row"
                     self.ui.tableWidget.removeRow(selected)
+
                     # The count_in will now be one less (i think...)
-                    self.count_in = self.count_in - 1
+                    self.count_in -= 1
+                    self.current_row -= self.current_row  # JAMES - also need to decrement the current row
 
                 else:
                     QtGui.QMessageBox.warning(self, 'Message',
                                               'Warning: Can\'t delete a row that is currently being processed.'
                                               '\nSelect "Stop", then remove')
 
-    #======================================================================
+    # ======================================================================
     # Kill HARP functions
     #======================================================================
     def closeEvent(self, event):

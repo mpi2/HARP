@@ -4,7 +4,7 @@ import sys
 import os
 import numpy as np
 import re
-from multiprocessing import cpu_count, Value,freeze_support
+from multiprocessing import cpu_count, Value, freeze_support
 import threading
 import Queue
 import cv2
@@ -13,8 +13,8 @@ import cv2
 from PyQt4 import QtGui, QtCore
 from sys import platform as _platform
 
-class Zproject:
 
+class Zproject:
     def __init__(self, img_dir, out_dir, callback):
         self.img_dir = img_dir
         self.out_dir = out_dir
@@ -33,20 +33,20 @@ class Zproject:
         files = []
 
         for fn in os.listdir(self.img_dir):
-            if fn.endswith(('spr.bmp', 'spr.BMP','spr.tif','spr.TIF','spr.jpg','spr.JPG','spr.jpeg','spr.JPEG')):
+            if fn.endswith(('spr.bmp', 'spr.BMP', 'spr.tif', 'spr.TIF', 'spr.jpg', 'spr.JPG', 'spr.jpeg', 'spr.JPEG')):
                 continue
-            if fn.endswith(('.bmp', '.BMP', '.tif', '.TIF','.jpg','.JPG','jpeg','JPEG')):
+            if fn.endswith(('.bmp', '.BMP', '.tif', '.TIF', '.jpg', '.JPG', 'jpeg', 'JPEG')):
                 prog = re.compile("rec")
                 if prog.search(fn):
                     files.append(os.path.join(self.img_dir, fn))
         if len(files) < 1:
-            return("no image files found in" + self.img_dir)
+            return ("no image files found in" + self.img_dir)
 
         im = cv2.imread(files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE)
         self.imdims = im.shape
 
-        #make a new list by removing every nth image
-        self.skip_num = 10
+        # make a new list by removing every nth image
+        self.skip_num = 100
         self.files = files[0::self.skip_num]
 
         self.num_max_threads = 2
@@ -81,27 +81,26 @@ class Zproject:
             return "Can't do the Z-projection. Make sure all image files are of the same dimension"
 
         #something wrong with image creation
-        if maxi.shape == (0,0):
+        if maxi.shape == (0, 0):
             return "something went wrong creating the Z-projection from {}".format(self.img_dir)
         else:
             cv2.imwrite(os.path.join(self.out_dir, self.max_intensity_file_name), maxi)
-            return(0)
+            return (0)
 
     def fileReader(self):
         for file_ in self.files:
             im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
             self.shared_z_count.value += (1 * self.skip_num)
             self.im_array_queue.put(im_array)
-        #Insert sentinels to signal end of list
+        # Insert sentinels to signal end of list
         for i in range(self.num_max_threads):
             self.im_array_queue.put(None)
-
 
     def maxFinder(self):
         max_ = np.zeros(self.imdims)
         while True:
             try:
-                #print(self.im_array_queue.qsize())
+                # print(self.im_array_queue.qsize())
                 im_array = self.im_array_queue.get(block=True)
                 #print("write queue size:", self.write_file_queue.qsize())
             except Queue.Empty:
@@ -113,13 +112,15 @@ class Zproject:
                 max_ = np.maximum(max_, im_array[:][:])
                 if self.shared_z_count.value % 10 == 0:
                     self.callback("Z project: {0} images".format(str(self.shared_z_count.value)))
-                #self.maxintensity_queue.put(max_)
+                    # self.maxintensity_queue.put(max_)
 
         self.maxintensity_queue.put(max_)
         return
 
+
 def dummyCallBack(msg):
     print(msg)
+
 
 class ZProjectThread(QtCore.QThread):
     def __init__(self, input, tmp_dir):
@@ -145,17 +146,19 @@ class ZProjectThread(QtCore.QThread):
 
         # An error has happened. The error message will be shown on the status section
         if zp_result != 0:
-            self.emit( QtCore.SIGNAL('update(QString)'), "Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(zp_result))
+            self.emit(QtCore.SIGNAL('update(QString)'),
+                      "Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(
+                          zp_result))
             return
         # let the user know what's happened
-        self.emit( QtCore.SIGNAL('update(QString)'), "Z-projection finished" )
+        self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
 
     def z_callback(self, msg):
-        self.emit( QtCore.SIGNAL('update(QString)'), msg )
+        self.emit(QtCore.SIGNAL('update(QString)'), msg)
 
 
 if __name__ == "__main__":
-    z = Zproject(sys.argv[1],sys.argv[2], dummyCallBack)
+    z = Zproject(sys.argv[1], sys.argv[2], dummyCallBack)
     zp_img = z.run()
 
 

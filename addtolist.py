@@ -21,6 +21,7 @@ import os
 import errorcheck
 import getpickle
 
+
 def start(self):
     """ Function to start the process of adding recon folders onto the processing list
 
@@ -72,7 +73,7 @@ def start(self):
 
     # get folder names
     in_dir = str(self.ui.lineEditInput.text())
-    path,folder_name = os.path.split(in_dir)
+    path, folder_name = os.path.split(in_dir)
 
     # Check if microCT, individual OPT or Batch OPT
     if self.modality == "MicroCT":

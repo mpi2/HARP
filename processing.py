@@ -50,8 +50,9 @@ class ProcessingThread(QtCore.QThread):
     on this QThread.
 
     """
+    update1 = QtCore.pyqtSignal()  #str, name='update1'
 
-    def __init__(self, config_path, memory, parent=None):
+    def __init__(self, config_paths, memory, parent=None):
         """ **Constructor**: Gets the pickle config file and initialises some instance variables
 
 
@@ -65,8 +66,7 @@ class ProcessingThread(QtCore.QThread):
         """
         print 'new'
         QtCore.QThread.__init__(self, parent)
-        filehandler = open(config_path, 'r')
-        self.configOb = copy.deepcopy(pickle.load(filehandler))
+        self.config_paths = config_paths
         self.memory = memory
         self.kill_check = 0
         self.imagej_pid = ''
@@ -107,81 +107,94 @@ class ProcessingThread(QtCore.QThread):
         #===============================================
         # Start processing!
         #===============================================
-        self.emit(QtCore.SIGNAL('update(QString)'), "Started Processing")
+
         # Get the directory of the script
         if getattr(sys, 'frozen', False):
             self.dir = os.path.dirname(sys.executable)
         elif __file__:
             self.dir = os.path.dirname(__file__)
 
-        #===============================================
-        # Setup logging files
-        #===============================================
-        session_log_path = os.path.join(self.configOb.meta_path, "session.log")
-        self.session_log = open(session_log_path, 'w+')
+        #=================================================
+        # Start for loop, loading each config file in turn
+        #=================================================
+        for job in iter(self.config_paths.get, None):
 
-        #logging if there is an error with scaling
-        self.scale_error = None
+            print job
 
-        self.session_log.write("########################################\n")
-        self.session_log.write("### HARP Session Log                 ###\n")
-        self.session_log.write("########################################\n")
-        # start time
-        self.session_log.write(str(datetime.datetime.now()) + "\n")
+            self.emit(QtCore.SIGNAL('update(QString)'), "Started Processing")
 
-        #===============================================
-        # Cropping
-        #===============================================
-        self.cropping()
-        # A callback function is used to monitor if autocrop was run sucessfully. This modifies the self.crop_status
-        # instance variable. Has to be success to continue
-        if self.crop_status != "success":
-            print "Cropping failed!"
-            print ""
-            return
+            filehandler = open(job, 'r')
+            self.configOb = copy.deepcopy(pickle.load(filehandler))
 
-        #===============================================
-        # Scaling
-        #===============================================
-        self.scaling()
+            #===============================================
+            # Setup logging files
+            #===============================================
+            session_log_path = os.path.join(self.configOb.meta_path, "session.log")
+            self.session_log = open(session_log_path, 'w+')
 
-        #===============================================
-        # Space for other methods e.g. masking or movies
-        #===============================================
-        #self.masking()
+            #logging if there is an error with scaling
+            self.scale_error = None
 
-        #===============================================
-        # Copying
-        #===============================================
-        # Cropping function only copies over image files. Need to copy over other files now scaling and cropping
-        # finished
-        if self.configOb.crop_option == "Automatic" or self.configOb.crop_option == "Manual":
-            self.copying()
+            self.session_log.write("########################################\n")
+            self.session_log.write("### HARP Session Log                 ###\n")
+            self.session_log.write("########################################\n")
+            # start time
+            self.session_log.write(str(datetime.datetime.now()) + "\n")
 
-        # If the old crop was used the non valid image files will have been hid in self.cropping. Now scaling and
-        # cropping finished, files can be shown again (taken out of temp folder).
-        if self.configOb.crop_option == "Old_crop":
-            self.show_files()
+            #===============================================
+            # Cropping
+            #===============================================
+            self.cropping()
+            # A callback function is used to monitor if autocrop was run sucessfully. This modifies the self.crop_status
+            # instance variable. Has to be success to continue
+            if self.crop_status != "success":
+                print "Cropping failed!"
+                print ""
+                return
 
-        #===============================================
-        # Compression
-        #===============================================
-        self.compression()
+            #===============================================
+            # Scaling
+            #===============================================
+            self.scaling()
 
-        if self.scale_error:
-            self.emit(QtCore.SIGNAL('update(QString)'),
-                      "Processing finished (problems creating some of the scaled stacks, see log file)")
-        else:
-            self.emit(QtCore.SIGNAL('update(QString)'), "Processing finished")
+            #===============================================
+            # Space for other methods e.g. masking or movies
+            #===============================================
+            #self.masking()
 
-        self.session_log.write("Processing finished\n")
-        self.session_log.write("########################################\n")
-        self.session_log.close()
-        #===============================================
-        # Finished!!
-        #===============================================
+            #===============================================
+            # Copying
+            #===============================================
+            # Cropping function only copies over image files. Need to copy over other files now scaling and cropping
+            # finished
+            if self.configOb.crop_option == "Automatic" or self.configOb.crop_option == "Manual":
+                self.copying()
+
+            # If the old crop was used the non valid image files will have been hid in self.cropping. Now scaling and
+            # cropping finished, files can be shown again (taken out of temp folder).
+            if self.configOb.crop_option == "Old_crop":
+                self.show_files()
+
+            #===============================================
+            # Compression
+            #===============================================
+            self.compression()
+
+            if self.scale_error:
+                self.emit(QtCore.SIGNAL('update(QString)'),
+                          "Processing finished (problems creating some of the scaled stacks, see log file)")
+            else:
+                #self.emit(QtCore.SIGNAL('update(QString)'), "Processing finished")
+                self.update1.emit()
+
+            self.session_log.write("Processing finished\n")
+            self.session_log.write("########################################\n")
+            self.session_log.close()
+            #===============================================
+            # Finished!!
+            #===============================================
+
         return
-
 
     def cropping(self):
         """ Performs cropping procedures. Decides what and how to crop based on the paramters in the config file
@@ -1018,13 +1031,13 @@ class ProcessingThread(QtCore.QThread):
         """
         print("Kill all")
         # Update the GUI with what has happened
-        self.emit(QtCore.SIGNAL('update(QString)'), "Processing Cancelled!")
+        #self.emit(QtCore.SIGNAL('update(QString)'), "Processing Cancelled!")  # shouldn't need this..
 
         # Kill the processes in autocrop
         autocrop.terminate()
 
         # Kills any processes in the ProcessingThread.run() method
-        self.kill_check == 1
+        self.kill_check == 1    # this does nothing...
 
         try:
             # If imagej pid is defined, means imagej is still running
@@ -1036,7 +1049,7 @@ class ProcessingThread(QtCore.QThread):
                     print "Killing"
                     print self.imagej_pid
                     os.kill(int(self.imagej_pid), signal.SIGKILL)
-                    self.emit(QtCore.SIGNAL('update(QString)'), "Processing Cancelled!")
+                    #self.emit(QtCore.SIGNAL('update(QString)'), "Processing Cancelled!")  # shouldn't need this..
 
                 elif _platform == "win32" or _platform == "win64":
                     proc = subprocess.Popen(["taskkill", "/f", "/t", "/im", str(self.imagej_pid)],
@@ -1048,7 +1061,7 @@ class ProcessingThread(QtCore.QThread):
                         print "program error output:", err
 
                 # Update the GUI again just in case it took a while.
-                self.emit(QtCore.SIGNAL('update(QString)'), "Processing Cancelled!")
+                #self.emit(QtCore.SIGNAL('update(QString)'), "Processing Cancelled!")  # shouldn't need this..
         except OSError as e:
             print("os.kill could not kill process, reason: {0}".format(e))
 
