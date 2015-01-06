@@ -14,16 +14,10 @@ import scipy.ndimage
 import scipy.misc
 import shutil
 import cv2
-from interpolator import interpolate
-
-
+#from interpolator import interpolate
 
 #from guppy import hpy
 from scipy.stats import nanmean as mean
-
-
-
-
 
 def scale_by_integer_factor(self, scale_factor):
 
@@ -38,87 +32,66 @@ def zoom_chunks(img_path_list, input_voxel_size, output_voxel_size):
     scale = input_voxel_size / output_voxel_size
     resampled_zs = []
 
+    temp_z = 'tempZ'
+    mkdir_force(temp_z)
+    resized_temp_file_list = []
+    temp_raw = 'tempXYscaled.raw'
+
     #Resample z slices
     for img_path in img_path_list:
         # Rescale the z slices
         z_slice_arr = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_GRAYSCALE)
         z_slice_resized = cv2.resize(z_slice_arr, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
-        resampled_zs.append(z_slice_resized)
+        #resampled_zs.append(z_slice_resized)
+        img_out_name = os.path.join(temp_z, os.path.basename(img_path))
+        cv2.imwrite( img_out_name, z_slice_resized)
+        resized_temp_file_list.append(img_out_name)
+
+    #create memory mapped version of the temporary slices
+    memmap = get_memmap(resized_temp_file_list, temp_raw)
 
     # Resample xz at y
-    temp_arr = np.dstack(resampled_zs)  # We seem to be in yxz space?
+    #temp_arr = np.array(resampled_zs)
     final_scaled_slices = []
 
-    print temp_arr.shape
-    for y in range(temp_arr.shape[0]):
-        xz_pane = temp_arr[y, :, :]
-        #print xz_pane.shape
-        scaled_xz = cv2.resize(xz_pane, (0, 0), fx=scale, fy=1, interpolation=cv2.INTER_AREA) #Dont scale x again (y here)
+    for y in range(memmap.shape[1]):
+        xz_plane = memmap[:, y, :]
+        scaled_xz = cv2.resize(xz_plane, (0, 0), fx=1, fy=scale, interpolation=cv2.INTER_AREA)
         final_scaled_slices.append(scaled_xz)
 
+    final_array = np.array(final_scaled_slices)
 
-    final_array = np.dstack(final_scaled_slices)
-    print final_array.shape
-
-    img = sitk.GetImageFromArray(np.swapaxes(np.swapaxes(final_array, 0, 1), 1, 2))
+    img = sitk.GetImageFromArray(np.swapaxes(final_array, 0, 1))  # Convert from yzx to zyx
     sitk.WriteImage(img, 'scaled_by_pixel.nrrd')
 
-    # Perform zooming
 
-    # Stich together
+def get_memmap(img_path_list, raw_name):
+    """
+    Save the slices as a raw file so it can be memory-mapped by numpy
+    :return:
+    """
+
+    if os.path.isfile(raw_name):
+        os.remove(raw_name)
+
+    dims = [len(img_path_list)]
+    first = cv2.imread(img_path_list[0], cv2.CV_LOAD_IMAGE_GRAYSCALE)
+    dims.extend(first.shape)
+
+    with open(raw_name, 'a') as fh:
+        for a in array_generator(img_path_list):
+            a.tofile(fh)
+
+    print dims
+    mapped_array = np.memmap(raw_name, dtype=np.uint8, mode='r', shape=tuple(dims))
+    return mapped_array
 
 
 def scale_by_pixel_size(img_path_list, input_voxel_size, output_voxel_size, use_c):
-    # self.INPUT_VOXEL_SIZE = input_voxel_size
-    # self.OUTPUT_VOXEL_SIZE = output_voxel_size
 
     scaled_vols_dir = mkdir_force('scaled_volumes')
-
-    memory_map(img_path_list)
-    #self.shrink_memmap()
-    #self.shrink_memmap()
-    #self.map_coordinates()
     zoom_chunks(img_path_list, input_voxel_size, output_voxel_size)
-    return
-    if use_c:
-        interpolate(img_path_list, input_voxel_size, output_voxel_size, get_dimensions)
-    else:
-        map_coordinates(img_path_list, input_voxel_size, output_voxel_size)
-    return
-    # Try the memory map
 
-
-
-    #TEMP_CHUNKS_DIR = 'tempChunks_delete'
-
-    print('scaling to voxel size')
-
-    # Save the interpolated chunks here
-    shrunk_chunks = []
-
-
-    #find the smallest remainder when divided by these numbers. Use that number to chop up the z-slices into chunks
-    # If can't divid fully, if it's a prime for eg, we just ommit one of the bottom slices
-
-    voxel_scale_factor = float(self.INPUT_VOXEL_SIZE // self.OUTPUT_VOXEL_SIZE)
-
-    chunksize = len(self.img_path_list) // NUM_CHUCKS
-    last_chunk_size = len(self.img_path_list) % NUM_CHUCKS
-
-    chunk_number = 0
-    for i in range(chunksize, len(self.img_path_list) + chunksize, chunksize):
-
-        images_to_read = self.img_path_list[chunk_end - divisor: chunk_end]
-        img_chunk = self.get_array_from_image_file(sitk.ReadImage(images_to_read))
-        arr_chunk = sitk.GetArrayFromImage(img_chunk)
-        interpolated_arr_chunk = scipy.ndimage.zoom(arr_chunk, voxel_scale_factor, order=3)
-        interpolated_img_chunk = sitk.GetImageFromArray(interpolated_arr_chunk)
-        outname = os.path.join(TEMP_CHUNKS_DIR, str(chunk_number) + '.tif')
-
-        sitk.WriteImage(interpolated_img_chunk, outname)
-        chunk_number += 1
-
-    self.stitch_chunks(TEMP_CHUNKS_DIR)
 
 
 def shrink_memmap(self):
@@ -190,21 +163,6 @@ def map_coordinates(img_path_list,  input_voxel_size, output_voxel_size):
         new_array[i, :, :] = r
     img_out = sitk.GetImageFromArray(new_array)
     sitk.WriteImage(img_out, 'interolated.nrrd')
-
-
-def memory_map(img_path_list):
-    """
-    Save the slices as a raw file so it can be memory-mapped by numpy
-    :return:
-    """
-
-    temp_memmap = 'tempMemapDelete.raw'
-    if os.path.isfile(temp_memmap):
-        os.remove(temp_memmap)
-
-    with open(temp_memmap, 'a') as fh:
-        for a in array_generator(img_path_list):
-            a.tofile(fh)
 
 
 def get_dimensions(img_path_list):
