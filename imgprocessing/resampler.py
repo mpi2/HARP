@@ -115,6 +115,7 @@ def get_img_paths(folder):
     :return: list of image file paths
     """
     extensions = ('.tiff', '.tif', '.bmp')
+    print 'here ' + folder
     return sorted([os.path.join(folder, x) for x in os.listdir(folder) if x.lower().endswith(extensions)])
 
 def mkdir_force(path):
