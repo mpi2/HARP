@@ -19,14 +19,13 @@ import shutil
 import cv2
 
 
-def scale_by_pixel_size(img_path_list, input_voxel_size, output_voxel_size, outpath):
-
-    scale = input_voxel_size / output_voxel_size
+def scale_by_pixel_size(img_dir, scale, outpath):
 
     temp_raw = 'tempXYscaled.raw'
     if os.path.isfile(temp_raw):
         os.remove(temp_raw)
 
+    img_path_list = get_img_paths(img_dir)
     #Get dimensions for the memory mapped raw file
     dims = [len(img_path_list)]
 
@@ -71,6 +70,7 @@ def scale_by_integer_factor(img_dir, scale_factor, outpath):
     :param scale_factor:
     :return:
     """
+    print('scaling by int')
     img_path_list = get_img_paths(img_dir)
     last_img_index = 0
     z_chuncks = []

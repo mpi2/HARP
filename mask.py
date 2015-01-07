@@ -1,9 +1,7 @@
 #!/usr/bin/python
 __author__ = 'james.brown'
 
-from PyQt4 import QtGui, QtCore
-from sys import platform as _platform
-import zproject
+from PyQt4 import QtCore
 
 
 class AutoMask(QtCore.QThread):
