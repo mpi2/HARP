@@ -109,10 +109,10 @@ def auto_thres_mask(option,
                    seg,
                    output,
                    option,
-                   force_background_clean = False,
-                   dilate = dilate,
-                   tight = tight,
-                   external = external)
+                   force_background_clean=False,
+                   dilate=dilate,
+                   tight=tight,
+                   external=external)
 
     return seg
 
@@ -358,14 +358,6 @@ def clean_up(img,
         dilate.SetKernelRadius(kernal)
         dilate.SetKernelType(sitk.sitkBall)
         seg = dilate.Execute(seg)
-
-	# James added erosion - 18/11/2014
-	# This is now effectively morphological closing
-	print "-Eroding"
-	erode = sitk.BinaryErodeImageFilter()
-	erode.SetKernelRadius(kernal)
-	erode.SetKernelType(sitk.sitkBall)
-	seg = erode.Execute(seg)
 
         sitk.WriteImage(seg, os.path.join(output, name + "_dilated.nrrd"))
 

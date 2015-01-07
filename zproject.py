@@ -46,7 +46,7 @@ class Zproject:
         self.imdims = im.shape
 
         # make a new list by removing every nth image
-        self.skip_num = 100
+        self.skip_num = 10
         self.files = files[0::self.skip_num]
 
         self.num_max_threads = 2
@@ -134,7 +134,7 @@ class ZProjectThread(QtCore.QThread):
     def run(self):
 
         # Get the directory of the script
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, 'frozen', False):  # James - I don't know what this is for
             self.dir = os.path.dirname(sys.executable)
         elif __file__:
             self.dir = os.path.dirname(__file__)

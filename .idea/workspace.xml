@@ -5,165 +5,89 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aba3e6c5-ccfb-4b78-9d0b-5267a04a2b08" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dictionaries/james_brown.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mask.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/masking_methods.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/setup_HARP.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/testing/unit_testing.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/macros/.FBCIndex" afterPath="$PROJECT_DIR$/ImageJ/macros/.FBCIndex" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/Animated_Gif.jar" afterPath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/Animated_Gif.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/jars/Auto_Threshold.jar" afterPath="$PROJECT_DIR$/ImageJ/plugins/jars/Auto_Threshold.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/jars/BeanShell.jar" afterPath="$PROJECT_DIR$/ImageJ/plugins/jars/BeanShell.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Analyze/Cell_Counter.jar" afterPath="$PROJECT_DIR$/ImageJ/plugins/Analyze/Cell_Counter.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/DM3_Reader.class" afterPath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/DM3_Reader.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/DM3_Reader.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/DM3_Reader.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/Exif_Reader.jar" afterPath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/Exif_Reader.jar" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HARP_user_guide.docx" afterPath="$PROJECT_DIR$/HARP_user_guide.docx" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HARP_user_guide.pdf" afterPath="$PROJECT_DIR$/HARP_user_guide.pdf" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/ImageJ.exe" afterPath="$PROJECT_DIR$/ImageJ/ImageJ.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/3D/ImageJ_3D_Viewer.jar" afterPath="$PROJECT_DIR$/ImageJ/plugins/3D/ImageJ_3D_Viewer.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/IntSeg_3D.jar" afterPath="$PROJECT_DIR$/ImageJ/plugins/IntSeg_3D.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/3D/Interactive_3D_Surface_Plot.jar" afterPath="$PROJECT_DIR$/ImageJ/plugins/3D/Interactive_3D_Surface_Plot.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Tools/Region_Growing_Segmentation.jar" afterPath="$PROJECT_DIR$/ImageJ/plugins/Tools/Region_Growing_Segmentation.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/ResampleImageFilter/ResampleImageFilter" afterPath="$PROJECT_DIR$/testing/ResampleImageFilter/ResampleImageFilter" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Tools/SIAH_meeting_7_Feb2.pptx" afterPath="$PROJECT_DIR$/ImageJ/plugins/Tools/SIAH_meeting_7_Feb2.pptx" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Tools/Segmentation.docx" afterPath="$PROJECT_DIR$/ImageJ/plugins/Tools/Segmentation.docx" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/3D/Volume_Viewer.jar" afterPath="$PROJECT_DIR$/ImageJ/plugins/3D/Volume_Viewer.jar" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/addtolist.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/addtolist.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/ajax-loader.gif" afterPath="$PROJECT_DIR$/docs/_build/html/_static/ajax-loader.gif" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/autocrop.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/autocrop.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/autocrop_fast_threaded.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/autocrop_fast_threaded.doctree" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/autofill.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/autofill.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/comment-bright.png" afterPath="$PROJECT_DIR$/docs/_build/html/_static/comment-bright.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/comment-close.png" afterPath="$PROJECT_DIR$/docs/_build/html/_static/comment-close.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/comment.png" afterPath="$PROJECT_DIR$/docs/_build/html/_static/comment.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/docs/conf.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/docs/conf.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/config.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/config.doctree" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/crop.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/crop.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/down-pressed.png" afterPath="$PROJECT_DIR$/docs/_build/html/_static/down-pressed.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/down.png" afterPath="$PROJECT_DIR$/docs/_build/html/_static/down.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/environment.pickle" afterPath="$PROJECT_DIR$/docs/_build/doctrees/environment.pickle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/errorcheck.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/errorcheck.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/file.png" afterPath="$PROJECT_DIR$/docs/_build/html/_static/file.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/getdimensions.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/getdimensions.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/getpickle.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/getpickle.doctree" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/harp.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/harp.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/index.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/index.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/mainwindow.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/mainwindow.doctree" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/ij.jar" afterPath="$PROJECT_DIR$/ImageJ/ij.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/interpolator/build/temp.linux-x86_64-2.7/interpolator.o" afterPath="$PROJECT_DIR$/testing/interpolator/build/temp.linux-x86_64-2.7/interpolator.o" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/interpolator.so" afterPath="$PROJECT_DIR$/testing/interpolator.so" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/interpolator/interpolator.so" afterPath="$PROJECT_DIR$/testing/interpolator/interpolator.so" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ui/mainwindow.ui" afterPath="$PROJECT_DIR$/ui/mainwindow.ui" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/minus.png" afterPath="$PROJECT_DIR$/docs/_build/html/_static/minus.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/modules.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/modules.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/docs/modules.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/docs/modules.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/multipage.tif" afterPath="$PROJECT_DIR$/lib/multipage.tif" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/objects.inv" afterPath="$PROJECT_DIR$/docs/_build/html/objects.inv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/plus.png" afterPath="$PROJECT_DIR$/docs/_build/html/_static/plus.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/nifti_io.jar" afterPath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/nifti_io.jar" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/processing.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/processing.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/startpro.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/startpro.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/up-pressed.png" afterPath="$PROJECT_DIR$/docs/_build/html/_static/up-pressed.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/up.png" afterPath="$PROJECT_DIR$/docs/_build/html/_static/up.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/vtkRenderAnimation.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/vtkRenderAnimation.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/zproject.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/zproject.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ (Debian_tom's conflicted copy 2014-05-29).project" afterPath="$PROJECT_DIR$/ (Debian_tom's conflicted copy 2014-05-29).project" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/.buildinfo" afterPath="$PROJECT_DIR$/docs/_build/html/.buildinfo" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HARP.bat" afterPath="$PROJECT_DIR$/HARP.bat" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/unins000.dat" afterPath="$PROJECT_DIR$/ImageJ/unins000.dat" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/unins000.exe" afterPath="$PROJECT_DIR$/ImageJ/unins000.exe" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/InputOutput/AVI_Writer.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/InputOutput/AVI_Writer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/InputOutput/Animated_Gif_Reader.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/InputOutput/Animated_Gif_Reader.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/macros/toolsets/Arrow Labelling Tools.txt" afterPath="$PROJECT_DIR$/ImageJ/macros/toolsets/Arrow Labelling Tools.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/Biorad_Reader.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/Biorad_Reader.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/ResampleImageFilter/CMakeCache.txt" afterPath="$PROJECT_DIR$/testing/ResampleImageFilter/CMakeCache.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Filters/Color_Transformer.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/Filters/Color_Transformer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Filters/Fast_Filters.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/Filters/Fast_Filters.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Filters/Fit_Polynomial.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/Filters/Fit_Polynomial.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/InputOutput/Gif_Stack_Writer.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/InputOutput/Gif_Stack_Writer.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/HARP.iml" afterPath="$PROJECT_DIR$/.idea/HARP.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/Makefile" afterPath="$PROJECT_DIR$/docs/Makefile" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/__init__.py" afterPath="$PROJECT_DIR$/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/addtolist.html" afterPath="$PROJECT_DIR$/docs/_build/html/addtolist.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/jre/LICENSE_de.rtf" afterPath="$PROJECT_DIR$/ImageJ/jre/LICENSE_de.rtf" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Analysis/MeasureMTF_.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/Analysis/MeasureMTF_.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/macros/toolsets/Scale Bar Tools for Microscopes.txt" afterPath="$PROJECT_DIR$/ImageJ/macros/toolsets/Scale Bar Tools for Microscopes.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/pcp/cw/notebook/Tab.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/pcp/cw/notebook/Tab.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/pcp/cw/notebook/TabPanel.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/pcp/cw/notebook/TabPanel.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/ZVI_Reader.java" afterPath="$PROJECT_DIR$/ImageJ/plugins/Input-Output/ZVI_Reader.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/addtolist.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/addtolist.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/addtolist.py" afterPath="$PROJECT_DIR$/addtolist.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/addtolist.rst" afterPath="$PROJECT_DIR$/docs/addtolist.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/addtolist.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/addtolist.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/appdata.py" afterPath="$PROJECT_DIR$/appdata.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/autocrop.html" afterPath="$PROJECT_DIR$/docs/_build/html/autocrop.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/appdirs.py" afterPath="$PROJECT_DIR$/lib/appdirs.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/autocrop.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/autocrop.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/autocrop.py" afterPath="$PROJECT_DIR$/autocrop.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/autocrop.rst" afterPath="$PROJECT_DIR$/docs/autocrop.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/autocrop.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/autocrop.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/autocrop_fast_threaded.html" afterPath="$PROJECT_DIR$/docs/_build/html/autocrop_fast_threaded.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/autocrop_fast_threaded.rst" afterPath="$PROJECT_DIR$/docs/autocrop_fast_threaded.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/autocrop_fast_threaded.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/autocrop_fast_threaded.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/autofill.html" afterPath="$PROJECT_DIR$/docs/_build/html/autofill.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/autofill.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/autofill.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/autofill.py" afterPath="$PROJECT_DIR$/autofill.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/autofill.rst" afterPath="$PROJECT_DIR$/docs/autofill.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/autofill.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/autofill.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/basic.css" afterPath="$PROJECT_DIR$/docs/_build/html/_static/basic.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/docs/conf.html" afterPath="$PROJECT_DIR$/docs/_build/html/docs/conf.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/conf.py" afterPath="$PROJECT_DIR$/docs/conf.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/docs/conf.rst" afterPath="$PROJECT_DIR$/docs/docs/conf.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/docs/conf.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/docs/conf.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/config.html" afterPath="$PROJECT_DIR$/docs/_build/html/config.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/config.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/config.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config.py" afterPath="$PROJECT_DIR$/config.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/config.rst" afterPath="$PROJECT_DIR$/docs/config.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/config.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/config.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/crop.html" afterPath="$PROJECT_DIR$/docs/_build/html/crop.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/crop.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/crop.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/crop.rst" afterPath="$PROJECT_DIR$/docs/crop.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/crop.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/crop.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/default.css" afterPath="$PROJECT_DIR$/docs/_build/html/_static/default.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/doctools.js" afterPath="$PROJECT_DIR$/docs/_build/html/_static/doctools.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/errorcheck.html" afterPath="$PROJECT_DIR$/docs/_build/html/errorcheck.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/errorcheck.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/errorcheck.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/errorcheck.py" afterPath="$PROJECT_DIR$/errorcheck.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/errorcheck.rst" afterPath="$PROJECT_DIR$/docs/errorcheck.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/errorcheck.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/errorcheck.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/file_read_speed_test.py" afterPath="$PROJECT_DIR$/testing/file_read_speed_test.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/genindex.html" afterPath="$PROJECT_DIR$/docs/_build/html/genindex.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/getdimensions.html" afterPath="$PROJECT_DIR$/docs/_build/html/getdimensions.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/getdimensions.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/getdimensions.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/getdimensions.py" afterPath="$PROJECT_DIR$/getdimensions.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/getdimensions.rst" afterPath="$PROJECT_DIR$/docs/getdimensions.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/getdimensions.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/getdimensions.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/getpickle.html" afterPath="$PROJECT_DIR$/docs/_build/html/getpickle.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/getpickle.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/getpickle.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/getpickle.py" afterPath="$PROJECT_DIR$/getpickle.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/getpickle.rst" afterPath="$PROJECT_DIR$/docs/getpickle.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/getpickle.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/getpickle.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/harp.html" afterPath="$PROJECT_DIR$/docs/_build/html/harp.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/harp.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/harp.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/harp.py" afterPath="$PROJECT_DIR$/harp.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/harp.rst" afterPath="$PROJECT_DIR$/docs/harp.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/harp.spec" afterPath="$PROJECT_DIR$/harp.spec" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/harp.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/harp.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/index.html" afterPath="$PROJECT_DIR$/docs/_build/html/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/index.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/index.rst" afterPath="$PROJECT_DIR$/docs/index.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/index.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/index.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/interpolator/interpolator.c" afterPath="$PROJECT_DIR$/testing/interpolator/interpolator.c" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/jquery.js" afterPath="$PROJECT_DIR$/docs/_build/html/_static/jquery.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/mainwindow.html" afterPath="$PROJECT_DIR$/docs/_build/html/mainwindow.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/mainwindow.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/mainwindow.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ui/mainwindow.py" afterPath="$PROJECT_DIR$/ui/mainwindow.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/mainwindow.rst" afterPath="$PROJECT_DIR$/docs/mainwindow.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/mainwindow.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/mainwindow.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/make.bat" afterPath="$PROJECT_DIR$/docs/make.bat" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/manualcrop.py" afterPath="$PROJECT_DIR$/manualcrop.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/modules.html" afterPath="$PROJECT_DIR$/docs/_build/html/modules.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/docs/modules.html" afterPath="$PROJECT_DIR$/docs/_build/html/docs/modules.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/modules.rst" afterPath="$PROJECT_DIR$/docs/modules.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/docs/modules.rst" afterPath="$PROJECT_DIR$/docs/docs/modules.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/modules.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/modules.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/docs/modules.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/docs/modules.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nrrdtominc2.py" afterPath="$PROJECT_DIR$/nrrdtominc2.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mask.py" afterPath="$PROJECT_DIR$/mask.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/masking_methods.py" afterPath="$PROJECT_DIR$/masking_methods.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nrrd.py" afterPath="$PROJECT_DIR$/nrrd.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/processing.html" afterPath="$PROJECT_DIR$/docs/_build/html/processing.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/processing.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/processing.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/processing.py" afterPath="$PROJECT_DIR$/processing.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/processing.rst" afterPath="$PROJECT_DIR$/docs/processing.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/processing.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/processing.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/py-modindex.html" afterPath="$PROJECT_DIR$/docs/_build/html/py-modindex.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/pygments.css" afterPath="$PROJECT_DIR$/docs/_build/html/_static/pygments.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/resampler.py" afterPath="$PROJECT_DIR$/testing/resampler.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/search.html" afterPath="$PROJECT_DIR$/docs/_build/html/search.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/searchindex.js" afterPath="$PROJECT_DIR$/docs/_build/html/searchindex.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/searchtools.js" afterPath="$PROJECT_DIR$/docs/_build/html/_static/searchtools.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/setup.py" afterPath="$PROJECT_DIR$/setup.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/siah_scale.txt" afterPath="$PROJECT_DIR$/siah_scale.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/siah_scale_low_mem1.txt" afterPath="$PROJECT_DIR$/siah_scale_low_mem1.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/siah_scale_low_mem2.txt" afterPath="$PROJECT_DIR$/siah_scale_low_mem2.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/sidebar.js" afterPath="$PROJECT_DIR$/docs/_build/html/_static/sidebar.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/startpro.html" afterPath="$PROJECT_DIR$/docs/_build/html/startpro.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/startpro.rst" afterPath="$PROJECT_DIR$/docs/startpro.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/startpro.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/startpro.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/tifffile.py" afterPath="$PROJECT_DIR$/lib/tifffile.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/underscore.js" afterPath="$PROJECT_DIR$/docs/_build/html/_static/underscore.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/vtkRenderAnimation.html" afterPath="$PROJECT_DIR$/docs/_build/html/vtkRenderAnimation.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vtkRenderAnimation.py" afterPath="$PROJECT_DIR$/vtkRenderAnimation.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/vtkRenderAnimation.rst" afterPath="$PROJECT_DIR$/docs/vtkRenderAnimation.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/vtkRenderAnimation.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/vtkRenderAnimation.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/unit_testing.py" afterPath="$PROJECT_DIR$/testing/unit_testing.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/websupport.js" afterPath="$PROJECT_DIR$/docs/_build/html/_static/websupport.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/xy_scale.py" afterPath="$PROJECT_DIR$/testing/xy_scale.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/zproject.html" afterPath="$PROJECT_DIR$/docs/_build/html/zproject.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/zproject.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/zproject.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/zproject.py" afterPath="$PROJECT_DIR$/zproject.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/zproject.rst" afterPath="$PROJECT_DIR$/docs/zproject.rst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_sources/zproject.txt" afterPath="$PROJECT_DIR$/docs/_build/html/_sources/zproject.txt" />
     </list>
     <ignored path="HARP.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -186,22 +110,36 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="harp.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="harp.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/harp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.23007518" vertical-offset="14450" max-vertical-offset="19652">
-              <caret line="870" column="0" selection-start-line="870" selection-start-column="0" selection-end-line="870" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="2975" max-vertical-offset="19907">
+              <caret line="197" column="30" selection-start-line="197" selection-start-column="30" selection-end-line="197" selection-end-column="30" />
+              <folding>
+                <element signature="e#732#763#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="processing.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/processing.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.25675675" vertical-offset="5048" max-vertical-offset="18377">
+              <caret line="311" column="64" selection-start-line="311" selection-start-column="64" selection-end-line="311" selection-end-column="64" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="processing.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/processing.py">
+      <file leaf-file-name="autocrop.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/autocrop.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="261" max-vertical-offset="18343">
-              <caret line="59" column="90" selection-start-line="59" selection-start-column="90" selection-end-line="59" selection-end-column="90" />
-              <folding />
+            <state vertical-scroll-proportion="0.0" vertical-offset="3932" max-vertical-offset="7344">
+              <caret line="260" column="94" selection-start-line="260" selection-start-column="94" selection-end-line="260" selection-end-column="94" />
+              <folding>
+                <element signature="e#50#65#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -220,13 +158,14 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/autocrop.py" />
-        <option value="$PROJECT_DIR$/mask.py" />
-        <option value="$PROJECT_DIR$/zproject.py" />
         <option value="$PROJECT_DIR$/testing/HARP_unittests.py" />
         <option value="$PROJECT_DIR$/ui/mainwindow.py" />
-        <option value="$PROJECT_DIR$/harp.py" />
         <option value="$PROJECT_DIR$/testing/unit_testing.py" />
+        <option value="$PROJECT_DIR$/mask.py" />
+        <option value="$PROJECT_DIR$/zproject.py" />
+        <option value="$PROJECT_DIR$/masking_methods.py" />
+        <option value="$PROJECT_DIR$/harp.py" />
+        <option value="$PROJECT_DIR$/autocrop.py" />
         <option value="$PROJECT_DIR$/processing.py" />
       </list>
     </option>
@@ -263,7 +202,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -284,12 +222,13 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="recentsLimit" value="5" />
     <property name="FullScreen" value="false" />
-    <property name="last_opened_file_path" value="$USER_HOME$/AppData/Local/Programs/Git/bin/git.exe" />
+    <property name="last_opened_file_path" value="/usr/bin/python2.7" />
     <property name="options.lastSelected" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="options.splitter.details.proportions" value="0.2" />
@@ -306,8 +245,8 @@
       <recent name="O:\HARP" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests in HARPTestCase">
-    <configuration default="false" name="Unittests in HARPTestCase" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.harp">
+    <configuration default="false" name="Unittests in GUIFeaturesTest" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -318,33 +257,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="HARP" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/testing/unit_testing.py" />
-      <option name="CLASS_NAME" value="HARPTestCase" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_CLASS" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <option name="PUREUNITTEST" value="true" />
-      <option name="PARAMS" value="" />
-      <option name="USE_PARAM" value="false" />
-      <RunnerSettings RunnerId="PyDebugRunner" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PyDebugRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="Unittests in HARPTestCase (1)" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/testing" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="HARP" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/testing/unit_testing.py" />
-      <option name="CLASS_NAME" value="HARPTestCase" />
+      <option name="CLASS_NAME" value="GUIFeaturesTest" />
       <option name="METHOD_NAME" value="" />
       <option name="FOLDER_NAME" value="" />
       <option name="TEST_TYPE" value="TEST_CLASS" />
@@ -357,7 +270,7 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
-    <configuration default="false" name="Unittest HARPTestCase.test_run_single_job" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration default="false" name="Unittests in SingleProcessingTest" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -368,8 +281,32 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="HARP" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/testing/unit_testing.py" />
-      <option name="CLASS_NAME" value="HARPTestCase" />
-      <option name="METHOD_NAME" value="test_run_single_job" />
+      <option name="CLASS_NAME" value="SingleProcessingTest" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_CLASS" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PUREUNITTEST" value="true" />
+      <option name="PARAMS" value="" />
+      <option name="USE_PARAM" value="false" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Unittest SingleProcessingTest.test_output" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/testing" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="HARP" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/testing/unit_testing.py" />
+      <option name="CLASS_NAME" value="SingleProcessingTest" />
+      <option name="METHOD_NAME" value="test_output" />
       <option name="FOLDER_NAME" value="" />
       <option name="TEST_TYPE" value="TEST_METHOD" />
       <option name="PATTERN" value="" />
@@ -381,7 +318,7 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
-    <configuration default="false" name="Unittest HARPTestCase.test_autofill" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration default="false" name="Unittest SingleProcessingTest.test_scaling" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -392,8 +329,8 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="HARP" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/testing/unit_testing.py" />
-      <option name="CLASS_NAME" value="HARPTestCase" />
-      <option name="METHOD_NAME" value="test_autofill" />
+      <option name="CLASS_NAME" value="SingleProcessingTest" />
+      <option name="METHOD_NAME" value="test_scaling" />
       <option name="FOLDER_NAME" value="" />
       <option name="TEST_TYPE" value="TEST_METHOD" />
       <option name="PATTERN" value="" />
@@ -405,26 +342,20 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
-    <configuration default="false" name="Unittests in HARPTestCase (2)" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration default="false" name="autocrop" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/testing" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="HARP" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/testing/unit_testing.py" />
-      <option name="CLASS_NAME" value="HARPTestCase" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_CLASS" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <option name="PUREUNITTEST" value="true" />
-      <option name="PARAMS" value="" />
-      <option name="USE_PARAM" value="false" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/autocrop.py" />
+      <option name="PARAMETERS" value="" />
       <RunnerSettings RunnerId="PythonRunner" />
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
@@ -550,20 +481,41 @@
       <option name="USE_PATTERN" value="false" />
       <method />
     </configuration>
-    <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests in HARPTestCase" />
-      <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in HARPTestCase (1)" />
-      <item index="2" class="java.lang.String" itemvalue="Python tests.Unittest HARPTestCase.test_run_single_job" />
-      <item index="3" class="java.lang.String" itemvalue="Python tests.Unittest HARPTestCase.test_autofill" />
-      <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests in HARPTestCase (2)" />
+    <configuration default="false" name="harp" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="HARP" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/harp.py" />
+      <option name="PARAMETERS" value="" />
+      <RunnerSettings RunnerId="PyDebugRunner" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PyDebugRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <list size="6">
+      <item index="0" class="java.lang.String" itemvalue="Python.harp" />
+      <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in GUIFeaturesTest" />
+      <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests in SingleProcessingTest" />
+      <item index="3" class="java.lang.String" itemvalue="Python tests.Unittest SingleProcessingTest.test_output" />
+      <item index="4" class="java.lang.String" itemvalue="Python tests.Unittest SingleProcessingTest.test_scaling" />
+      <item index="5" class="java.lang.String" itemvalue="Python.autocrop" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests in HARPTestCase" />
-        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in HARPTestCase (2)" />
-        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittest HARPTestCase.test_run_single_job" />
-        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittest HARPTestCase.test_autofill" />
-        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests in HARPTestCase (1)" />
+        <item index="0" class="java.lang.String" itemvalue="Python.autocrop" />
+        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittest SingleProcessingTest.test_scaling" />
+        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests in SingleProcessingTest" />
+        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittest SingleProcessingTest.test_output" />
+        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests in GUIFeaturesTest" />
       </list>
     </recent_temporary>
   </component>
@@ -577,6 +529,11 @@
       <created>1419238762536</created>
       <updated>1419238762536</updated>
     </task>
+    <task id="LOCAL-00001" summary="Changed processing.py to run as a single thread for all jobs (and fixed resulting bugs)&#10;Started writing unit tests">
+      <created>1420550164080</created>
+      <updated>1420550164080</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -584,22 +541,23 @@
     <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.203125" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3988764" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.203125" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39794007" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3988764" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32490638" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32442397" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32397005" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32958803" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32771537" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32718894" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -614,39 +572,28 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="CHECK_NEW_TODO" value="false" />
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
+    <MESSAGE value="Changed processing.py to run as a single thread for all jobs (and fixed resulting bugs)&#10;Started writing unit tests" />
+    <MESSAGE value="Starting writing code to autocrop based on an otsu derived mask" />
+    <MESSAGE value="Have written new version of autocrop using an Otsu threshold derived mask" />
+    <option name="LAST_COMMIT_MESSAGE" value="Have written new version of autocrop using an Otsu threshold derived mask" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/zproject.py</url>
-          <line>135</line>
-          <option name="timeStamp" value="44" />
-        </line-breakpoint>
-      </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="66" />
+      <option name="time" value="68" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/harp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="21006">
-          <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/harp.py">
-      <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="19839">
           <caret line="27" column="11" selection-start-line="27" selection-start-column="11" selection-end-line="27" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -654,7 +601,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="20736">
           <caret line="243" column="28" selection-start-line="243" selection-start-column="28" selection-end-line="243" selection-end-column="28" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -662,7 +608,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="16981" max-vertical-offset="19584">
           <caret line="1027" column="32" selection-start-line="1027" selection-start-column="32" selection-end-line="1027" selection-end-column="32" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -677,7 +622,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="19584">
           <caret line="34" column="16" selection-start-line="34" selection-start-column="16" selection-end-line="34" selection-end-column="16" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -685,7 +629,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="19465">
           <caret line="1029" column="30" selection-start-line="1029" selection-start-column="30" selection-end-line="1029" selection-end-column="30" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -701,7 +644,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="20610">
           <caret line="1015" column="46" selection-start-line="1015" selection-start-column="46" selection-end-line="1015" selection-end-column="46" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -716,7 +658,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="20610">
           <caret line="978" column="39" selection-start-line="978" selection-start-column="39" selection-end-line="978" selection-end-column="39" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -731,7 +672,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="19601">
           <caret line="976" column="42" selection-start-line="976" selection-start-column="42" selection-end-line="976" selection-end-column="42" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -753,7 +693,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="15997" max-vertical-offset="19584">
           <caret line="959" column="0" selection-start-line="959" selection-start-column="0" selection-end-line="959" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -768,7 +707,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="19601">
           <caret line="944" column="42" selection-start-line="944" selection-start-column="42" selection-end-line="944" selection-end-column="42" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -790,7 +728,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="19601">
           <caret line="913" column="46" selection-start-line="913" selection-start-column="46" selection-end-line="913" selection-end-column="46" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -812,7 +749,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="14943" max-vertical-offset="19414">
           <caret line="908" column="59" selection-start-line="908" selection-start-column="59" selection-end-line="908" selection-end-column="59" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -827,7 +763,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="14841" max-vertical-offset="19414">
           <caret line="884" column="35" selection-start-line="884" selection-start-column="35" selection-end-line="884" selection-end-column="35" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -842,7 +777,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="14841" max-vertical-offset="19414">
           <caret line="884" column="35" selection-start-line="884" selection-start-column="35" selection-end-line="884" selection-end-column="35" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -902,24 +836,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/setup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1080">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#32#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/zproject.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.24918567" vertical-offset="1394" max-vertical-offset="2822">
-          <caret line="98" column="24" selection-start-line="98" selection-start-column="24" selection-end-line="98" selection-end-column="24" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/testing/file_read_speed_test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.3314367" vertical-offset="233" max-vertical-offset="936">
@@ -948,20 +864,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/autocrop.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.47763348" vertical-offset="5534" max-vertical-offset="6494">
-          <caret line="351" column="54" selection-start-line="351" selection-start-column="46" selection-end-line="351" selection-end-column="54" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/autofill.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="6058" max-vertical-offset="11373">
-          <caret line="363" column="23" selection-start-line="363" selection-start-column="23" selection-end-line="363" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/addtolist.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="4522">
@@ -969,52 +871,92 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda/Lib/unittest/suite.py">
+    <entry file="file://$PROJECT_DIR$/testing/xy_scale.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33224756" vertical-offset="1632" max-vertical-offset="5202">
-          <caret line="111" column="0" selection-start-line="111" selection-start-column="0" selection-end-line="111" selection-end-column="0" />
-          <folding />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="693">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda/Lib/unittest/case.py">
+    <entry file="file://$PROJECT_DIR$/autofill.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33224756" vertical-offset="5151" max-vertical-offset="18173">
-          <caret line="328" column="0" selection-start-line="328" selection-start-column="0" selection-end-line="328" selection-end-column="0" />
-          <folding />
+        <state vertical-scroll-proportion="8.847026" vertical-offset="216" max-vertical-offset="12042">
+          <caret line="363" column="23" selection-start-line="363" selection-start-column="23" selection-end-line="363" selection-end-column="23" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/testing/unit_testing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="109" max-vertical-offset="1955">
-          <caret line="12" column="37" selection-start-line="12" selection-start-column="37" selection-end-line="12" selection-end-column="37" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="580" max-vertical-offset="2988">
+          <caret line="83" column="47" selection-start-line="83" selection-start-column="47" selection-end-line="83" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mask.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.27221173" vertical-offset="0" max-vertical-offset="1058">
+          <caret line="16" column="19" selection-start-line="16" selection-start-column="19" selection-end-line="16" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/zproject.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="972" max-vertical-offset="2988">
+          <caret line="48" column="26" selection-start-line="48" selection-start-column="26" selection-end-line="48" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/masking_methods.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-15.037037" vertical-offset="5678" max-vertical-offset="11628">
+          <caret line="338" column="59" selection-start-line="338" selection-start-column="59" selection-end-line="338" selection-end-column="59" />
           <folding>
-            <element signature="e#22#32#0" expanded="true" />
+            <element signature="e#0#24#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/testing/xy_scale.py">
+    <entry file="file://$PROJECT_DIR$/setup_HARP.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="693">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="694">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/processing.py">
+    <entry file="file://$PROJECT_DIR$/setup.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="261" max-vertical-offset="18343">
-          <caret line="59" column="90" selection-start-line="59" selection-start-column="90" selection-end-line="59" selection-end-column="90" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="153">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/autocrop.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3932" max-vertical-offset="7344">
+          <caret line="260" column="94" selection-start-line="260" selection-start-column="94" selection-end-line="260" selection-end-column="94" />
+          <folding>
+            <element signature="e#50#65#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/harp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.23007518" vertical-offset="14450" max-vertical-offset="19652">
-          <caret line="870" column="0" selection-start-line="870" selection-start-column="0" selection-end-line="870" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="2975" max-vertical-offset="19907">
+          <caret line="197" column="30" selection-start-line="197" selection-start-column="30" selection-end-line="197" selection-end-column="30" />
+          <folding>
+            <element signature="e#732#763#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/processing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.25675675" vertical-offset="5048" max-vertical-offset="18377">
+          <caret line="311" column="64" selection-start-line="311" selection-start-column="64" selection-end-line="311" selection-end-column="64" />
           <folding />
         </state>
       </provider>

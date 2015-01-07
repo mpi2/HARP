@@ -3,6 +3,8 @@ __author__ = 'james.brown'
 
 from PyQt4 import QtGui, QtCore
 from sys import platform as _platform
+import zproject
+
 
 class AutoMask(QtCore.QThread):
 

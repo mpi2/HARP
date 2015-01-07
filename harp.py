@@ -979,13 +979,13 @@ l
         # If finished, initiate the processing of the next folder on the list
         if re.search("Processing finished", message) or re.search("error", message):
             print message
-            print 'test_finished'
             item = QtGui.QTableWidgetItem()
             self.ui.tableWidget.setItem(self.current_row, 4, item)
             item = self.ui.tableWidget.item(self.current_row, 4)
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             # Processing has finished for this job, so we should have moved onto the next job (if there is one)
             # self.start_processing_thread()  # JAMES - removed now because the processing thread is still running
+            self.p_thread_pool = None  # this makes unit testing easier...
             self.current_row += 1  # we instead need to increment the row count as we're moving onto the next
 
             # update the opt channels table
@@ -993,8 +993,6 @@ l
 
         # Depending on the name of files and status update columns may need to be resized
         self.ui.tableWidget.resizeColumnsToContents()
-
-        self.update1.emit("hello", 'carrots')
 
     def add_more(self):
         """ When the add more button is pressed should switch back to the first tab

@@ -272,7 +272,7 @@ class ProcessingThread(QtCore.QThread):
             self.emit(QtCore.SIGNAL('update(QString)'), "Performing crop from derived cropbox")
             dimensions_tuple = None
             try:
-                # Cropbox dimensions are stored as pickle object. So need to extact
+                # Cropbox dimensions are stored as pickle object. So need to extract
                 filehandler = open(self.configOb.cropbox_path, 'r')
                 cropbox_object = copy.deepcopy(pickle.load(filehandler))
                 derived_cropbox = cropbox_object.cropbox
@@ -309,7 +309,8 @@ class ProcessingThread(QtCore.QThread):
         # It may be better to add the execptions closer to the event as these can catch a broad range
         try:
             # Run autocrop and catch errors
-            self.auto_crop.run()
+            #self.auto_crop.run() #  the old version of autocrop
+            self.auto_crop.run_auto_mask()  # James - new version of autocrap using Tom's Otsu masking
 
         except WindowsError as e:
             self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the "

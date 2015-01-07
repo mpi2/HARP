@@ -8,11 +8,13 @@ import fnmatch
 import numpy as np
 import math
 from collections import Counter
-#from matplotlib import pyplot as plt
 import threading
 import cv2
 import multiprocessing as mp
 from time import sleep
+import zproject
+import SimpleITK as sitk
+import masking_methods
 
 shared_terminate = mp.Value("i", 0)
 msg_q = mp.Queue()
@@ -21,7 +23,6 @@ msg_q = mp.Queue()
 class Autocrop():
     def __init__(self, in_dir, out_dir, callback, ignore_exts, num_proc=None, def_crop=None, repeat_crop=None):
         """
-
         :param in_dir:
         :param out_dir:
         :param callback:
@@ -49,21 +50,21 @@ class Autocrop():
 
         self.metric_file_queue = mp.Queue(30)
         self.crop_metric_queue = mp.Queue()
-        self.skip_num = 10  #read evey n files for determining cropping box
-        self.threshold = 0.01  #Threshold for cropping metric
+        self.skip_num = 10  # read every n files for determining cropping box
+        self.threshold = 0.01  # threshold for cropping metric
         shared_terminate.value = 0
 
-
     def metricFinder(self):
-        '''Processes each image file individually
-		Implements __call__() so it can be used in multithreading by '''
+        """
+        Processes each image file individually
+        Implements __call__() so it can be used in multithreading by '''
         '''
-		@param: filename path of an image to process
-		@returns: tuple of bounding box coords
+        @param: filename path of an image to process
+        @returns: tuple of bounding box coords
 
-		Reads image into array. Flips it around each time
-		with column/row of interest as the top top row
-		'''
+        Reads image into array. Flips it around each time
+        with column/row of interest as the top top row
+        """
 
         global shared_terminate
 
@@ -77,7 +78,7 @@ class Autocrop():
 
                 self.yield_python()
 
-                if matrix == 'STOP':  #Found a sentinel
+                if matrix == 'STOP':  # found a sentinel
                     break
             except Exception as e:
                 print("metric queue error:",e)
@@ -92,8 +93,7 @@ class Autocrop():
 
 
     def calc_auto_crop(self, padding=0):
-        '''
-		'''
+
         #Distances of cropping boxes from their respective sides
         ldist = self.get_cropping_box("x")
         tdist = self.get_cropping_box("y")
@@ -139,7 +139,6 @@ class Autocrop():
             return
         self.run_crop_process()
 
-
     def run_crop_process(self):
         global shared_terminate
         # Perform the cropping using cv2
@@ -181,12 +180,12 @@ class Autocrop():
 
 
     def get_cropping_box(self, side, rev=False):
-        '''
-		Given the metrics for each row x and y coordinate, calculate the point to crop given a threshold value
-		@param slices dict: two keys x and y with metrics for respective dimensions
-		@param side str: x or y
-		@param threshold int:
-		'''
+        """
+        Given the metrics for each row x and y coordinate, calculate the point to crop given a threshold value
+        @param slices dict: two keys x and y with metrics for respective dimensions
+        @param side str: x or y
+        @param threshold int:
+        """
         #print metric_slices
         vals = [self.lowvals(x[side]) for x in self.metric_slices]
 
@@ -202,34 +201,82 @@ class Autocrop():
 
         self.yield_python()
 
-
     def entropy(self, array):
-        '''
-		not currently used
-		'''
+        """
+        not currently used
+        """
         p, lns = Counter(self.round_down(array, 4)), float(len(array))
         return -sum(count / lns * math.log(count / lns, 2) for count in p.values())
-
 
     def round_down(self, array, divisor):
         for n in array:
             yield n - (n % divisor)
 
-
     def lowvals(self, array, value=15):
-        '''
-		Values lower than value, set to zero
-		'''
+        """
+        Values lower than value, set to zero
+        """
         low_values_indices = array < value
         array[low_values_indices] = 0
         return array
 
+    def run_auto_mask(self):
+
+        # Get list of files
+        sparse_files, files = self.getFileList(self.in_dir, self.skip_num)
+        self.files = files
+
+        if len(sparse_files) < 1:
+            return ("no image files found in " + self.in_dir)
+
+        # Start with a z-projection
+        zp = zproject.Zproject(self.in_dir, self.out_dir, self.zp_callback)
+        zp.run()
+
+        # Load z projection image
+        zp_im = sitk.ReadImage(os.path.join(self.out_dir, "max_intensity_z.png"))
+
+        # Apply otsu threshold and remove all but largest component
+        seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=255, numberOfHistogramBins=128)
+        seg = sitk.ConnectedComponent(seg)  # label non-background pixels
+        seg = sitk.RelabelComponent(seg)  # relabel components in order of ascending size
+        # seg = seg == 1  # discard all but largest component
+
+        # Get bounding box
+        label_stats = sitk.LabelStatisticsImageFilter()
+        label_stats.Execute(zp_im, seg)
+        self.crop_box = label_stats.GetBoundingBox(1)  # xmin, xmax, ymin, ymax (I think)
+
+        # Actually perform the cropping
+        crop_count = 1
+        for slice_ in self.files:
+
+            im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+            if crop_count % 20 == 0:
+                self.callback(
+                    "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
+
+            crop_count += 1
+
+            imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
+            filename = os.path.basename(slice_)
+            crop_out = os.path.join(self.out_dir, filename)
+
+            cv2.imwrite(crop_out, imcrop)
+            #self.yield_python()
+
+        self.callback("success")
+        return
+
+    def zp_callback(self, msg):
+        print msg
 
     def run(self):
-        '''
-		'''
-        #get a subset of files to work with to speed it up
+        """
+        Runs the autocrop procedure
+        """
 
+        #get a subset of files to work with to speed it up
         sparse_files, files = self.getFileList(self.in_dir, self.skip_num)
         self.files = files
 
@@ -279,13 +326,12 @@ class Autocrop():
             self.crop_metric_queue.put('STOP')
             self.metric_slices = [item for item in iter(self.crop_metric_queue.get, 'STOP')]
 
-
-            #Die if signalled from gui
+            # Die if signalled from gui
             if shared_terminate.value == 1:
                 self.callback("Processing Cancelled!")
                 return
 
-            # Perform the actuall cropping
+            # Perform the actual cropping
             self.calc_auto_crop(padding)
 
             if shared_terminate.value == 1:
@@ -294,41 +340,39 @@ class Autocrop():
             self.callback("success")
             return
 
-
-    def getFileList(self, dir, skip):
-        '''
-		Get the list of files from dir. Exclude known non slice files
-		'''
+    def getFileList(self, filedir, skip):
+        """
+        Get the list of files from filedir. Exclude known non slice files
+        """
         files = []
-        for fn in os.listdir(dir):
+        for fn in os.listdir(filedir):
             if any(fn.endswith(x) for x in self.ignore_exts):
                 continue
             if any(fnmatch.fnmatch(fn, x) for x in (
                     '*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF', '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG' )):
                 files.append(os.path.join(self.in_dir, fn))
-        return (tuple(files[0::skip]), files)
-
+        return tuple(files[0::skip]), files
 
     def convertDistFromEdgesToCoords(self, distances):
-        '''
-		Convert distances from sides(which comes from auto detection) sides into x,y,w,h
-		PIL uses actual coords not width height
-		'''
+        """
+        Convert distances from sides(which comes from auto detection) sides into x,y,w,h
+        PIL uses actual coords not width height
+        """
         x2 = self.imdims[0] - distances[2]
         y2 = self.imdims[1] - distances[3]
-        return ((distances[0], distances[1], x2, y2))
-
+        return distances[0], distances[1], x2, y2
 
     def convertXYWH_ToCoords(self, xywh):
-        '''
-		The input dimensions from the GUI needs converting for PIL
-		'''
+        """
+        The input dimensions from the GUI needs converting for PIL
+        """
         x1 = xywh[0] + xywh[2]
         y1 = xywh[1] + xywh[3]
-        return ((xywh[0], xywh[1], x1, y1))
+        return xywh[0], xywh[1], x1, y1
 
     def yield_python(self, seconds=0):
         sleep(seconds)
+
 
 def terminate():
     global shared_terminate
@@ -351,24 +395,24 @@ def init_cropping_win(self):
         filename = os.path.basename(file_)
         crop_out = os.path.join(self.out_dir, filename)
         cv2.imwrite(crop_out, imcrop)
-    msg_q.put("STOP")  #  sentinel
+    msg_q.put("STOP")  # sentinel
 
 
 def dummy_callback(msg):
-    '''use for cli running'''
+    """use for cli running"""
     print msg
 
 
 def cli_run():
-    '''
-	Parse the arguments
-	'''
+    """
+    Parse the arguments
+    """
     parser = argparse.ArgumentParser(description='crop a stack of bitmaps')
     parser.add_argument('-i', dest='in_dir', help='dir with bmps to crop', required=True)
     parser.add_argument('-o', dest='out_dir', help='destination for cropped images', required=True)
     parser.add_argument('-t', dest='file_type', help='tif or bmp', default="bmp")
     parser.add_argument('-d', nargs=4, type=int, dest='def_crop', help='set defined boundaries for crop x,y,w,h',
-                        default=None)
+                    default=None)
     parser.add_argument('-p', dest="num_proc", help='number of processors to use', default=None)
     args = parser.parse_args()
     ac = Autocrop(args.in_dir, args.out_dir, args.num_proc, args.def_crop)
