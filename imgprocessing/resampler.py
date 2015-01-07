@@ -64,14 +64,14 @@ def scale_by_pixel_size(img_path_list, input_voxel_size, output_voxel_size, outp
     sitk.WriteImage(img, outpath)
 
 
-def scale_by_integer_factor(img_path_list, scale_factor, outpath):
+def scale_by_integer_factor(img_dir, scale_factor, outpath):
     """
     Shrink the image by an integer factor. Confirmed only on even-dimension images currently. May need to add
     padding. This is working!
     :param scale_factor:
     :return:
     """
-
+    img_path_list = get_img_paths(img_dir)
     last_img_index = 0
     z_chuncks = []
 

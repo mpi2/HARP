@@ -10,9 +10,6 @@ Performs the following processing:
 Performs all processing on QThread. All analysis is based on a config file generated using harp.py and other
 associated modules.
 
-NOTE: QT Designer automatically uses mixed case for its class object names e.g radioButton. This format is not PEP8 but
-has not been changed.
-
 -------------------------------------------------------
 """
 from PyQt4 import QtGui, QtCore
@@ -38,9 +35,7 @@ from config import ConfigClass
 import numpy as np
 import cv2
 from SimpleITK import GetImageFromArray, WriteImage
-
-# from vtkRenderAnimation import Animator
-#from Segmentation import watershed_filter
+from imgprocessing import resampler
 
 
 class ProcessingThread(QtCore.QThread):
@@ -50,7 +45,6 @@ class ProcessingThread(QtCore.QThread):
     on this QThread.
 
     """
-
 
     def __init__(self, config_paths, memory, parent=None):
         """ **Constructor**: Gets the pickle config file and initialises some instance variables
@@ -105,9 +99,6 @@ class ProcessingThread(QtCore.QThread):
             :func:`show_files()`,
             :func:`compression()`,
         """
-        #===============================================
-        # Start processing!
-        #===============================================
 
         # Get the directory of the script
         if getattr(sys, 'frozen', False):
@@ -153,19 +144,8 @@ class ProcessingThread(QtCore.QThread):
                 print ""
                 return
 
-            #===============================================
-            # Scaling
-            #===============================================
             self.scaling()
 
-            #===============================================
-            # Space for other methods e.g. masking or movies
-            #===============================================
-            #self.masking()
-
-            #===============================================
-            # Copying
-            #===============================================
             # Cropping function only copies over image files. Need to copy over other files now scaling and cropping
             # finished
             if self.configOb.crop_option == "Automatic" or self.configOb.crop_option == "Manual":
@@ -176,9 +156,6 @@ class ProcessingThread(QtCore.QThread):
             if self.configOb.crop_option == "Old_crop":
                 self.show_files()
 
-            #===============================================
-            # Compression
-            #===============================================
             self.compression()
 
             if self.scale_error:
@@ -191,9 +168,6 @@ class ProcessingThread(QtCore.QThread):
             self.session_log.write("Processing finished\n")
             self.session_log.write("########################################\n")
             self.session_log.close()
-            #===============================================
-            # Finished!!
-            #===============================================
 
         return
 
@@ -427,8 +401,6 @@ class ProcessingThread(QtCore.QThread):
         :ivar int self.kill_check: if 1 it means HARP has been stopped via the GUI
 
         .. seealso::
-            :func:`execute_imagej()`,
-            :func:`memory_check()`,
         """
         # Check if HARP has been stopped
         if self.kill_check:
@@ -443,150 +415,31 @@ class ProcessingThread(QtCore.QThread):
         if not os.path.exists(self.configOb.scale_path):
             os.makedirs(self.configOb.scale_path)
 
-        # Memory of computer being used will depend on how much memory will be used in imageJ
-        # e.g 50% total memory of the computer
-        self.memory_4_imageJ = 1024
-        #self.memory_4_imageJ = (int(self.memory) * .5)
-        #self.memory_4_imageJ = self.memory_4_imageJ * 0.00000095367
-        #self.memory_4_imageJ = int(self.memory_4_imageJ)
-
         memory_mb = int(int(self.memory) * 0.00000095367)
         self.session_log.write("Total Memory of Computer(mb):" + str(memory_mb) + "\n")
-        self.session_log.write("Memory for ImageJ(mb):" + str(self.memory_4_imageJ) + "\n")
 
         # Perform scaling for all options used. Do a memory check before performing scaling.
         if self.configOb.SF2 == "yes":
-            memory_result = self.memory_check(2)
-            if memory_result:
-                self.execute_imagej(2.0)
+            self.downsample(2)
 
         if self.configOb.SF3 == "yes":
-            memory_result = self.memory_check(3)
-            if memory_result:
-                self.execute_imagej(3.0)
+            self.downsample(3)
 
         if self.configOb.SF4 == "yes":
-            memory_result = self.memory_check(4)
-            if memory_result:
-                self.execute_imagej(4.0)
+               self.downsample(4)
 
         if self.configOb.SF5 == "yes":
-            memory_result = self.memory_check(5)
-            if memory_result:
-                self.execute_imagej(5.0)
+                self.downsample(5)
 
         if self.configOb.SF6 == "yes":
-            memory_result = self.memory_check(6)
-            if memory_result:
-                self.execute_imagej(6.0)
+               self.downsample(6)
 
         if self.configOb.pixel_option == "yes":
-            memory_result = self.memory_check(self.configOb.SFX_pixel)
-            if memory_result:
                 self.execute_imagej("Pixel")
 
-    def memory_check(self, scale):
-        """ Rough attempt to see how much memory to use for ImageJ
 
-        2 Outcomes:
-            * Enough memory to perform as standard
-            * Not enough memory: No scaling will occur
-
-        The approximate amount of memory required is 4x that of the memory of the approx scaled stack
-
-        :param int scale: The scaling factor used.
-        :ivar obj self.session_log: python file object. Used to record the log of what has happened.
-        :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.
-        :ivar int memory_4_imageJ: Use 90% of available memory for imageJ. Calculated as 0.9*self.memory
-        :ivar int self.kill_check: if 1 it means HARP has been stopped via the GUI
-
-        :return boolean: True if memory is sufficient, False if not sufficient and scaling wont occur
+    def downsample(self, scale):
         """
-        # Get the scale in decimal equivalent
-        scale_div = float(1.0 / scale)
-
-        # If no crop option the memory check is done using data extrapolated from the original recon folder
-        if self.configOb.crop_option == "No_crop":
-            crop_folder_size_mb = float(self.configOb.recon_folder_size) * 1024.0
-            print "Recon folder size to downsize (mb)", crop_folder_size_mb
-            num_files = len([name for name in os.listdir(self.configOb.input_folder) if os.path.isfile(name)])
-
-        else:
-
-            prog = re.compile("(.*)_rec\d+\.(bmp|tif|jpg|jpeg)", re.IGNORECASE)
-            filename = ""
-            # for loop to go through the directory
-            for line in os.listdir(self.folder_for_scaling):
-                line = str(line)
-                #print line+"\n"
-                # if the line matches the regex break
-                if prog.match(line):
-                    filename = line
-                    break
-
-            # get the number of files, ignore any non recon files
-            num_files = len([f for f in os.listdir(self.configOb.cropped_path) if
-                             ((f[-4:] == ".bmp") or (f[-4:] == ".tif") or (f[-4:] == ".jpg") or (f[-4:] == ".jpeg") or
-                              (f[-4:] == ".BMP") or (f[-4:] == ".TIF") or (f[-4:] == ".JPG") or (f[-4:] == ".JPEG") and
-                              (f[-7:] != "spr.bmp") and (f[-7:] != "spr.tif") and (f[-7:] != "spr.jpg") and (
-                                 f[-7:] != "spr.jpeg") and
-                              (f[-7:] != "spr.BMP") and (f[-7:] != "spr.TIF") and (f[-7:] != "spr.JPG") and (
-                                 f[-7:] != "spr.JPEG"))])
-
-            # get the size of the file matched previously
-            filename = os.path.join(self.folder_for_scaling, filename)
-            file1_size = os.path.getsize(filename)
-
-            # approx folder size
-            approx_size = num_files * file1_size
-
-            # convert to mb
-            crop_folder_size_mb = (approx_size / (1024 * 1024.0))
-
-
-        # Get the approx size of the statck by dividing by x,y ans z of the folder size. e.g. for scaling by 2
-        # will be divided by 0.5, 0.5 and 0.5
-        memory_for_scale = crop_folder_size_mb * (scale_div * scale_div * scale_div)
-
-        # Based on a very approximate estimate I have said it will take imagej 4x that of the memory of
-        # the approx scaled stack
-        memory_for_scale = memory_for_scale * 4
-
-        self.num_files = num_files
-
-        # Check if there is enough memory  available.
-        if self.memory_4_imageJ < memory_for_scale:
-            print "not enough memory"
-            self.session_log.write("Not enough memory for this scaling\n")
-            self.emit(QtCore.SIGNAL('update(QString)'), "Not enough memory for scaling\n")
-            fail_file_name = os.path.join(self.configOb.scale_path, "insufficient_memory_for_scaling_" + str(scale))
-            fail_file = open(fail_file_name, 'w+')
-            fail_file.close()
-            self.scale_error = True
-            return False
-        else:
-            # enough memory
-            return True
-
-    def execute_imagej(self, sf):
-        """ Runs the imagej scaling using a subprocess call
-
-        The method does the following:
-
-            1. Setup: Deterimines some settings used in imagej (e.g. interpolation)
-            2. Normal scaling: Performs scaling as per the imagej macro siah_scale.txt
-            3. Low memory scaling: If the the normal scaling failed due to memory reasons. The scaling is repeated
-                using a low memory imagej macro
-
-        :param float sf: Scaling factor chosen by the user
-        :ivar str self.scale_log_path: Path to scale log
-        :ivar str self.session_scale: python file object. Used to record the log of what has happened for scaling.
-        :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.
-        :ivar int memory_4_imageJ: Use 90% of available memory for imageJ. Calculated as 0.9*self.memory
-        :ivar int self.kill_check: if 1 it means HARP has been stopped via the GUI
-
-        .. seealso::
-            :func:`scale_error_check()`,
         """
         if self.kill_check:
             return
@@ -595,17 +448,17 @@ class ProcessingThread(QtCore.QThread):
         # Setup
         #===============================================================================
         # Setup a logging file specifically for this scaling
-        self.scale_log_path = os.path.join(self.configOb.meta_path, str(sf) + "_scale.log")
+        self.scale_log_path = os.path.join(self.configOb.meta_path, str(scale) + "_scale.log")
         self.session_scale = open(self.scale_log_path, 'w+')
 
-        # Gets the new pixel numbers for the scaled stack name (see in imagej macro)
-        if (self.configOb.recon_pixel_size) and sf != "Pixel":
-            new_pixel = float(self.configOb.recon_pixel_size) * float(sf)
+ 
+        if (self.configOb.recon_pixel_size) and scale != "Pixel":
+            new_pixel = float(self.configOb.recon_pixel_size) * float(scale)
             new_pixel = str(round(new_pixel, 4))
             interpolation = "default"
 
         elif self.configOb.pixel_option == "yes":
-            sf = self.configOb.SFX_pixel
+            scale = self.configOb.SFX_pixel
             new_pixel = self.configOb.user_specified_pixel
 
             interpolation = "yes"
@@ -614,204 +467,23 @@ class ProcessingThread(QtCore.QThread):
             interpolation = "default"
 
         # Get the scaling factor in decimal
-        dec_sf = round((1 / sf), 4)
-
-        # ij path if run from executable
-        ijpath = os.path.join('..', '..', 'ImageJ', 'ij.jar')
-        if not os.path.exists(ijpath):
-            #ij path if ran from script
-            ijpath = os.path.join(self.dir, 'ImageJ', 'ij.jar')
-
-        if not os.path.exists(ijpath):
-            print 'path to imageJ', ijpath
-            self.emit(QtCore.SIGNAL('update(QString)'), "Error: Can't find Imagej")
-            self.kill_check == 1
-            return
-
-        # Setup macro path
-        # If run run as an executable the path will be different
-        ij_macro_path = os.path.join('..', '..', "siah_scale.txt")
-        if not os.path.exists(ij_macro_path):
-            ij_macro_path = os.path.join(self.dir, "siah_scale.txt")
-
-        ij_macro_path_low_mem1 = os.path.join('..', '..', "siah_scale_low_mem1.txt")
-        if not os.path.exists(ij_macro_path_low_mem1):
-            ij_macro_path_low_mem1 = os.path.join(self.dir, "siah_scale_low_mem1.txt")
-
-        ij_macro_path_low_mem2 = os.path.join(self.dir, "siah_scale_low_mem2.txt")
-        if not os.path.exists(ij_macro_path_low_mem2):
-            ij_macro_path_low_mem2 = os.path.join('..', '..', "siah_scale_low_mem2.txt")
-
-        if not os.path.exists(ij_macro_path):
-            print 'path to imageJ macro', ijpath
-            self.emit(QtCore.SIGNAL('update(QString)'), "error: Can't find Imagej macro script")
-            self.kill_check == 1
-            return
+        dec_sf = round((1.0 / scale), 4)
 
         # detail scaling in log
         self.session_log.write("Scale by factor:\n")
-        self.session_log.write(str(sf))
-        self.emit(QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(sf)))
+        self.session_log.write(str(scale))
+        self.emit(QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(scale)))
 
         #===============================================================================
         # Normal scaling
         #===============================================================================
-        print "norm scaling"
-        file_name = os.path.join(self.configOb.scale_path,
-                                 self.configOb.full_name + "_scaled_" + str(sf) + "_pixel_" + new_pixel + ".tif")
+        print "normal scaling"
+        out_name = os.path.join(self.configOb.scale_path,
+                                self.configOb.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".tif")
 
-        # Subprocess call for imagej macro
-        process = subprocess.Popen(
-            ["java", "-Xmx" + str(self.memory_4_imageJ) + "m", "-jar", ijpath, "-batch", ij_macro_path,
-             self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name],
-            stdout=self.session_scale, stderr=self.session_scale)
+        resampler.scale_by_integer_factor(self.configOb.cropped_path, scale, os.path.join(self.configOb.scale_path, 'testing.nrrd'))
 
-        #record a process ID incase we need to kill imagej
-        self.imagej_pid = str(process.pid)
 
-        #NOTE: process.communicate catches when processing is finished
-        # I dont think the out and error variables work here as we already assigned stderr and stdout in the
-        # subprocess call
-        out, err = process.communicate()
-        print process.returncode
-
-        # check if there was a memory problem then repeat as low memory version
-        result = self.scale_error_check("norm", sf)
-
-        # If a non-memory error occured call it a day for this one
-        if self.scale_error == True:
-            return
-
-        if result == "repeat":
-            #===============================================
-            # Low memory scaling
-            #===============================================
-            # Low memory version splits the processing done in imagej into two parts.
-            # The first part scales by x and y, and does this in batch mode (slice by slice). This saves the output
-            # as an image sequence. The image sequence is stored in a temp folder.
-            # The second part does the z scale (has to load in the whole stack for this)
-            # The temp folder is then deleted
-            print "low mem version"
-            self.emit(QtCore.SIGNAL('update(QString)'), "Performing low memory scaling ({})".format(str(sf)))
-
-            # reset the scaling log
-            self.session_scale.close()
-            self.session_scale = open(self.scale_log_path, 'w+')
-
-            # Subprocess call for imagej macro
-            # First x and y scaling and save a temp stack
-            temp_folder = os.path.join(self.configOb.scale_path, "tmp")
-            if not os.path.exists(temp_folder):
-                os.mkdir(temp_folder)
-
-            # Subprocess call to do the x and y scaling
-            process = subprocess.Popen(
-                ["java", "-Xmx" + str(self.memory_4_imageJ) + "m", "-jar", ijpath, "-batch", ij_macro_path_low_mem1,
-                 self.configOb.imageJ + "^" + str(dec_sf) + "^" + interpolation + "^" + temp_folder + os.sep + "^"],
-                stdout=self.session_scale, stderr=self.session_scale)
-
-            # record a pid so we can kill
-            self.imagej_pid = str(process.pid)
-
-            # recognises when the process has finished and then continues with script
-            out, err = process.communicate()
-
-            # check if any errors occured.
-            self.scale_error_check("low", sf)
-            if self.scale_error == True:
-                print "error"
-                # Remove the temp folder
-                shutil.rmtree(temp_folder)
-                return
-
-            print "second part of scaling"
-            file_name = os.path.join(self.configOb.scale_path,
-                                     self.configOb.full_name + "_scaled_" + str(sf) + "_pixel_" + new_pixel + ".tif")
-
-            # Subprocess call to do the z scaling
-            process2 = subprocess.Popen(
-                ["java", "-Xmx" + str(self.memory_4_imageJ) + "m", "-jar", ijpath, "-batch", ij_macro_path_low_mem2,
-                 temp_folder + os.sep + "^" + str(dec_sf) + "^" + interpolation + "^" + file_name + "^" + str(
-                     self.num_files) + "^"],
-                stdout=self.session_scale, stderr=self.session_scale)
-
-            self.imagej_pid = str(process2.pid)
-            # recognises when the process has finished and then continues with script
-            out, err = process2.communicate()
-            # check if any errors occured
-            self.scale_error_check("low", sf)
-            shutil.rmtree(temp_folder)
-            self.session_scale.close()
-
-    def scale_error_check(self, mem_opt, sf):
-        """ Check the session log from imagej scaling
-
-        Used by execute_imagej() to check if a low memory repeat is to be performed.
-
-        :param str mem_opt: What memory option was used "norm" or "low" memory version.
-        :param float sf: Used for logging purposes
-        :return str: Will return the string "repeat" if a memory problem has occured
-        """
-        self.session_scale_check = open(self.scale_log_path, "r")
-
-        # reset processing ID, as processing has finished.
-        self.imagej_pid = ""
-
-        # Check the self.session_scale file for memory or any other problem messages
-        prog1 = re.compile("<Out of memory>")
-        prog2 = re.compile(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        out_of_memory = None
-        other_ij_problem = None
-
-        # First check for memory problems
-        for line in self.session_scale_check:
-            # "chomp" the line endings off
-            line = line.rstrip()
-            # if the line matches the regex print the (\w+.\w+) part of regex
-            if prog1.match(line):
-                # Grab the pixel size with with .group(1)
-                out_of_memory = True
-                break
-
-        # Then check for any other problems.
-        for line in self.session_scale_check:
-            # "chomp" the line endings off
-            line = line.rstrip()
-            # if the line matches the regex print the (\w+.\w+) part of regex
-            if prog2.match(line):
-                # Grab the pixel size with with .group(1)
-                other_ij_problem = True
-                break
-
-        if out_of_memory and mem_opt == "norm":
-            # Dont use the word "error" in the signal message. If "error" is used HARP might skip any further
-            # processing for this HARP processing list.
-            self.emit(QtCore.SIGNAL('update(QString)'),
-                      "Problem in scaling. Not enough memory will try low memory version\n")
-            self.session_scale.write("Error in scaling will try low memory version\n")
-            # return "repeat" so processing starts again with low memory
-            return "repeat"
-
-        elif out_of_memory and mem_opt == "low":
-            # Out of memory BUT already attempted to repeat using low memory imagej macro.
-            # Can't do anythin else!
-            self.emit(QtCore.SIGNAL('update(QString)'), "Problem in scaling. Not enough memory\n")
-            self.session_log.write("Error in scaling\n")
-            fail_file_name = os.path.join(self.configOb.scale_path, "insufficient_memory_for_scaling_" + str(sf))
-            fail_file = open(fail_file_name, 'w+')
-            fail_file.close()
-            self.scale_error = True
-
-        elif other_ij_problem:
-            # other problem we can't do anythin about...
-            self.emit(QtCore.SIGNAL('update(QString)'), "Problem in scaling. Check log file\n")
-            self.session_scale.write("Error in scaling\n")
-            fail_file_name = os.path.join(self.configOb.scale_path, "error_performing_scaling_by_" + str(sf))
-            fail_file = open(fail_file_name, 'w+')
-            fail_file.close()
-            self.scale_error = True
-        else:
-            self.session_log.write("Finished scaling\n")
 
     def hide_files(self):
         """ Puts non-image files non-valid image files into a temp folder so will be ignored for scaling
