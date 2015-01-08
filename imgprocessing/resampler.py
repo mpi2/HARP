@@ -70,46 +70,31 @@ def scale_by_pixel_size(images, scale, outpath):
             z_slice_resized.tofile(xy_fh)
 
     #create memory mapped version of the temporary xy scaled slices
-    memmap = np.memmap(temp_xy, dtype=np.uint8, mode='r', shape=tuple(xy_scaled_dims))
-
-    # Resample xz at y
-    #final_scaled_slices = []
+    xy_scaled_mmap = np.memmap(temp_xy, dtype=np.uint8, mode='r', shape=tuple(xy_scaled_dims))
 
     #Get dimensions for the memory mapped raw xyz file
     xyz_scaled_dims = []
     first = True
 
     with open(temp_xyz, 'a') as xyz_fh:
-        for y in range(memmap.shape[1]):
-            xz_plane = memmap[:, y, :]
+        for y in range(xy_scaled_mmap.shape[1]):
+
+            xz_plane = xy_scaled_mmap[:, y, :]
 
             scaled_xz = cv2.resize(xz_plane, (0, 0), fx=1, fy=scale, interpolation=cv2.INTER_AREA)
             if first:
                 first = False
-
-                xyz_scaled_dims.append(memmap.shape[1])
+                xyz_scaled_dims.append(xy_scaled_mmap.shape[1])
                 xyz_scaled_dims.append(scaled_xz.shape[0])
                 xyz_scaled_dims.append(scaled_xz.shape[1])
 
             #final_scaled_slices.append(scaled_xz)
             scaled_xz.tofile(xyz_fh)
 
-
-
-    #final_array = np.array(final_scaled_slices)
-
     #create memory mapped version of the temporary xy scaled slices
-    final_array = np.memmap(temp_xyz, dtype=np.uint8, mode='r', shape=tuple(xyz_scaled_dims))
+    xyz_scaled_mmap = np.memmap(temp_xyz, dtype=np.uint8, mode='r', shape=tuple(xyz_scaled_dims))
 
-
-    #final_array = np.fromfile(temp_xyz, dtype=np.uint8).reshape(xyz_scaled_dims)
-
-
-    #img = sitk.GetImageFromArray(np.swapaxes(final_array, 0, 1))  # Convert from yzx to zyx
-    #sitk.WriteImage(img, outpath)
-    
-    #test the nrrd writer for streaming
-    nrrd.write(outpath, np.swapaxes(final_array.T, 1, 2))
+    nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
 
     try:
         os.remove(temp_xy)
