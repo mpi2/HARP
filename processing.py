@@ -285,7 +285,7 @@ class ProcessingThread(QtCore.QThread):
         try:
             # Run autocrop and catch errors
             #self.auto_crop.run() #  the old version of autocrop
-            self.auto_crop.run_auto_mask()  # James - new version of autocrap using Tom's Otsu masking
+            self.cropped_files_list = self.auto_crop.run_auto_mask()  # James - new version of autocrap using Tom's Otsu masking
 
         except WindowsError as e:
             self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the "
@@ -481,7 +481,7 @@ class ProcessingThread(QtCore.QThread):
         out_name = os.path.join(self.configOb.scale_path,
                                 self.configOb.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".tif")
 
-        resampler.scale_by_pixel_size(self.configOb.cropped_path, 1.0 / scale, out_name)
+        resampler.scale_by_pixel_size(self.cropped_files_list, 1.0 / scale, out_name)
 
 
 
