@@ -50,6 +50,8 @@ def scale_by_pixel_size(images, scale, outpath):
     #Get dimensions for the memory mapped raw file
     dims = [len(img_path_list)]
 
+    img_path_list = sorted(img_path_list)
+
     #Resample z slices
     with open(temp_raw, 'a') as fh:
         first = True
@@ -159,4 +161,5 @@ if __name__ == '__main__':
         parser.add_argument('-s', '--scale_factor', dest='scale_factor', help='downscaling factor (int)')
         args = parser.parse_args()
 
+        #scale_by_integer_factor(args.input_dir, int(args.scale_factor), args.output_path)
         scale_by_pixel_size(args.input_dir, float(args.scale_factor), args.output_path)
