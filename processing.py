@@ -15,8 +15,10 @@ associated modules.
 from PyQt4 import QtGui, QtCore
 import sys
 import subprocess
-import os, signal
+import os
+import signal
 import re
+
 
 try:
     import cPickle as pickle
@@ -30,12 +32,11 @@ from multiprocessing import freeze_support
 from sys import platform as _platform
 import traceback
 import fnmatch
-import autocrop
 from config import ConfigClass
 import numpy as np
 import cv2
 from SimpleITK import GetImageFromArray, WriteImage
-from imgprocessing import resampler
+from imgprocessing import resampler, autocrop
 
 
 class ProcessingThread(QtCore.QThread):
@@ -393,12 +394,8 @@ class ProcessingThread(QtCore.QThread):
     def scaling(self):
         """  Sets up a series of scaling methods depending on memory and scaling options.
 
-        Scaling perform using **execute_imagej()** and memory check performed using **memory_check()**.
-
         :ivar obj self.session_log: python file object. Used to record the log of what has happened.
         :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.
-        :ivar int self.memory: Memory calculated before processing started
-        :ivar int self.memory_4_imageJ: Use 90% of available memory for imageJ. Calculated as 0.9*self.memory
         :ivar int self.kill_check: if 1 it means HARP has been stopped via the GUI
 
         .. seealso::
@@ -427,16 +424,17 @@ class ProcessingThread(QtCore.QThread):
             self.downsample(3)
 
         if self.configOb.SF4 == "yes":
-               self.downsample(4)
+            self.downsample(4)
 
         if self.configOb.SF5 == "yes":
-                self.downsample(5)
+            self.downsample(5)
 
         if self.configOb.SF6 == "yes":
-               self.downsample(6)
+            self.downsample(6)
 
         if self.configOb.pixel_option == "yes":
-                self.execute_imagej("Pixel")
+            scale_factor = self.configOb.SFX_pixel
+            self.downsample(scale_factor)
 
 
     def downsample(self, scale):
@@ -479,10 +477,12 @@ class ProcessingThread(QtCore.QThread):
         # Normal scaling
         #===============================================================================
         print "normal scaling"
+
         out_name = os.path.join(self.configOb.scale_path,
                                 self.configOb.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".tif")
 
-        resampler.scale_by_integer_factor(self.configOb.cropped_path, scale, os.path.join(self.configOb.scale_path, 'testing.nrrd'))
+        resampler.scale_by_pixel_size(self.configOb.cropped_path, 1.0 / scale, out_name)
+
 
 
 
@@ -701,6 +701,8 @@ class ProcessingThread(QtCore.QThread):
 
         Calls a method autocrop.terminate() which sends stop signals to stop the multithreaded processing running
         for the autocrop
+
+        Neil: This needs rewriting. There is no ImageJ, but dpo we have to kill the scaling threads??
 
         """
         print("Kill all")

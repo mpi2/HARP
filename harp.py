@@ -30,13 +30,14 @@ import uuid
 from PyQt4.QtCore import pyqtSlot, SIGNAL
 import psutil
 
+
 # Harwell modules and classes
 import autofill
 import addtolist
 import Queue
 from ui.mainwindow import Ui_MainWindow
 from processing import ProcessingThread
-from zproject import ZProjectThread
+from imgprocessing.zproject import ZProjectThread
 import manualcrop
 from appdata import AppData
 

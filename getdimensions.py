@@ -1,7 +1,9 @@
 from PyQt4 import QtCore, QtGui
 import os
-from zproject import ZProjectThread
+
+from imgprocessing.zproject import ZProjectThread
 import manualcrop
+
 
 #======================================================================
 #  Functions for get Dimensions (z projection)
