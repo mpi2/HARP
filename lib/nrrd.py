@@ -321,19 +321,11 @@ _NRRD_FIELD_FORMATTERS = {
 
 def _write_data(data, filehandle, options):
     # Now write data directly
-    rawdata = data.tostring(order = 'F')
+
     if options['encoding'] == 'raw':
-        filehandle.write(rawdata)
-    elif options['encoding'] == 'gzip':
-        gzfileobj = gzip.GzipFile(fileobj = filehandle)
-        gzfileobj.write(rawdata)
-        gzfileobj.close()
-    elif options['encoding'] == 'bz2':
-        bz2fileobj = bz2.BZ2File(fileobj = filehandle)
-        bz2fileobj.write(rawdata)
-        bz2fileobj.close()
-    else:
-        raise NrrdError('Unsupported encoding: "%s"' % options['encoding'])
+        for z in range(data.shape[2]):
+            rawdata = data[:, :, z].tostring(order='F')
+            filehandle.write(rawdata)
 
 
 def write(filename, data, options={}, separate_header=False):
@@ -359,7 +351,7 @@ def write(filename, data, options={}, separate_header=False):
 
     # The default encoding is 'gzip'
     if 'encoding' not in options:
-        options['encoding'] = 'gzip'
+        options['encoding'] = 'raw'
 
     # A bit of magic in handling options here.
     # If *.nhdr filename provided, this overrides `separate_header=False`

@@ -44,7 +44,6 @@ def scale_by_pixel_size(images, scale, outpath):
             img_path_list = get_img_paths(images)
 
     elif type(images) in [list, tuple]:
-        print 'iterable'
         img_path_list = images
     else:
         raise ValueError("HARP Resampler: resampler needs a direcory of images or a list of images")
@@ -80,7 +79,6 @@ def scale_by_pixel_size(images, scale, outpath):
     xyz_scaled_dims = []
     first = True
 
-
     with open(temp_xyz, 'a') as xyz_fh:
         for y in range(memmap.shape[1]):
             xz_plane = memmap[:, y, :]
@@ -96,23 +94,33 @@ def scale_by_pixel_size(images, scale, outpath):
             #final_scaled_slices.append(scaled_xz)
             scaled_xz.tofile(xyz_fh)
 
+
+
     #final_array = np.array(final_scaled_slices)
 
     #create memory mapped version of the temporary xy scaled slices
-    #final_array = np.memmap(temp_xyz, dtype=np.uint8, mode='r', shape=tuple(xyz_scaled_dims))
+    final_array = np.memmap(temp_xyz, dtype=np.uint8, mode='r', shape=tuple(xyz_scaled_dims))
 
-    final_array = np.fromfile(temp_xyz, dtype=np.uint8).reshape(xyz_scaled_dims)
+
+    #final_array = np.fromfile(temp_xyz, dtype=np.uint8).reshape(xyz_scaled_dims)
+
 
     #img = sitk.GetImageFromArray(np.swapaxes(final_array, 0, 1))  # Convert from yzx to zyx
     #sitk.WriteImage(img, outpath)
     
     #test the nrrd writer for streaming
-    nrrd.write(outpath, final_array)
+    nrrd.write(outpath, np.swapaxes(final_array.T, 1, 2))
 
     try:
         os.remove(temp_xy)
     except OSError:
         pass
+
+    try:
+        os.remove(temp_xyz)
+    except OSError:
+        pass
+
 
 def scale_by_integer_factor(img_dir, scale_factor, outpath):
     """
