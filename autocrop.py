@@ -220,6 +220,26 @@ class Autocrop():
         array[low_values_indices] = 0
         return array
 
+    def pad_bounding_box(self, bbox, padding):
+
+        bbox[0] -= padding  # xmin
+        if bbox[0] < 0:
+            bbox[0] = 0
+
+        bbox[1] += padding  # xmax
+        if bbox[1] > self.imdims[0] - 1:
+            bbox[1] = 0
+
+        bbox[2] -= padding  # ymin
+        if bbox[2] < 0:
+            bbox[2] = 0
+
+        bbox[3] += padding  # ymax
+        if bbox[3] > self.imdims[1] - 1:
+            bbox[3] = 0
+
+        return bbox
+
     def run_auto_mask(self):
 
         # Get list of files
@@ -245,7 +265,13 @@ class Autocrop():
         # Get bounding box
         label_stats = sitk.LabelStatisticsImageFilter()
         label_stats.Execute(zp_im, seg)
-        self.crop_box = label_stats.GetBoundingBox(1)  # xmin, xmax, ymin, ymax (I think)
+        bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
+
+        # Padding
+        self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE).shape
+        padding = int(np.mean(self.imdims) * 0.025)
+        bbox = self.pad_bounding_box(bbox, padding)
+        self.crop_box = tuple(bbox)
 
         # Actually perform the cropping
         crop_count = 1
