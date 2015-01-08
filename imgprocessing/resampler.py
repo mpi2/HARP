@@ -132,16 +132,9 @@ if __name__ == '__main__':
     if __name__ == "__main__":
 
         parser = argparse.ArgumentParser("Image resampler (downscale)")
-        parser.add_argument('-ip', '--input_voxel_size', dest='input_voxel_size', help='Original voxel size')
-        parser.add_argument('-if', '--input_folder', dest='input_dir', help='Input folder')
+        parser.add_argument('-i', '--input_folder', dest='input_dir', help='Input folder')
         parser.add_argument('-o', '--output_path', dest='output_path', help='Output path')
-        parser.add_argument('-sf', '--scale_factor', dest='scale_factor', help='downscaling factor (int)')
-        parser.add_argument('-op', '--output_voxel_size', dest='output_voxel_size', type=float, help='downscaling voxel size (um)')
+        parser.add_argument('-s', '--scale_factor', dest='scale_factor', help='downscaling factor (int)')
         args = parser.parse_args()
 
-        img_list = get_img_paths(args.input_dir)
-
-        if args.scale_factor:
-            scale_by_integer_factor(img_list, int(args.scale_factor), args.output_path)
-        elif args.output_voxel_size:
-            scale_by_pixel_size(img_list, float(args.input_voxel_size), float(args.output_voxel_size), args.output_path)
+        scale_by_pixel_size(args.input_dir, float(args.scale_factor), args.output_path)
