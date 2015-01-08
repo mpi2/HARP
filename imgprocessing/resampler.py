@@ -17,6 +17,7 @@ import SimpleITK as sitk
 import os
 import shutil
 import cv2
+import collections
 
 
 def scale_by_pixel_size(images, scale, outpath):
@@ -32,10 +33,18 @@ def scale_by_pixel_size(images, scale, outpath):
     if os.path.isfile(temp_raw):
         os.remove(temp_raw)
 
+    #Check if we have a directory with images or a list with images
     if os.path.isdir(images):
         img_path_list = get_img_paths(images)
-    else:
+
+    elif type(images) in [list, tuple]:
+        print 'iterable'
         img_path_list = images
+    else:
+        raise ValueError("HARP Resampler: resampler needs a direcory of images or a list of images")
+
+    if len(img_path_list) < 1:
+        raise ValueError("HARP Resampler: There are no images in the list or directory")
 
     #Get dimensions for the memory mapped raw file
     dims = [len(img_path_list)]
@@ -52,9 +61,6 @@ def scale_by_pixel_size(images, scale, outpath):
                 dims.extend(z_slice_resized.shape)
                 first = False
             z_slice_resized.tofile(fh)
-            #img_out_name = os.path.join(temp_z, os.path.basename(img_path))
-            #cv2.imwrite(img_out_name, z_slice_resized)
-            #append(img_out_name)
 
     #create memory mapped version of the temporary slices
     print dims
