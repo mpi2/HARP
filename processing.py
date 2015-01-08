@@ -481,6 +481,7 @@ class ProcessingThread(QtCore.QThread):
         out_name = os.path.join(self.configOb.scale_path,
                                 self.configOb.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".tif")
 
+        print "\n".join(self.cropped_files_list)
         resampler.scale_by_pixel_size(self.cropped_files_list, 1.0 / scale, out_name)
 
 
