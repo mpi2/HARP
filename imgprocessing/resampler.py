@@ -19,13 +19,24 @@ import shutil
 import cv2
 
 
-def scale_by_pixel_size(img_dir, scale, outpath):
+def scale_by_pixel_size(images, scale, outpath):
+    """
+    :param images: iterable or a directory
+    :param scale:
+    :param outpath:
+    :return:
+    """
 
     temp_raw = 'tempXYscaled.raw'
+
     if os.path.isfile(temp_raw):
         os.remove(temp_raw)
 
-    img_path_list = get_img_paths(img_dir)
+    if os.path.isdir(images):
+        img_path_list = get_img_paths(images)
+    else:
+        img_path_list = images
+
     #Get dimensions for the memory mapped raw file
     dims = [len(img_path_list)]
 
@@ -62,6 +73,10 @@ def scale_by_pixel_size(img_dir, scale, outpath):
     img = sitk.GetImageFromArray(np.swapaxes(final_array, 0, 1))  # Convert from yzx to zyx
     sitk.WriteImage(img, outpath)
 
+    try:
+        os.remove(temp_raw)
+    except OSError:
+        pass
 
 def scale_by_integer_factor(img_dir, scale_factor, outpath):
     """
