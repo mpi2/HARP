@@ -256,7 +256,8 @@ class Autocrop():
         zp.run()
 
         # Load z projection image
-        zp_im = sitk.ReadImage(os.path.join(self.out_dir, "max_intensity_z.png"))
+        z_proj_path = os.path.join(self.out_dir, "max_intensity_z.png")
+        zp_im = sitk.ReadImage(z_proj_path)
 
         # Apply otsu threshold and remove all but largest component
         seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=255, numberOfHistogramBins=128)
@@ -275,8 +276,13 @@ class Autocrop():
         bbox = self.pad_bounding_box(bbox, padding)
         self.crop_box = tuple(bbox)
 
+        # Delete z projection image
+        os.remove(z_proj_path)
+
         # Actually perform the cropping
         crop_count = 1
+        cropped_files = []
+
         for slice_ in self.files:
 
             im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
@@ -289,12 +295,13 @@ class Autocrop():
             imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
             filename = os.path.basename(slice_)
             crop_out = os.path.join(self.out_dir, filename)
+            cropped_files.append(crop_out)
 
             cv2.imwrite(crop_out, imcrop)
             #self.yield_python()
 
         self.callback("success")
-        return
+        return cropped_files
 
     def zp_callback(self, msg):
         print msg
