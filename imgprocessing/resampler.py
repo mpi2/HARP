@@ -34,8 +34,9 @@ def scale_by_pixel_size(images, scale, outpath):
         os.remove(temp_raw)
 
     #Check if we have a directory with images or a list with images
-    if os.path.isdir(images):
-        img_path_list = get_img_paths(images)
+    if type(images) is str:
+        if os.path.isdir(images):
+            img_path_list = get_img_paths(images)
 
     elif type(images) in [list, tuple]:
         print 'iterable'
