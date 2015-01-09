@@ -76,6 +76,8 @@ def scale_by_pixel_size(images, scale, outpath):
     xyz_scaled_dims = []
     first = True
 
+    final_scaled_slices = []
+
     with open(temp_xyz, 'a') as xyz_fh:
         for y in range(xy_scaled_mmap.shape[1]):
 
@@ -88,13 +90,17 @@ def scale_by_pixel_size(images, scale, outpath):
                 xyz_scaled_dims.append(scaled_xz.shape[0])
                 xyz_scaled_dims.append(scaled_xz.shape[1])
 
-            #final_scaled_slices.append(scaled_xz)
+            final_scaled_slices.append(scaled_xz)
             scaled_xz.tofile(xyz_fh)
 
-    #create memory mapped version of the temporary xy scaled slices
-    xyz_scaled_mmap = np.memmap(temp_xyz, dtype=np.uint8, mode='r', shape=tuple(xyz_scaled_dims))
+    final_scaled_slices = np.asarray(final_scaled_slices)
 
-    nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
+    #create memory mapped version of the temporary xy scaled slices
+    #xyz_scaled_mmap = np.memmap(temp_xyz, dtype=np.uint8, mode='r', shape=tuple(xyz_scaled_dims))
+    #xyz_scaled_mmap = np.fromfile(temp_xyz, dtype=np.uint8).reshape(tuple(xy_scaled_dims))
+
+    nrrd.write(outpath, np.swapaxes(final_scaled_slices.T, 1, 2))
+   # nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
 
     try:
         os.remove(temp_xy)
