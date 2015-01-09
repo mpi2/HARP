@@ -252,6 +252,49 @@ class Autocrop():
         if len(sparse_files) < 1:
             return ("no image files found in " + self.in_dir)
 
+<<<<<<< HEAD
+        # Start with a z-projection
+        zp = zproject.Zproject(self.in_dir, self.configOb.meta_path, self.zp_callback)
+        zp.run()
+
+        # Load z projection image
+        z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
+        zp_im = sitk.ReadImage(z_proj_path)
+
+        #Get the datatype
+        testimg = cv2.imread(self.files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+        datatype = testimg.dtype
+        if datatype == np.uint16:
+            outval = 65536
+        else:
+            outval = 255
+        print 'label'
+
+        try:
+            # Apply otsu threshold and remove all but largest component
+            seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=outval, numberOfHistogramBins=128)
+            seg = sitk.ConnectedComponent(seg)  # label non-background pixels
+            seg = sitk.RelabelComponent(seg)  # relabel components in order of ascending size
+        except Exception:
+            print "failed++++++++++++++++++++"
+        # seg = seg == 1  # discard all but largest component
+        # Get bounding box
+        label_stats = sitk.LabelStatisticsImageFilter()
+        label_stats.Execute(zp_im, seg)
+        bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
+
+        # Padding
+        self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED).shape
+        padding = int(np.mean(self.imdims) * 0.025)
+        bbox = self.pad_bounding_box(bbox, padding)
+        self.crop_box = tuple(bbox)
+
+        # Delete z projection image
+        # try:
+        #     os.remove(z_proj_path)
+        # except OSError:
+        #     print 'cant find z projection to delete it'
+=======
         if self.def_crop:
             self.calc_manual_crop()
             if shared_terminate.value == 1:
@@ -269,7 +312,6 @@ class Autocrop():
             z_proj_path = os.path.join(self.out_dir, "max_intensity_z.png")
             zp_im = sitk.ReadImage(z_proj_path)
 
-        try:
             # Apply otsu threshold and remove all but largest component
             seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=255, numberOfHistogramBins=128)
             seg = sitk.ConnectedComponent(seg)  # label non-background pixels
@@ -286,21 +328,41 @@ class Autocrop():
             padding = int(np.mean(self.imdims) * 0.025)
             bbox = self.pad_bounding_box(bbox, padding)
             self.crop_box = tuple(bbox)
+>>>>>>> 36d9979ddbe707346b2060a9663391314d4a32da
 
             # Delete z projection image
             os.remove(z_proj_path)
 
+<<<<<<< HEAD
+
+        for slice_ in self.files:
+
+            im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+            if crop_count % 20 == 0:
+                self.callback(
+                    "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
+=======
             # Actually perform the cropping
             crop_count = 1
             cropped_files = []
 
             for slice_ in self.files:
+>>>>>>> 36d9979ddbe707346b2060a9663391314d4a32da
 
                 im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
                 if crop_count % 20 == 0:
                     self.callback(
                         "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
 
+<<<<<<< HEAD
+            imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
+            filename = os.path.basename(slice_)
+            crop_out = os.path.join(self.out_dir, filename)
+            cropped_files.append(crop_out)
+            print 'crop out' ,crop_out
+            cv2.imwrite(crop_out, imcrop)
+            #self.yield_python()
+=======
                 crop_count += 1
 
                 imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
@@ -310,6 +372,7 @@ class Autocrop():
 
                 cv2.imwrite(crop_out, imcrop)
                 #self.yield_python()
+>>>>>>> 36d9979ddbe707346b2060a9663391314d4a32da
 
             self.callback("success")
             return cropped_files
