@@ -2,3 +2,5 @@
 docs/
 .idea/
 
+.idea/
+*.db

@@ -245,63 +245,72 @@ class Autocrop():
     def run_auto_mask(self):
 
         # Get list of files
-        sparse_files, files = self.getFileList(self.in_dir, self.skip_num)
+        sparse_files, files, cropped_files = self.getFileList(self.in_dir, self.skip_num)
         self.files = files
 
         if len(sparse_files) < 1:
             return ("no image files found in " + self.in_dir)
 
-        # Start with a z-projection
-        zp = zproject.Zproject(self.in_dir, self.out_dir, self.zp_callback)
-        zp.run()
+        if self.def_crop:
+            self.calc_manual_crop()
+            if shared_terminate.value == 1:
+                self.callback("Processing Cancelled!")
+                return
+            self.callback("success")
+            return cropped_files
+        else:
 
-        # Load z projection image
-        z_proj_path = os.path.join(self.out_dir, "max_intensity_z.png")
-        zp_im = sitk.ReadImage(z_proj_path)
+            # Start with a z-projection
+            zp = zproject.Zproject(self.in_dir, self.out_dir, self.zp_callback)
+            zp.run()
 
-        # Apply otsu threshold and remove all but largest component
-        seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=255, numberOfHistogramBins=128)
-        seg = sitk.ConnectedComponent(seg)  # label non-background pixels
-        seg = sitk.RelabelComponent(seg)  # relabel components in order of ascending size
-        # seg = seg == 1  # discard all but largest component
+            # Load z projection image
+            z_proj_path = os.path.join(self.out_dir, "max_intensity_z.png")
+            zp_im = sitk.ReadImage(z_proj_path)
 
-        # Get bounding box
-        label_stats = sitk.LabelStatisticsImageFilter()
-        label_stats.Execute(zp_im, seg)
-        bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
+            # Apply otsu threshold and remove all but largest component
+            seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=255, numberOfHistogramBins=128)
+            seg = sitk.ConnectedComponent(seg)  # label non-background pixels
+            seg = sitk.RelabelComponent(seg)  # relabel components in order of ascending size
+            # seg = seg == 1  # discard all but largest component
 
-        # Padding
-        self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE).shape
-        padding = int(np.mean(self.imdims) * 0.025)
-        bbox = self.pad_bounding_box(bbox, padding)
-        self.crop_box = tuple(bbox)
+            # Get bounding box
+            label_stats = sitk.LabelStatisticsImageFilter()
+            label_stats.Execute(zp_im, seg)
+            bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
 
-        # Delete z projection image
-        os.remove(z_proj_path)
+            # Padding
+            self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE).shape
+            padding = int(np.mean(self.imdims) * 0.025)
+            bbox = self.pad_bounding_box(bbox, padding)
+            self.crop_box = tuple(bbox)
 
-        # Actually perform the cropping
-        crop_count = 1
-        cropped_files = []
+            # Delete z projection image
+            os.remove(z_proj_path)
 
-        for slice_ in self.files:
+            # Actually perform the cropping
+            crop_count = 1
+            cropped_files = []
 
-            im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
-            if crop_count % 20 == 0:
-                self.callback(
-                    "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
+            for slice_ in self.files:
 
-            crop_count += 1
+                im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+                if crop_count % 20 == 0:
+                    self.callback(
+                        "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
 
-            imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
-            filename = os.path.basename(slice_)
-            crop_out = os.path.join(self.out_dir, filename)
-            cropped_files.append(crop_out)
+                crop_count += 1
 
-            cv2.imwrite(crop_out, imcrop)
-            #self.yield_python()
+                imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
+                filename = os.path.basename(slice_)
+                crop_out = os.path.join(self.out_dir, filename)
+                cropped_files.append(crop_out)
 
-        self.callback("success")
-        return cropped_files
+                cv2.imwrite(crop_out, imcrop)
+                #self.yield_python()
+
+            self.callback("success")
+            return cropped_files
 
     def zp_callback(self, msg):
         print msg
@@ -380,13 +389,15 @@ class Autocrop():
         Get the list of files from filedir. Exclude known non slice files
         """
         files = []
+        cropped_files =[]
         for fn in os.listdir(filedir):
             if any(fn.endswith(x) for x in self.ignore_exts):
                 continue
             if any(fnmatch.fnmatch(fn, x) for x in (
                     '*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF', '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG' )):
                 files.append(os.path.join(self.in_dir, fn))
-        return tuple(files[0::skip]), files
+                cropped_files.append(os.path.join(self.out_dir, fn))
+        return tuple(files[0::skip]), files, cropped_files
 
     def convertDistFromEdgesToCoords(self, distances):
         """
