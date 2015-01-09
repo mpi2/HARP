@@ -57,21 +57,25 @@ def scale_by_pixel_size(images, scale, outpath):
     img_path_list = sorted(img_path_list)
 
     xz_scaled_array = []
-    #Resample z slices
+
+    datatype = 'uint8'
+
     with open(temp_xy, 'ab') as xy_fh:
         first = True
         for img_path in img_path_list:
 
             # Rescale the z slices
-            z_slice_arr = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+            z_slice_arr = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_UNCHANGED)
+            # Bin function
             z_slice_resized = cv2.resize(z_slice_arr, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
             if first:
                 xy_scaled_dims.extend(z_slice_resized.shape)
+                datatype = z_slice_resized.dtype
                 first = False
-            z_slice_resized.tofile(xy_fh, format="")
+            z_slice_resized.tofile(xy_fh)
 
     #create memory mapped version of the temporary xy scaled slices
-    xy_scaled_mmap = np.memmap(temp_xy, dtype=np.uint8, mode='r', shape=tuple(xy_scaled_dims))
+    xy_scaled_mmap = np.memmap(temp_xy, dtype=datatype, mode='r', shape=tuple(xy_scaled_dims))
 
     #Get dimensions for the memory mapped raw xyz file
     xyz_scaled_dims = []
@@ -95,8 +99,8 @@ def scale_by_pixel_size(images, scale, outpath):
             scaled_xz.tofile(xyz_fh)
 
     #create memory mapped version of the temporary xy scaled slices
-    xyz_scaled_mmap = np.memmap(temp_xyz, dtype=np.uint8, mode='r', shape=tuple(xyz_scaled_dims))
-   
+    xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
+
     nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
 
     try:
@@ -144,14 +148,14 @@ def scale_by_integer_factor(img_dir, scale_factor, outpath):
 
 
 def get_dimensions(img_path_list):
-    array = cv2.imread(img_path_list[0], cv2.CV_LOAD_IMAGE_GRAYSCALE)
+    array = cv2.imread(img_path_list[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
     dims = (len(img_path_list), array.shape[0], array.shape[1])
     return dims
 
 
 def array_generator(file_list):
     for impath in file_list:
-        array = cv2.imread(impath, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+        array = cv2.imread(impath, cv2.CV_LOAD_IMAGE_UNCHANGED)
         yield array
 
 

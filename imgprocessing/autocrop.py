@@ -23,7 +23,7 @@ msg_q = mp.Queue()
 
 
 class Autocrop():
-    def __init__(self, in_dir, out_dir, callback, ignore_exts, num_proc=None, def_crop=None, repeat_crop=None):
+    def __init__(self, in_dir, out_dir, callback, ignore_exts, configOb, num_proc=None, def_crop=None, repeat_crop=None):
         """
         :param in_dir:
         :param out_dir:
@@ -40,6 +40,7 @@ class Autocrop():
 
         #call the super
         self.callback = callback
+        self.configOb = configOb
         self.ignore_exts = ignore_exts
         self.in_dir = in_dir
         self.out_dir = out_dir
@@ -252,40 +253,55 @@ class Autocrop():
             return ("no image files found in " + self.in_dir)
 
         # Start with a z-projection
-        zp = zproject.Zproject(self.in_dir, self.out_dir, self.zp_callback)
+        zp = zproject.Zproject(self.in_dir, self.configOb.meta_path, self.zp_callback)
         zp.run()
 
         # Load z projection image
-        z_proj_path = os.path.join(self.out_dir, "max_intensity_z.png")
+        z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
         zp_im = sitk.ReadImage(z_proj_path)
 
-        # Apply otsu threshold and remove all but largest component
-        seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=255, numberOfHistogramBins=128)
-        seg = sitk.ConnectedComponent(seg)  # label non-background pixels
-        seg = sitk.RelabelComponent(seg)  # relabel components in order of ascending size
-        # seg = seg == 1  # discard all but largest component
+        #Get the datatype
+        testimg = cv2.imread(self.files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+        datatype = testimg.dtype
+        if datatype == np.uint16:
+            outval = 65536
+        else:
+            outval = 255
+        print 'label'
 
+        try:
+            # Apply otsu threshold and remove all but largest component
+            seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=outval, numberOfHistogramBins=128)
+            seg = sitk.ConnectedComponent(seg)  # label non-background pixels
+            seg = sitk.RelabelComponent(seg)  # relabel components in order of ascending size
+        except Exception:
+            print "failed++++++++++++++++++++"
+        # seg = seg == 1  # discard all but largest component
         # Get bounding box
         label_stats = sitk.LabelStatisticsImageFilter()
         label_stats.Execute(zp_im, seg)
         bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
 
         # Padding
-        self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE).shape
+        self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED).shape
         padding = int(np.mean(self.imdims) * 0.025)
         bbox = self.pad_bounding_box(bbox, padding)
         self.crop_box = tuple(bbox)
 
         # Delete z projection image
-        os.remove(z_proj_path)
+        # try:
+        #     os.remove(z_proj_path)
+        # except OSError:
+        #     print 'cant find z projection to delete it'
 
         # Actually perform the cropping
         crop_count = 1
         cropped_files = []
 
+
         for slice_ in self.files:
 
-            im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+            im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_UNCHANGED)
             if crop_count % 20 == 0:
                 self.callback(
                     "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
@@ -296,7 +312,7 @@ class Autocrop():
             filename = os.path.basename(slice_)
             crop_out = os.path.join(self.out_dir, filename)
             cropped_files.append(crop_out)
-
+            print 'crop out' ,crop_out
             cv2.imwrite(crop_out, imcrop)
             #self.yield_python()
 
@@ -319,7 +335,7 @@ class Autocrop():
             return ("no image files found in " + self.in_dir)
 
         #get image dimensions from first file
-        self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE).shape
+        self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED).shape
         padding = int(np.mean(self.imdims) * 0.025)
 
         if self.def_crop:
@@ -348,7 +364,7 @@ class Autocrop():
                 if self.shared_auto_count.value % 40 == 0:
                     self.callback("Getting crop box: {0}/{1} images".format(str(self.shared_auto_count.value),
                                                                             str(len(self.files))))
-                im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+                im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
                 self.metric_file_queue.put(im)
                 self.yield_python()
 

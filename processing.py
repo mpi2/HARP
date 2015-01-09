@@ -272,8 +272,9 @@ class ProcessingThread(QtCore.QThread):
         self.session_log.write(str(datetime.datetime.now()) + "\n")
 
         # make autocrop object
+        #TODO: just send configOb
         self.auto_crop = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path,
-                                           self.autocrop_update_slot, self.extensions_to_ignore,
+                                           self.autocrop_update_slot, self.extensions_to_ignore, self.configOb,
                                            def_crop=dimensions_tuple, repeat_crop=derived_cropbox)
 
         # WindowsError is an execption only available on Windows need to make a fake WindowsError exception for linux
