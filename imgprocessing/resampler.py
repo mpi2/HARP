@@ -68,16 +68,14 @@ def scale_by_pixel_size(images, scale, outpath):
             if first:
                 xy_scaled_dims.extend(z_slice_resized.shape)
                 first = False
-            #z_slice_resized.tofile(xy_fh)
-            xz_scaled_array.append(z_slice_resized)
+            z_slice_resized.tofile(xy_fh)
 
-    xy_scaled_scaled_array = np.asarray(xz_scaled_array)
-    nrrd.write(outpath, xy_scaled_scaled_array)
-    return
+
 
     #create memory mapped version of the temporary xy scaled slices
     xy_scaled_mmap = np.memmap(temp_xy, dtype=np.uint8, mode='r', shape=tuple(xy_scaled_dims))
-
+    nrrd.write(outpath, xy_scaled_mmap)
+    return
     #Get dimensions for the memory mapped raw xyz file
     xyz_scaled_dims = []
     first = True
