@@ -282,7 +282,7 @@ class Autocrop():
             bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
 
             # Padding
-            self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE).shape
+            self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED).shape
             padding = int(np.mean(self.imdims) * 0.025)
             bbox = self.pad_bounding_box(bbox, padding)
             self.crop_box = tuple(bbox)
@@ -296,7 +296,7 @@ class Autocrop():
 
             for slice_ in self.files:
 
-                im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+                im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_UNCHANGED)
                 if crop_count % 20 == 0:
                     self.callback(
                         "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
