@@ -246,12 +246,11 @@ class Autocrop():
             bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
 
             # Padding
-            self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE).shape
+            self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED).shape
             padding = int(np.mean(self.imdims) * 0.025)
             bbox = self.pad_bounding_box(bbox, padding)
             self.crop_box = tuple(bbox)
 
-            #TODO: check for sane bounding box dimensions
             if self.crop_box[1] - self.crop_box[0] < 10 or self.crop_box[3] - self.crop_box[2] < 10:
                 self.callback('Autocrop failed! Try manual cropping')
                 return
@@ -266,7 +265,7 @@ class Autocrop():
 
             for slice_ in self.files:
 
-                im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+                im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_UNCHANGED)
                 if crop_count % 20 == 0:
                     self.callback(
                         "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
@@ -300,7 +299,7 @@ class Autocrop():
             return ("no image files found in " + self.in_dir)
 
         #get image dimensions from first file
-        self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE).shape
+        self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED).shape
         padding = int(np.mean(self.imdims) * 0.025)
 
         if self.def_crop:
@@ -329,7 +328,7 @@ class Autocrop():
                 if self.shared_auto_count.value % 40 == 0:
                     self.callback("Getting crop box: {0}/{1} images".format(str(self.shared_auto_count.value),
                                                                             str(len(self.files))))
-                im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+                im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
                 self.metric_file_queue.put(im)
                 self.yield_python()
 
