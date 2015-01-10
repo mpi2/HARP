@@ -42,7 +42,7 @@ class Zproject:
         if len(files) < 1:
             return ("no image files found in" + self.img_dir)
 
-        im = cv2.imread(files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+        im = cv2.imread(files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE)
         self.imdims = im.shape
 
         # make a new list by removing every nth image
@@ -89,7 +89,7 @@ class Zproject:
 
     def fileReader(self):
         for file_ in self.files:
-            im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+            im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
             self.shared_z_count.value += (1 * self.skip_num)
             self.im_array_queue.put(im_array)
         # Insert sentinels to signal end of list

@@ -57,43 +57,6 @@ class Autocrop():
         self.threshold = 0.01  # threshold for cropping metric
         shared_terminate.value = 0
 
-    def metricFinder(self):
-        """
-        Processes each image file individually
-        Implements __call__() so it can be used in multithreading by '''
-        '''
-        @param: filename path of an image to process
-        @returns: tuple of bounding box coords
-
-        Reads image into array. Flips it around each time
-        with column/row of interest as the top top row
-        """
-
-        global shared_terminate
-
-        while True:
-            try:
-                if shared_terminate.value == 1:
-                    self.callback("Processing Cancelled!")
-                    return
-
-                matrix = self.metric_file_queue.get(block=True)
-
-                self.yield_python()
-
-                if matrix == 'STOP':  # found a sentinel
-                    break
-            except Exception as e:
-                print("metric queue error:",e)
-            else:
-                #matrix = np.array(im)
-                crops = {}
-                crops["x"] = np.std(matrix, axis=0)
-                crops["y"] = np.std(matrix, axis=1)
-                self.crop_metric_queue.put(crops)
-                self.yield_python()
-            #self.metric_file_queue.task_done()
-
 
     def calc_auto_crop(self, padding=0):
 
@@ -204,12 +167,7 @@ class Autocrop():
 
         self.yield_python()
 
-    def entropy(self, array):
-        """
-        not currently used
-        """
-        p, lns = Counter(self.round_down(array, 4)), float(len(array))
-        return -sum(count / lns * math.log(count / lns, 2) for count in p.values())
+
 
     def round_down(self, array, divisor):
         for n in array:
@@ -262,16 +220,22 @@ class Autocrop():
         else:
 
             # Start with a z-projection
-            zp = zproject.Zproject(self.in_dir, self.out_dir, self.zp_callback)
+            zp = zproject.Zproject(self.in_dir, self.configOb.meta_path, self.zp_callback)
             zp.run()
 
             # Load z projection image
-            z_proj_path = os.path.join(self.out_dir, "max_intensity_z.png")
+            z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
             zp_im = sitk.ReadImage(z_proj_path)
 
-        try:
+            testimg = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+            datatype = testimg.dtype
+            if datatype is np.uint16:
+                outval = 65535
+            else:
+                outval = 255
+
             # Apply otsu threshold and remove all but largest component
-            seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=255, numberOfHistogramBins=128)
+            seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=outval, numberOfHistogramBins=128)
             seg = sitk.ConnectedComponent(seg)  # label non-background pixels
             seg = sitk.RelabelComponent(seg)  # relabel components in order of ascending size
             # seg = seg == 1  # discard all but largest component
@@ -282,13 +246,19 @@ class Autocrop():
             bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
 
             # Padding
-            self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED).shape
+            self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE).shape
             padding = int(np.mean(self.imdims) * 0.025)
             bbox = self.pad_bounding_box(bbox, padding)
             self.crop_box = tuple(bbox)
 
+            #TODO: check for sane bounding box dimensions
+            if self.crop_box[1] - self.crop_box[0] < 10 or self.crop_box[3] - self.crop_box[2] < 10:
+                self.callback('Autocrop failed! Try manual cropping')
+                return
+
+
             # Delete z projection image
-            os.remove(z_proj_path)
+            #os.remove(z_proj_path)
 
             # Actually perform the cropping
             crop_count = 1
@@ -296,7 +266,7 @@ class Autocrop():
 
             for slice_ in self.files:
 
-                im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+                im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
                 if crop_count % 20 == 0:
                     self.callback(
                         "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
@@ -330,7 +300,7 @@ class Autocrop():
             return ("no image files found in " + self.in_dir)
 
         #get image dimensions from first file
-        self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED).shape
+        self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_GRAYSCALE).shape
         padding = int(np.mean(self.imdims) * 0.025)
 
         if self.def_crop:
@@ -359,7 +329,7 @@ class Autocrop():
                 if self.shared_auto_count.value % 40 == 0:
                     self.callback("Getting crop box: {0}/{1} images".format(str(self.shared_auto_count.value),
                                                                             str(len(self.files))))
-                im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+                im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_GRAYSCALE)
                 self.metric_file_queue.put(im)
                 self.yield_python()
 
