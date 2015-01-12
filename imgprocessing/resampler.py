@@ -16,9 +16,7 @@ import SimpleITK as sitk
 import os
 import shutil
 import cv2
-import collections#
 import lib.nrrd as nrrd
-import sys
 
 
 def resample(images, scale, outpath, scaleby_int):
@@ -34,7 +32,7 @@ def resample(images, scale, outpath, scaleby_int):
     temp_xyz = 'tempXYZscaled.raw'
 
     #Just in case they didn't previously get deleted
-    _remove_temp_files(temp_xy, temp_xyz)
+    _remove_temp_files([temp_xy, temp_xyz])
 
     if os.path.isfile(temp_xy):
         os.remove(temp_xy)
@@ -114,7 +112,7 @@ def resample(images, scale, outpath, scaleby_int):
 
     nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
 
-    _remove_temp_files(temp_xy, temp_xyz)
+    _remove_temp_files([temp_xy, temp_xyz])
 
 
 def _remove_temp_files(file_list):
