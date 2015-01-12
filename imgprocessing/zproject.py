@@ -40,9 +40,12 @@ class Zproject:
                 if prog.search(fn):
                     files.append(os.path.join(self.img_dir, fn))
         if len(files) < 1:
-            return ("no image files found in" + self.img_dir)
+            return "no image files found in" + self.img_dir
 
         im = cv2.imread(files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+        if im == None:
+            return "Cant load {}. Is it corrupted?".format(files[0])
+
         self.imdims = im.shape
 
         # make a new list by removing every nth image
