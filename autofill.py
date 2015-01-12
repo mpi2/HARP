@@ -208,15 +208,15 @@ def auto_file_out(self):
         path, folder_name = os.path.split(input)
         pattern = re.compile("recons", re.IGNORECASE)
         if re.search(pattern, input):
-            output_path = pattern.sub("processed recons", path)
-            output_full = os.path.join(output_path,self.full_name)
+            output_path = pattern.sub("processed_recons", path)
+            output_full = os.path.join(output_path, self.full_name)
             self.ui.lineEditOutput.setText(os.path.abspath(output_full))
         else:
-            output_full = os.path.join(path,"processed recons",folder_name)
+            output_full = os.path.join(path, "processed_recons", folder_name)
 
             self.ui.lineEditOutput.setText(os.path.abspath(output_full))
     except:
-        QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected getting and auto file out',sys.exc_info()[0])
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: Unexpected getting and auto file out', sys.exc_info()[0])
 
 
 def auto_get_scan(self):
