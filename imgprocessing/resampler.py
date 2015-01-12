@@ -29,7 +29,9 @@ def scale_by_pixel_size(images, scale, outpath, scaleby_int):
     :param scaleby_int bool: True-> scale by binning. False-> use cv2 interpolated scaling
     :return:
     """
-
+    # if scaleby_int:
+    #     binshrink(images, scale, outpath)
+    #     return
     temp_xy = 'tempXYscaled.raw'
     temp_xyz = 'tempXYZscaled.raw'
 
@@ -66,11 +68,11 @@ def scale_by_pixel_size(images, scale, outpath, scaleby_int):
             # Rescale the z slices
             z_slice_arr = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_UNCHANGED)
 
+            # This might slow things doen by reasigning to the original array. Maybe we jsut need a differnt view on it
             if scaleby_int:
-                z_slice_resized = rebin(z_slice_arr, scale)
-                print 'scale by int'
-            else:
-                z_slice_resized = cv2.resize(z_slice_arr, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+                z_slice_arr = droppixels(z_slice_arr, scale, scale)
+
+            z_slice_resized = cv2.resize(z_slice_arr, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
 
             if first:
                 xy_scaled_dims.extend(z_slice_resized.shape)
@@ -92,7 +94,11 @@ def scale_by_pixel_size(images, scale, outpath, scaleby_int):
 
             xz_plane = xy_scaled_mmap[:, y, :]
 
+            if scaleby_int:
+                xz_plane = droppixels(xz_plane, 1, scale)
+
             scaled_xz = cv2.resize(xz_plane, (0, 0), fx=1, fy=scale, interpolation=cv2.INTER_AREA)
+
             if first:
                 first = False
                 xyz_scaled_dims.append(xy_scaled_mmap.shape[1])
@@ -106,7 +112,7 @@ def scale_by_pixel_size(images, scale, outpath, scaleby_int):
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
     nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
-
+    return
     try:
         os.remove(temp_xy)
     except OSError:
@@ -118,46 +124,36 @@ def scale_by_pixel_size(images, scale, outpath, scaleby_int):
         pass
 
 
-def rebin(a, scale):
+def droppixels(a, scaley, scalex):
     """
-    Resizes a 2d array by averaging elements,
-    New dimensions must be integral factors of original dimensions
-    https://gist.github.com/zonca/1348792
+    Make an array divisible by integar scale factors by dropping pixels from the right and bottom of the image
     """
 
     #If New dimension not integral factors of original, drop pixels to make it so they are
-
     y1, x1 = a.shape
-    if y1 % 1/scale != 0:
+    changed = False
 
-    else
-        y2 = y1 * scale
+    # Get the shape of the old array after dropping pixels
 
+    dropy = y1 % (1 / scaley)
+    if dropy != 0:
+        y1 -= dropy
+        b = a[0:-dropy]
+        changed = True
 
-    dropy = y1 % y2
-    dropx = x1 % x2
+    dropx = x1 % (1 / scalex)
+    if dropx != 0:
+        x1 -= dropx
+        b = a[:, 0:-dropx]
+        changed = True
 
+    if not changed:
+        b = a
 
-    print 'scale', scale
-
-    y2, x2 = y1 * scale, x1 * scale
-
-
-
-    if dropy > 0 and dropx > 0:
-        slice_ = a[0:-dropy, 0:-dropx]
-    if dropy > 0 and dropx == 0:
-        slice_ = a[0:-dropy]
-    if dropy == 0 and dropx > 0:
-        slice_ = a[:, 0:-dropx]
-    else:
-        slice_ = a
-
-    return slice_.reshape((y2, y1/y2, x2, x1/x2)).mean(3).mean(1)
+    return b
 
 
-
-def scale_by_integer_factor(img_dir, scale_factor, outpath):
+def binshrink(img_dir, scale_factor, outpath):
     """
     Shrink the image by an integer factor. Confirmed only on even-dimension images currently. May need to add
     padding. This is working!
@@ -168,6 +164,8 @@ def scale_by_integer_factor(img_dir, scale_factor, outpath):
     img_path_list = get_img_paths(img_dir)
     last_img_index = 0
     z_chuncks = []
+
+    scale_factor = int(1/ scale_factor)
 
     for i in range(scale_factor, len(img_path_list) + scale_factor, scale_factor):
         slice_paths = [x for x in img_path_list[last_img_index: i + 1]]
@@ -228,8 +226,10 @@ if __name__ == '__main__':
         parser = argparse.ArgumentParser("Image resampler (downscale)")
         parser.add_argument('-i', '--input_folder', dest='input_dir', help='Input folder')
         parser.add_argument('-o', '--output_path', dest='output_path', help='Output path')
-        parser.add_argument('-s', '--scale_factor', dest='scale_factor', help='downscaling factor (int)')
+        parser.add_argument('-sf', '--scale_factor', dest='scale_factor', help='downscaling factor (float)')
+        parser.add_argument('-si', '--scale_byint', dest='scaleby_int', action='store_true', default=False)
+
         args = parser.parse_args()
 
         #scale_by_integer_factor(args.input_dir, int(args.scale_factor), args.output_path)
-        scale_by_pixel_size(args.input_dir, float(args.scale_factor), args.output_path)
+        scale_by_pixel_size(args.input_dir, float(args.scale_factor), args.output_path, args.scaleby_int)

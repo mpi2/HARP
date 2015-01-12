@@ -278,6 +278,7 @@ class ProcessingThread(QtCore.QThread):
                                            def_crop=dimensions_tuple, repeat_crop=derived_cropbox)
 
         # WindowsError is an execption only available on Windows need to make a fake WindowsError exception for linux
+        # Neil: What's this for?
         if not getattr(__builtins__, "WindowsError", None):
             class WindowsError(OSError): pass
 
@@ -481,7 +482,10 @@ class ProcessingThread(QtCore.QThread):
         out_name = os.path.join(self.configOb.scale_path,
                                 self.configOb.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".nrrd")
 
-        resampler.scale_by_pixel_size(self.cropped_files_list, 1.0 / scale, out_name, scaleby_int)
+        try:
+            resampler.scale_by_pixel_size(self.cropped_files_list, 1.0 / scale, out_name, scaleby_int)
+        except ValueError as e:
+            self.emit(QtCore.SIGNAL('update(QString)'), "Rescaling the image failed: {}".format(e))
 
 
 
