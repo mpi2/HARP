@@ -2,14 +2,20 @@
 
 import argparse
 import os
-from sys import platform as _platform
 import fnmatch
 import numpy as np
-import multiprocessing as mp
-from time import sleep
 import cv2
+import scipy.ndimage
 import SimpleITK as sitk
 from imgprocessing import zproject
+
+
+class HarpDataError(Exception):
+    """
+    Raised when some of the supplied data is found to be faulty
+    """
+    pass
+
 
 class Crop():
     def __init__(self, in_dir, out_dir, callback, ignore_exts, configOb, num_proc=None, def_crop=None, repeat_crop=None):
@@ -23,9 +29,6 @@ class Crop():
         :param repeat_crop:
         :return:
         """
-        # freeze support (windows only)
-        if _platform == "win32" or _platform == "win64":
-            mp.freeze_support()
 
         #call the super
         self.callback = callback
@@ -33,15 +36,11 @@ class Crop():
         self.ignore_exts = ignore_exts
         self.in_dir = in_dir
         self.out_dir = out_dir
-        self.shared_auto_count = mp.Value("i", 0)
-        self.shared_crop_count = mp.Value("i", 0)
+        self.crop_count =  0
         self.imdims = None
         self.def_crop = def_crop
         self.num_proc = num_proc
         self.repeat_crop = repeat_crop
-
-        self.metric_file_queue = mp.Queue(30)
-        self.crop_metric_queue = mp.Queue()
         self.skip_num = 10  # read every n files for determining cropping box
         self.threshold = 0.01  # threshold for cropping metric
 
@@ -68,20 +67,28 @@ class Crop():
         """
         first = True
         for file_ in sorted(self.files):
-            im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+            #im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+            im = scipy.ndimage.imread(file_)
+
             if im == None:
-                raise ValueError("failed to read {}".format(file_))
+                raise HarpDataError("failed to read {}".format(file_))
+
             if first:
                 dimcheck = im.shape
                 first = False
+
             else:
                 if im.shape != dimcheck:
-                    raise ValueError("first file had shape of {}. file_ has shape {}".format(dimcheck, im.shape))
+                    raise HarpDataError("Cropping. First file had shape of {}. {} has shape {}".
+                                        format(dimcheck, file_, im.shape))
+                # try:
+                #     pass
+                #     #im[dimcheck] Check for indexing error as .shape is derived from header only
 
-            self.shared_crop_count.value += 1
-            if self.shared_crop_count.value % 20 == 0:
+            self.crop_count.value += 1
+            if self.crop_count.value % 20 == 0:
                 self.callback(
-                    "Cropping: {0}/{1} images".format(str(self.shared_crop_count.value), str(len(self.files))))
+                    "Cropping: {0}/{1} images".format(str(self.crop_count.value), str(len(self.files))))
 
             imcrop = im[self.crop_box[1]:self.crop_box[3], self.crop_box[0]: self.crop_box[2]]
             filename = os.path.basename(file_)
@@ -132,7 +139,8 @@ class Crop():
             z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
             zp_im = sitk.ReadImage(z_proj_path)
 
-            testimg = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+            #testimg = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+            testimg = scipy.ndimage.imread(sparse_files[0])
             if testimg == None:
                 self.callback('Failed to read {}. Is it corrupt'.format(sparse_files[0]))
                 return
@@ -169,9 +177,11 @@ class Crop():
 
             for slice_ in self.files:
 
-                im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+                #im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+                im = scipy.ndimage.imread(slice_)
+
                 if im == None:
-                    raise ValueError('Failed to read {}. Is it corrupt'.format(slice_))
+                    raise HarpDataError('Failed to read {}. Is it corrupt'.format(slice_))
 
                 if crop_count % 20 == 0:
                     self.callback(
@@ -239,5 +249,4 @@ def cli_run():
 
 
 if __name__ == '__main__':
-    mp.freeze_support()
     cli_run()

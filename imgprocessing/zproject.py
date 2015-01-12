@@ -8,10 +8,12 @@ from multiprocessing import cpu_count, Value, freeze_support
 import threading
 import Queue
 import cv2
+import scipy.ndimage
 
 # For QThread class
-from PyQt4 import QtGui, QtCore
-from sys import platform as _platform
+from PyQt4 import QtCore
+
+#TODO: add HarpDataError exception handling
 
 
 class Zproject:
@@ -42,7 +44,8 @@ class Zproject:
         if len(files) < 1:
             return "no image files found in" + self.img_dir
 
-        im = cv2.imread(files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+        #im = cv2.imread(files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+        im = scipy.ndimage.imread(files[0])
         if im == None:
             return "Cant load {}. Is it corrupted?".format(files[0])
 
@@ -92,7 +95,8 @@ class Zproject:
 
     def fileReader(self):
         for file_ in self.files:
-            im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+            #im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+            im_array = scipy.ndimage.imread(file_)
             self.shared_z_count.value += (1 * self.skip_num)
             self.im_array_queue.put(im_array)
         # Insert sentinels to signal end of list

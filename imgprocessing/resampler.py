@@ -48,10 +48,10 @@ def resample(images, scale, outpath, scaleby_int):
     elif type(images) in [list, tuple]:
         img_path_list = images
     else:
-        raise ValueError("HARP Resampler: resampler needs a direcory of images or a list of images")
+        raise HarpDataError("HARP Resampler: resampler needs a direcory of images or a list of images")
 
     if len(img_path_list) < 1:
-        raise ValueError("HARP Resampler: There are no images in the list or directory")
+        raise HarpDataError("HARP Resampler: There are no images in the list or directory")
 
     #Get dimensions for the memory mapped raw xy file
     xy_scaled_dims = [len(img_path_list)]
@@ -216,6 +216,13 @@ def mkdir_force(path):
         shutil.rmtree(path)
     os.mkdir(path)
     return path
+
+
+class HarpDataError(Exception):
+    """
+    Raised when some of the supplied data is found to be faulty
+    """
+    pass
 
 
 if __name__ == '__main__':

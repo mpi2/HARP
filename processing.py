@@ -303,8 +303,7 @@ class ProcessingThread(QtCore.QThread):
                                    traceback.format_exc() + "\n")
             self.emit(QtCore.SIGNAL('update(QString)'), "error: HARP can't find the files, see log file")
 
-        except ValueError as e:
-            # This is where we catch exceptions that we catch data problem errors
+        except HarpDataError as e:
             self.session_log.write("Error: {}".format(e))
             self.emit(QtCore.SIGNAL('update(QString)'), "error: {}".format(e))
 
@@ -490,7 +489,7 @@ class ProcessingThread(QtCore.QThread):
         try:
             files_for_scaling = self.getFileList(self.folder_for_scaling)
             resampler.resample(files_for_scaling, scale, out_name, scaleby_int)
-        except ValueError as e:
+        except HarpDataError as e:
             self.emit(QtCore.SIGNAL('update(QString)'), "Rescaling the image failed: {}".format(e))
 
     def getFileList(self, input_folder):
@@ -699,6 +698,13 @@ class ProcessingThread(QtCore.QThread):
 
         """
         pass
+
+
+class HarpDataError(Exception):
+    """
+    Raised when some of the supplied data is found to be faulty
+    """
+    pass
 
 
 def main():
