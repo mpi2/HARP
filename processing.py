@@ -273,7 +273,7 @@ class ProcessingThread(QtCore.QThread):
 
         # make autocrop object
         #TODO: just send configOb
-        self.auto_crop = crop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path,
+        self.auto_crop = crop.Crop(self.configOb.input_folder, self.configOb.cropped_path,
                                            self.autocrop_update_slot, self.extensions_to_ignore, self.configOb,
                                            def_crop=dimensions_tuple, repeat_crop=derived_cropbox)
 
