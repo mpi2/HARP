@@ -74,9 +74,11 @@ class Crop():
             if shared_terminate.value == 1:
                 self.callback("Processing Cancelled!")
                 return
+
             im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
             if im == None:
                 self.callback("failed to read {}".format(file_))
+
             self.shared_crop_count.value += 1
             if self.shared_crop_count.value % 20 == 0:
                 self.callback(
@@ -136,6 +138,10 @@ class Crop():
             zp_im = sitk.ReadImage(z_proj_path)
 
             testimg = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+            if testimg == None:
+                self.callback('Failed to read {}. Is it corrupt'.format(sparse_files[0]))
+                return
+
             datatype = testimg.dtype
             if datatype is np.uint16:
                 outval = 65535
@@ -154,7 +160,7 @@ class Crop():
             bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
 
             # Padding
-            self.imdims = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED).shape
+            self.imdims = testimg.shape
             padding = int(np.mean(self.imdims) * 0.025)
             bbox = self.pad_bounding_box(bbox, padding)
             self.crop_box = tuple(bbox)
@@ -169,6 +175,10 @@ class Crop():
             for slice_ in self.files:
 
                 im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+                if im == None:
+                    self.callback(self.callback('Failed to read {}. Is it corrupt'.format(slice_)))
+                    return
+
                 if crop_count % 20 == 0:
                     self.callback(
                         "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
