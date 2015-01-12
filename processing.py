@@ -287,7 +287,7 @@ class ProcessingThread(QtCore.QThread):
         try:
             # Run autocrop and catch errors
             #self.auto_crop.run() #  the old version of autocrop
-            self.cropped_files_list = self.auto_crop.run_auto_mask()  # James - new version of autocrap using Tom's Otsu masking
+            self.auto_crop.run_auto_mask()  # James - new version of autocrop
 
         except WindowsError as e:
             self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the "
@@ -483,12 +483,23 @@ class ProcessingThread(QtCore.QThread):
                                 self.configOb.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".nrrd")
 
         try:
-            resampler.scale_by_pixel_size(self.cropped_files_list, 1.0 / scale, out_name, scaleby_int)
+            files_for_scaling = self.getFileList(self.folder_for_scaling)
+            resampler.scale_by_pixel_size(files_for_scaling, 1.0 / scale, out_name, scaleby_int)
         except ValueError as e:
             self.emit(QtCore.SIGNAL('update(QString)'), "Rescaling the image failed: {}".format(e))
 
-
-
+    def getFileList(self, input_folder):
+        """
+        Get the list of files from filedir. Exclude known non slice files
+        """
+        files = []
+        for fn in os.listdir(input_folder):
+            if any(fn.endswith(x) for x in self.extensions_to_ignore):
+                continue
+            if any(fnmatch.fnmatch(fn, x) for x in (
+                    '*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF', '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG' )):
+                files.append(os.path.join(input_folder, fn))
+        return files
 
     def hide_files(self):
         """ Puts non-image files non-valid image files into a temp folder so will be ignored for scaling

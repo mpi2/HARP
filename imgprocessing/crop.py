@@ -216,7 +216,6 @@ class Autocrop():
                 self.callback("Processing Cancelled!")
                 return
             self.callback("success")
-            return cropped_files
         else:
 
             # Start with a z-projection
@@ -255,13 +254,8 @@ class Autocrop():
                 self.callback('Autocrop failed! Try manual cropping')
                 return
 
-
-            # Delete z projection image
-            #os.remove(z_proj_path)
-
             # Actually perform the cropping
             crop_count = 1
-            cropped_files = []
 
             for slice_ in self.files:
 
@@ -275,13 +269,9 @@ class Autocrop():
                 imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
                 filename = os.path.basename(slice_)
                 crop_out = os.path.join(self.out_dir, filename)
-                cropped_files.append(crop_out)
-
                 cv2.imwrite(crop_out, imcrop)
-                #self.yield_python()
 
             self.callback("success")
-            return cropped_files
 
     def zp_callback(self, msg):
         pass
@@ -293,7 +283,7 @@ class Autocrop():
         """
 
         #get a subset of files to work with to speed it up
-        sparse_files, files = self.getFileList(self.in_dir, self.skip_num)
+        sparse_files, files, cropped_files = self.getFileList(self.in_dir, self.skip_num)
         self.files = files
 
         if len(sparse_files) < 1:

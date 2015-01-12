@@ -107,7 +107,7 @@ class Zproject:
                 pass
             else:
                 self.im_array_queue.task_done()
-                if im_array == None:
+                if im_array is None:
                     break
                 max_ = np.maximum(max_, im_array[:][:])
                 if self.shared_z_count.value % 10 == 0:
