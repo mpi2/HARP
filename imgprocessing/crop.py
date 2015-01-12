@@ -11,11 +11,6 @@ import cv2
 import SimpleITK as sitk
 from imgprocessing import zproject
 
-
-shared_terminate = mp.Value("i", 0)
-msg_q = mp.Queue()
-
-
 class Crop():
     def __init__(self, in_dir, out_dir, callback, ignore_exts, configOb, num_proc=None, def_crop=None, repeat_crop=None):
         """
@@ -49,7 +44,6 @@ class Crop():
         self.crop_metric_queue = mp.Queue()
         self.skip_num = 10  # read every n files for determining cropping box
         self.threshold = 0.01  # threshold for cropping metric
-        shared_terminate.value = 0
 
     def calc_manual_crop(self):
         # Repeat crop variable is for when an autocrop has already been performed for a channel of OPT and the user
@@ -68,15 +62,14 @@ class Crop():
         self.run_crop_process()
 
     def run_crop_process(self):
-        global shared_terminate
-        # Perform the cropping using cv2
+      """
+      Perform a crop based on previously selected bounding boxter
+      :return:
+      """
         for file_ in self.files:
-            if shared_terminate.value == 1:
-                self.callback("Processing Cancelled!")
-                return
-
             im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
             if im == None:
+                print "dodgy file"
                 self.callback("failed to read {}".format(file_))
 
             self.shared_crop_count.value += 1
@@ -123,9 +116,6 @@ class Crop():
 
         if self.def_crop:
             self.calc_manual_crop()
-            if shared_terminate.value == 1:
-                self.callback("Processing Cancelled!")
-                return
             self.callback("success")
         else:
 
@@ -222,12 +212,6 @@ class Crop():
 
     def yield_python(self, seconds=0):
         sleep(seconds)
-
-
-def terminate():
-    global shared_terminate
-    shared_terminate.value = 1
-
 
 def dummy_callback(msg):
     """use for cli running"""
