@@ -199,6 +199,12 @@ class MainWindow(QtGui.QMainWindow):
         # Accept drag and drop
         self.setAcceptDrops(True)
 
+        # Make line edits accept only digits
+        self.ui.lineEditX.setValidator(QtGui.QIntValidator(0, 100000))
+        self.ui.lineEditY.setValidator(QtGui.QIntValidator(0, 100000))
+        self.ui.lineEditH.setValidator(QtGui.QIntValidator(1, 100000))
+        self.ui.lineEditW.setValidator(QtGui.QIntValidator(1, 100000))
+
         # to make the window visible
 
         self.showMaximized()

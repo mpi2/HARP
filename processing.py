@@ -278,7 +278,6 @@ class ProcessingThread(QtCore.QThread):
                                            def_crop=dimensions_tuple, repeat_crop=derived_cropbox)
 
         # WindowsError is an execption only available on Windows need to make a fake WindowsError exception for linux
-        # Neil: What's this for?
         if not getattr(__builtins__, "WindowsError", None):
             class WindowsError(OSError): pass
 
