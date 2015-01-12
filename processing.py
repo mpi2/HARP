@@ -303,6 +303,11 @@ class ProcessingThread(QtCore.QThread):
                                    traceback.format_exc() + "\n")
             self.emit(QtCore.SIGNAL('update(QString)'), "error: HARP can't find the files, see log file")
 
+        except ValueError as e:
+            # This is where we catch exceptions that we catch data problem errors
+            self.session_log.write("Error: {}".format(e))
+            self.emit(QtCore.SIGNAL('update(QString)'), "error: {}".format(e))
+
         except Exception as e:
             self.session_log.write("error: Unknown exception. Exception message:\n"
                                    + "Exception traceback:" +
@@ -690,56 +695,10 @@ class ProcessingThread(QtCore.QThread):
                 out.close()
 
     def kill_slot(self):
-        """ This method is called every time a user presses stop
-
-        This slot is connected to the emission command self.emit(QtCore.SIGNAL('kill(QString)'), "kill") when called
-        in harp.py
-
-        See harp.kill_em_all() and harp.processing_thread() for how the kill slot was setup.
-
-        It should kill any python processes by changing switches which are checked regularly in the methods used.
-
-        Calls a method autocrop.terminate() which sends stop signals to stop the multithreaded processing running
-        for the autocrop
-
-        Neil: This needs rewriting. There is no ImageJ, but dpo we have to kill the scaling threads??
+        """ How do we now kill a job if it's on this thread.
 
         """
-        print("Kill all")
-        # Update the GUI with what has happened
-        #self.emit(QtCore.SIGNAL('update(QString)'), "Processing Cancelled!")  # shouldn't need this..
-
-        # Kill the processes in autocrop
-        crop.terminate()
-
-        # Kills any processes in the ProcessingThread.run() method
-        self.kill_check == 1    # this does nothing...
-
-        try:
-            # If imagej pid is defined, means imagej is still running
-            if self.imagej_pid:
-                print "Killing imagej"
-
-                # Different kill methods for windows and linux
-                if _platform == "linux" or _platform == "linux2":
-                    print "Killing"
-                    print self.imagej_pid
-                    os.kill(int(self.imagej_pid), signal.SIGKILL)
-                    #self.emit(QtCore.SIGNAL('update(QString)'), "Processing Cancelled!")  # shouldn't need this..
-
-                elif _platform == "win32" or _platform == "win64":
-                    proc = subprocess.Popen(["taskkill", "/f", "/t", "/im", str(self.imagej_pid)],
-                                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    (out, err) = proc.communicate()
-                    if out:
-                        print "program output:", out
-                    if err:
-                        print "program error output:", err
-
-                # Update the GUI again just in case it took a while.
-                #self.emit(QtCore.SIGNAL('update(QString)'), "Processing Cancelled!")  # shouldn't need this..
-        except OSError as e:
-            print("os.kill could not kill process, reason: {0}".format(e))
+        pass
 
 
 def main():

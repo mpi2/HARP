@@ -62,15 +62,21 @@ class Crop():
         self.run_crop_process()
 
     def run_crop_process(self):
-      """
-      Perform a crop based on previously selected bounding boxter
-      :return:
-      """
-        for file_ in self.files:
+        """
+        Perform a crop based on previously selected bounding boxter
+        :return:
+        """
+        first = True
+        for file_ in sorted(self.files):
             im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
             if im == None:
-                print "dodgy file"
-                self.callback("failed to read {}".format(file_))
+                raise ValueError("failed to read {}".format(file_))
+            if first:
+                dimcheck = im.shape
+                first = False
+            else:
+                if im.shape != dimcheck:
+                    raise ValueError("first file had shape of {}. file_ has shape {}".format(dimcheck, im.shape))
 
             self.shared_crop_count.value += 1
             if self.shared_crop_count.value % 20 == 0:
@@ -81,7 +87,6 @@ class Crop():
             filename = os.path.basename(file_)
             crop_out = os.path.join(self.out_dir, filename)
             cv2.imwrite(crop_out, imcrop)
-            self.yield_python()
 
         self.callback("cropping finished")
 
@@ -109,7 +114,7 @@ class Crop():
 
         # Get list of files
         sparse_files, files, cropped_files = self.getFileList(self.in_dir, self.skip_num)
-        self.files = files
+        self.files = sorted(files)
 
         if len(sparse_files) < 1:
             return ("no image files found in " + self.in_dir)
@@ -166,8 +171,7 @@ class Crop():
 
                 im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_UNCHANGED)
                 if im == None:
-                    self.callback(self.callback('Failed to read {}. Is it corrupt'.format(slice_)))
-                    return
+                    raise ValueError('Failed to read {}. Is it corrupt'.format(slice_))
 
                 if crop_count % 20 == 0:
                     self.callback(
@@ -191,7 +195,7 @@ class Crop():
         Get the list of files from filedir. Exclude known non slice files
         """
         files = []
-        cropped_files =[]
+        cropped_files = []
         for fn in os.listdir(filedir):
             if any(fn.endswith(x) for x in self.ignore_exts):
                 continue
@@ -210,8 +214,6 @@ class Crop():
         y1 = xywh[1] + xywh[3]
         return xywh[0], xywh[1], x1, y1
 
-    def yield_python(self, seconds=0):
-        sleep(seconds)
 
 def dummy_callback(msg):
     """use for cli running"""
