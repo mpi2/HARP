@@ -36,7 +36,7 @@ from config import ConfigClass
 import numpy as np
 import cv2
 from SimpleITK import GetImageFromArray, WriteImage
-from imgprocessing import resampler, autocrop
+from imgprocessing import resampler, crop
 
 
 class ProcessingThread(QtCore.QThread):
@@ -178,7 +178,7 @@ class ProcessingThread(QtCore.QThread):
         The majority of this method is to determine what parameters are in the config file and setup the autocrop
         accordingly.
 
-        Once the cropping is setup the autocrop.py module is called and a callback autocrop_update_slot method
+        Once the cropping is setup the crop.py module is called and a callback autocrop_update_slot method
         is used to monitor progress
 
         :ivar obj self.session_log: python file object. Used to record the log of what has happened.
@@ -273,7 +273,7 @@ class ProcessingThread(QtCore.QThread):
 
         # make autocrop object
         #TODO: just send configOb
-        self.auto_crop = autocrop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path,
+        self.auto_crop = crop.Autocrop(self.configOb.input_folder, self.configOb.cropped_path,
                                            self.autocrop_update_slot, self.extensions_to_ignore, self.configOb,
                                            def_crop=dimensions_tuple, repeat_crop=derived_cropbox)
 
@@ -320,7 +320,6 @@ class ProcessingThread(QtCore.QThread):
             if any(file_.endswith(x) for x in self.extensions_to_ignore):
                 continue
             if file_.endswith(('tiff', 'tif', 'TIFF', 'TIF', 'BMP', 'bmp')):
-                print file_
                 array_2d = cv2.imread(os.path.join(in_dir, file_), cv2.CV_LOAD_IMAGE_GRAYSCALE)
                 if array_3d is None:
                     array_3d = array_2d
@@ -435,10 +434,10 @@ class ProcessingThread(QtCore.QThread):
 
         if self.configOb.pixel_option == "yes":
             scale_factor = self.configOb.SFX_pixel
-            self.downsample(scale_factor)
+            self.downsample(scale_factor, scaleby_int=False)
 
 
-    def downsample(self, scale):
+    def downsample(self, scale, scaleby_int=True):
         """
         """
         if self.kill_check:
@@ -482,8 +481,7 @@ class ProcessingThread(QtCore.QThread):
         out_name = os.path.join(self.configOb.scale_path,
                                 self.configOb.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".nrrd")
 
-        print "\n".join(self.cropped_files_list)
-        resampler.scale_by_pixel_size(self.cropped_files_list, 1.0 / scale, out_name)
+        resampler.scale_by_pixel_size(self.cropped_files_list, 1.0 / scale, out_name, scaleby_int)
 
 
 
@@ -522,7 +520,7 @@ class ProcessingThread(QtCore.QThread):
 
         # loop through crop path
         for fn in os.listdir(crop_path):
-            print fn
+            #print fn
             fnlc = fn.lower()
             full_fn = os.path.join(crop_path, fn)
             # Known non image files
@@ -555,21 +553,6 @@ class ProcessingThread(QtCore.QThread):
         # remove temp folder
         shutil.rmtree(tmp_crop)
 
-
-    def movies(self):
-        """ todo
-        """
-        movie_path = os.path.join(self.configOb.output_folder, "movies")
-        if not os.path.exists(movie_path):
-            os.makedirs(movie_path)
-
-        print "starting movies"
-        for file in range(len(self.scale_array)):
-            print self.scale_array[file]
-            movie = Animator(str(file), movie_path)
-
-            #self.scale_array.
-            #movie = Animator(self., out_dir)
 
     def masking(self):
         """ todo """
@@ -712,7 +695,7 @@ class ProcessingThread(QtCore.QThread):
         #self.emit(QtCore.SIGNAL('update(QString)'), "Processing Cancelled!")  # shouldn't need this..
 
         # Kill the processes in autocrop
-        autocrop.terminate()
+        crop.terminate()
 
         # Kills any processes in the ProcessingThread.run() method
         self.kill_check == 1    # this does nothing...

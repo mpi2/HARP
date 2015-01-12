@@ -21,11 +21,12 @@ import lib.nrrd as nrrd
 import sys
 
 
-def scale_by_pixel_size(images, scale, outpath):
+def scale_by_pixel_size(images, scale, outpath, scaleby_int):
     """
     :param images: iterable or a directory
     :param scale:
     :param outpath:
+    :param scaleby_int bool: True-> scale by binning. False-> use cv2 interpolated scaling
     :return:
     """
 
@@ -56,8 +57,6 @@ def scale_by_pixel_size(images, scale, outpath):
 
     img_path_list = sorted(img_path_list)
 
-    xz_scaled_array = []
-
     datatype = 'uint8'
 
     with open(temp_xy, 'ab') as xy_fh:
@@ -66,8 +65,13 @@ def scale_by_pixel_size(images, scale, outpath):
 
             # Rescale the z slices
             z_slice_arr = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_UNCHANGED)
-            # Bin function
-            z_slice_resized = cv2.resize(z_slice_arr, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+
+            if scaleby_int:
+                z_slice_resized = rebin(z_slice_arr, scale)
+                print 'scale by int'
+            else:
+                z_slice_resized = cv2.resize(z_slice_arr, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+
             if first:
                 xy_scaled_dims.extend(z_slice_resized.shape)
                 datatype = z_slice_resized.dtype
@@ -112,6 +116,45 @@ def scale_by_pixel_size(images, scale, outpath):
         os.remove(temp_xyz)
     except OSError:
         pass
+
+
+def rebin(a, scale):
+    """
+    Resizes a 2d array by averaging elements,
+    New dimensions must be integral factors of original dimensions
+    https://gist.github.com/zonca/1348792
+    """
+
+    #If New dimension not integral factors of original, drop pixels to make it so they are
+
+    y1, x1 = a.shape
+    if y1 % 1/scale != 0:
+
+    else
+        y2 = y1 * scale
+
+
+    dropy = y1 % y2
+    dropx = x1 % x2
+
+
+    print 'scale', scale
+
+    y2, x2 = y1 * scale, x1 * scale
+
+
+
+    if dropy > 0 and dropx > 0:
+        slice_ = a[0:-dropy, 0:-dropx]
+    if dropy > 0 and dropx == 0:
+        slice_ = a[0:-dropy]
+    if dropy == 0 and dropx > 0:
+        slice_ = a[:, 0:-dropx]
+    else:
+        slice_ = a
+
+    return slice_.reshape((y2, y1/y2, x2, x1/x2)).mean(3).mean(1)
+
 
 
 def scale_by_integer_factor(img_dir, scale_factor, outpath):

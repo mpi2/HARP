@@ -284,7 +284,8 @@ class Autocrop():
             return cropped_files
 
     def zp_callback(self, msg):
-        print msg
+        pass
+        #print msg
 
     def run(self):
         """
@@ -405,7 +406,7 @@ def init_cropping_win(self):
         im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
         self.shared_crop_count.value += 1
         if self.shared_crop_count.value % 20 == 0:
-            print "Cropping: {0}/{1} images".format(str(self.shared_crop_count.value), str(len(self.files)))
+            #print "Cropping: {0}/{1} images".format(str(self.shared_crop_count.value), str(len(self.files)))
             msg_q.put("Cropping: {0}/{1} images".format(str(self.shared_crop_count.value), str(len(self.files))))
 
         imcrop = im[self.crop_box[1]:self.crop_box[3], self.crop_box[0]: self.crop_box[2]]

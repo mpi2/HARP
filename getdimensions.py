@@ -88,7 +88,7 @@ def zproject_slot(self, message):
     # Check if z projection finished
     if message == "Z-projection finished":
         # Get the crop dimensions and save the file
-        self.run_crop(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
+        self.get_manual_bbox(os.path.join(self.tmp_dir, "max_intensity_z.tif"))
 
 def run_crop(self, img_path):
     """ Creates the a window to display the z projection used to get crop dimensions
