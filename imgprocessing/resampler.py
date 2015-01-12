@@ -112,7 +112,7 @@ def scale_by_pixel_size(images, scale, outpath, scaleby_int):
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
     nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
-    return
+    
     try:
         os.remove(temp_xy)
     except OSError:
