@@ -484,7 +484,7 @@ class ProcessingThread(QtCore.QThread):
 
         try:
             files_for_scaling = self.getFileList(self.folder_for_scaling)
-            resampler.scale_by_pixel_size(files_for_scaling, 1.0 / scale, out_name, scaleby_int)
+            resampler.resample(files_for_scaling, scale, out_name, scaleby_int)
         except ValueError as e:
             self.emit(QtCore.SIGNAL('update(QString)'), "Rescaling the image failed: {}".format(e))
 
