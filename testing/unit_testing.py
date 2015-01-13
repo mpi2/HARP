@@ -2,8 +2,10 @@ __author__ = 'james'
 
 import sys
 import os
+import pickle
 import unittest
 import SimpleITK as sitk
+import numpy as np
 from PyQt4.QtGui import QApplication
 from PyQt4.QtTest import QTest
 from PyQt4.QtCore import Qt, QTimer
@@ -61,8 +63,7 @@ class BasicTest(unittest.TestCase):
         self.ex.ui.pushButtonStart.click()
 
         # Wait for process to finish
-        time_out = 0
-        while self.ex.p_thread_pool is not None:
+        while self.ex.workthread is not None:
             QTest.qWait(250)
 
 
@@ -138,10 +139,17 @@ class ScalingTests(BasicTest):
 
         # Call superclass method
         BasicTest.setUp(self)
+
+        # Set default example data
         self.set_example_data(self.default_uCT)
 
     def test_scaling(self):
 
+        # Ground truth
+        ground_truth = ((402, 602, 602), (334, 500, 500), (223, 333, 333),
+                        (167, 250, 248), (134, 200, 200), (111, 167, 162))
+
+        # Turn off cropping
         self.ex.ui.checkBoxCropYes.click()
 
         # Set all scaling factors to checked (2 is already selected by default)
@@ -166,10 +174,10 @@ class ScalingTests(BasicTest):
         self.assertEqual(len(scaled_stacks), 6)
 
         # Loop, load and check each one for dimensions
-        for stack in scaled_stacks:
-            im = sitk.ReadImage(os.path.join(scaled_stacks, stack))
-
-            # TODO check against expected dimensions here
+        for stack, true_dims in zip(scaled_stacks, ground_truth):
+            print stack
+            im = sitk.ReadImage(os.path.join(scaled_dir, stack))
+            self.assertEqual(sitk.GetArrayFromImage(im).shape, true_dims)
 
 
 class FaultyData(BasicTest):
