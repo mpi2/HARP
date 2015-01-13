@@ -5,6 +5,8 @@ import os
 import cv2
 import SimpleITK as sitk
 import scipy.ndimage
+import Image
+import numpy as np
 
 
 path_to_test_dir = '/home/neil/work/harp_test_data/medium'
@@ -22,6 +24,12 @@ elif sys.argv[1] == 'numpy':
     for impath in img_path_list:
         img = scipy.ndimage.imread(os.path.join(path_to_test_dir, impath))
     print img.shape, img.dtype
+
+elif sys.argv[1] == 'pil':
+    for impath in img_path_list:
+        img = Image.open(os.path.join(path_to_test_dir, impath))
+        ar = np.array(img)
+    print ar.shape, ar.dtype
 
 
 elif sys.argv[1] == 'sitk':

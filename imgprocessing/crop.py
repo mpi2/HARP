@@ -85,10 +85,10 @@ class Crop():
                 #     pass
                 #     #im[dimcheck] Check for indexing error as .shape is derived from header only
 
-            self.crop_count.value += 1
-            if self.crop_count.value % 20 == 0:
+            self.crop_count += 1
+            if self.crop_count % 20 == 0:
                 self.callback(
-                    "Cropping: {0}/{1} images".format(str(self.crop_count.value), str(len(self.files))))
+                    "Cropping: {0}/{1} images".format(str(self.crop_count), str(len(self.files))))
 
             imcrop = im[self.crop_box[1]:self.crop_box[3], self.crop_box[0]: self.crop_box[2]]
             filename = os.path.basename(file_)
