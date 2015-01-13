@@ -31,7 +31,7 @@ import autofill
 import addtolist
 import Queue
 from ui.mainwindow import Ui_MainWindow
-from processing import ProcessingThread, getfilelist
+from processing import ProcessingThread
 from imgprocessing.zproject import ZProjectThread
 import manualcrop
 from appdata import AppData
@@ -795,13 +795,19 @@ l
         """
         # Get input folder
         input_folder = str(self.ui.lineEditInput.text())
-        imglist = getfilelist(input_folder)
 
-        self.zprojection_ouput = os.path.join(self.tmp_dir, "max_intensity_z.png")
+        # Set thread off
+<<<<<<< HEAD
+        z_thread_pool = [(ZProjectThread(input_folder, self.tmp_dir))]
 
-        self.z_thread = ZProjectThread(imglist, self.zprojection_ouput)
-        self.connect(self.z_thread, QtCore.SIGNAL("update(QString)"), self.zproject_slot)
-        self.z_thread.start()
+        self.connect(z_thread_pool[len(z_thread_pool) - 1], QtCore.SIGNAL("update(QString)"),
+                     self.zproject_slot)
+        z_thread_pool[len(z_thread_pool) - 1].start()
+=======
+        z_thread = ZProjectThread(input_folder, self.tmp_dir)
+        self.connect(z_thread, QtCore.SIGNAL("update(QString)"), self.zproject_slot)
+        z_thread.start()
+>>>>>>> f38c4a1f31f3721afcba09726155cdd0941aff38
 
     def zproject_slot(self, message):
         """ Listens to the z projection child process.
@@ -815,10 +821,12 @@ l
         # Update HARP GUI to status of the zprojection
         self.ui.textEditStatusMessages.setText(message)
 
+        imgfile_list = processing.
+
         # Check if z projection finished
         if message == "Z-projection finished":
             # Get the crop dimensions and save the file
-            self.get_manual_bbox(self.zprojection_ouput)
+            self.get_manual_bbox(os.path.join(self.tmp_dir, "max_intensity_z.png"))
 
     def get_manual_bbox(self, img_path):
         """ Creates the a window to display the z projection used to get crop dimensions

@@ -8,6 +8,9 @@ import cv2
 import scipy.ndimage
 import SimpleITK as sitk
 from imgprocessing import zproject
+import sys
+sys.path.append("..")
+import processing
 
 
 class HarpDataError(Exception):
@@ -18,13 +21,12 @@ class HarpDataError(Exception):
 
 
 class Crop():
-    def __init__(self, in_dir, out_dir, callback, ignore_exts, configOb,
+    def __init__(self, in_dir, out_dir, callback, configOb,
                  thread_terminate_flag, num_proc=None, def_crop=None, repeat_crop=None):
         """
         :param in_dir:
         :param out_dir:
         :param callback:
-        :param ignore_exts: tuple, file extension names to miss from cropping, such as *.spr.tiff
         :param num_proc:
         :param def_crop:
         :param repeat_crop:
@@ -35,7 +37,6 @@ class Crop():
         self.callback = callback
         self.configOb = configOb
         self.thread_terminate_flag = thread_terminate_flag
-        self.ignore_exts = ignore_exts
         self.in_dir = in_dir
         self.out_dir = out_dir
         self.crop_count =  0
@@ -69,10 +70,10 @@ class Crop():
         """
         first = True
         for file_ in sorted(self.files):
-            #im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
-            im = scipy.ndimage.imread(file_)
 
-            if im == None:
+            try:
+                im = scipy.ndimage.imread(file_)
+            except IOError as e:
                 raise HarpDataError("failed to read {}".format(file_))
 
             if first:
@@ -129,29 +130,29 @@ class Crop():
     def run_auto_mask(self):
 
         # Get list of files
-        sparse_files, files, cropped_files = self.getFileList(self.in_dir, self.skip_num)
-        self.files = sorted(files)
+        imglist = processing.getfilelist(self.in_dir)
+        self.files = sorted(imglist)
 
-        if len(sparse_files) < 1:
-            return ("no image files found in " + self.in_dir)
+        if len(imglist) < 1:
+            return "no image files found in " + self.in_dir
 
         if self.def_crop:
             self.calc_manual_crop()
             self.callback("success")
         else:
 
+            z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
+
             # Start with a z-projection
-            zp = zproject.Zproject(self.in_dir, self.configOb.meta_path, self.zp_callback)
+            zp = zproject.Zproject(imglist, z_proj_path, self.zp_callback)
             zp.run()
 
-            # Load z projection image
-            z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
             zp_im = sitk.ReadImage(z_proj_path)
 
-            #testimg = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
-            testimg = scipy.ndimage.imread(sparse_files[0])
-            if testimg == None:
-                raise HarpDataError('Failed to read {}. Is it corrupt'.format(sparse_files[0]))
+            try:
+                testimg = scipy.ndimage.imread(imglist[0])
+            except IOError as e:
+                raise HarpDataError('Failed to read {}. Is it corrupt'.format(imglist[0]))
 
             datatype = testimg.dtype
             if datatype is np.uint16:
@@ -184,10 +185,9 @@ class Crop():
 
             for slice_ in self.files:
 
-                #im = cv2.imread(slice_, cv2.CV_LOAD_IMAGE_UNCHANGED)
-                im = scipy.ndimage.imread(slice_)
-
-                if im == None:
+                try:
+                    im = scipy.ndimage.imread(slice_)
+                except IOError as e:
                     raise HarpDataError('Failed to read {}. Is it corrupt'.format(slice_))
 
                 if crop_count % 20 == 0:
@@ -209,22 +209,6 @@ class Crop():
     def zp_callback(self, msg):
         pass
         #print msg
-
-    def getFileList(self, filedir, skip):
-        """
-        Get the list of files from filedir. Exclude known non slice files
-        """
-        files = []
-        cropped_files = []
-        for fn in os.listdir(filedir):
-            if any(fn.endswith(x) for x in self.ignore_exts):
-                continue
-            if any(fnmatch.fnmatch(fn, x) for x in (
-                    '*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF', '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG' )):
-                files.append(os.path.join(self.in_dir, fn))
-                cropped_files.append(os.path.join(self.out_dir, fn))
-        return tuple(files[0::skip]), files, cropped_files
-
 
     def convertXYWH_ToCoords(self, xywh):
         """
