@@ -19,7 +19,7 @@ import cv2
 import lib.nrrd as nrrd
 
 
-def resample(images, scale, outpath, scaleby_int):
+def resample(images, scale, outpath, scaleby_int, thread_terminate_flag):
     """
     :param images: iterable or a directory
     :param scale: int. Factor to scale by
@@ -62,7 +62,12 @@ def resample(images, scale, outpath, scaleby_int):
 
     with open(temp_xy, 'ab') as xy_fh:
         first = True
+        count = 0
         for img_path in img_path_list:
+            count += 1
+            if count % 50 == 0:
+                if thread_terminate_flag.value == 1:
+                    return
 
             # Rescale the z slices
             z_slice_arr = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_UNCHANGED)
@@ -89,7 +94,12 @@ def resample(images, scale, outpath, scaleby_int):
     final_scaled_slices = []
 
     with open(temp_xyz, 'ab') as xyz_fh:
+        count = 0
         for y in range(xy_scaled_mmap.shape[1]):
+            count += 1
+            if count % 50 == 0:
+                if thread_terminate_flag.value == 1:
+                    return
 
             xz_plane = xy_scaled_mmap[:, y, :]
 

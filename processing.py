@@ -46,24 +46,20 @@ class ProcessingThread(QtCore.QThread):
 
     """
 
-    def __init__(self, config_paths, memory, parent=None):
-        """ **Constructor**: Gets the pickle config file and initialises some instance variables
+    def __init__(self, config_paths, thread_terminate_flag, parent=None):
+        """Gets the pickle config file and initialises some instance variables
 
-
-        :param str memory: Path to where config file is. Contains all the parameter information.
         :param obj parent: This is a way to pass the "self" object to the processing thread.
         :param str config_path: Path to where config file is. Contains all the parameter information.
         :ivar obj self.configOb: Not strictly a variable... This is an object containing all the parameters.
                                     Setup at _init_ here from the config file path given.
         :ivar int self.kill_check: Switch for the kill signal. Initialised at 0, when switched to 1 processing killed.
-        :ivar float self.memory: Taken from the memory param. Saved as instance variable to be used later
         """
         print 'new'
         #QtCore.QThread.__init__(self, parent)
         super(ProcessingThread, self).__init__(parent)
         self.config_paths = config_paths
-        self.memory = memory
-        self.kill_check = 0
+        self.thread_terminate_flag = thread_terminate_flag
         self.imagej_pid = ''
         self.crop_status = ''
          # List of file extensions to ignore
@@ -272,9 +268,10 @@ class ProcessingThread(QtCore.QThread):
 
         # make autocrop object
         #TODO: just send configOb
-        self.auto_crop = crop.Crop(self.configOb.input_folder, self.configOb.cropped_path,
+        cropper = crop.Crop(self.configOb.input_folder, self.configOb.cropped_path,
                                            self.autocrop_update_slot, self.extensions_to_ignore, self.configOb,
-                                           def_crop=dimensions_tuple, repeat_crop=derived_cropbox)
+                                           self.thread_terminate_flag, def_crop=dimensions_tuple,
+                                           repeat_crop=derived_cropbox)
 
         # WindowsError is an execption only available on Windows need to make a fake WindowsError exception for linux
         # Neil: What's this for?
@@ -285,8 +282,7 @@ class ProcessingThread(QtCore.QThread):
         # It may be better to add the execptions closer to the event as these can catch a broad range
         try:
             # Run autocrop and catch errors
-            #self.auto_crop.run() #  the old version of autocrop
-            self.auto_crop.run_auto_mask()  # James - new version of autocrop
+            cropper.run_auto_mask()  # James - new version of autocrop
 
         except WindowsError as e:
             self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the "
@@ -396,16 +392,11 @@ class ProcessingThread(QtCore.QThread):
             self.crop_status = "error"
 
     def scaling(self):
-        """  Sets up a series of scaling methods depending on memory and scaling options.
+        """
 
-        :ivar obj self.session_log: python file object. Used to record the log of what has happened.
-        :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.
-        :ivar int self.kill_check: if 1 it means HARP has been stopped via the GUI
-
-        .. seealso::
         """
         # Check if HARP has been stopped
-        if self.kill_check:
+        if self.thread_terminate_flag.value == 1:
             return
 
         # Record started
@@ -417,10 +408,7 @@ class ProcessingThread(QtCore.QThread):
         if not os.path.exists(self.configOb.scale_path):
             os.makedirs(self.configOb.scale_path)
 
-        memory_mb = int(int(self.memory) * 0.00000095367)
-        self.session_log.write("Total Memory of Computer(mb):" + str(memory_mb) + "\n")
-
-        # Perform scaling for all options used. Do a memory check before performing scaling.
+        # Perform scaling for all options used.
         if self.configOb.SF2 == "yes":
             self.downsample(2)
 
@@ -444,7 +432,7 @@ class ProcessingThread(QtCore.QThread):
     def downsample(self, scale, scaleby_int=True):
         """
         """
-        if self.kill_check:
+        if self.thread_terminate_flag.value == 1:
             return
 
         #===============================================================================
@@ -487,7 +475,7 @@ class ProcessingThread(QtCore.QThread):
 
         try:
             files_for_scaling = self.getFileList(self.folder_for_scaling)
-            resampler.resample(files_for_scaling, scale, out_name, scaleby_int)
+            resampler.resample(files_for_scaling, scale, out_name, scaleby_int, self.thread_terminate_flag)
         except HarpDataError as e:
             self.emit(QtCore.SIGNAL('update(QString)'), "Rescaling the image failed: {}".format(e))
 
@@ -585,7 +573,7 @@ class ProcessingThread(QtCore.QThread):
         :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified here.
         """
         # Check if GUI has been stopped
-        if self.kill_check:
+        if self.thread_terminate_flag.value == 1:
             return
 
         # Tell the GUI what's going on
@@ -617,7 +605,7 @@ class ProcessingThread(QtCore.QThread):
         :ivar obj self.configOb: Simple object which contains all the parameter information. Not modified here.
         """
         # Check if stop button pressed on GUI
-        if self.kill_check:
+        if self.thread_terminate_flag.value == 1:
             return
 
         # Record the log
@@ -641,7 +629,7 @@ class ProcessingThread(QtCore.QThread):
                 self.emit(QtCore.SIGNAL('update(QString)'), "Compression of scan folder finished")
 
                 # Check if stop button pressed on GUI
-                if self.kill_check:
+                if self.thread_terminate_flag.value == 1:
                     return
 
                 #============================================
@@ -658,7 +646,7 @@ class ProcessingThread(QtCore.QThread):
 
         # compression for crop folder
         # Check if stop button pressed on GUI
-        if self.kill_check:
+        if self.thread_terminate_flag.value == 1:
             return
 
         if self.configOb.crop_comp == "yes":
@@ -691,12 +679,6 @@ class ProcessingThread(QtCore.QThread):
                     pass  # No recon log available
 
                 out.close()
-
-    def kill_slot(self):
-        """ How do we now kill a job if it's on this thread.
-
-        """
-        pass
 
 
 class HarpDataError(Exception):

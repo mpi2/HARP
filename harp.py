@@ -40,7 +40,7 @@ from processing import ProcessingThread
 from imgprocessing.zproject import ZProjectThread
 import manualcrop
 from appdata import AppData
-
+import multiprocessing as mp
 
 class MainWindow(QtGui.QMainWindow):
     """  Class to provide the GUI end of HARP.
@@ -84,8 +84,6 @@ class MainWindow(QtGui.QMainWindow):
         self.stop_pro_switch = 0
         self.count_in = 0
         self.current_row = 0
-        self.p_thread_pool = []
-
         # Set to "" or NA so that HARP can record in the log and GUI there is no data for these parameters. Will be
         # updated later if parameters are identified.
         self.scan_folder = "NA"
@@ -205,7 +203,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEditH.setValidator(QtGui.QIntValidator(1, 100000))
         self.ui.lineEditW.setValidator(QtGui.QIntValidator(1, 100000))
 
-        # to make the window visible
+        # Shared variable for passing between threads. Not sure if best option. NH
+        self.thread_terminate_flag = mp.Value("i", 0)
 
         self.showMaximized()
 
@@ -878,8 +877,6 @@ l
         This monitors what recon folder we are processing based on the processing list on the processing tab.
 
         Summary of steps:
-
-        1. Check what the total memory is on the computer. And save as instance variable
         2. Go through a while loop to see what is the first recon folder on the list that needs processing
         3. Get the location of the relevant config object (config file)
         4. Setup a new thread using **ProcessingThread** to perform the processing in the background.
@@ -887,7 +884,7 @@ l
         6. When the signal is sent to say processing is finished for specific recon folder. This method
            (*start_processing_thread**) is run again processing the next recon on the list.
 
-        :ivar tuple self.p_thread_pool:
+
             A tuple of the threads used. (Should only use 1 and then reset when we start again)
             NOTE: Potentially this should just be a class variable (i.e. not self) so would not need to be reset
         :ivar int self.stop_pro_switch: If value 1 HARP stops processes due to user pressing stop. Set at 0 at start.
@@ -933,21 +930,13 @@ l
 
         # Reset instance variables
         self.stop_pro_switch = 0
-        self.p_thread_pool = []
-
-        # Get memory of the computer (can't seem to do this in the thread)
-        mem_summary = psutil.virtual_memory()
-        prog = re.compile("total=(\d+)")
-        memory = re.search(prog, str(mem_summary)).group(1)
-
+        self.thread_terminate_flag.value = 0 # Terminate when set to 1
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
-        wt = ProcessingThread(job_queue, memory, self)
+        self.workthread = ProcessingThread(job_queue, self.thread_terminate_flag, self)
         # the update(QString) SENDS signals from the processing thread (wt) to the processing_slot
-        self.connect(wt, QtCore.SIGNAL("update(QString)"), self.processing_slot)
+        self.connect(self.workthread, QtCore.SIGNAL("update(QString)"), self.processing_slot)
         # The kill(Qstring) SENDS signals from the GUI to the function "kill_slot" in the the processing thread
-        self.connect(self, QtCore.SIGNAL("kill(QString)"), wt.kill_slot)
-        self.p_thread_pool.append(wt)
-        self.p_thread_pool[len(self.p_thread_pool) - 1].start()
+        self.workthread.start()
 
     def processing_slot(self, message):
         """ listens to the child process and displays any messages.
@@ -992,7 +981,7 @@ l
             item.setText(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             # Processing has finished for this job, so we should have moved onto the next job (if there is one)
             # self.start_processing_thread()  # JAMES - removed now because the processing thread is still running
-            self.p_thread_pool = None  # this makes unit testing easier...
+            self.workthread = None  # this makes unit testing easier...
             self.current_row += 1  # we instead need to increment the row count as we're moving onto the next
 
             # update the opt channels table
@@ -1050,7 +1039,7 @@ l
     def stop_processing(self):
         """ kills the current process
 
-        :ivar tuple self.p_thread_pool: A tuple of the threads used. Reset here before the next process.
+        :ivar tuple self.workthread: A tuple of the threads used. Reset here before the next process.
         :ivar int self.stop_pro_switch: If value 1 HARP stops processes due to user pressing stop. Set at 1 here.
 
         .. seealso::
@@ -1065,14 +1054,15 @@ l
             item = self.ui.tableWidget.item(self.current_row, 2)
             item.setText("Processing Cancelled!")
 
-        self.kill_em_all()
+        self.thread_terminate_flag.value = 1
 
         self.ui.pushButtonStart.setEnabled(True)
         self.ui.pushButtonStop.setEnabled(False)
 
-        self.p_thread_pool = None
 
         self.stop_pro_switch = 1
+        #self.workthread = None
+
 
     def delete_rows(self, event):
         """ Deletes a row from the processing list on the processing tab
@@ -1151,15 +1141,6 @@ l
                 self.kill_em_all()
             else:
                 event.ignore()
-
-    def kill_em_all(self):
-        """ Function to kill all processes
-        Emits a kill signal to the processing.py method kill_slot(. This is possible as the connection was
-        setup in the method **processing_thread()**
-        """
-        print "starting kill em all"
-        # Emits a kill signal to the processing kill slot set in the processing_thread()
-        self.emit(QtCore.SIGNAL('kill(QString)'), "kill")
 
 
 def main():

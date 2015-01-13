@@ -18,7 +18,8 @@ class HarpDataError(Exception):
 
 
 class Crop():
-    def __init__(self, in_dir, out_dir, callback, ignore_exts, configOb, num_proc=None, def_crop=None, repeat_crop=None):
+    def __init__(self, in_dir, out_dir, callback, ignore_exts, configOb,
+                 thread_terminate_flag, num_proc=None, def_crop=None, repeat_crop=None):
         """
         :param in_dir:
         :param out_dir:
@@ -33,6 +34,7 @@ class Crop():
         #call the super
         self.callback = callback
         self.configOb = configOb
+        self.thread_terminate_flag = thread_terminate_flag
         self.ignore_exts = ignore_exts
         self.in_dir = in_dir
         self.out_dir = out_dir
@@ -87,6 +89,9 @@ class Crop():
 
             self.crop_count += 1
             if self.crop_count % 20 == 0:
+                if self.thread_terminate_flag.value == 1:
+                    self.callback("Processing Cancelled!")
+                    return
                 self.callback(
                     "Cropping: {0}/{1} images".format(str(self.crop_count), str(len(self.files))))
 
@@ -186,6 +191,9 @@ class Crop():
                     raise HarpDataError('Failed to read {}. Is it corrupt'.format(slice_))
 
                 if crop_count % 20 == 0:
+                    if self.thread_terminate_flag.value == 1:
+                        self.callback("Processing Cancelled!")
+                        return
                     self.callback(
                         "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
 
