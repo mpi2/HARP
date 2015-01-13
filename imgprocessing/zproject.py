@@ -19,7 +19,7 @@ from PyQt4 import QtCore
 
 class Zproject:
 
-    def __init__(self, img_dir, out_dir, callback):
+    def __init__(self, imglist, out_dir, callback):
         self.img_dir = img_dir
         self.out_dir = out_dir
         self.shared_z_count = Value("i", 0)
@@ -27,6 +27,7 @@ class Zproject:
         self.im_array_queue = Queue.Queue(maxsize=20)
         self.maxintensity_queue = Queue.Queue()
         self.max_intensity_file_name = "max_intensity_z.png"  # Qt on windows is funny about tiffs
+        self.skip_num = 10
 
     def run(self):
         """
@@ -34,67 +35,23 @@ class Zproject:
         @return in 0 on success
         @return string with error message (TODO)
         """
-        files = []
+        if len(imglist) < 1:
+            return "no images in list"
 
-        for fn in os.listdir(self.img_dir):
-            if fn.endswith(('spr.bmp', 'spr.BMP', 'spr.tif', 'spr.TIF', 'spr.jpg', 'spr.JPG', 'spr.jpeg', 'spr.JPEG')):
-                continue
-            if fn.endswith(('.bmp', '.BMP', '.tif', '.TIF', '.jpg', '.JPG', 'jpeg', 'JPEG')):
-                prog = re.compile("rec")
-                if prog.search(fn):
-                    files.append(os.path.join(self.img_dir, fn))
-        if len(files) < 1:
-            return "no image files found in" + self.img_dir
-
-        #im = cv2.imread(files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
-        im = scipy.ndimage.imread(files[0])
-        if im is None:
+        try:
+            im = scipy.ndimage.imread(files[0])
+        except IOError as e:
             return "Cant load {}. Is it corrupted?".format(files[0])
 
-        self.imdims = im.shape
+        imdims = im.shape
 
         # make a new list by removing every nth image
-        self.skip_num = 10
-        self.files = files[0::self.skip_num]
+        sparse_filelist = files[0::self.skip_num]
 
-        self.num_max_threads = 2
+        max_array = max_projection(sparse_filelist, imdims)
 
-        #Start the file reader
-        read_thread = threading.Thread(target=self.file_reader)
-        read_thread.setDaemon(True)
-        read_thread.start()
-
-        #Start the thread to determine max intensities
-        max_threads = []
-
-        for i in range(self.num_max_threads):
-            t = threading.Thread(target=self.max_finder)
-            t.setDaemon(True)
-            t.start()
-            max_threads.append(t)
-        for th in max_threads:
-            th.join()
-        print("maxes done")
-
-        max_arrays = []
-        while True:
-            try:
-                max_arrays.append(self.maxintensity_queue.get_nowait())
-            except Queue.Empty:
-                break
-        #Process the max intensities from the separate threads
-        try:
-            maxi = reduce(np.maximum, max_arrays)
-        except TypeError as e:
-            return "Can't do the Z-projection. Make sure all image files are of the same dimension"
-
-        #something wrong with image creation
-        if maxi.shape == (0, 0):
-            return "something went wrong creating the Z-projection from {}".format(self.img_dir)
-        else:
-            #cv2.imwrite(os.path.join(self.out_dir, self.max_intensity_file_name), maxi)
-            io.imsave(os.path.join(self.out_dir, self.max_intensity_file_name), maxi)
-            return 0
+        io.imsave(os.path.join(self.out_dir, self.max_intensity_file_name), max_array)
+        return 0  # Change
 
     def file_reader(self):
         for file_ in self.files:
@@ -106,26 +63,17 @@ class Zproject:
         for i in range(self.num_max_threads):
             self.im_array_queue.put(None)
 
-    def max_finder(self):
-        max_ = np.zeros(self.imdims)
-        while True:
-            try:
-                # print(self.im_array_queue.qsize())
-                im_array = self.im_array_queue.get(block=True)
+    def max_projection(self, filelist, imdims):
 
-            except Queue.Empty:
-                pass
-            else:
-                self.im_array_queue.task_done()
-                if im_array is None:
-                    break
-                max_ = np.maximum(max_, im_array[:][:])
-                if self.shared_z_count.value % 10 == 0:
-                    self.callback("Z project: {0} images".format(str(self.shared_z_count.value)))
-                    # self.maxintensity_queue.put(max_)
-
-        self.maxintensity_queue.put(max_)
-        return
+        max_ = np.zeros(imdims)
+        count = 0
+        for file_ in filelist:
+            count += 1
+            im_array = scipy.ndimage.imread(file_)
+            max_ = np.maximum(max_, im_array[:][:])
+            if count % 10 == 0:
+                self.callback("Z project: {0} images".format(str(self.shared_z_count.value)))
+        return max_
 
 
 def zproject_callback(msg):
@@ -133,7 +81,10 @@ def zproject_callback(msg):
 
 
 class ZProjectThread(QtCore.QThread):
-    def __init__(self, input_folder, tmp_dir):
+    """
+    Runs the Zprojection on a seperate thread
+    """
+    def __init__(self, imglist, tmp_dir):
         QtCore.QThread.__init__(self)
         self.input_folder = input_folder
         self.tmp_dir = tmp_dir

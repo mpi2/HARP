@@ -797,8 +797,8 @@ l
         input_folder = str(self.ui.lineEditInput.text())
 
         # Set thread off
-        z_thread_pool = []
-        z_thread_pool.append(ZProjectThread(input_folder, self.tmp_dir))
+        z_thread_pool = [(ZProjectThread(input_folder, self.tmp_dir))]
+
         self.connect(z_thread_pool[len(z_thread_pool) - 1], QtCore.SIGNAL("update(QString)"),
                      self.zproject_slot)
         z_thread_pool[len(z_thread_pool) - 1].start()
@@ -814,6 +814,8 @@ l
         """
         # Update HARP GUI to status of the zprojection
         self.ui.textEditStatusMessages.setText(message)
+
+        imgfile_list = processing.
 
         # Check if z projection finished
         if message == "Z-projection finished":
