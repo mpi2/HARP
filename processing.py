@@ -60,7 +60,6 @@ class ProcessingThread(QtCore.QThread):
         super(ProcessingThread, self).__init__(parent)
         self.config_paths = config_paths
         self.thread_terminate_flag = thread_terminate_flag
-        self.imagej_pid = ''
         self.crop_status = ''
          # List of file extensions to ignore
         self.extensions_to_ignore = ('spr.bmp', 'spr.BMP', 'spr.tif', 'spr.TIF',
