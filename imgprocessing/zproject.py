@@ -9,6 +9,7 @@ import threading
 import Queue
 import cv2
 import scipy.ndimage
+import skimage.io as io
 
 # For QThread class
 from PyQt4 import QtCore
@@ -90,7 +91,8 @@ class Zproject:
         if maxi.shape == (0, 0):
             return "something went wrong creating the Z-projection from {}".format(self.img_dir)
         else:
-            cv2.imwrite(os.path.join(self.out_dir, self.max_intensity_file_name), maxi)
+            #cv2.imwrite(os.path.join(self.out_dir, self.max_intensity_file_name), maxi)
+            io.imsave(os.path.join(self.out_dir, self.max_intensity_file_name), maxi)
             return (0)
 
     def fileReader(self):
@@ -109,7 +111,7 @@ class Zproject:
             try:
                 # print(self.im_array_queue.qsize())
                 im_array = self.im_array_queue.get(block=True)
-                #print("write queue size:", self.write_file_queue.qsize())
+
             except Queue.Empty:
                 pass
             else:

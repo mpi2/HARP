@@ -7,6 +7,7 @@ import SimpleITK as sitk
 import scipy.ndimage
 import Image
 import numpy as np
+import skimage.io as io
 
 
 path_to_test_dir = '/home/neil/work/harp_test_data/medium'
@@ -48,9 +49,14 @@ elif sys.argv[1] == 'sitk_write':
 
 elif sys.argv[1] == 'cv_write':
         impath = img_path_list[0]
-        print impath
         img = sitk.ReadImage(os.path.join(path_to_test_dir, impath))
         arr = sitk.GetArrayFromImage(img)
         for i in range(100):
             cv2.imwrite(os.path.join(path_to_test_dir, 'testout.tif'), arr)
 
+elif sys.argv[1] == 'numpy_write':
+        impath = img_path_list[0]
+        img = sitk.ReadImage(os.path.join(path_to_test_dir, impath))
+        arr = sitk.GetArrayFromImage(img)
+        for i in range(100):
+            io.imsave(os.path.join(path_to_test_dir, 'testout.tif'), arr)

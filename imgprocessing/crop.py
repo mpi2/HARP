@@ -90,7 +90,11 @@ class Crop():
                 self.callback(
                     "Cropping: {0}/{1} images".format(str(self.crop_count), str(len(self.files))))
 
-            imcrop = im[self.crop_box[1]:self.crop_box[3], self.crop_box[0]: self.crop_box[2]]
+            try:
+                imcrop = im[self.crop_box[1]:self.crop_box[3], self.crop_box[0]: self.crop_box[2]]
+            except IndexError as e:
+                raise HarpDataError("Crop box out of range. Is {} corrupted".format(file_))
+
             filename = os.path.basename(file_)
             crop_out = os.path.join(self.out_dir, filename)
             cv2.imwrite(crop_out, imcrop)
@@ -142,8 +146,7 @@ class Crop():
             #testimg = cv2.imread(sparse_files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
             testimg = scipy.ndimage.imread(sparse_files[0])
             if testimg == None:
-                self.callback('Failed to read {}. Is it corrupt'.format(sparse_files[0]))
-                return
+                raise HarpDataError('Failed to read {}. Is it corrupt'.format(sparse_files[0]))
 
             datatype = testimg.dtype
             if datatype is np.uint16:
@@ -169,8 +172,7 @@ class Crop():
             self.crop_box = tuple(bbox)
 
             if self.crop_box[1] - self.crop_box[0] < 10 or self.crop_box[3] - self.crop_box[2] < 10:
-                self.callback('Autocrop failed! Try manual cropping')
-                return
+                raise HarpDataError('Autocrop failed! Try manual cropping')
 
             # Actually perform the cropping
             crop_count = 1

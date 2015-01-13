@@ -29,7 +29,6 @@ import tarfile
 import datetime
 import copy
 from multiprocessing import freeze_support
-from sys import platform as _platform
 import traceback
 import fnmatch
 from config import ConfigClass
