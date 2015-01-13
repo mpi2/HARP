@@ -62,8 +62,7 @@ class ProcessingThread(QtCore.QThread):
         self.thread_terminate_flag = thread_terminate_flag
         self.crop_status = ''
          # List of file extensions to ignore
-        self.extensions_to_ignore = ('spr.bmp', 'spr.BMP', 'spr.tif', 'spr.TIF',
-                                     'spr.jpg', 'spr.JPG', '*spr.jpeg', 'spr.JPEG')
+
 
     def __del__(self):
         print "Processing stopped"
@@ -268,7 +267,7 @@ class ProcessingThread(QtCore.QThread):
         # make autocrop object
         #TODO: just send configOb
         cropper = crop.Crop(self.configOb.input_folder, self.configOb.cropped_path,
-                                           self.autocrop_update_slot, self.extensions_to_ignore, self.configOb,
+                                           self.autocrop_update_slot, self.configOb,
                                            self.thread_terminate_flag, def_crop=dimensions_tuple,
                                            repeat_crop=derived_cropbox)
 
@@ -473,24 +472,11 @@ class ProcessingThread(QtCore.QThread):
                                 self.configOb.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".nrrd")
 
         try:
-            files_for_scaling = self.getFileList(self.folder_for_scaling)
+            files_for_scaling = getfilelist(self.folder_for_scaling)
             resampler.resample(files_for_scaling, scale, out_name, scaleby_int, self.thread_terminate_flag)
         except HarpDataError as e:
             self.emit(QtCore.SIGNAL('update(QString)'), "Rescaling the image failed: {}".format(e))
 
-    @staticmethod
-    def getFileList(input_folder, extension_to_ignore):
-        """
-        Get the list of files from filedir. Exclude known non slice files
-        """
-        files = []
-        for fn in os.listdir(input_folder):
-            if any(fn.endswith(x) for x in extensions_to_ignore):
-                continue
-            if any(fnmatch.fnmatch(fn, x) for x in (
-                    '*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF', '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG' )):
-                files.append(os.path.join(input_folder, fn))
-        return files
 
     def hide_files(self):
         """ Puts non-image files non-valid image files into a temp folder so will be ignored for scaling
@@ -686,6 +672,26 @@ class HarpDataError(Exception):
     Raised when some of the supplied data is found to be faulty
     """
     pass
+
+
+def getfilelist(input_folder):
+    """
+    Get the list of files from filedir. Exclude known non slice files
+    """
+    extensions_to_ignore = ('spr.bmp', 'spr.BMP', 'spr.tif', 'spr.TIF',
+                            'spr.jpg', 'spr.JPG', '*spr.jpeg', 'spr.JPEG')
+    files = []
+
+    for fn in os.listdir(input_folder):
+        if any(fn.endswith(x) for x in extensions_to_ignore):
+            continue
+        if any(fnmatch.fnmatch(fn, x) for x in (
+                '*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF',
+                '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG')):
+
+            files.append(os.path.join(input_folder, fn))
+
+    return files
 
 
 def main():

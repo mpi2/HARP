@@ -267,7 +267,7 @@
 <span class="sd">		&#39;&#39;&#39;</span>
         <span class="c">#get a subset of files to work with to speed it up</span>
 
-        <span class="n">sparse_files</span><span class="p">,</span> <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFileList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_num</span><span class="p">)</span>
+        <span class="n">sparse_files</span><span class="p">,</span> <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getfilelist</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_num</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">files</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sparse_files</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -332,7 +332,7 @@
             <span class="k">return</span>
 
 </div>
-<div class="viewcode-block" id="Autocrop.getFileList"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.getFileList">[docs]</a>    <span class="k">def</span> <span class="nf">getFileList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">,</span> <span class="n">skip</span><span class="p">):</span>
+<div class="viewcode-block" id="Autocrop.getfilelist"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.getfilelist">[docs]</a>    <span class="k">def</span> <span class="nf">getfilelist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">,</span> <span class="n">skip</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">		Get the list of files from dir. Exclude known non slice files</span>
 <span class="sd">		&#39;&#39;&#39;</span>

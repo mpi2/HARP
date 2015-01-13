@@ -19,14 +19,11 @@ from PyQt4 import QtCore
 
 class Zproject:
 
-    def __init__(self, imglist, out_dir, callback):
-        self.img_dir = img_dir
-        self.out_dir = out_dir
-        self.shared_z_count = Value("i", 0)
+    def __init__(self, imglist, zprojection_output, callback):
+        self.skip = 10
+        self.imglist = imglist
         self.callback = callback
-        self.im_array_queue = Queue.Queue(maxsize=20)
-        self.maxintensity_queue = Queue.Queue()
-        self.max_intensity_file_name = "max_intensity_z.png"  # Qt on windows is funny about tiffs
+        self.zprojection_output = zprojection_output
         self.skip_num = 10
 
     def run(self):
@@ -35,33 +32,24 @@ class Zproject:
         @return in 0 on success
         @return string with error message (TODO)
         """
-        if len(imglist) < 1:
+        if len(self.imglist) < 1:
             return "no images in list"
 
         try:
-            im = scipy.ndimage.imread(files[0])
+            im = scipy.ndimage.imread(self.imglist[0])
         except IOError as e:
-            return "Cant load {}. Is it corrupted?".format(files[0])
+            return "Cant load {}. Is it corrupted?".format(self.imglist[0])
 
         imdims = im.shape
 
         # make a new list by removing every nth image
-        sparse_filelist = files[0::self.skip_num]
+        sparse_filelist = sorted(self.imglist)[0::self.skip_num]
 
-        max_array = max_projection(sparse_filelist, imdims)
+        max_array = self.max_projection(sparse_filelist, imdims)
 
-        io.imsave(os.path.join(self.out_dir, self.max_intensity_file_name), max_array)
+        io.imsave(self.zprojection_output, max_array)
         return 0  # Change
 
-    def file_reader(self):
-        for file_ in self.files:
-            #im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
-            im_array = scipy.ndimage.imread(file_)
-            self.shared_z_count.value += (1 * self.skip_num)
-            self.im_array_queue.put(im_array)
-        # Insert sentinels to signal end of list
-        for i in range(self.num_max_threads):
-            self.im_array_queue.put(None)
 
     def max_projection(self, filelist, imdims):
 
@@ -72,7 +60,7 @@ class Zproject:
             im_array = scipy.ndimage.imread(file_)
             max_ = np.maximum(max_, im_array[:][:])
             if count % 10 == 0:
-                self.callback("Z project: {0} images".format(str(self.shared_z_count.value)))
+                self.callback("Z project: {0} images".format(count * self.skip))
         return max_
 
 
@@ -84,24 +72,22 @@ class ZProjectThread(QtCore.QThread):
     """
     Runs the Zprojection on a seperate thread
     """
-    def __init__(self, imglist, tmp_dir):
+    def __init__(self, imglist, zprojection_output):
         QtCore.QThread.__init__(self)
-        self.input_folder = input_folder
-        self.tmp_dir = tmp_dir
+        self.imglist = imglist
+        self.zprojection_output = zprojection_output
 
-    def __del__(self):
-        self.wait()
 
     def run(self):
 
-        # Get the directory of the script
+        # Get the directory of the script. Maybe we can get rid of this, NH
         if getattr(sys, 'frozen', False):  # James - I don't know what this is for. Neil - Me neither
             self.dir = os.path.dirname(sys.executable)
         elif __file__:
             self.dir = os.path.dirname(__file__)
 
         # Set up a zproject object
-        zp = Zproject(self.input_folder, self.tmp_dir, self.z_callback)
+        zp = Zproject(self.imglist, self.zprojection_output, self.z_callback)
         # run the object
         zp_result = zp.run()
 
