@@ -98,6 +98,9 @@ class MainWindow(QtGui.QMainWindow):
         # Temp folder for pre-processing log (if in use) and z-project
         self.tmp_dir = tempfile.mkdtemp()
 
+        # Temp file for z-projection
+        self.zprojection_output = os.path.join(self.tmp_dir, "max_intensity_z.png")
+
         # get input folder
         self.ui.pushButtonInput.clicked.connect(self.select_file_in)
 
@@ -393,6 +396,13 @@ l
             self.ui.lineEditInput.setText(folder)
             # run all the autofill methods
             self.autofill_pipe()
+
+        # Clear z-projection data from temp file
+        try:
+            if os.path.isfile(self.zprojection_output):
+                os.remove(self.zprojection_output)
+        except OSError as e:
+            print "OSError: problem deleting z-projection - ", e
 
     def autofill_pipe(self, suppress=False):
         """ Performs a series of methods to automatically update parameters
@@ -796,8 +806,6 @@ l
         # Get input folder
         input_folder = str(self.ui.lineEditInput.text())
         imglist = getfilelist(input_folder)
-
-        self.zprojection_output = os.path.join(self.tmp_dir, "max_intensity_z.png")
 
         self.z_thread = zproject.Zproject(imglist, self.zprojection_output)
         self.connect(self.z_thread, QtCore.SIGNAL("update(QString)"), self.zproject_slot)

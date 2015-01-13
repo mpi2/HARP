@@ -29,23 +29,26 @@ class Zproject(QtCore.QThread):
         @return in 0 on success
         @return string with error message (TODO)
         """
-        if len(self.imglist) < 1:
-            return "no images in list"
 
-        try:
-            im = scipy.ndimage.imread(self.imglist[0])
-        except IOError as e:
-            return "Cant load {}. Is it corrupted?".format(self.imglist[0])
+        if os.path.isfile(self.zprojection_output) is False:
 
-        imdims = im.shape
+            if len(self.imglist) < 1:
+                return "no images in list"
 
-        # make a new list by removing every nth image
-        sparse_filelist = sorted(self.imglist)[0::self.skip_num]
+            try:
+                im = scipy.ndimage.imread(self.imglist[0])
+            except IOError as e:
+                return "Cant load {}. Is it corrupted?".format(self.imglist[0])
 
-        print "performing z-projection on sparse file list"
+            imdims = im.shape
 
-        max_array = self.max_projection(sparse_filelist, imdims)
-        cv2.imwrite(self.zprojection_output, max_array)
+            # make a new list by removing every nth image
+            sparse_filelist = sorted(self.imglist)[0::self.skip_num]
+
+            print "performing z-projection on sparse file list"
+
+            max_array = self.max_projection(sparse_filelist, imdims)
+            cv2.imwrite(self.zprojection_output, max_array)
 
         self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
 
