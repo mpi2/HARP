@@ -478,13 +478,14 @@ class ProcessingThread(QtCore.QThread):
         except HarpDataError as e:
             self.emit(QtCore.SIGNAL('update(QString)'), "Rescaling the image failed: {}".format(e))
 
-    def getFileList(self, input_folder):
+    @staticmethod
+    def getFileList(input_folder, extension_to_ignore):
         """
         Get the list of files from filedir. Exclude known non slice files
         """
         files = []
         for fn in os.listdir(input_folder):
-            if any(fn.endswith(x) for x in self.extensions_to_ignore):
+            if any(fn.endswith(x) for x in extensions_to_ignore):
                 continue
             if any(fnmatch.fnmatch(fn, x) for x in (
                     '*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF', '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG' )):
