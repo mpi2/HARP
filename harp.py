@@ -1128,17 +1128,25 @@ l
 
         # if processing switch live, dont shutdown
         if switch == "live":
-            QtGui.QMessageBox.warning(self, 'Message',
-                                      'Warning: Processing still running.\nStop processing and then close down')
-            event.ignore()
+
+            reply = QtGui.QMessageBox.question(self, "Confirm quit", "Warning: all processing jobs will be cancelled. "
+                                                                "Are you sure you want to quit?",
+                                               QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+
+            if reply == QtGui.QMessageBox.Yes:  # Kill processing and accept close event
+                self.stop_processing()
+                event.accept()
+            else:
+                event.ignore()
+
         # Processing dead so ask user if they want to quit.
         else:
-            reply = QtGui.QMessageBox.question(self, 'Message', 'Are you sure to quit?',
+            reply = QtGui.QMessageBox.question(self, "Confirm quit", "Are you sure you want to quit?",
                                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
-            event.accept()
+
             if reply == QtGui.QMessageBox.Yes:
                 # Kill_em_all class to try and kill any processes
-                self.kill_em_all()
+                event.accept()
             else:
                 event.ignore()
 
