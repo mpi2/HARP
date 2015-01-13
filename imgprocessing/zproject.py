@@ -18,6 +18,7 @@ from PyQt4 import QtCore
 
 
 class Zproject:
+
     def __init__(self, img_dir, out_dir, callback):
         self.img_dir = img_dir
         self.out_dir = out_dir
@@ -28,11 +29,11 @@ class Zproject:
         self.max_intensity_file_name = "max_intensity_z.png"  # Qt on windows is funny about tiffs
 
     def run(self):
-        '''
+        """
         Run the Zprojection
         @return in 0 on success
         @return string with error message (TODO)
-        '''
+        """
         files = []
 
         for fn in os.listdir(self.img_dir):
@@ -47,7 +48,7 @@ class Zproject:
 
         #im = cv2.imread(files[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
         im = scipy.ndimage.imread(files[0])
-        if im == None:
+        if im is None:
             return "Cant load {}. Is it corrupted?".format(files[0])
 
         self.imdims = im.shape
@@ -59,7 +60,7 @@ class Zproject:
         self.num_max_threads = 2
 
         #Start the file reader
-        read_thread = threading.Thread(target=self.fileReader)
+        read_thread = threading.Thread(target=self.file_reader)
         read_thread.setDaemon(True)
         read_thread.start()
 
@@ -67,7 +68,7 @@ class Zproject:
         max_threads = []
 
         for i in range(self.num_max_threads):
-            t = threading.Thread(target=self.maxFinder)
+            t = threading.Thread(target=self.max_finder)
             t.setDaemon(True)
             t.start()
             max_threads.append(t)
@@ -93,9 +94,9 @@ class Zproject:
         else:
             #cv2.imwrite(os.path.join(self.out_dir, self.max_intensity_file_name), maxi)
             io.imsave(os.path.join(self.out_dir, self.max_intensity_file_name), maxi)
-            return (0)
+            return 0
 
-    def fileReader(self):
+    def file_reader(self):
         for file_ in self.files:
             #im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
             im_array = scipy.ndimage.imread(file_)
@@ -105,7 +106,7 @@ class Zproject:
         for i in range(self.num_max_threads):
             self.im_array_queue.put(None)
 
-    def maxFinder(self):
+    def max_finder(self):
         max_ = np.zeros(self.imdims)
         while True:
             try:
@@ -127,14 +128,14 @@ class Zproject:
         return
 
 
-def dummyCallBack(msg):
+def zproject_callback(msg):
     print(msg)
 
 
 class ZProjectThread(QtCore.QThread):
-    def __init__(self, input, tmp_dir):
+    def __init__(self, input_folder, tmp_dir):
         QtCore.QThread.__init__(self)
-        self.input_folder = input
+        self.input_folder = input_folder
         self.tmp_dir = tmp_dir
 
     def __del__(self):
@@ -167,7 +168,7 @@ class ZProjectThread(QtCore.QThread):
 
 
 if __name__ == "__main__":
-    z = Zproject(sys.argv[1], sys.argv[2], dummyCallBack)
+    z = Zproject(sys.argv[1], sys.argv[2], zproject_callback)
     zp_img = z.run()
 
 
