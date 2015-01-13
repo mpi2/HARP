@@ -26,12 +26,7 @@ import subprocess
 import sys
 import tempfile
 import uuid
-
 from PyQt4.QtCore import pyqtSlot, SIGNAL
-import psutil
-
-
-# Harwell modules and classes
 import autofill
 import addtolist
 import Queue
@@ -1042,8 +1037,6 @@ l
         :ivar tuple self.workthread: A tuple of the threads used. Reset here before the next process.
         :ivar int self.stop_pro_switch: If value 1 HARP stops processes due to user pressing stop. Set at 1 here.
 
-        .. seealso::
-            :func:`kill_em_all()`,
         """
         print "Stop!!"
 
@@ -1059,9 +1052,7 @@ l
         self.ui.pushButtonStart.setEnabled(True)
         self.ui.pushButtonStop.setEnabled(False)
 
-
         self.stop_pro_switch = 1
-        #self.workthread = None
 
 
     def delete_rows(self, event):
