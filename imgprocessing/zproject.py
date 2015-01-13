@@ -14,15 +14,15 @@ import skimage.io as io
 from PyQt4 import QtCore
 
 
-class Zproject(multiprocessing.Process):
+class Zproject(QtCore.QThread):
 
     def __init__(self, imglist, zprojection_output):
+        QtCore.QThread.__init__(self)
         self.skip = 10
         self.imglist = imglist
-        #self.callback = callback
         self.zprojection_output = zprojection_output
         self.skip_num = 10
-        self.run()
+
 
     def run(self):
         """
@@ -62,48 +62,48 @@ class Zproject(multiprocessing.Process):
             inds = im_array > maxi
             maxi[inds] = im_array[inds]
             if count % 10 == 0:
-                pass
+                self.emit(QtCore.SIGNAL('update(QString)'), str(count))
                 #self.callback("Z project: {0} images".format(count * self.skip))
         return maxi
 
-def zproject_callback(msg):
-    print(msg)
-
-
-class ZProjectThread(QtCore.QThread):
-    """
-    Runs the Zprojection on a seperate thread
-    """
-    def __init__(self, imglist, zprojection_output):
-        QtCore.QThread.__init__(self)
-        self.imglist = imglist
-        self.zprojection_output = zprojection_output
-
-
-    def run(self):
-
-        # Get the directory of the script. Maybe we can get rid of this, NH
-        if getattr(sys, 'frozen', False):  # James - I don't know what this is for. Neil - Me neither
-            self.dir = os.path.dirname(sys.executable)
-        elif __file__:
-            self.dir = os.path.dirname(__file__)
-
-        # Set up a zproject object
-        zp = Zproject(self.imglist, self.zprojection_output, self.z_callback)
-        # run the object
-        zp_result = zp.run()
-
-        # An error has happened. The error message will be shown on the status section
-        if zp_result != 0:
-            self.emit(QtCore.SIGNAL('update(QString)'),
-                      "Z projection failed. Error message: {0}. Contact the DCC if it happens again".format(
-                          zp_result))
-            return
-        # let the user know what's happened
-        self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
-
-    def z_callback(self, msg):
-        self.emit(QtCore.SIGNAL('update(QString)'), msg)
+# def zproject_callback(msg):
+#     print(msg)
+#
+#
+# class ZProjectThread(QtCore.QThread):
+#     """
+#     Runs the Zprojection on a seperate thread
+#     """
+#     def __init__(self, imglist, zprojection_output):
+#         QtCore.QThread.__init__(self)
+#         self.imglist = imglist
+#         self.zprojection_output = zprojection_output
+#
+#
+#     def run(self):
+#
+#         # Get the directory of the script. Maybe we can get rid of this, NH
+#         if getattr(sys, 'frozen', False):  # James - I don't know what this is for. Neil - Me neither
+#             self.dir = os.path.dirname(sys.executable)
+#         elif __file__:
+#             self.dir = os.path.dirname(__file__)
+#
+#         # Set up a zproject object
+#         zp = Zproject(self.imglist, self.zprojection_output)
+#         # run the object
+#         zp_result = zp.run()
+#
+#         # An error has happened. The error message will be shown on the status section
+#         if zp_result != 0:
+#             self.emit(QtCore.SIGNAL('update(QString)'),
+#                       "Z projection failed. Error message: {0}. Contact the DCC if it happens again".format(
+#                           zp_result))
+#             return
+#         # let the user know what's happened
+#         self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
+#
+#     def z_callback(self, msg):
+#         self.emit(QtCore.SIGNAL('update(QString)'), msg)
 
 
 if __name__ == "__main__":
