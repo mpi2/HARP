@@ -797,9 +797,9 @@ l
         input_folder = str(self.ui.lineEditInput.text())
         imglist = getfilelist(input_folder)
 
-        self.zprojection_ouput = os.path.join(self.tmp_dir, "max_intensity_z.png")
+        self.zprojection_output = os.path.join(self.tmp_dir, "max_intensity_z.png")
 
-        self.z_thread = zproject.Zproject(imglist, self.zprojection_ouput)
+        self.z_thread = zproject.Zproject(imglist, self.zprojection_output)
         self.connect(self.z_thread, QtCore.SIGNAL("update(QString)"), self.zproject_slot)
         self.z_thread.start()
 
@@ -818,7 +818,7 @@ l
         # Check if z projection finished
         if message == "Z-projection finished":
             # Get the crop dimensions and save the file
-            self.get_manual_bbox(self.zprojection_ouput)
+            self.get_manual_bbox(self.zprojection_output)
 
     def get_manual_bbox(self, img_path):
         """ Creates the a window to display the z projection used to get crop dimensions

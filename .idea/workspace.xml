@@ -4,50 +4,11 @@
     <bookmark url="file://$PROJECT_DIR$/processing.py" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="aba3e6c5-ccfb-4b78-9d0b-5267a04a2b08" name="Default" comment="Added more tests">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HARP_user_guide.docx" afterPath="$PROJECT_DIR$/HARP_user_guide.docx" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HARP_user_guide.pdf" afterPath="$PROJECT_DIR$/HARP_user_guide.pdf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/ResampleImageFilter/ResampleImageFilter" afterPath="$PROJECT_DIR$/testing/ResampleImageFilter/ResampleImageFilter" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/addtolist.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/addtolist.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/autocrop.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/autocrop.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/autofill.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/autofill.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/crop.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/crop.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/environment.pickle" afterPath="$PROJECT_DIR$/docs/_build/doctrees/environment.pickle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/getdimensions.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/getdimensions.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/harp.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/harp.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/interpolator/build/temp.linux-x86_64-2.7/interpolator.o" afterPath="$PROJECT_DIR$/testing/interpolator/build/temp.linux-x86_64-2.7/interpolator.o" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/interpolator.so" afterPath="$PROJECT_DIR$/testing/interpolator.so" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/interpolator/interpolator.so" afterPath="$PROJECT_DIR$/testing/interpolator/interpolator.so" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ui/mainwindow.ui" afterPath="$PROJECT_DIR$/ui/mainwindow.ui" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/doctrees/processing.doctree" afterPath="$PROJECT_DIR$/docs/_build/doctrees/processing.doctree" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/ResampleImageFilter/CMakeCache.txt" afterPath="$PROJECT_DIR$/testing/ResampleImageFilter/CMakeCache.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/addtolist.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/addtolist.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/appdirs.py" afterPath="$PROJECT_DIR$/lib/appdirs.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/autocrop.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/autocrop.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/autofill.html" afterPath="$PROJECT_DIR$/docs/_build/html/autofill.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/autofill.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/autofill.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/autofill.py" afterPath="$PROJECT_DIR$/autofill.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/crop.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/crop.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/errorcheck.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/errorcheck.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/genindex.html" afterPath="$PROJECT_DIR$/docs/_build/html/genindex.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/getdimensions.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/getdimensions.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/getpickle.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/getpickle.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/harp.html" afterPath="$PROJECT_DIR$/docs/_build/html/harp.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/harp.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/harp.html" />
+    <list default="true" id="aba3e6c5-ccfb-4b78-9d0b-5267a04a2b08" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/file_read_speed_test.py" afterPath="$PROJECT_DIR$/testing/file_read_speed_test.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/harp.py" afterPath="$PROJECT_DIR$/harp.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/interpolator/interpolator.c" afterPath="$PROJECT_DIR$/testing/interpolator/interpolator.c" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/jquery.js" afterPath="$PROJECT_DIR$/docs/_build/html/_static/jquery.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/mainwindow.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/mainwindow.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ui/mainwindow.py" afterPath="$PROJECT_DIR$/ui/mainwindow.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/masking_methods.py" afterPath="$PROJECT_DIR$/masking_methods.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/processing.html" afterPath="$PROJECT_DIR$/docs/_build/html/processing.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/processing.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/processing.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/processing.py" afterPath="$PROJECT_DIR$/processing.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/searchtools.js" afterPath="$PROJECT_DIR$/docs/_build/html/_static/searchtools.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/tifffile.py" afterPath="$PROJECT_DIR$/lib/tifffile.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_static/websupport.js" afterPath="$PROJECT_DIR$/docs/_build/html/_static/websupport.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/_build/html/_modules/zproject.html" afterPath="$PROJECT_DIR$/docs/_build/html/_modules/zproject.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/imgprocessing/zproject.py" afterPath="$PROJECT_DIR$/imgprocessing/zproject.py" />
     </list>
     <list id="cb098bdb-ad14-4094-b2b6-f5ad302c60c9" name="Failed commit: Default" comment="Have written new version of autocrop using an Otsu threshold derived mask" />
     <ignored path="HARP.iws" />
@@ -74,8 +35,30 @@
       <file leaf-file-name="harp.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/harp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.32692307" vertical-offset="357" max-vertical-offset="19312">
-              <caret line="59" column="61" selection-start-line="59" selection-start-column="61" selection-end-line="59" selection-end-column="61" />
+            <state vertical-scroll-proportion="0.64739066" vertical-offset="16133" max-vertical-offset="19652">
+              <caret line="976" column="68" selection-start-line="976" selection-start-column="68" selection-end-line="976" selection-end-column="68" />
+              <folding>
+                <element signature="e#732#763#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="zproject.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/imgprocessing/zproject.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="107" max-vertical-offset="1921">
+              <caret line="60" column="52" selection-start-line="60" selection-start-column="52" selection-end-line="60" selection-end-column="52" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="addtolist.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/addtolist.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="3570" max-vertical-offset="4522">
+              <caret line="14" column="5" selection-start-line="14" selection-start-column="5" selection-end-line="14" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -104,12 +87,13 @@
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/imgprocessing/autocrop.py" />
         <option value="$PROJECT_DIR$/autofill.py" />
-        <option value="$PROJECT_DIR$/imgprocessing/zproject.py" />
         <option value="$PROJECT_DIR$/imgprocessing/crop.py" />
         <option value="$PROJECT_DIR$/processing.py" />
         <option value="$PROJECT_DIR$/testing/unit_testing.py" />
         <option value="$PROJECT_DIR$/imgprocessing/resampler.py" />
+        <option value="$PROJECT_DIR$/testing/file_read_speed_test.py" />
         <option value="$PROJECT_DIR$/harp.py" />
+        <option value="$PROJECT_DIR$/imgprocessing/zproject.py" />
       </list>
     </option>
   </component>
@@ -581,28 +565,32 @@
       <created>1421078835613</created>
       <updated>1421078835613</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Ubuntu keeps messing up, haven't made any actual changes">
+      <created>1421160003760</created>
+      <updated>1421160003760</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
     <editor active="false" />
     <layout>
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32958803" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32677904" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.203125" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.203125" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39794007" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30992508" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30992508" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.30992508" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32958803" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32677904" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32958803" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
@@ -636,7 +624,8 @@
     <MESSAGE value="Started writing a test bed with various example data" />
     <MESSAGE value="Fixed bug where scaling would fail if no cropping was performed" />
     <MESSAGE value="Added more tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added more tests" />
+    <MESSAGE value="Ubuntu keeps messing up, haven't made any actual changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Ubuntu keeps messing up, haven't made any actual changes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -650,7 +639,7 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="86" />
+      <option name="time" value="88" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -829,23 +818,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/manualcrop.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.36296296" vertical-offset="3705" max-vertical-offset="5032">
-          <caret line="247" column="0" selection-start-line="247" selection-start-column="0" selection-end-line="247" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/appdata.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1080">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/testing/file_read_speed_test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.3314367" vertical-offset="233" max-vertical-offset="936">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
@@ -861,13 +836,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.34562212" vertical-offset="4858" max-vertical-offset="6851">
           <caret line="299" column="61" selection-start-line="299" selection-start-column="61" selection-end-line="299" selection-end-column="61" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/addtolist.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="4522">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -957,13 +925,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.049038462" vertical-offset="0" max-vertical-offset="1040">
-          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/imgprocessing/crop.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="920" max-vertical-offset="4386">
@@ -992,27 +953,61 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/manualcrop.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.39652678" vertical-offset="270" max-vertical-offset="5032">
+          <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/autofill.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3201923" vertical-offset="5175" max-vertical-offset="11373">
+        <state vertical-scroll-proportion="-7.2722144" vertical-offset="10664" max-vertical-offset="11373">
           <caret line="328" column="26" selection-start-line="328" selection-start-column="26" selection-end-line="328" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0719323" vertical-offset="0" max-vertical-offset="709">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/testing/file_read_speed_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.23977433" vertical-offset="0" max-vertical-offset="1037">
+          <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/addtolist.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3213" max-vertical-offset="4522">
+          <caret line="14" column="5" selection-start-line="14" selection-start-column="5" selection-end-line="14" selection-end-column="5" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/imgprocessing/zproject.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.3730769" vertical-offset="0" max-vertical-offset="2125">
-          <caret line="93" column="0" selection-start-line="93" selection-start-column="0" selection-end-line="93" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="107" max-vertical-offset="1921">
+          <caret line="60" column="52" selection-start-line="60" selection-start-column="52" selection-end-line="60" selection-end-column="52" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/harp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.32692307" vertical-offset="357" max-vertical-offset="19312">
-          <caret line="59" column="61" selection-start-line="59" selection-start-column="61" selection-end-line="59" selection-end-column="61" />
-          <folding />
+        <state vertical-scroll-proportion="0.64739066" vertical-offset="16133" max-vertical-offset="19652">
+          <caret line="976" column="68" selection-start-line="976" selection-start-column="68" selection-end-line="976" selection-end-column="68" />
+          <folding>
+            <element signature="e#732#763#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
