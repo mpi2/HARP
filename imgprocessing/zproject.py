@@ -10,11 +10,7 @@ import Queue
 import cv2
 import scipy.ndimage
 import skimage.io as io
-
-# For QThread class
 from PyQt4 import QtCore
-
-#TODO: add HarpDataError exception handling
 
 
 class Zproject:
@@ -47,22 +43,25 @@ class Zproject:
 
         max_array = self.max_projection(sparse_filelist, imdims)
 
-        io.imsave(self.zprojection_output, max_array)
+        cv2.imwrite(self.zprojection_output, max_array)
         return 0  # Change
-
 
     def max_projection(self, filelist, imdims):
 
-        max_ = np.zeros(imdims)
+        maxi = np.zeros(imdims)
         count = 0
         for file_ in filelist:
             count += 1
+
             im_array = scipy.ndimage.imread(file_)
-            max_ = np.maximum(max_, im_array[:][:])
+
+            #im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+            #max_ = np.maximum(max_, im_array[:][:])
+            inds = im_array > maxi
+            maxi[inds] = im_array[inds]
             if count % 10 == 0:
                 self.callback("Z project: {0} images".format(count * self.skip))
-        return max_
-
+        return maxi
 
 def zproject_callback(msg):
     print(msg)
@@ -94,7 +93,7 @@ class ZProjectThread(QtCore.QThread):
         # An error has happened. The error message will be shown on the status section
         if zp_result != 0:
             self.emit(QtCore.SIGNAL('update(QString)'),
-                      "Z projection failed. Error message: {0}. Give Tom or Neil a Call if it happens again".format(
+                      "Z projection failed. Error message: {0}. Contact the DCC if it happens again".format(
                           zp_result))
             return
         # let the user know what's happened
@@ -105,6 +104,7 @@ class ZProjectThread(QtCore.QThread):
 
 
 if __name__ == "__main__":
+
     z = Zproject(sys.argv[1], sys.argv[2], zproject_callback)
     zp_img = z.run()
 

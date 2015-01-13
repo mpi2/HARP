@@ -148,7 +148,7 @@ class MainWidget(QtGui.QWidget):
         #y2 = self.orig_height - (int(large_box[3] - (self.img_dist_top / self.scaleFact)))
 
         ijCropBox = (x1, y1, width, height )
-        print "ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox))
+        #print "ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox))
         logging.info("ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox)))
         cropBox = (x1, y1, width, height)
         self.callback(cropBox)

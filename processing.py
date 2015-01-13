@@ -352,6 +352,7 @@ class ProcessingThread(QtCore.QThread):
 
         # check if a tuple. If it is a tuple it means that the crop box has been sen from the autocrop. Then make
         # a pickle object of the object so it can be used again if derived crop option is used
+        print message
         if type(msg) == tuple:
             # create our generic class for pickles
             crop_box_ob = ConfigClass()

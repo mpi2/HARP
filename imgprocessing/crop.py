@@ -39,7 +39,6 @@ class Crop():
         self.thread_terminate_flag = thread_terminate_flag
         self.in_dir = in_dir
         self.out_dir = out_dir
-        self.crop_count =  0
         self.imdims = None
         self.def_crop = def_crop
         self.num_proc = num_proc
@@ -69,8 +68,10 @@ class Crop():
         :return:
         """
         first = True
-        for file_ in sorted(self.files):
+        count = 0
 
+        for file_ in sorted(self.files):
+            count += 1
             try:
                 im = scipy.ndimage.imread(file_)
             except IOError as e:
@@ -88,13 +89,12 @@ class Crop():
                 #     pass
                 #     #im[dimcheck] Check for indexing error as .shape is derived from header only
 
-            self.crop_count += 1
-            if self.crop_count % 20 == 0:
+            if count % 20 == 0:
                 if self.thread_terminate_flag.value == 1:
                     self.callback("Processing Cancelled!")
                     return
                 self.callback(
-                    "Cropping: {0}/{1} images".format(str(self.crop_count), str(len(self.files))))
+                    "Cropping: {0}/{1} images".format(count, str(len(self.files))))
 
             try:
                 imcrop = im[self.crop_box[1]:self.crop_box[3], self.crop_box[0]: self.crop_box[2]]
@@ -140,7 +140,7 @@ class Crop():
             self.calc_manual_crop()
             self.callback("success")
         else:
-
+            self.callback("Determining crop bounding box")
             z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
 
             # Start with a z-projection
@@ -181,7 +181,7 @@ class Crop():
                 raise HarpDataError('Autocrop failed! Try manual cropping')
 
             # Actually perform the cropping
-            crop_count = 1
+            count = 0
 
             for slice_ in self.files:
 
@@ -190,12 +190,12 @@ class Crop():
                 except IOError as e:
                     raise HarpDataError('Failed to read {}. Is it corrupt'.format(slice_))
 
-                if crop_count % 20 == 0:
+                if count % 20 == 0:
                     if self.thread_terminate_flag.value == 1:
                         self.callback("Processing Cancelled!")
                         return
                     self.callback(
-                        "Cropping: {0}/{1} images".format(str(crop_count), str(len(self.files))))
+                        "Cropping: {0}/{1} images".format(count, str(len(self.files))))
 
                 crop_count += 1
 
