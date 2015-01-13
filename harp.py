@@ -797,11 +797,9 @@ l
         input_folder = str(self.ui.lineEditInput.text())
 
         # Set thread off
-        z_thread_pool = []
-        z_thread_pool.append(ZProjectThread(input_folder, self.tmp_dir))
-        self.connect(z_thread_pool[len(z_thread_pool) - 1], QtCore.SIGNAL("update(QString)"),
-                     self.zproject_slot)
-        z_thread_pool[len(z_thread_pool) - 1].start()
+        z_thread = ZProjectThread(input_folder, self.tmp_dir)
+        self.connect(z_thread, QtCore.SIGNAL("update(QString)"), self.zproject_slot)
+        z_thread.start()
 
     def zproject_slot(self, message):
         """ Listens to the z projection child process.
@@ -1054,7 +1052,6 @@ l
 
         self.stop_pro_switch = 1
 
-
     def delete_rows(self, event):
         """ Deletes a row from the processing list on the processing tab
 
@@ -1112,7 +1109,7 @@ l
                 break
             if status:
                 if (status.text() != "Pending" and not re.search("Processing finished", status.text())
-                    and status.text() != "Processing Cancelled!" and not re.search("error", status.text())):
+                        and status.text() != "Processing Cancelled!" and not re.search("error", status.text())):
                     switch = "live"
                     break
             count += 1
@@ -1121,7 +1118,7 @@ l
         if switch == "live":
 
             reply = QtGui.QMessageBox.question(self, "Confirm quit", "Warning: all processing jobs will be cancelled. "
-                                                                "Are you sure you want to quit?",
+                                                     "Are you sure you want to quit?",
                                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 
             if reply == QtGui.QMessageBox.Yes:  # Kill processing and accept close event
@@ -1136,7 +1133,6 @@ l
                                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 
             if reply == QtGui.QMessageBox.Yes:
-                # Kill_em_all class to try and kill any processes
                 event.accept()
             else:
                 event.ignore()

@@ -98,7 +98,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="bp">self</span><span class="o">.</span><span class="n">skip_num</span><span class="p">]</span>
 
         <span class="c">#Start the file reader</span>
-        <span class="n">read_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fileReader</span><span class="p">)</span>
+        <span class="n">read_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_reader</span><span class="p">)</span>
         <span class="n">read_thread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
         <span class="n">read_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
@@ -106,7 +106,7 @@
         <span class="n">max_threads</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_max_threads</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_max_threads</span><span class="p">):</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxFinder</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_finder</span><span class="p">)</span>
             <span class="n">t</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
             <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
             <span class="n">max_threads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
@@ -130,7 +130,7 @@
             <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="s">&quot;max_intensity_z.tif&quot;</span><span class="p">),</span> <span class="n">maxi</span><span class="p">)</span>
             <span class="k">return</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="Zproject.fileReader"><a class="viewcode-back" href="../zproject.html#zproject.Zproject.fileReader">[docs]</a>    <span class="k">def</span> <span class="nf">fileReader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Zproject.file_reader"><a class="viewcode-back" href="../zproject.html#zproject.Zproject.file_reader">[docs]</a>    <span class="k">def</span> <span class="nf">file_reader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">file_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>
             <span class="n">im_array</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CV_LOAD_IMAGE_GRAYSCALE</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">shared_z_count</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_num</span><span class="p">)</span>
@@ -140,7 +140,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">im_array_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="Zproject.maxFinder"><a class="viewcode-back" href="../zproject.html#zproject.Zproject.maxFinder">[docs]</a>    <span class="k">def</span> <span class="nf">maxFinder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Zproject.max_finder"><a class="viewcode-back" href="../zproject.html#zproject.Zproject.max_finder">[docs]</a>    <span class="k">def</span> <span class="nf">max_finder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">max_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imdims</span><span class="p">)</span>
         <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -161,7 +161,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">maxintensity_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">max_</span><span class="p">)</span>
         <span class="k">return</span>
 </div></div>
-<div class="viewcode-block" id="dummyCallBack"><a class="viewcode-back" href="../zproject.html#zproject.dummyCallBack">[docs]</a><span class="k">def</span> <span class="nf">dummyCallBack</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+<div class="viewcode-block" id="zproject_callback"><a class="viewcode-back" href="../zproject.html#zproject.zproject_callback">[docs]</a><span class="k">def</span> <span class="nf">zproject_callback</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
     <span class="k">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="ZProjectThread"><a class="viewcode-back" href="../zproject.html#zproject.ZProjectThread">[docs]</a><span class="k">class</span> <span class="nc">ZProjectThread</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="p">):</span>
@@ -198,7 +198,7 @@
 
 </div></div>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="n">Zproject</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">dummyCallBack</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">Zproject</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">zproject_callback</span><span class="p">)</span>
     <span class="n">zp_img</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 
