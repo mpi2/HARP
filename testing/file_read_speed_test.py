@@ -5,12 +5,12 @@ import os
 import cv2
 import SimpleITK as sitk
 import scipy.ndimage
-import Image
+from PIL import Image
 import numpy as np
 import skimage.io as io
 
 
-path_to_test_dir = '/home/neil/work/harp_test_data/medium'
+path_to_test_dir = '/home/neil/work/harp_test_data/small_1'
 
 
 
@@ -36,7 +36,7 @@ elif sys.argv[1] == 'pil':
 elif sys.argv[1] == 'sitk':
     for impath in img_path_list:
         img = sitk.ReadImage(os.path.join(path_to_test_dir, impath))
-    print img.shape, img.dtype
+    print img.GetSize()
 
 
 elif sys.argv[1] == 'sitk_write':
