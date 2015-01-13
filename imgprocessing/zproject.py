@@ -5,6 +5,7 @@ import os
 import numpy as np
 import re
 from multiprocessing import cpu_count, Value, freeze_support
+import multiprocessing
 import threading
 import Queue
 import cv2
@@ -13,14 +14,15 @@ import skimage.io as io
 from PyQt4 import QtCore
 
 
-class Zproject:
+class Zproject(multiprocessing.Process):
 
-    def __init__(self, imglist, zprojection_output, callback):
+    def __init__(self, imglist, zprojection_output):
         self.skip = 10
         self.imglist = imglist
-        self.callback = callback
+        #self.callback = callback
         self.zprojection_output = zprojection_output
         self.skip_num = 10
+        self.run()
 
     def run(self):
         """
@@ -60,7 +62,8 @@ class Zproject:
             inds = im_array > maxi
             maxi[inds] = im_array[inds]
             if count % 10 == 0:
-                self.callback("Z project: {0} images".format(count * self.skip))
+                pass
+                #self.callback("Z project: {0} images".format(count * self.skip))
         return maxi
 
 def zproject_callback(msg):

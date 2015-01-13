@@ -20,6 +20,7 @@ has not been changed.
 from PyQt4 import QtCore, QtGui
 import datetime
 from multiprocessing import freeze_support
+import multiprocessing as mp
 import os
 import re
 import subprocess
@@ -32,7 +33,7 @@ import addtolist
 import Queue
 from ui.mainwindow import Ui_MainWindow
 from processing import ProcessingThread, getfilelist
-from imgprocessing.zproject import ZProjectThread
+import imgprocessing.zproject as zp
 import manualcrop
 from appdata import AppData
 import multiprocessing as mp
@@ -799,9 +800,13 @@ l
 
         self.zprojection_ouput = os.path.join(self.tmp_dir, "max_intensity_z.png")
 
-        self.z_thread = ZProjectThread(imglist, self.zprojection_ouput)
-        self.connect(self.z_thread, QtCore.SIGNAL("update(QString)"), self.zproject_slot)
-        self.z_thread.start()
+        # self.z_thread = ZProjectThread(imglist, self.zprojection_ouput)
+        # self.connect(self.z_thread, QtCore.SIGNAL("update(QString)"), self.zproject_slot)
+        # self.z_thread.start()
+
+        process = zp.Zproject(imglist, self.zprojection_ouput)
+        process.run()
+
 
     def zproject_slot(self, message):
         """ Listens to the z projection child process.
