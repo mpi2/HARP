@@ -13,6 +13,7 @@ import math
 import operator
 import sys
 import os
+import numpy as np
 try:
     import Image
 except ImportError:
@@ -205,67 +206,69 @@ class MainWidget(QtGui.QWidget):
 
         #Fet the current mouse pos
         pos = (event.pos().x() + self.img_dist_left, event.pos().y() + self.img_dist_top)
-        #print pos
+
         #Get ccords of current rubber band
         rect = self.pixmap_item.rubberBand.geometry().getCoords()
 
         topLx = rect[0]
         topLy = rect[1]
-        botRx= rect[2]
+        botRx = rect[2]
         botRy = rect[3]
 
-        #find closest corder to mouse with Pythagoras
-        dists = {1:math.sqrt((pos[0] - topLx)**2  + ( pos[1] - topLy)**2 ),
-                 2:math.sqrt((pos[0] - botRx)**2  + ( pos[1] - topLy)**2 ),
-                 3:math.sqrt((pos[0] - botRx)**2  + ( pos[1] - botRy)**2 ),
-                 4:math.sqrt((pos[0] - topLx)**2  + ( pos[1] - botRy)**2 )}
+        # Compute distances to all four corners
+        dists = {1: math.sqrt((pos[0] - topLx)**2 + (pos[1] - topLy)**2),
+                 2: math.sqrt((pos[0] - botRx)**2 + (pos[1] - topLy)**2),
+                 3: math.sqrt((pos[0] - botRx)**2 + (pos[1] - botRy)**2),
+                 4: math.sqrt((pos[0] - topLx)**2 + (pos[1] - botRy)**2)}
 
+        # Find minimum distance
         corner = min(dists.iteritems(), key=operator.itemgetter(1))[0]
-
-        #get the corner. Corner numbered 1-4 clockwise from top-left
-        side = 1
-        if corner == 1:
-            k = {1: abs(pos[1] - topLy),
-               4: abs(pos[0] - topLx)}
-            side = min(k.iteritems(), key=operator.itemgetter(1))[0]
-
-        if corner == 2:
-            k = {2: abs(pos[0] - botRx),
-               1: abs(pos[1] - topLy)}
-            side = min(k.iteritems(), key=operator.itemgetter(1))[0]
-
-        if corner == 3:
-            k = {2: abs(pos[0] - botRx),
-               3: abs(pos[1] - botRy)}
-            side = min(k.iteritems(), key=operator.itemgetter(1))[0]
-
-        if corner == 4:
-            k = {4: abs(pos[0] - topLx),
-               3: abs(pos[1] - botRy)}
-            side = min(k.iteritems(), key=operator.itemgetter(1))[0]
-
         r = self.pixmap_item.rubberBand.geometry()
 
-        #Get the nearest side. Sides numbered 1-4 clockwise from top
-        #print "corner:" , corner, " side:", side
-        if side == 1:
-            r.setTop(pos[1])
-            self.pixmap_item.rubberBand.setGeometry(r)
-            #print r.getRect()
-        if side == 2:
-            r.setRight(pos[0])
-            self.pixmap_item.rubberBand.setGeometry(r)
-        if side == 3:
-            r.setBottom(pos[1])
-            self.pixmap_item.rubberBand.setGeometry(r)
-            #print r.getRect()
-        if side == 4:
+        # Modify rectangle according to selected corner and mouse position
+        if corner == 1:
             r.setLeft(pos[0])
-            self.pixmap_item.rubberBand.setGeometry(r)
+            r.setTop(pos[1])
+            # k = {1: abs(pos[1] - topLy),
+            #      4: abs(pos[0] - topLx)}
+            # side = min(k.iteritems(), key=operator.itemgetter(1))[0]
+        if corner == 2:
+            r.setRight(pos[0])
+            r.setTop(pos[1])
+            # k = {2: abs(pos[0] - botRx),
+            #      1: abs(pos[1] - topLy)}
+            # side = min(k.iteritems(), key=operator.itemgetter(1))[0]
+        if corner == 3:
+            r.setRight(pos[0])
+            r.setBottom(pos[1])
+            # k = {2: abs(pos[0] - botRx),
+            #      3: abs(pos[1] - botRy)}
+            # side = min(k.iteritems(), key=operator.itemgetter(1))[0]
+        if corner == 4:
+            r.setLeft(pos[0])
+            r.setBottom(pos[1])
+            # k = {4: abs(pos[0] - topLx),
+            #      3: abs(pos[1] - botRy)}
+            # side = min(k.iteritems(), key=operator.itemgetter(1))[0]
 
+        self.pixmap_item.rubberBand.setGeometry(r)
+
+        #Get the nearest side. Sides numbered 1-4 clockwise from top
+        # print "corner: ", corner, " side: ", side
+        # if side == 1:
+        #     r.setTop(pos[1])
+        #     self.pixmap_item.rubberBand.setGeometry(r)
+        # if side == 2:
+        #     r.setRight(pos[0])
+        #     self.pixmap_item.rubberBand.setGeometry(r)
+        # if side == 3:
+        #     r.setBottom(pos[1])
+        #     self.pixmap_item.rubberBand.setGeometry(r)
+        # if side == 4:
+        #     r.setLeft(pos[0])
+        #     self.pixmap_item.rubberBand.setGeometry(r)
 
         print(r)
-
 
     def mouseRelease(self, event):
         '''
@@ -274,9 +277,6 @@ class MainWidget(QtGui.QWidget):
         '''
         if self.drawing:
             self.drawing = False
-
-
-
 
 def run_from_cli(callback, image):
     #Need access to app to be able to exit gracefully from cli

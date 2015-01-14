@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-
+import os
 import numpy as np
 import cv2
 import scipy.ndimage
@@ -26,23 +26,24 @@ class Zproject(QtCore.QThread):
         """
         print 'zproject thread id', QtCore.QThread.currentThreadId()
 
-        if len(self.imglist) < 1:
-            return "no images in list"
+        if os.path.isfile(self.zprojection_output) is False:
 
-        try:
-            im = scipy.ndimage.imread(self.imglist[0])
-        except IOError as e:
-            return "Cant load {}. Is it corrupted?".format(self.imglist[0])
+            if len(self.imglist) < 1:
+                return "no images in list"
+            try:
+                im = scipy.ndimage.imread(self.imglist[0])
+            except IOError as e:
+                return "Cant load {}. Is it corrupted?".format(self.imglist[0])
 
-        imdims = im.shape
+            imdims = im.shape
 
-        # make a new list by removing every nth image
-        sparse_filelist = sorted(self.imglist)[0::self.skip_num]
+            # make a new list by removing every nth image
+            sparse_filelist = sorted(self.imglist)[0::self.skip_num]
 
-        print "performing z-projection on sparse file list"
+            print "performing z-projection on sparse file list"
 
-        max_array = self.max_projection(sparse_filelist, imdims)
-        cv2.imwrite(self.zprojection_output, max_array)
+            max_array = self.max_projection(sparse_filelist, imdims)
+            cv2.imwrite(self.zprojection_output, max_array)
 
         self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
 

@@ -217,9 +217,9 @@ def add_to_list_action(self):
             and not self.ui.lineEditDerivedChnName.text():
         self.stop = True
         self.stop_chn_for_loop = True
-        QtGui.QMessageBox.warning(self,'Message','Warning: Derived dimensions for autocrop option selected.'
-                                                    ' This requires a valid channel to be used to get the crop '
-                                                    'dimensions from')
+        QtGui.QMessageBox.warning(self, 'Message', 'Warning: Derived dimensions for autocrop option selected.'
+                                                   ' This requires a valid channel to be used to get the crop '
+                                                   'dimensions from')
         return
 
     # Perform some checks before any processing is carried out
