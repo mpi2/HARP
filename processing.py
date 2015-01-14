@@ -280,7 +280,7 @@ class ProcessingThread(QtCore.QThread):
         # It may be better to add the execptions closer to the event as these can catch a broad range
         try:
             # Run autocrop and catch errors
-            cropper.run()  # James - new version of autocrop
+            cropper.run_auto_mask()  # James - new version of autocrop
 
         except WindowsError as e:
             self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the "
@@ -304,7 +304,7 @@ class ProcessingThread(QtCore.QThread):
             self.session_log.write("error: Unknown exception. Exception message:\n"
                                    + "Exception traceback:" +
                                    traceback.format_exc() + "\n")
-            self.emit(QtCore.SIGNAL('update(QString)'), "error: Unknown exception (see log): " + str(e))
+            self.emit(QtCore.SIGNAL('update(QString)'), "error:(see log): " + str(e))
 
     def tiffstack_from_slices(self, in_dir, outfile):
         """
@@ -352,6 +352,7 @@ class ProcessingThread(QtCore.QThread):
 
         # check if a tuple. If it is a tuple it means that the crop box has been sen from the autocrop. Then make
         # a pickle object of the object so it can be used again if derived crop option is used
+        print msg
         if type(msg) == tuple:
             # create our generic class for pickles
             crop_box_ob = ConfigClass()
