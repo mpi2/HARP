@@ -32,29 +32,31 @@ class Zproject(QtCore.QThread):
             if len(self.imglist) < 1:
                 return "no images in list"
             try:
-                im = scipy.ndimage.imread(self.imglist[0])
+                print self.imglist[0]
+                im = cv2.imread(self.imglist[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
             except IOError as e:
                 return "Cant load {}. Is it corrupted?".format(self.imglist[0])
 
             imdims = im.shape
+            dtype = im.dtype
 
             # make a new list by removing every nth image
             sparse_filelist = sorted(self.imglist)[0::self.skip_num]
 
             print "performing z-projection on sparse file list"
 
-            max_array = self.max_projection(sparse_filelist, imdims)
+            max_array = self.max_projection(sparse_filelist, imdims, dtype)
             cv2.imwrite(self.zprojection_output, max_array)
 
         self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
 
-    def max_projection(self, filelist, imdims):
+    def max_projection(self, filelist, imdims, bit_depth):
 
-        maxi = np.zeros(imdims)
+        maxi = np.zeros(imdims, dtype=bit_depth)
 
         for count, file_ in enumerate(filelist):
 
-            im_array = scipy.ndimage.imread(file_)
+            im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
 
             #im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
             #max_ = np.maximum(max_, im_array[:][:])
