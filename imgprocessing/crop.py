@@ -127,7 +127,7 @@ class Crop():
 
         return bbox
 
-    def run_auto_mask(self):
+    def run(self):
 
         # Get list of files
         imglist = processing.getfilelist(self.in_dir)
@@ -181,9 +181,7 @@ class Crop():
                 raise HarpDataError('Autocrop failed! Try manual cropping')
 
             # Actually perform the cropping
-            count = 0
-
-            for slice_ in self.files:
+            for count, slice_ in enumerate(self.files):
 
                 try:
                     im = scipy.ndimage.imread(slice_)
@@ -196,8 +194,6 @@ class Crop():
                         return
                     self.callback(
                         "Cropping: {0}/{1} images".format(count, str(len(self.files))))
-
-                crop_count += 1
 
                 imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
                 filename = os.path.basename(slice_)
