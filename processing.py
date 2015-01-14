@@ -257,6 +257,8 @@ class ProcessingThread(QtCore.QThread):
                 self.emit(QtCore.SIGNAL('update(QString)'), "error: Unknown exception trying to get derived dimension"
                                                             " (see log): " + str(e))
 
+            print "Derived cropbox: ", derived_cropbox
+
         #===============================================
         # Perform the crop!
         #===============================================

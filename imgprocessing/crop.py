@@ -136,7 +136,7 @@ class Crop():
         if len(imglist) < 1:
             return "no image files found in " + self.in_dir
 
-        if self.def_crop:
+        if self.def_crop or self.repeat_crop:
             self.calc_manual_crop()
             self.callback("success")
         else:
