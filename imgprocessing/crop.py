@@ -60,18 +60,18 @@ class Crop():
         else:
             self.callback("Processing Cancelled!")
             return
-        self.run_crop_process()
+        self.run()
 
-    def run_crop_process(self):
+    def run(self):
         """
-        Perform a crop based on previously selected bounding boxter
+        Perform a crop based on previously selected bounding box
         :return:
         """
         first = True
-        count = 0
+        first = True
 
-        for file_ in sorted(self.files):
-            count += 1
+        for count, file_ in enumerate(sorted(self.files)):
+
             try:
                 im = scipy.ndimage.imread(file_)
             except IOError as e:
@@ -96,12 +96,12 @@ class Crop():
                 self.callback(
                     "Cropping: {0}/{1} images".format(count, str(len(self.files))))
 
+            filename = os.path.basename(file_)
             try:
                 imcrop = im[self.crop_box[1]:self.crop_box[3], self.crop_box[0]: self.crop_box[2]]
             except IndexError as e:
-                raise HarpDataError("Crop box out of range. Is {} corrupted".format(file_))
+                raise HarpDataError("Crop box out of range. Is {} corrupted?".format(filename))
 
-            filename = os.path.basename(file_)
             crop_out = os.path.join(self.out_dir, filename)
             cv2.imwrite(crop_out, imcrop)
 
@@ -186,9 +186,7 @@ class Crop():
                 raise HarpDataError('Autocrop failed, cropbox too small! Try manual cropping')
 
             # Actually perform the cropping
-            count = 0
-
-            for slice_ in self.files:
+            for count, slice_ in enumerate(self.files):
 
                 try:
                     im = scipy.ndimage.imread(slice_)
@@ -201,8 +199,6 @@ class Crop():
                         return
                     self.callback(
                         "Cropping: {0}/{1} images".format(count, str(len(self.files))))
-
-                count += 1
 
                 imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
                 filename = os.path.basename(slice_)

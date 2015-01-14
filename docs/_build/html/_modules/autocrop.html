@@ -158,7 +158,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">yield_python</span><span class="p">()</span>
 
         <span class="c"># do the cropping in cv2</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">run_crop_process</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </div>
 <div class="viewcode-block" id="Autocrop.calc_manual_crop"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.calc_manual_crop">[docs]</a>    <span class="k">def</span> <span class="nf">calc_manual_crop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c"># Repeat crop variable is for when an autocrop has already been performed for a channel of OPT and the user</span>
@@ -174,10 +174,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="s">&quot;Processing Cancelled!&quot;</span><span class="p">)</span>
             <span class="k">return</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">run_crop_process</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
 </div>
-<div class="viewcode-block" id="Autocrop.run_crop_process"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.run_crop_process">[docs]</a>    <span class="k">def</span> <span class="nf">run_crop_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Autocrop.run"><a class="viewcode-back" href="../autocrop.html#autocrop.Autocrop.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">global</span> <span class="n">shared_terminate</span>
         <span class="c"># Perform the cropping using cv2</span>
         <span class="k">for</span> <span class="n">file_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>

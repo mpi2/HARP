@@ -341,7 +341,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s">&#39;update(QString)&#39;</span><span class="p">),</span> <span class="s">&quot;error: HARP can&#39;t find the folder, see log file&quot;</span><span class="p">)</span>
 
         <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="c"># This is referring to an error in either the functions run_crop_process or init_cropping. P</span>
+            <span class="c"># This is referring to an error in either the functions run or init_cropping. P</span>
             <span class="c"># ossibly the exception would be more beneficial placed directly in autocrop....</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">session_log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;error: HARP most likely can&#39;t find the folder, maybe a temporary problem connecting&quot;</span>
                                    <span class="s">&quot; to the network. Exception message:</span><span class="se">\n</span><span class="s"> Exception traceback:&quot;</span> <span class="o">+</span>

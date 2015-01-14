@@ -289,7 +289,7 @@ class ProcessingThread(QtCore.QThread):
             self.emit(QtCore.SIGNAL('update(QString)'), "error: HARP can't find the folder, see log file")
 
         except TypeError as e:
-            # This is referring to an error in either the functions run_crop_process or init_cropping. P
+            # This is referring to an error in either the functions run or init_cropping. P
             # ossibly the exception would be more beneficial placed directly in autocrop....
             self.session_log.write("error: HARP most likely can't find the folder, maybe a temporary problem connecting"
                                    " to the network. Exception message:\n Exception traceback:" +
@@ -352,7 +352,6 @@ class ProcessingThread(QtCore.QThread):
 
         # check if a tuple. If it is a tuple it means that the crop box has been sen from the autocrop. Then make
         # a pickle object of the object so it can be used again if derived crop option is used
-        print msg
         if type(msg) == tuple:
             # create our generic class for pickles
             crop_box_ob = ConfigClass()
