@@ -785,6 +785,7 @@ l
         # Let the user know what is going on
         self.ui.textEditStatusMessages.setText("Z-projection in process, please wait")
         # Run the zprojection
+        print 'harp thread id', QtCore.QThread.currentThreadId()
         self.start_z_thread()
 
     def start_z_thread(self):
@@ -798,7 +799,6 @@ l
         imglist = getfilelist(input_folder)
 
         self.zprojection_output = os.path.join(self.tmp_dir, "max_intensity_z.png")
-
         self.z_thread = zproject.Zproject(imglist, self.zprojection_output)
         self.connect(self.z_thread, QtCore.SIGNAL("update(QString)"), self.zproject_slot)
         self.z_thread.start()

@@ -144,8 +144,8 @@ class Crop():
             z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
 
             # Start with a z-projection
-            zp = zproject.Zproject(imglist, z_proj_path, self.zp_callback)
-            zp.run()
+            zp = zproject.Zproject(imglist, z_proj_path)
+            zp.run_onthisthread()
 
             zp_im = sitk.ReadImage(z_proj_path)
 
@@ -177,8 +177,13 @@ class Crop():
             bbox = self.pad_bounding_box(bbox, padding)
             self.crop_box = tuple(bbox)
 
-            if self.crop_box[1] - self.crop_box[0] < 10 or self.crop_box[3] - self.crop_box[2] < 10:
-                raise HarpDataError('Autocrop failed! Try manual cropping')
+            dimsx = self.crop_box[1] - self.crop_box[0]
+            dimsy = self.crop_box[3] - self.crop_box[2]
+
+            print self.crop_box
+
+            if dimsx < 10 or dimsy < 10:
+                raise HarpDataError('Autocrop failed, cropbox too small! Try manual cropping')
 
             # Actually perform the cropping
             count = 0
@@ -197,7 +202,7 @@ class Crop():
                     self.callback(
                         "Cropping: {0}/{1} images".format(count, str(len(self.files))))
 
-                crop_count += 1
+                count += 1
 
                 imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
                 filename = os.path.basename(slice_)
