@@ -9,12 +9,13 @@ from PyQt4 import QtCore
 
 class Zproject(QtCore.QThread):
 
-    def __init__(self, imglist, zprojection_output):
+    def __init__(self, imglist, zprojection_output, force=False):
         super(Zproject, self).__init__()
         self.skip = 10
         self.imglist = imglist
         self.zprojection_output = zprojection_output
         self.skip_num = 10
+        self.force = force
 
     def run(self):
         self.run_onthisthread()
@@ -26,7 +27,7 @@ class Zproject(QtCore.QThread):
         """
         print 'zproject thread id', QtCore.QThread.currentThreadId()
 
-        if os.path.isfile(self.zprojection_output) is False:
+        if os.path.isfile(self.zprojection_output) is False or self.force:
 
             if len(self.imglist) < 1:
                 return "no images in list"

@@ -144,7 +144,7 @@ class Crop():
             z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
 
             # Start with a z-projection
-            zp = zproject.Zproject(imglist, z_proj_path)
+            zp = zproject.Zproject(imglist, z_proj_path, force=True)
             zp.run_onthisthread()
 
             zp_im = sitk.ReadImage(z_proj_path)
