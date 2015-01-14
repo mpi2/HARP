@@ -39,11 +39,12 @@ class Zproject(QtCore.QThread):
         # make a new list by removing every nth image
         sparse_filelist = sorted(self.imglist)[0::self.skip_num]
 
+        print "performing z-projection on sparse file list"
+
         max_array = self.max_projection(sparse_filelist, imdims)
         cv2.imwrite(self.zprojection_output, max_array)
 
         self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
-
 
     def max_projection(self, filelist, imdims):
 
@@ -63,9 +64,9 @@ class Zproject(QtCore.QThread):
                 #self.callback("Z project: {0} images".format(count * self.skip))
         return maxi
 
-# class ZprojectThreaded(Zproject, QtCore.QThread):
-#
-#     def __init__(self, imglist, zprojection_output):
-#         super(ZprojectThreaded, self).__init__(imglist, zprojection_output)
+
+
+
+
 
 

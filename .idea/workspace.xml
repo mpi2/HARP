@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aba3e6c5-ccfb-4b78-9d0b-5267a04a2b08" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testing/file_read_speed_test.py" afterPath="$PROJECT_DIR$/testing/file_read_speed_test.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/harp.py" afterPath="$PROJECT_DIR$/harp.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/imgprocessing/zproject.py" afterPath="$PROJECT_DIR$/imgprocessing/zproject.py" />
@@ -35,8 +34,8 @@
       <file leaf-file-name="harp.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/harp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.64739066" vertical-offset="16133" max-vertical-offset="19652">
-              <caret line="976" column="68" selection-start-line="976" selection-start-column="68" selection-end-line="976" selection-end-column="68" />
+            <state vertical-scroll-proportion="0.3751763" vertical-offset="2675" max-vertical-offset="19788">
+              <caret line="173" column="28" selection-start-line="173" selection-start-column="28" selection-end-line="173" selection-end-column="28" />
               <folding>
                 <element signature="e#732#763#0" expanded="true" />
               </folding>
@@ -44,11 +43,21 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="processing.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/processing.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-4.464286" vertical-offset="8205" max-vertical-offset="12019">
+              <caret line="495" column="8" selection-start-line="495" selection-start-column="8" selection-end-line="508" selection-end-column="18" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="zproject.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/imgprocessing/zproject.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="107" max-vertical-offset="1921">
-              <caret line="60" column="52" selection-start-line="60" selection-start-column="52" selection-end-line="60" selection-end-column="52" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="311" max-vertical-offset="1972">
+              <caret line="37" column="16" selection-start-line="37" selection-start-column="16" selection-end-line="37" selection-end-column="16" />
               <folding />
             </state>
           </provider>
@@ -92,8 +101,8 @@
         <option value="$PROJECT_DIR$/testing/unit_testing.py" />
         <option value="$PROJECT_DIR$/imgprocessing/resampler.py" />
         <option value="$PROJECT_DIR$/testing/file_read_speed_test.py" />
-        <option value="$PROJECT_DIR$/harp.py" />
         <option value="$PROJECT_DIR$/imgprocessing/zproject.py" />
+        <option value="$PROJECT_DIR$/harp.py" />
       </list>
     </option>
   </component>
@@ -145,20 +154,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="HARP" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="HARP" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="HARP" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="imgprocessing" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -569,7 +564,11 @@
       <created>1421160003760</created>
       <updated>1421160003760</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Fixed z-project callback issue, and changed status string to be more informative">
+      <created>1421171457620</created>
+      <updated>1421171457620</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -582,7 +581,7 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32677904" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.203125" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.203125" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39794007" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30992508" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
@@ -625,7 +624,8 @@
     <MESSAGE value="Fixed bug where scaling would fail if no cropping was performed" />
     <MESSAGE value="Added more tests" />
     <MESSAGE value="Ubuntu keeps messing up, haven't made any actual changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="Ubuntu keeps messing up, haven't made any actual changes" />
+    <MESSAGE value="Fixed z-project callback issue, and changed status string to be more informative" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed z-project callback issue, and changed status string to be more informative" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -903,13 +903,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/processing.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="3468" max-vertical-offset="12291">
-          <caret line="204" column="72" selection-start-line="204" selection-start-column="72" selection-end-line="204" selection-end-column="72" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/AppData/Local/Continuum/Anaconda/Lib/ntpath.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33286318" vertical-offset="1039" max-vertical-offset="9333">
@@ -995,16 +988,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/imgprocessing/zproject.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="107" max-vertical-offset="1921">
-          <caret line="60" column="52" selection-start-line="60" selection-start-column="52" selection-end-line="60" selection-end-column="52" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="311" max-vertical-offset="1972">
+          <caret line="37" column="16" selection-start-line="37" selection-start-column="16" selection-end-line="37" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/processing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.464286" vertical-offset="8205" max-vertical-offset="12019">
+          <caret line="495" column="8" selection-start-line="495" selection-start-column="8" selection-end-line="508" selection-end-column="18" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/harp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.64739066" vertical-offset="16133" max-vertical-offset="19652">
-          <caret line="976" column="68" selection-start-line="976" selection-start-column="68" selection-end-line="976" selection-end-column="68" />
+        <state vertical-scroll-proportion="0.3751763" vertical-offset="2675" max-vertical-offset="19788">
+          <caret line="173" column="28" selection-start-line="173" selection-start-column="28" selection-end-line="173" selection-end-column="28" />
           <folding>
             <element signature="e#732#763#0" expanded="true" />
           </folding>
