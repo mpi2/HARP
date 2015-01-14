@@ -5,7 +5,6 @@ import os
 import fnmatch
 import numpy as np
 import cv2
-import scipy.ndimage
 import SimpleITK as sitk
 from imgprocessing import zproject
 import sys
@@ -73,7 +72,7 @@ class Crop():
         for count, file_ in enumerate(sorted(self.files)):
 
             try:
-                im = scipy.ndimage.imread(file_)
+                im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
             except IOError as e:
                 raise HarpDataError("failed to read {}".format(file_))
 
@@ -150,7 +149,7 @@ class Crop():
             zp_im = sitk.ReadImage(z_proj_path)
 
             try:
-                testimg = scipy.ndimage.imread(imglist[0])
+                testimg = cv2.imread(imglist[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
             except IOError as e:
                 raise HarpDataError('Failed to read {}. Is it corrupt'.format(imglist[0]))
 
@@ -189,7 +188,7 @@ class Crop():
             for count, slice_ in enumerate(self.files):
 
                 try:
-                    im = scipy.ndimage.imread(slice_)
+                    im = cv2.CV_LOAD_IMAGE_UNCHANGED(slice_)
                 except IOError as e:
                     raise HarpDataError('Failed to read {}. Is it corrupt'.format(slice_))
 

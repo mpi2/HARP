@@ -3,7 +3,6 @@
 import os
 import numpy as np
 import cv2
-import scipy.ndimage
 from PyQt4 import QtCore
 
 
