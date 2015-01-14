@@ -21,7 +21,7 @@ class HarpDataError(Exception):
 
 class Crop():
     def __init__(self, in_dir, out_dir, callback, configOb,
-                 thread_terminate_flag, num_proc=None, def_crop=None, repeat_crop=None):
+                 thread_terminate_flag, app_data, def_crop=None, repeat_crop=None):
         """
         :param in_dir:
         :param out_dir:
@@ -36,11 +36,11 @@ class Crop():
         self.callback = callback
         self.configOb = configOb
         self.thread_terminate_flag = thread_terminate_flag
+        self.app_data = app_data
         self.in_dir = in_dir
         self.out_dir = out_dir
         self.imdims = None
         self.def_crop = def_crop
-        self.num_proc = num_proc
         self.repeat_crop = repeat_crop
         self.skip_num = 10  # read every n files for determining cropping box
         self.threshold = 0.01  # threshold for cropping metric
@@ -129,8 +129,10 @@ class Crop():
     def run_auto_mask(self):
 
         # Get list of files
-        imglist = processing.getfilelist(self.in_dir)
+        #imglist = processing.getfilelist(self.in_dir)
+        imglist = processing.getfilelist(self.in_dir, self.app_data.files_to_use, self.app_data.files_to_ignore)
         self.files = sorted(imglist)
+        print 'ram', self.files
 
         if len(imglist) < 1:
             return "no image files found in " + self.in_dir

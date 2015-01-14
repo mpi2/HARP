@@ -8,6 +8,9 @@ from os.path import expanduser
 import os
 import collections
 
+default_ignore = ['spr.bmp', 'spr.tif', 'spr.tiff', 'spr.jpg', 'spr.jpeg', '.txt', '.text', '.log', '.crv']
+default_use = ['*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.tiff', '*rec*.jpg', '*rec*.jpeg']
+
 
 class AppData(object):
     def __init__(self):
@@ -37,7 +40,7 @@ class AppData(object):
                 with open(self.app_data_file, 'r') as fh:
                     self.app_data = yaml.load(fh)
 
-    def write_app_data(self):
+    def save(self):
         if self.using_appdata:
             with open(self.app_data_file, 'w') as fh:
                 fh.write(yaml.dump(self.app_data))
@@ -56,4 +59,36 @@ class AppData(object):
             self.app_data = {}
         if self.using_appdata:
             self.app_data['last_dir_browsed'] = path
+
+    @property
+    def files_to_ignore(self):
+        if self.using_appdata:
+            if self.app_data:
+                if not self.app_data.get('files_to_ignore'):
+                    self.app_data['files_to_ignore'] = default_ignore
+                return self.app_data['files_to_ignore']
+
+    @files_to_ignore.setter
+    def files_to_ignore(self, pattern_list):
+        if self.using_appdata:
+            self.app_data['files_to_ignore'] = pattern_list
+
+    @property
+    def files_to_use(self):
+        if self.using_appdata:
+            if self.app_data:
+                if not self.app_data.get('files_to_use'):
+                    self.app_data['files_to_use'] = default_use
+                return self.app_data['files_to_use']
+
+    @files_to_use.setter
+    def files_to_use(self, pattern_list):
+        if self.using_appdata:
+            self.app_data['files_to_use'] = pattern_list
+
+    def reset_ignore_file(self):
+        self.app_data['files_to_ignore'] = default_ignore
+
+    def reset_use_file(self):
+        self.app_data['files_to_use'] = default_use
 

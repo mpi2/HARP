@@ -46,7 +46,7 @@ class ProcessingThread(QtCore.QThread):
 
     """
 
-    def __init__(self, config_paths, thread_terminate_flag, parent=None):
+    def __init__(self, config_paths, thread_terminate_flag, appdata, parent=None):
         """Gets the pickle config file and initialises some instance variables
 
         :param obj parent: This is a way to pass the "self" object to the processing thread.
@@ -60,6 +60,7 @@ class ProcessingThread(QtCore.QThread):
         super(ProcessingThread, self).__init__(parent)
         self.config_paths = config_paths
         self.thread_terminate_flag = thread_terminate_flag
+        self.app_data = appdata
         self.crop_status = ''
          # List of file extensions to ignore
 
@@ -270,7 +271,7 @@ class ProcessingThread(QtCore.QThread):
         #TODO: just send configOb
         cropper = crop.Crop(self.configOb.input_folder, self.configOb.cropped_path,
                                            self.autocrop_update_slot, self.configOb,
-                                           self.thread_terminate_flag, def_crop=dimensions_tuple,
+                                           self.thread_terminate_flag, self.app_data, def_crop=dimensions_tuple,
                                            repeat_crop=derived_cropbox)
 
         # WindowsError is an execption only available on Windows need to make a fake WindowsError exception for linux
@@ -474,10 +475,16 @@ class ProcessingThread(QtCore.QThread):
                                 self.configOb.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".nrrd")
 
         try:
-            files_for_scaling = getfilelist(self.folder_for_scaling)
+            files_for_scaling = getfilelist(self.folder_for_scaling,
+                                            self.app_data.files_to_use, self.app_data.files_to_ignore)
+            if len(files_for_scaling) < 1:
+                self.emit(QtCore.SIGNAL('update(QString)'), "Rescaling failed. No images found: {}")
+
             resampler.resample(files_for_scaling, scale, out_name, scaleby_int, self.thread_terminate_flag)
         except HarpDataError as e:
             self.emit(QtCore.SIGNAL('update(QString)'), "Rescaling the image failed: {}".format(e))
+
+
 
 
     def hide_files(self):
@@ -509,20 +516,18 @@ class ProcessingThread(QtCore.QThread):
             print "OSError Problem making temp folder", e
             return
 
-        non_image_suffix = ('spr.bmp', 'spr.tif', 'spr.tiff', 'spr.jpg', 'spr.jpeg', '.txt', '.text', '.log', '.crv')
-        image_list = ('*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.tiff', '*rec*.jpg', '*rec*.jpeg')
-
         # loop through crop path
         for fn in os.listdir(crop_path):
             #print fn
             fnlc = fn.lower()
             full_fn = os.path.join(crop_path, fn)
             # Known non image files
-            if any(fnlc.endswith(x) for x in non_image_suffix):
+            if any(fnlc.endswith(x) for x in self.app_data.files_to_ignore):
                 shutil.move(full_fn, tmp_crop)
                 continue
             # Check if known image file
-            if any(fnmatch.fnmatch(fnlc, x) for x in image_list):
+
+            if any(fnmatch.fnmatch(fnlc, x) for x in self.app_data.files_to_use):
                 # a standard image file so ignore
                 continue
             else:
@@ -676,21 +681,20 @@ class HarpDataError(Exception):
     pass
 
 
-def getfilelist(input_folder):
+def getfilelist(input_folder, files_to_use, files_to_ignore):
     """
     Get the list of files from filedir. Exclude known non slice files
     """
-    extensions_to_ignore = ('spr.bmp', 'spr.BMP', 'spr.tif', 'spr.TIF',
-                            'spr.jpg', 'spr.JPG', '*spr.jpeg', 'spr.JPEG')
+    # extensions_to_ignore = ('spr.bmp', 'spr.BMP', 'spr.tif', 'spr.TIF',
+    #                         'spr.jpg', 'spr.JPG', '*spr.jpeg', 'spr.JPEG')
     files = []
 
     for fn in os.listdir(input_folder):
-        if any(fn.endswith(x) for x in extensions_to_ignore):
+        if any(fn.endswith(x) for x in files_to_ignore):
             continue
-        if any(fnmatch.fnmatch(fn, x) for x in (
-                '*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF',
-                '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG')):
-
+        if any(fnmatch.fnmatch(fn, x) for x in files_to_use):
+                # '*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF',
+                # '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG')):
             files.append(os.path.join(input_folder, fn))
 
     return files

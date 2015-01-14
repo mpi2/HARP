@@ -71,6 +71,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Store app-specific data such as last directory browsed
         self.app_data = AppData()
+        self.opttab_populate_patterns()
 
         # Initialise various switches
         self.modality = "MicroCT"
@@ -190,6 +191,11 @@ class MainWindow(QtGui.QMainWindow):
 
         # The IMPC button sets the deafaults for sending data to the DCC
         self.ui.pushButtonIMPC.clicked.connect(self.impc_button)
+
+        #Save the options
+        self.ui.pushButtonSaveOptions.clicked.connect(self.opttab_save)
+        self.ui.pushButtonResetIgnoreFiles.clicked.connect(self.opttab_reset_ignore_file)
+        self.ui.pushButtonResetUSeFiles.clicked.connect(self.opttab_reset_use_files)
 
         # Accept drag and drop
         self.setAcceptDrops(True)
@@ -804,7 +810,10 @@ l
         """
         # Get input folder
         input_folder = str(self.ui.lineEditInput.text())
-        imglist = getfilelist(input_folder)
+        imglist = getfilelist(input_folder, self.app_data.files_to_use, self.app_data.files_to_ignore)
+
+
+        #TODO check for empty list
 
         self.z_thread = zproject.Zproject(imglist, self.zprojection_output)
         self.connect(self.z_thread, QtCore.SIGNAL("update(QString)"), self.zproject_slot)
@@ -934,7 +943,7 @@ l
         self.stop_pro_switch = 0
         self.thread_terminate_flag.value = 0 # Terminate when set to 1
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
-        self.workthread = ProcessingThread(job_queue, self.thread_terminate_flag, self)
+        self.workthread = ProcessingThread(job_queue, self.thread_terminate_flag, self.app_data, self)
         # the update(QString) SENDS signals from the processing thread (wt) to the processing_slot
         self.connect(self.workthread, QtCore.SIGNAL("update(QString)"), self.processing_slot)
         # The kill(Qstring) SENDS signals from the GUI to the function "kill_slot" in the the processing thread
@@ -1093,6 +1102,32 @@ l
                                               'Warning: Can\'t delete a row that is currently being processed.'
                                               '\nSelect "Stop", then remove')
 
+    def opttab_populate_patterns(self):
+        """
+        Read the patterns to ignore from the user appdata
+        :return:
+        """
+        self.ui.textEditIgnoreFiles.setText('  '.join(self.app_data.files_to_ignore))
+        self.ui.textEditUseFile.setText('  '.join(self.app_data.files_to_use))
+
+    def opttab_save(self):
+
+        ignore_patterns = str(self.ui.textEditIgnoreFiles.toPlainText()).split()
+        self.app_data.files_to_ignore = ignore_patterns
+
+        use_patterns = str(self.ui.textEditUseFile.toPlainText()).split()
+        self.app_data.files_to_use = use_patterns
+
+
+    def opttab_reset_ignore_file(self):
+        self.app_data.reset_ignore_file()
+        self.opttab_populate_patterns()
+
+
+    def opttab_reset_use_files(self):
+        self.app_data.reset_use_file()
+        self.opttab_populate_patterns()
+
     # ======================================================================
     # Kill HARP functions
     #======================================================================
@@ -1104,7 +1139,7 @@ l
         Performs a loop through the item list and checks if any process still running
         :param qt_event event: qt close event (when HARP is closed)
         """
-        self.app_data.write_app_data()
+        self.app_data.save()
 
         print "Close event"
         # First check if a process still running by looking through the processing table and checking the status

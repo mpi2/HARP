@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Mon Jan  5 14:40:29 2015
+# Created: Wed Jan 14 19:30:06 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -49,7 +49,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents_2 = QtGui.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 1319, 900))
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 1308, 952))
         self.scrollAreaWidgetContents_2.setObjectName(_fromUtf8("scrollAreaWidgetContents_2"))
         self.gridLayout_2 = QtGui.QGridLayout(self.scrollAreaWidgetContents_2)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
@@ -871,7 +871,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 98, 89))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1321, 842))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.scrollAreaWidgetContents)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
@@ -908,13 +908,40 @@ class Ui_MainWindow(object):
         self.pushButtonAdd.setObjectName(_fromUtf8("pushButtonAdd"))
         self.gridLayout_9.addWidget(self.pushButtonAdd, 6, 2, 1, 1)
         self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
+        self.tab_3 = QtGui.QWidget()
+        self.tab_3.setObjectName(_fromUtf8("tab_3"))
+        self.textBrowser = QtGui.QTextBrowser(self.tab_3)
+        self.textBrowser.setGeometry(QtCore.QRect(30, 10, 351, 171))
+        self.textBrowser.setObjectName(_fromUtf8("textBrowser"))
+        self.textEditIgnoreFiles = QtGui.QTextEdit(self.tab_3)
+        self.textEditIgnoreFiles.setGeometry(QtCore.QRect(30, 190, 351, 75))
+        self.textEditIgnoreFiles.setObjectName(_fromUtf8("textEditIgnoreFiles"))
+        self.pushButtonSaveOptions = QtGui.QPushButton(self.tab_3)
+        self.pushButtonSaveOptions.setGeometry(QtCore.QRect(140, 350, 96, 31))
+        self.pushButtonSaveOptions.setObjectName(_fromUtf8("pushButtonSaveOptions"))
+        self.pushButtonResetIgnoreFiles = QtGui.QPushButton(self.tab_3)
+        self.pushButtonResetIgnoreFiles.setGeometry(QtCore.QRect(140, 280, 96, 31))
+        self.pushButtonResetIgnoreFiles.setObjectName(_fromUtf8("pushButtonResetIgnoreFiles"))
+        self.textBrowser_2 = QtGui.QTextBrowser(self.tab_3)
+        self.textBrowser_2.setGeometry(QtCore.QRect(390, 10, 351, 171))
+        self.textBrowser_2.setObjectName(_fromUtf8("textBrowser_2"))
+        self.textEditUseFile = QtGui.QTextEdit(self.tab_3)
+        self.textEditUseFile.setGeometry(QtCore.QRect(390, 190, 351, 75))
+        self.textEditUseFile.setObjectName(_fromUtf8("textEditUseFile"))
+        self.pushButtonResetUSeFiles = QtGui.QPushButton(self.tab_3)
+        self.pushButtonResetUSeFiles.setGeometry(QtCore.QRect(520, 280, 96, 31))
+        self.pushButtonResetUSeFiles.setObjectName(_fromUtf8("pushButtonResetUSeFiles"))
+        self.checkBox_2 = QtGui.QCheckBox(self.tab_3)
+        self.checkBox_2.setGeometry(QtCore.QRect(770, 10, 251, 26))
+        self.checkBox_2.setObjectName(_fromUtf8("checkBox_2"))
+        self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
         self.gridLayout_10.addWidget(self.tabWidget, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtGui.QStatusBar(MainWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         MainWindow.setStatusBar(self.statusbar)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1363, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1363, 28))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuMore_Options = QtGui.QMenu(self.menubar)
         self.menuMore_Options.setObjectName(_fromUtf8("menuMore_Options"))
@@ -948,7 +975,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -1074,6 +1101,29 @@ class Ui_MainWindow(object):
         self.pushButtonStop.setText(_translate("MainWindow", "Stop", None))
         self.pushButtonAdd.setText(_translate("MainWindow", "Add More", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Processing", None))
+        self.textBrowser.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Cantarell\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; font-weight:600;\">File names to ignore</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">The patterns wensure that only recon files get processed and not other generated images. The default settings work for Skyscan xxx</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">Example: &quot;*spr.bmp&quot;  This entry will ensure no files that end in spr.bmp will get processeed</span></p></body></html>", None))
+        self.pushButtonSaveOptions.setText(_translate("MainWindow", "save options", None))
+        self.pushButtonResetIgnoreFiles.setText(_translate("MainWindow", "reset", None))
+        self.textBrowser_2.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Cantarell\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; font-weight:600;\">File names to use</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">The patterns here are used to select files for use in processing. The default settings work for Skyscan xxx</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">Example: &quot;*rec.bmp&quot; </span></p></body></html>", None))
+        self.pushButtonResetUSeFiles.setText(_translate("MainWindow", "reset", None))
+        self.checkBox_2.setText(_translate("MainWindow", "Supress file name warnings", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Options", None))
         self.menuMore_Options.setTitle(_translate("MainWindow", "View", None))
         self.menuHelp.setTitle(_translate("MainWindow", "Help", None))
         self.actionChange_ID.setText(_translate("MainWindow", "Allow identification to be changed", None))
