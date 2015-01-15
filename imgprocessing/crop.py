@@ -14,6 +14,11 @@ from imgprocessing.io import imread, imwrite
 from appdata import HarpDataError
 
 
+class HarpDataError(Exception):
+    """
+    Raised when some of the supplied data is found to be faulty
+    """
+    pass
 
 
 class Crop():
@@ -100,6 +105,9 @@ class Crop():
                 if im.shape != dimcheck:
                     raise HarpDataError("Cropping. First file had shape of {}. {} has shape {}".
                                         format(dimcheck, file_, im.shape))
+                # try:
+                #     pass
+                #     #im[dimcheck] Check for indexing error as .shape is derived from header only
 
             if count % 20 == 0:
                 if self.thread_terminate_flag.value == 1:
