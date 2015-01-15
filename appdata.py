@@ -8,8 +8,8 @@ from os.path import expanduser
 import os
 import collections
 
-default_ignore = ['spr.bmp', 'spr.tif', 'spr.tiff', 'spr.jpg', 'spr.jpeg', '.txt', '.text', '.log', '.crv']
-default_use = ['*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.tiff', '*rec*.jpg', '*rec*.jpeg']
+default_ignore = ['*spr.bmp', '*spr.tif', '*spr.tiff', '*spr.jpg', '*spr.jpeg', '*.txt', '*.text', '*.log', '*.crv']
+default_use = ['*rec*.bmp', '*rec*.tif', '*rec*.tiff', '*rec*.jpg', '*rec*.jpeg']
 
 
 class AppData(object):
@@ -92,3 +92,28 @@ class AppData(object):
     def reset_use_file(self):
         self.app_data['files_to_use'] = default_use
 
+    @property
+    def suppress_name_warnings(self):
+        if self.using_appdata:
+            if self.app_data:
+                if not self.app_data.get('suppress_name_warnings'):
+                    self.app_data['suppress_name_warnings'] = False
+                return self.app_data['suppress_name_warnings']
+
+    @suppress_name_warnings.setter
+    def suppress_name_warnings(self, suppress):
+        if self.using_appdata:
+            self.app_data['suppress_name_warnings'] = suppress
+
+    @property
+    def suppress_modality_warnings(self):
+        if self.using_appdata:
+            if self.app_data:
+                if not self.app_data.get('suppress_modality_warnings'):
+                    self.app_data['suppress_modality_warnings'] = False
+                return self.app_data['suppress_modality_warnings']
+
+    @suppress_modality_warnings.setter
+    def suppress_modality_warnings(self, suppress):
+        if self.using_appdata:
+            self.app_data['suppress_modality_warnings'] = suppress

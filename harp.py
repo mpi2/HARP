@@ -87,8 +87,6 @@ class MainWindow(QtGui.QMainWindow):
         self.pixel_size = ""
         # Initalize the pixel size view to blank
         self.ui.lcdNumberPixel.display(self.pixel_size)
-        self.suppress_name_warnings = False
-        self.suppress_modality_warning = False
 
         # Get current directory
         # Need to check if script is being run from an pyinstaller created executable or just from python
@@ -446,9 +444,9 @@ l
         # Perform autofill of parameter settings
         # ###################################################
         # check if uCT or opt data
-        autofill.opt_uCT_check(self, self.suppress_modality_warning)
+        autofill.opt_uCT_check(self, self.app_data.suppress_modality_warnings)
         # Autocomplete the name
-        autofill.get_name(self, str(self.ui.lineEditInput.text()), self.suppress_name_warnings)
+        autofill.get_name(self, str(self.ui.lineEditInput.text()), self.app_data.suppress_name_warnings)
         # Get the reconLog and associated pixel size
         autofill.get_recon_log(self)
         # Get the output folder location
@@ -1116,6 +1114,8 @@ l
         """
         self.ui.textEditIgnoreFiles.setText('  '.join(self.app_data.files_to_ignore))
         self.ui.textEditUseFile.setText('  '.join(self.app_data.files_to_use))
+        self.ui.checkBoxSuppressModalityWarning.setChecked(self.app_data.suppress_modality_warnings)
+        self.ui.checkBoxSuppressNameWarnings.setChecked(self.app_data.suppress_name_warnings)
 
     def opttab_save(self):
 
@@ -1125,8 +1125,8 @@ l
         use_patterns = str(self.ui.textEditUseFile.toPlainText()).split()
         self.app_data.files_to_use = use_patterns
 
-        self.suppress_name_warnings = self.ui.checkBoxSuppressNameWarnings.isChecked()
-        self.suppress_modality_warning = self.ui.checkBoxSuppressModalityWarning.isChecked()
+        self.app_data.suppress_name_warnings = self.ui.checkBoxSuppressNameWarnings.isChecked()
+        self.app_data.suppress_modality_warnings = self.ui.checkBoxSuppressModalityWarning.isChecked()
 
 
     def opttab_reset_ignore_file(self):
