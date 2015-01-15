@@ -18,6 +18,6 @@ def _read_ndimage(imgpath):
     return scipy.ndimage.imread(imgpath)
 
 
-def imwrite(img, imgpath):
+def imwrite(imgpath, img):
     cv2.imwrite(imgpath, img)
 
