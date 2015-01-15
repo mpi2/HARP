@@ -28,13 +28,15 @@ class Zproject(QtCore.QThread):
 
         if os.path.isfile(self.zprojection_output) is False or self.force:
 
+            print "Computing z-projection..."
+
             if len(self.imglist) < 1:
-                return "no images in list"
+                self.emit(QtCore.SIGNAL('update(QString)'),  "No recon images found!")
             try:
                 print self.imglist[0]
                 im = cv2.imread(self.imglist[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
             except IOError as e:
-                return "Cant load {}. Is it corrupted?".format(self.imglist[0])
+                self.emit(QtCore.SIGNAL('update(QString)'), "Cant load {}. Is it corrupted?".format(self.imglist[0]))
 
             imdims = im.shape
             dtype = im.dtype

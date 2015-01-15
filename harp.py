@@ -862,7 +862,7 @@ l
         self.ui.lineEditY.setText(str(box[1]))
         self.ui.lineEditW.setText(str(box[2]))
         self.ui.lineEditH.setText(str(box[3]))
-        self.ui.textEditStatusMessages.setText("Dimensions selected")
+        self.ui.textEditStatusMessages.setText("Dimensions selected: " + str(box))
         self.ui.pushButtonGetDimensions.setText("Get Dimensions")
 
     def add_to_list(self):
