@@ -131,7 +131,6 @@ class Crop():
         #imglist = processing.getfilelist(self.in_dir)
         imglist = processing.getfilelist(self.in_dir, self.app_data.files_to_use, self.app_data.files_to_ignore)
         self.files = sorted(imglist)
-        print 'ram', self.files
 
         if len(imglist) < 1:
             return "no image files found in " + self.in_dir

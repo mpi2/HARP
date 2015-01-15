@@ -29,7 +29,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -1772,8 +1772,8 @@ QGroupBox::title
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>102</width>
-             <height>102</height>
+             <width>1321</width>
+             <height>840</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout">
@@ -1858,10 +1858,10 @@ QGroupBox::title
        <widget class="QTextBrowser" name="textBrowser">
         <property name="geometry">
          <rect>
-          <x>30</x>
+          <x>390</x>
           <y>10</y>
           <width>351</width>
-          <height>171</height>
+          <height>211</height>
          </rect>
         </property>
         <property name="html">
@@ -1869,9 +1869,9 @@ QGroupBox::title
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cantarell'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;File names to ignore&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;File names to ignore&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;The patterns wensure that only recon files get processed and not other generated images. The default settings work for Skyscan xxx&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;These patterns ensure that only recon files get processed and not other generated images. The default settings work for recons generated with NRecon. &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Example: &amp;quot;*spr.bmp&amp;quot;  This entry will ensure no files that end in spr.bmp will get processeed&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -1879,8 +1879,8 @@ p, li { white-space: pre-wrap; }
        <widget class="QTextEdit" name="textEditIgnoreFiles">
         <property name="geometry">
          <rect>
-          <x>30</x>
-          <y>190</y>
+          <x>390</x>
+          <y>230</y>
           <width>351</width>
           <height>75</height>
          </rect>
@@ -1902,8 +1902,8 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButtonResetIgnoreFiles">
         <property name="geometry">
          <rect>
-          <x>140</x>
-          <y>280</y>
+          <x>500</x>
+          <y>340</y>
           <width>96</width>
           <height>31</height>
          </rect>
@@ -1915,10 +1915,10 @@ p, li { white-space: pre-wrap; }
        <widget class="QTextBrowser" name="textBrowser_2">
         <property name="geometry">
          <rect>
-          <x>390</x>
+          <x>20</x>
           <y>10</y>
           <width>351</width>
-          <height>171</height>
+          <height>211</height>
          </rect>
         </property>
         <property name="html">
@@ -1926,18 +1926,18 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cantarell'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;File names to use&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;File names to use&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;The patterns here are used to select files for use in processing. The default settings work for Skyscan xxx&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;The patterns here are used to select files for use in processing. The default settings work for recons processed witrh NRecon.  The search patterns are case-insenstive&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Example: &amp;quot;*rec.bmp&amp;quot; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Example: &amp;quot;*rec*.bmp&amp;quot; includes files such as xxxx_rec_0001.bmp &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
        <widget class="QTextEdit" name="textEditUseFile">
         <property name="geometry">
          <rect>
-          <x>390</x>
-          <y>190</y>
+          <x>20</x>
+          <y>230</y>
           <width>351</width>
           <height>75</height>
          </rect>
@@ -1946,8 +1946,8 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButtonResetUSeFiles">
         <property name="geometry">
          <rect>
-          <x>520</x>
-          <y>280</y>
+          <x>150</x>
+          <y>340</y>
           <width>96</width>
           <height>31</height>
          </rect>

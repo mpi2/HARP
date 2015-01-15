@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Thu Jan 15 13:36:31 2015
+# Created: Thu Jan 15 15:28:15 2015
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -862,7 +862,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 102, 102))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1321, 840))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.scrollAreaWidgetContents)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
@@ -902,25 +902,25 @@ class Ui_MainWindow(object):
         self.tab_3 = QtGui.QWidget()
         self.tab_3.setObjectName(_fromUtf8("tab_3"))
         self.textBrowser = QtGui.QTextBrowser(self.tab_3)
-        self.textBrowser.setGeometry(QtCore.QRect(30, 10, 351, 171))
+        self.textBrowser.setGeometry(QtCore.QRect(390, 10, 351, 211))
         self.textBrowser.setObjectName(_fromUtf8("textBrowser"))
         self.textEditIgnoreFiles = QtGui.QTextEdit(self.tab_3)
-        self.textEditIgnoreFiles.setGeometry(QtCore.QRect(30, 190, 351, 75))
+        self.textEditIgnoreFiles.setGeometry(QtCore.QRect(390, 230, 351, 75))
         self.textEditIgnoreFiles.setObjectName(_fromUtf8("textEditIgnoreFiles"))
         self.pushButtonSaveOptions = QtGui.QPushButton(self.tab_3)
         self.pushButtonSaveOptions.setGeometry(QtCore.QRect(340, 380, 96, 31))
         self.pushButtonSaveOptions.setObjectName(_fromUtf8("pushButtonSaveOptions"))
         self.pushButtonResetIgnoreFiles = QtGui.QPushButton(self.tab_3)
-        self.pushButtonResetIgnoreFiles.setGeometry(QtCore.QRect(140, 280, 96, 31))
+        self.pushButtonResetIgnoreFiles.setGeometry(QtCore.QRect(500, 340, 96, 31))
         self.pushButtonResetIgnoreFiles.setObjectName(_fromUtf8("pushButtonResetIgnoreFiles"))
         self.textBrowser_2 = QtGui.QTextBrowser(self.tab_3)
-        self.textBrowser_2.setGeometry(QtCore.QRect(390, 10, 351, 171))
+        self.textBrowser_2.setGeometry(QtCore.QRect(20, 10, 351, 211))
         self.textBrowser_2.setObjectName(_fromUtf8("textBrowser_2"))
         self.textEditUseFile = QtGui.QTextEdit(self.tab_3)
-        self.textEditUseFile.setGeometry(QtCore.QRect(390, 190, 351, 75))
+        self.textEditUseFile.setGeometry(QtCore.QRect(20, 230, 351, 75))
         self.textEditUseFile.setObjectName(_fromUtf8("textEditUseFile"))
         self.pushButtonResetUSeFiles = QtGui.QPushButton(self.tab_3)
-        self.pushButtonResetUSeFiles.setGeometry(QtCore.QRect(520, 280, 96, 31))
+        self.pushButtonResetUSeFiles.setGeometry(QtCore.QRect(150, 340, 96, 31))
         self.pushButtonResetUSeFiles.setObjectName(_fromUtf8("pushButtonResetUSeFiles"))
         self.checkBoxSuppressNameWarnings = QtGui.QCheckBox(self.tab_3)
         self.checkBoxSuppressNameWarnings.setGeometry(QtCore.QRect(770, 10, 251, 26))
@@ -969,7 +969,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -1099,9 +1099,9 @@ class Ui_MainWindow(object):
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Cantarell\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; font-weight:600;\">File names to ignore</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">File names to ignore</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">The patterns wensure that only recon files get processed and not other generated images. The default settings work for Skyscan xxx</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">These patterns ensure that only recon files get processed and not other generated images. The default settings work for recons generated with NRecon. </span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">Example: &quot;*spr.bmp&quot;  This entry will ensure no files that end in spr.bmp will get processeed</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButtonSaveOptions.setText(QtGui.QApplication.translate("MainWindow", "save options", None, QtGui.QApplication.UnicodeUTF8))
@@ -1110,11 +1110,11 @@ class Ui_MainWindow(object):
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Cantarell\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; font-weight:600;\">File names to use</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">File names to use</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">The patterns here are used to select files for use in processing. The default settings work for Skyscan xxx</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">The patterns here are used to select files for use in processing. The default settings work for recons processed witrh NRecon.  The search patterns are case-insenstive</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">Example: &quot;*rec.bmp&quot; </span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">Example: &quot;*rec*.bmp&quot; includes files such as xxxx_rec_0001.bmp </span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButtonResetUSeFiles.setText(QtGui.QApplication.translate("MainWindow", "reset", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBoxSuppressNameWarnings.setText(QtGui.QApplication.translate("MainWindow", "Supress file name warnings", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBoxSuppressModalityWarning.setText(QtGui.QApplication.translate("MainWindow", "Supress modality warnings", None, QtGui.QApplication.UnicodeUTF8))

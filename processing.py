@@ -684,20 +684,17 @@ class HarpDataError(Exception):
     pass
 
 
-def getfilelist(input_folder, files_to_use, files_to_ignore):
+def getfilelist(input_folder, files_to_use_regx, files_to_ignore_regex):
     """
     Get the list of files from filedir. Exclude known non slice files
     """
-    # extensions_to_ignore = ('spr.bmp', 'spr.BMP', 'spr.tif', 'spr.TIF',
-    #                         'spr.jpg', 'spr.JPG', '*spr.jpeg', 'spr.JPEG')
     files = []
 
     for fn in os.listdir(input_folder):
-        if any(fn.endswith(x) for x in files_to_ignore):
+        if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in files_to_ignore_regex):
             continue
-        if any(fnmatch.fnmatch(fn, x) for x in files_to_use):
-                # '*rec*.bmp', '*rec*.BMP', '*rec*.tif', '*rec*.TIF',
-                # '*rec*.jpg', '*rec*.JPG', '*rec*.jpeg', '*rec*.JPEG')):
+        if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in files_to_use_regx):
+
             files.append(os.path.join(input_folder, fn))
 
     return files
