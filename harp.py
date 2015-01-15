@@ -438,6 +438,7 @@ l
         self.crop_box_use = False
         # Set the crop option back to auto
         self.ui.radioButtonAuto.setChecked(True)
+        self.ui.pushButtonGetDimensions.setEnabled(False)
         # Reset the channel name for OPT
         self.ui.lineEditDerivedChnName.setText("")
 
