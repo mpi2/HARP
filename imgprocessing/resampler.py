@@ -17,6 +17,7 @@ import os
 import shutil
 import cv2
 import lib.nrrd as nrrd
+from imgprocessing.io import imread
 
 
 def resample(images, scale, outpath, scaleby_int, thread_terminate_flag):
@@ -70,7 +71,7 @@ def resample(images, scale, outpath, scaleby_int, thread_terminate_flag):
                     return
 
             # Rescale the z slices
-            z_slice_arr = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_UNCHANGED)
+            z_slice_arr = imread(img_path)
 
             # This might slow things doen by reasigning to the original array. Maybe we jsut need a differnt view on it
             if scaleby_int:
@@ -199,14 +200,14 @@ def _binshrink(img_dir, scale_factor, outpath):
 
 
 def get_dimensions(img_path_list):
-    array = cv2.imread(img_path_list[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+    array = imread(img_path_list[0])
     dims = (len(img_path_list), array.shape[0], array.shape[1])
     return dims
 
 
 def array_generator(file_list):
     for impath in file_list:
-        array = cv2.imread(impath, cv2.CV_LOAD_IMAGE_UNCHANGED)
+        array = imread(impath)
         yield array
 
 

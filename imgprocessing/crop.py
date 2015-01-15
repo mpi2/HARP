@@ -3,13 +3,14 @@
 import argparse
 import os
 import fnmatch
+import sys
 import numpy as np
 import cv2
 import SimpleITK as sitk
 from imgprocessing import zproject
-import sys
 sys.path.append("..")
 import processing
+from imgprocessing.io import imread, imwrite
 
 
 class HarpDataError(Exception):
@@ -31,8 +32,6 @@ class Crop():
         :param repeat_crop:
         :return:
         """
-
-        #call the super
         self.callback = callback
         self.configOb = configOb
         self.thread_terminate_flag = thread_terminate_flag
@@ -72,7 +71,7 @@ class Crop():
         for count, file_ in enumerate(sorted(self.files)):
 
             try:
-                im = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+                im = imread(file_)
             except IOError as e:
                 raise HarpDataError("failed to read {}".format(file_))
 
@@ -102,7 +101,7 @@ class Crop():
                 raise HarpDataError("Crop box out of range. Is {} corrupted?".format(filename))
 
             crop_out = os.path.join(self.out_dir, filename)
-            cv2.imwrite(crop_out, imcrop)
+            imwrite(crop_out, imcrop)
 
         self.callback("cropping finished")
 
@@ -151,7 +150,7 @@ class Crop():
             zp_im = sitk.ReadImage(z_proj_path)
 
             try:
-                testimg = cv2.imread(imglist[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+                testimg = imread(imglist[0])
             except IOError as e:
                 raise HarpDataError('Failed to read {}. Is it corrupt'.format(imglist[0]))
 
@@ -190,7 +189,7 @@ class Crop():
             for count, slice_ in enumerate(self.files):
 
                 try:
-                    im = cv2.CV_LOAD_IMAGE_UNCHANGED(slice_)
+                    im = imread(slice_)
                 except IOError as e:
                     raise HarpDataError('Failed to read {}. Is it corrupt'.format(slice_))
 
@@ -204,7 +203,7 @@ class Crop():
                 imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
                 filename = os.path.basename(slice_)
                 crop_out = os.path.join(self.out_dir, filename)
-                cv2.imwrite(crop_out, imcrop)
+                imwrite(crop_out, imcrop)
 
             self.callback("success")
 

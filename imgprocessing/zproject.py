@@ -1,9 +1,14 @@
 #!/usr/bin/python
 
 import os
+from PyQt4 import QtCore
+import sys
+
 import numpy as np
 import cv2
-from PyQt4 import QtCore
+
+sys.path.append('..')
+from imgprocessing.io import imread, imwrite
 
 
 class Zproject(QtCore.QThread):
@@ -32,7 +37,7 @@ class Zproject(QtCore.QThread):
                 return "no images in list"
             try:
                 print self.imglist[0]
-                im = cv2.imread(self.imglist[0], cv2.CV_LOAD_IMAGE_UNCHANGED)
+                im = imread(self.imglist[0])
             except IOError as e:
                 return "Cant load {}. Is it corrupted?".format(self.imglist[0])
 
@@ -45,7 +50,7 @@ class Zproject(QtCore.QThread):
             print "performing z-projection on sparse file list"
 
             max_array = self.max_projection(sparse_filelist, imdims, dtype)
-            cv2.imwrite(self.zprojection_output, max_array)
+            imwrite(self.zprojection_output, max_array)
 
         self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
 
@@ -55,7 +60,7 @@ class Zproject(QtCore.QThread):
 
         for count, file_ in enumerate(filelist):
 
-            im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+            im_array = imread(file_)
 
             #im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
             #max_ = np.maximum(max_, im_array[:][:])
