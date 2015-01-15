@@ -402,7 +402,8 @@ def opt_uCT_check(self, suppress=False):
         self.ui.checkBoxInd.setEnabled(False)
     else:
         if not suppress:
-            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Cannot automatically determine if uCT or OPT please check')
+            QtGui.QMessageBox.warning(self, 'uCT or OPT?', 'Unable to determine imaging modality. '
+                                                           'Please select uCT or OPT.')
 
 def get_channels(self):
     """ Updates the OPT list on the GUI

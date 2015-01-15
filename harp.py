@@ -867,7 +867,6 @@ l
             self.ui.textEditStatusMessages.setText("No dimensions selected")
         self.ui.pushButtonGetDimensions.setEnabled(True)
 
-
     def add_to_list(self):
         """ This adds the recon information onto the "processing tab" also saves a pickle file which includes all the
         parameter information.

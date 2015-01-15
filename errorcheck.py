@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, QtCore
 import os
 import re
+import shutil
 
 
 def errorCheck(self):
@@ -98,9 +99,9 @@ def errorCheck(self):
 
     # Check user has not selected to scale by pixel without having a recon folder
     if self.ui.checkBoxPixel.isChecked() and self.pixel_size == "":
-        QtGui.QMessageBox.warning(self, 'Message',
-                                  'Warning: Pixel size could not be obtained from original recon log. Scaling '
-                                  '"By Pixel (um) is not possible"')
+        QtGui.QMessageBox.warning(self, 'Unable to scale by pixel',
+                                  'Pixel size could not be obtained from original recon log. Unable to scale '
+                                  '"By Pixel (um)"')
         self.stop = True
         return
 
@@ -130,7 +131,7 @@ def errorCheck(self):
             self.stop = None
             break
         if twi0.text() == outputFolder:
-            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Output folder is already on the processing list')
+            QtGui.QMessageBox.warning(self, 'Error adding job', 'Output folder is already on the processing list!')
             self.stop = True
             return
         count = count+1
@@ -139,40 +140,56 @@ def errorCheck(self):
     if self.ui.radioButtonUseOldCrop.isChecked() and self.ui.checkBoxCropYes.isChecked():
         if not os.path.exists(os.path.join(str(self.ui.lineEditOutput.text()),"cropped")):
             self.stop = True
-            QtGui.QMessageBox.warning(self,'Message','Warning: Use old crop option selected. '
-                                                               'This requires a previous crop to have been performed')
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Use old crop option selected. '
+                                            'This requires a previous crop to have been performed')
             return
 
     if self.ui.radioButtonuCT.isChecked() and self.ui.radioButtonDerived.isChecked():
             self.stop = True
-            QtGui.QMessageBox.warning(self,'Message','Warning: Derived Dimension crop option is not available for'
-                                                     ' uCT processing')
+            QtGui.QMessageBox.warning(self, 'Message', 'Warning: Derived Dimension crop option is not available for'
+                                            ' uCT processing')
             return
 
     # seeing if output folder exists
     if self.ui.checkBoxRF.isChecked():
-        # I think it is too dangerous to delete everything in a folder
-        # shutil.rmtree(outputFolder)
-        # os.makedirs(outputFolder)
-        self.stop = None
+        remove_folder_contents(self, outputFolder)  # WARNING: THIS DELETES THE OUTPUT FOLDER AND ITS CONTENTS
     # Check if output folder already exists. Ask if it is ok to overwrite
     elif os.path.exists(outputFolder):
-        # Running dialog box to inform user of options
-        message = QtGui.QMessageBox.question(self, 'Message',
-                                             'Folder already exists for the location:\n{0}\n'
-                                             'Is it OK to overwrite files in this folder?\n'
-                                             'NOTE: If you are using the "old crop" option you will not overwrite the '
-                                             'original cropped recon'.format(outputFolder),
-                                             QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-        if message == QtGui.QMessageBox.Yes:
-            self.stop = None
-        if message == QtGui.QMessageBox.No:
-            self.stop = True
-            return
+
+        if len(os.listdir(outputFolder)) > 0:
+
+            # Warning box to inform user
+            message = QtGui.QMessageBox.warning(self, 'Warning',
+                                                 'The specified output folder already exists! '
+                                                 'Is it OK to overwrite files in this folder?\n\n'
+                                                 '(NOTE: If you are using the "old crop" option you will not overwrite the '
+                                                 'original cropped recon.)'.format(outputFolder),
+                                                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            if message == QtGui.QMessageBox.Yes:
+                remove_folder_contents(self, outputFolder)  # WARNING: THIS DELETES THE OUTPUT FOLDER AND ITS CONTENTS
+            if message == QtGui.QMessageBox.No:
+                self.stop = True
+                return
+
     else:
         os.makedirs(outputFolder)
         self.stop = None
 
+
+def remove_folder_contents(self, outputFolder):
+
+    # WARNING: this function will delete the folder and its contents, before creating a new folder
+    try:
+        shutil.rmtree(outputFolder)
+        os.makedirs(outputFolder)
+        self.stop = None
+    except OSError:
+        self.stop = True
+        error_box = QtGui.QMessageBox()
+        error_box.setWindowTitle("Error")
+        error_box.setText("Unable to overwrite folder contents. Please specify a different output folder.")
+        error_box.setIcon(QtGui.QMessageBox.Critical)
+        error_box.exec_()
 
 
 

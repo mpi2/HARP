@@ -150,7 +150,7 @@ def start(self):
 
             #need to setup the output folder based on original folder.
             #multiple channels (onl)
-            if len(self.chan_full)>1:
+            if len(self.chan_full) > 1:
                 path_out, old_folder_name = os.path.split(str(out_dir_original))
                 output_folder = os.path.join(path_out,name)
                 self.ui.lineEditOutput.setText(os.path.abspath(output_folder))
