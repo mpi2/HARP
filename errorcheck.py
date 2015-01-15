@@ -18,6 +18,9 @@ def errorCheck(self):
     inputFolder = str(self.ui.lineEditInput.text())
     outputFolder = str(self.ui.lineEditOutput.text())
 
+    # flag for use old crop
+    use_old = False
+
     # reset the stop switch
     self.stop = None
 
@@ -138,6 +141,8 @@ def errorCheck(self):
 
     # Check if a crop folder is available if UseOldCrop is used
     if self.ui.radioButtonUseOldCrop.isChecked() and self.ui.checkBoxCropYes.isChecked():
+
+        use_old = True
         if not os.path.exists(os.path.join(str(self.ui.lineEditOutput.text()),"cropped")):
             self.stop = True
             QtGui.QMessageBox.warning(self, 'Message', 'Warning: Use old crop option selected. '
@@ -151,7 +156,7 @@ def errorCheck(self):
             return
 
     # seeing if output folder exists
-    if self.ui.checkBoxRF.isChecked():
+    if self.ui.checkBoxRF.isChecked() and not use_old:
         remove_folder_contents(self, outputFolder)  # WARNING: THIS DELETES THE OUTPUT FOLDER AND ITS CONTENTS
     # Check if output folder already exists. Ask if it is ok to overwrite
     elif os.path.exists(outputFolder):
@@ -165,7 +170,7 @@ def errorCheck(self):
                                                  '(NOTE: If you are using the "old crop" option you will not overwrite the '
                                                  'original cropped recon.)'.format(outputFolder),
                                                  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-            if message == QtGui.QMessageBox.Yes:
+            if message == QtGui.QMessageBox.Yes and not use_old:
                 remove_folder_contents(self, outputFolder)  # WARNING: THIS DELETES THE OUTPUT FOLDER AND ITS CONTENTS
             if message == QtGui.QMessageBox.No:
                 self.stop = True
