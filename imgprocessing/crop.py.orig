@@ -14,11 +14,6 @@ from imgprocessing.io import imread, imwrite
 from appdata import HarpDataError
 
 
-class HarpDataError(Exception):
-    """
-    Raised when some of the supplied data is found to be faulty
-    """
-    pass
 
 
 class Crop():
@@ -105,9 +100,6 @@ class Crop():
                 if im.shape != dimcheck:
                     raise HarpDataError("Cropping. First file had shape of {}. {} has shape {}".
                                         format(dimcheck, file_, im.shape))
-                # try:
-                #     pass
-                #     #im[dimcheck] Check for indexing error as .shape is derived from header only
 
             if count % 20 == 0:
                 if self.thread_terminate_flag.value == 1:
@@ -184,6 +176,89 @@ class Crop():
 
         return bbox
 
+<<<<<<< HEAD
+=======
+    def run_auto_mask(self):
+
+        # Get list of files
+        #imglist = processing.getfilelist(self.in_dir)
+        imglist = processing.getfilelist(self.in_dir, self.app_data.files_to_use, self.app_data.files_to_ignore)
+        self.files = sorted(imglist)
+
+        if len(imglist) < 1:
+            return "no image files found in " + self.in_dir
+
+        if self.def_crop or self.repeat_crop:
+            self.calc_manual_crop()
+            self.callback("success")
+        else:
+            self.callback("Determining crop bounding box")
+            z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
+
+            # Start with a z-projection
+            zp = zproject.Zproject(imglist, z_proj_path, callback=self.callback, force=True)
+            zp.run_onthisthread()
+
+            zp_im = sitk.ReadImage(z_proj_path)
+
+            try:
+                testimg = imread(imglist[0])
+            except IOError as e:
+                raise HarpDataError('Failed to read {}. Is it corrupt'.format(imglist[0]))
+
+            datatype = testimg.dtype
+            if datatype is np.uint16:
+                outval = 65535
+            else:
+                outval = 255
+
+            # Apply otsu threshold and remove all but largest component
+            seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=outval, numberOfHistogramBins=128)
+            seg = sitk.ConnectedComponent(seg)  # label non-background pixels
+            seg = sitk.RelabelComponent(seg)  # relabel components in order of ascending size
+            # seg = seg == 1  # discard all but largest component
+
+            # Get bounding box
+            label_stats = sitk.LabelStatisticsImageFilter()
+            label_stats.Execute(zp_im, seg)
+            bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
+
+            # Padding
+            self.imdims = testimg.shape
+            padding = int(np.mean(self.imdims) * 0.025)
+            bbox = self.pad_bounding_box(bbox, padding)
+            self.crop_box = tuple(bbox)
+
+            dimsx = self.crop_box[1] - self.crop_box[0]
+            dimsy = self.crop_box[3] - self.crop_box[2]
+
+            print self.crop_box
+
+            if dimsx < 10 or dimsy < 10:
+                raise HarpDataError('Autocrop failed, cropbox too small! Try manual cropping')
+
+            # Actually perform the cropping
+            for count, slice_ in enumerate(self.files):
+
+                try:
+                    im = imread(slice_)
+                except IOError as e:
+                    raise HarpDataError('Failed to read {}. Is it corrupt'.format(slice_))
+
+                if count % 20 == 0:
+                    if self.thread_terminate_flag.value == 1:
+                        self.callback("Processing Cancelled!")
+                        return
+                    self.callback(
+                        "Cropping: {0}/{1} images".format(count, str(len(self.files))))
+
+                imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
+                filename = os.path.basename(slice_)
+                crop_out = os.path.join(self.out_dir, filename)
+                imwrite(crop_out, imcrop)
+
+            self.callback("success")
+>>>>>>> 9ea3eabea1c2887c0ae6e6bc4cda72a08d79e56a
 
     def zp_callback(self, msg):
         pass
