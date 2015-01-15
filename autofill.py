@@ -361,7 +361,7 @@ def size_cleanup(self, size_gb, size_mb):
 #==========================================================================
 # All the uCT channel shenanigans
 #==========================================================================
-def opt_uCT_check(self,suppress=False):
+def opt_uCT_check(self, suppress=False):
     """ Checks whether or not folder name contains reference to either opt or microCT
 
     Updates the GUI options based on modality

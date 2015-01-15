@@ -411,7 +411,7 @@ l
         except OSError as e:
             print "OSError: problem deleting z-projection - ", e
 
-    def autofill_pipe(self):
+    def autofill_pipe(self, suppress=False):
         """ Performs a series of methods to automatically update parameters
 
         Uses the methods in the autofill module.

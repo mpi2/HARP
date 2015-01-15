@@ -36,6 +36,8 @@ import numpy as np
 import cv2
 from SimpleITK import GetImageFromArray, WriteImage
 from imgprocessing import resampler, crop
+from imgprocessing.io import imread
+
 
 
 class ProcessingThread(QtCore.QThread):
@@ -297,6 +299,7 @@ class ProcessingThread(QtCore.QThread):
             self.session_log.write("error: HARP most likely can't find the folder, maybe a temporary problem connecting"
                                    " to the network. Exception message:\n Exception traceback:" +
                                    traceback.format_exc() + "\n")
+            self.session_log.flush()
             self.emit(QtCore.SIGNAL('update(QString)'), "error: HARP can't find the files, see log file")
 
         except HarpDataError as e:
@@ -321,7 +324,7 @@ class ProcessingThread(QtCore.QThread):
             if any(file_.endswith(x) for x in self.extensions_to_ignore):
                 continue
             if file_.endswith(('tiff', 'tif', 'TIFF', 'TIF', 'BMP', 'bmp')):
-                array_2d = cv2.imread(os.path.join(in_dir, file_), cv2.CV_LOAD_IMAGE_GRAYSCALE)
+                array_2d = imread(os.path.join(in_dir, file_))
                 if array_3d is None:
                     array_3d = array_2d
                     continue
