@@ -29,7 +29,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -1956,7 +1956,7 @@ p, li { white-space: pre-wrap; }
          <string>reset</string>
         </property>
        </widget>
-       <widget class="QCheckBox" name="checkBox_2">
+       <widget class="QCheckBox" name="checkBoxSuppressNameWarnings">
         <property name="geometry">
          <rect>
           <x>770</x>
@@ -1967,6 +1967,19 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Supress file name warnings</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="checkBoxSuppressModalityWarning">
+        <property name="geometry">
+         <rect>
+          <x>770</x>
+          <y>50</y>
+          <width>251</width>
+          <height>26</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Supress modality warnings</string>
         </property>
        </widget>
       </widget>

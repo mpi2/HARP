@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Wed Jan 14 19:30:06 2015
+# Created: Thu Jan 15 08:55:52 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -931,9 +931,12 @@ class Ui_MainWindow(object):
         self.pushButtonResetUSeFiles = QtGui.QPushButton(self.tab_3)
         self.pushButtonResetUSeFiles.setGeometry(QtCore.QRect(520, 280, 96, 31))
         self.pushButtonResetUSeFiles.setObjectName(_fromUtf8("pushButtonResetUSeFiles"))
-        self.checkBox_2 = QtGui.QCheckBox(self.tab_3)
-        self.checkBox_2.setGeometry(QtCore.QRect(770, 10, 251, 26))
-        self.checkBox_2.setObjectName(_fromUtf8("checkBox_2"))
+        self.checkBoxSuppressNameWarnings = QtGui.QCheckBox(self.tab_3)
+        self.checkBoxSuppressNameWarnings.setGeometry(QtCore.QRect(770, 10, 251, 26))
+        self.checkBoxSuppressNameWarnings.setObjectName(_fromUtf8("checkBoxSuppressNameWarnings"))
+        self.checkBoxSuppressModalityWarning = QtGui.QCheckBox(self.tab_3)
+        self.checkBoxSuppressModalityWarning.setGeometry(QtCore.QRect(770, 50, 251, 26))
+        self.checkBoxSuppressModalityWarning.setObjectName(_fromUtf8("checkBoxSuppressModalityWarning"))
         self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
         self.gridLayout_10.addWidget(self.tabWidget, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -975,7 +978,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -1122,7 +1125,8 @@ class Ui_MainWindow(object):
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">Example: &quot;*rec.bmp&quot; </span></p></body></html>", None))
         self.pushButtonResetUSeFiles.setText(_translate("MainWindow", "reset", None))
-        self.checkBox_2.setText(_translate("MainWindow", "Supress file name warnings", None))
+        self.checkBoxSuppressNameWarnings.setText(_translate("MainWindow", "Supress file name warnings", None))
+        self.checkBoxSuppressModalityWarning.setText(_translate("MainWindow", "Supress modality warnings", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Options", None))
         self.menuMore_Options.setTitle(_translate("MainWindow", "View", None))
         self.menuHelp.setTitle(_translate("MainWindow", "Help", None))

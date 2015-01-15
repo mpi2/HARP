@@ -87,6 +87,8 @@ class MainWindow(QtGui.QMainWindow):
         self.pixel_size = ""
         # Initalize the pixel size view to blank
         self.ui.lcdNumberPixel.display(self.pixel_size)
+        self.suppress_name_warnings = False
+        self.suppress_modality_warning = False
 
         # Get current directory
         # Need to check if script is being run from an pyinstaller created executable or just from python
@@ -192,7 +194,7 @@ class MainWindow(QtGui.QMainWindow):
         # The IMPC button sets the deafaults for sending data to the DCC
         self.ui.pushButtonIMPC.clicked.connect(self.impc_button)
 
-        #Save the options
+        #Options tab
         self.ui.pushButtonSaveOptions.clicked.connect(self.opttab_save)
         self.ui.pushButtonResetIgnoreFiles.clicked.connect(self.opttab_reset_ignore_file)
         self.ui.pushButtonResetUSeFiles.clicked.connect(self.opttab_reset_use_files)
@@ -409,7 +411,7 @@ l
         except OSError as e:
             print "OSError: problem deleting z-projection - ", e
 
-    def autofill_pipe(self, suppress=False):
+    def autofill_pipe(self):
         """ Performs a series of methods to automatically update parameters
 
         Uses the methods in the autofill module.
@@ -443,9 +445,9 @@ l
         # Perform autofill of parameter settings
         # ###################################################
         # check if uCT or opt data
-        autofill.opt_uCT_check(self, suppress)
+        autofill.opt_uCT_check(self, self.suppress_modality_warning)
         # Autocomplete the name
-        autofill.get_name(self, str(self.ui.lineEditInput.text()), suppress)
+        autofill.get_name(self, str(self.ui.lineEditInput.text()), self.suppress_name_warnings)
         # Get the reconLog and associated pixel size
         autofill.get_recon_log(self)
         # Get the output folder location
@@ -1117,6 +1119,9 @@ l
 
         use_patterns = str(self.ui.textEditUseFile.toPlainText()).split()
         self.app_data.files_to_use = use_patterns
+
+        self.suppress_name_warnings = self.ui.checkBoxSuppressNameWarnings.isChecked()
+        self.suppress_modality_warning = self.ui.checkBoxSuppressModalityWarning.isChecked()
 
 
     def opttab_reset_ignore_file(self):
