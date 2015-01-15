@@ -32,6 +32,7 @@ class Crop(QtGui.QMainWindow):
 
         super(Crop, self).__init__(parent)
         self.setWindowTitle("Manual cropping")
+        self.callback = callback
         self.widget = MainWidget(self, callback, image)
         self.widget.resize(950, 950)
         self.setCentralWidget(self.widget)
@@ -57,11 +58,12 @@ class Crop(QtGui.QMainWindow):
         self.widget.doTheCrop()
 
     def closeMenuAction(self):
-    #sys.exit(app.exec_())
-    #self.widget.close()
+        self.callback(None)
         self.close()
 
-
+    def closeEvent(self, event):
+        self.callback(None)
+        event.accept()
 
 
 class MainWidget(QtGui.QWidget):
@@ -148,7 +150,7 @@ class MainWidget(QtGui.QWidget):
         #x2 = self.orig_width - (int(large_box[2] - (self.img_dist_left / self.scaleFact )))
         #y2 = self.orig_height - (int(large_box[3] - (self.img_dist_top / self.scaleFact)))
 
-        ijCropBox = (x1, y1, width, height )
+        ijCropBox = (x1, y1, width, height)
         #print "ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox))
         logging.info("ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox)))
         cropBox = (x1, y1, width, height)
@@ -277,6 +279,7 @@ class MainWidget(QtGui.QWidget):
         '''
         if self.drawing:
             self.drawing = False
+
 
 def run_from_cli(callback, image):
     #Need access to app to be able to exit gracefully from cli

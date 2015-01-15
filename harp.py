@@ -798,6 +798,8 @@ l
             QtGui.QMessageBox.warning(self, 'Message', 'Warning: input folder is empty')
             return
 
+        # Disable to button for now
+        self.ui.pushButtonGetDimensions.setEnabled(False)
         # Set to None so z_projection doesn't stop unless cancelled
         self.stop = None
         # Let the user know what is going on
@@ -815,9 +817,7 @@ l
         input_folder = str(self.ui.lineEditInput.text())
         imglist = getfilelist(input_folder, self.app_data.files_to_use, self.app_data.files_to_ignore)
 
-
-        #TODO check for empty list
-
+        #TODO check for empty list`
         self.z_thread = zproject.Zproject(imglist, self.zprojection_output)
         self.connect(self.z_thread, QtCore.SIGNAL("update(QString)"), self.zproject_slot)
         self.z_thread.start()
@@ -859,12 +859,16 @@ l
 
         :param list box: Crop dimensions (crop box) the user selected
         """
-        self.ui.lineEditX.setText(str(box[0]))
-        self.ui.lineEditY.setText(str(box[1]))
-        self.ui.lineEditW.setText(str(box[2]))
-        self.ui.lineEditH.setText(str(box[3]))
-        self.ui.textEditStatusMessages.setText("Dimensions selected: " + str(box))
-        self.ui.pushButtonGetDimensions.setText("Get Dimensions")
+        if box is not None:
+            self.ui.lineEditX.setText(str(box[0]))
+            self.ui.lineEditY.setText(str(box[1]))
+            self.ui.lineEditW.setText(str(box[2]))
+            self.ui.lineEditH.setText(str(box[3]))
+            self.ui.textEditStatusMessages.setText("Manual dimensions selected")
+        else:
+            self.ui.textEditStatusMessages.setText("No dimensions selected")
+        self.ui.pushButtonGetDimensions.setEnabled(True)
+
 
     def add_to_list(self):
         """ This adds the recon information onto the "processing tab" also saves a pickle file which includes all the

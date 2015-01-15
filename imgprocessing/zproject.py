@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
+from __future__ import division
 import os
 from PyQt4 import QtCore
 import sys
-
 import numpy as np
 import cv2
 
@@ -13,13 +13,17 @@ from imgprocessing.io import imread, imwrite
 
 class Zproject(QtCore.QThread):
 
-    def __init__(self, imglist, zprojection_output, force=False):
+    def __init__(self, imglist, zprojection_output, callback=None, force=False):
         super(Zproject, self).__init__()
         self.skip = 10
         self.imglist = imglist
         self.zprojection_output = zprojection_output
         self.skip_num = 10
         self.force = force
+        if callback is None:
+            self.callback = self.z_callback
+        else:
+            self.callback = callback
 
     def run(self):
         self.run_onthisthread()
@@ -68,13 +72,13 @@ class Zproject(QtCore.QThread):
             #max_ = np.maximum(max_, im_array[:][:])
             inds = im_array > maxi
             maxi[inds] = im_array[inds]
-            if count % 10 == 0:
-                self.emit(QtCore.SIGNAL('update(QString)'), "Z-project: " + str(count * 10) + "/" + str(len(self.imglist))
-                                                            + " images processed")
-                #self.callback("Z project: {0} images".format(count * self.skip))
+            status_str = "Z-project: " + str(count * 10) + "/" + str(len(self.imglist)) + " images processed"
+            self.emit(QtCore.SIGNAL('update(QString)'), status_str)
+            self.callback("Determining crop box ({:.1%})".format(count / len(filelist)))
         return maxi
 
-
+    def z_callback(self, msg):  # this is just a dummy callback
+        pass
 
 
 
