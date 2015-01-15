@@ -37,7 +37,7 @@ import cv2
 from SimpleITK import GetImageFromArray, WriteImage
 from imgprocessing import resampler, crop
 from imgprocessing.io import imread
-
+from appdata import HarpDataError
 
 
 class ProcessingThread(QtCore.QThread):
@@ -270,7 +270,7 @@ class ProcessingThread(QtCore.QThread):
         self.session_log.write(str(datetime.datetime.now()) + "\n")
 
         # make autocrop object
-        #TODO: just send configOb
+
         cropper = crop.Crop(self.configOb.input_folder, self.configOb.cropped_path,
                                            self.autocrop_update_slot, self.configOb,
                                            self.thread_terminate_flag, self.app_data, def_crop=dimensions_tuple,
@@ -285,7 +285,7 @@ class ProcessingThread(QtCore.QThread):
         # It may be better to add the execptions closer to the event as these can catch a broad range
         try:
             # Run autocrop and catch errors
-            cropper.run_auto_mask()  # James - new version of autocrop
+            cropper.run(auto=True)  # James - new version of autocrop
 
         except WindowsError as e:
             self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the "
@@ -311,6 +311,8 @@ class ProcessingThread(QtCore.QThread):
                                    + "Exception traceback:" +
                                    traceback.format_exc() + "\n")
             self.emit(QtCore.SIGNAL('update(QString)'), "error:(see log): " + str(e))
+
+        self.session_log.flush()
 
     def tiffstack_from_slices(self, in_dir, outfile):
         """
@@ -677,12 +679,6 @@ class ProcessingThread(QtCore.QThread):
                 out.close()
 
 
-class HarpDataError(Exception):
-    """
-    Raised when some of the supplied data is found to be faulty
-    """
-    pass
-
 
 def getfilelist(input_folder, files_to_use_regx, files_to_ignore_regex):
     """
@@ -694,10 +690,10 @@ def getfilelist(input_folder, files_to_use_regx, files_to_ignore_regex):
         if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in files_to_ignore_regex):
             continue
         if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in files_to_use_regx):
-
+            print fn
             files.append(os.path.join(input_folder, fn))
 
-    return files
+    return sorted(files)
 
 
 def main():

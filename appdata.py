@@ -117,3 +117,10 @@ class AppData(object):
     def suppress_modality_warnings(self, suppress):
         if self.using_appdata:
             self.app_data['suppress_modality_warnings'] = suppress
+
+
+class HarpDataError(Exception):
+    """
+    Raised when some of the supplied data is found to be faulty
+    """
+    pass

@@ -11,13 +11,9 @@ from imgprocessing import zproject
 sys.path.append("..")
 import processing
 from imgprocessing.io import imread, imwrite
+from appdata import HarpDataError
 
 
-class HarpDataError(Exception):
-    """
-    Raised when some of the supplied data is found to be faulty
-    """
-    pass
 
 
 class Crop():
@@ -58,22 +54,43 @@ class Crop():
         else:
             self.callback("Processing Cancelled!")
             return
-        self.run()
+        return self.crop_box
 
-    def run(self):
+
+    def run(self, auto=False):
         """
         Perform a crop based on previously selected bounding box
         :return:
         """
-        first = True
+        # Get list of files
+        #imglist = processing.getfilelist(self.in_dir)
+        imglist = processing.getfilelist(self.in_dir, self.app_data.files_to_use, self.app_data.files_to_ignore)
+
+        if len(imglist) < 1:
+            raise HarpDataError("no image files found in " + self.in_dir)
+
+        if auto:
+            cb = self.auto_bounding_box(imglist)
+            print cb
+            #rearange as dims come in a differenbt order from the different methods
+            cropbox = (cb[2], cb[3], cb[0], cb[1]) #todo check correct
+
+        else:
+            cropbox = self.calc_manual_crop()
+
         first = True
 
-        for count, file_ in enumerate(sorted(self.files)):
+        for count, file_ in enumerate(imglist):
+            print file_
 
             try:
                 im = imread(file_)
             except IOError as e:
                 raise HarpDataError("failed to read {}".format(file_))
+
+            else:
+                if im.shape[0] < 1 or im.shape[1] < 1:
+                    raise HarpDataError('Cannot read file, {}'.format(file_))
 
             if first:
                 dimcheck = im.shape
@@ -83,27 +100,61 @@ class Crop():
                 if im.shape != dimcheck:
                     raise HarpDataError("Cropping. First file had shape of {}. {} has shape {}".
                                         format(dimcheck, file_, im.shape))
-                # try:
-                #     pass
-                #     #im[dimcheck] Check for indexing error as .shape is derived from header only
 
             if count % 20 == 0:
                 if self.thread_terminate_flag.value == 1:
-                    self.callback("Processing Cancelled!")
-                    return
+                    raise HarpDataError('Cancelled')
                 self.callback(
-                    "Cropping: {0}/{1} images".format(count, str(len(self.files))))
+                    "Cropping: {0}/{1} images".format(count, str(len(imglist))))
 
             filename = os.path.basename(file_)
+            crop_out = os.path.join(self.out_dir, filename)
+
             try:
-                imcrop = im[self.crop_box[1]:self.crop_box[3], self.crop_box[0]: self.crop_box[2]]
+                imcrop = im[cropbox[0]:cropbox[1], cropbox[2]: cropbox[3]]
             except IndexError as e:
                 raise HarpDataError("Crop box out of range. Is {} corrupted?".format(filename))
 
-            crop_out = os.path.join(self.out_dir, filename)
+
             imwrite(crop_out, imcrop)
 
-        self.callback("cropping finished")
+
+        self.callback("success")
+
+    def auto_bounding_box(self, filelist):
+
+        self.callback("Determining crop bounding box")
+        z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
+
+        # Start with a z-projection
+        zp = zproject.Zproject(filelist, z_proj_path, force=True)
+        zp.run_onthisthread()
+
+        zp_im = sitk.ReadImage(z_proj_path)
+
+        try:
+            testimg = imread(filelist[0])
+        except IOError as e:
+            raise HarpDataError('Failed to read {}. Is it corrupt'.format(imglist[0]))
+
+        datatype = testimg.dtype
+        if datatype is np.uint16:
+            outval = 65535
+        else:
+            outval = 255
+
+        # Apply otsu threshold and remove all but largest component
+        seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=outval, numberOfHistogramBins=128)
+        seg = sitk.ConnectedComponent(seg)  # label non-background pixels
+        seg = sitk.RelabelComponent(seg)  # relabel components in order of ascending size
+        # seg = seg == 1  # discard all but largest component
+
+        # Get bounding box
+        label_stats = sitk.LabelStatisticsImageFilter()
+        label_stats.Execute(zp_im, seg)
+        bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
+        return bbox
+
 
     def pad_bounding_box(self, bbox, padding):
 
@@ -125,86 +176,6 @@ class Crop():
 
         return bbox
 
-    def run_auto_mask(self):
-
-        # Get list of files
-        #imglist = processing.getfilelist(self.in_dir)
-        imglist = processing.getfilelist(self.in_dir, self.app_data.files_to_use, self.app_data.files_to_ignore)
-        self.files = sorted(imglist)
-
-        if len(imglist) < 1:
-            return "no image files found in " + self.in_dir
-
-        if self.def_crop or self.repeat_crop:
-            self.calc_manual_crop()
-            self.callback("success")
-        else:
-            self.callback("Determining crop bounding box")
-            z_proj_path = os.path.join(self.configOb.meta_path, "max_intensity_z.png")
-
-            # Start with a z-projection
-            zp = zproject.Zproject(imglist, z_proj_path, force=True)
-            zp.run_onthisthread()
-
-            zp_im = sitk.ReadImage(z_proj_path)
-
-            try:
-                testimg = imread(imglist[0])
-            except IOError as e:
-                raise HarpDataError('Failed to read {}. Is it corrupt'.format(imglist[0]))
-
-            datatype = testimg.dtype
-            if datatype is np.uint16:
-                outval = 65535
-            else:
-                outval = 255
-
-            # Apply otsu threshold and remove all but largest component
-            seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=outval, numberOfHistogramBins=128)
-            seg = sitk.ConnectedComponent(seg)  # label non-background pixels
-            seg = sitk.RelabelComponent(seg)  # relabel components in order of ascending size
-            # seg = seg == 1  # discard all but largest component
-
-            # Get bounding box
-            label_stats = sitk.LabelStatisticsImageFilter()
-            label_stats.Execute(zp_im, seg)
-            bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
-
-            # Padding
-            self.imdims = testimg.shape
-            padding = int(np.mean(self.imdims) * 0.025)
-            bbox = self.pad_bounding_box(bbox, padding)
-            self.crop_box = tuple(bbox)
-
-            dimsx = self.crop_box[1] - self.crop_box[0]
-            dimsy = self.crop_box[3] - self.crop_box[2]
-
-            print self.crop_box
-
-            if dimsx < 10 or dimsy < 10:
-                raise HarpDataError('Autocrop failed, cropbox too small! Try manual cropping')
-
-            # Actually perform the cropping
-            for count, slice_ in enumerate(self.files):
-
-                try:
-                    im = imread(slice_)
-                except IOError as e:
-                    raise HarpDataError('Failed to read {}. Is it corrupt'.format(slice_))
-
-                if count % 20 == 0:
-                    if self.thread_terminate_flag.value == 1:
-                        self.callback("Processing Cancelled!")
-                        return
-                    self.callback(
-                        "Cropping: {0}/{1} images".format(count, str(len(self.files))))
-
-                imcrop = im[self.crop_box[2]:self.crop_box[3], self.crop_box[0]: self.crop_box[1]]
-                filename = os.path.basename(slice_)
-                crop_out = os.path.join(self.out_dir, filename)
-                imwrite(crop_out, imcrop)
-
-            self.callback("success")
 
     def zp_callback(self, msg):
         pass
