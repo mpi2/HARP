@@ -54,6 +54,7 @@ class Crop(QtGui.QMainWindow):
         self.setCentralWidget(self.widget)
         self.widget.setContentsMargins(0,0,0,0)
         self.widget.show()
+        self.cropbox = None
 
         #Do not allow resizing for now as the rubber band does not move in proportion with the image
         self.widget.setFixedSize(QtCore.QSize(1000, 1000))
@@ -74,11 +75,11 @@ class Crop(QtGui.QMainWindow):
         self.widget.doTheCrop()
 
     def closeMenuAction(self):
-        self.callback(None)
+        self.callback(self.cropbox)
         self.close()
 
     def closeEvent(self, event):
-        self.callback(None)
+        self.callback(self.cropbox)
         event.accept()
 
 
@@ -138,7 +139,6 @@ class MainWidget(QtGui.QWidget):
         self.width = 1
         self.height = 1
         self.drawing = True
-        self.cropBox = None
         self.cornerSet = False
 
         #Hack. Mouse events give me position of mouse relative to image
@@ -169,9 +169,7 @@ class MainWidget(QtGui.QWidget):
         ijCropBox = (x1, y1, width, height)
         #print "ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox))
         logging.info("ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox)))
-        cropBox = (x1, y1, width, height)
-        self.callback(cropBox)
-        print self.cropBox
+        self.parent.cropbox = (x1, y1, width, height)
         self.parent.close()
 
 
