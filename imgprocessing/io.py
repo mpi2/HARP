@@ -24,6 +24,7 @@ def imread(imgpath):
     if sys.platform == "win32" or sys.platform == "win64":
         return _read_cv2(imgpath)
     else:
+        return _read_cv2(imgpath)
         return _read_ndimage(imgpath)
 
 

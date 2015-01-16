@@ -969,7 +969,7 @@ l
             :func:`processing.ProcessingThread()`,
             :func:`autofill.get_channels()`
         """
-        print message
+        # print message
         if self.stop_pro_switch:
             return
 

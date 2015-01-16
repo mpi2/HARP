@@ -74,7 +74,7 @@ class ProcessingThread(QtCore.QThread):
                                     Setup at _init_ here from the config file path given.
         :ivar int self.kill_check: Switch for the kill signal. Initialised at 0, when switched to 1 processing killed.
         """
-        print 'new'
+
         #QtCore.QThread.__init__(self, parent)
         super(ProcessingThread, self).__init__(parent)
         self.config_paths = config_paths
@@ -680,19 +680,49 @@ class ProcessingThread(QtCore.QThread):
                 shape = [shape[1], shape[0]]
                 shape.append(len(cropped_img_list))
 
-                options = {'encoding': 'bz2'}
-                nrrd_filehandle = nrrd.get_nrrd_filehandle(outfile, shape, first_image.dtype, options)
 
-                bz2fileobj = bz2.BZ2File(fileobj=nrrd_filehandle)
-                bz2fileobj.write(rawdata)
+                nrrd_filehandle = nrrd.get_nrrd_filehandle(outfile, shape, first_image.dtype, 3)
+                compressor = bz2.BZ2Compressor()
+
+                print 'hdhdhdhd', len(cropped_img_list)
 
                 for f in cropped_img_list:
                     img_arr = imread(f)
                     rawdata = img_arr.T.tostring(order='F')
-                    #nrrd_filehandle.write(rawdata)
-                    bz2fileobj.write
+                    nrrd_filehandle.write(rawdata)
+
                 nrrd_filehandle.close()
-                bz2fileobj.close()
+
+                BLOCK_SIZE = 52428800 # Around 20 MB in memory at one time
+                # TODOO: Chack its smaller than image size
+                compressed_name = outfile + '.bz2'
+
+                with open(compressed_name, 'wb') as fh_w, open(outfile, 'rb') as fh_r:
+                    while True:
+                        block = fh_r.read(BLOCK_SIZE)
+                        if not block:
+                            break
+
+                        compressed = compressor.compress(block)
+                        if compressed:
+                            fh_w.write(compressed)
+
+                    # Send any data being buffered by the compressor
+                    remaining = compressor.flush()
+                    while remaining:
+                        to_send = remaining[:BLOCK_SIZE]
+                        remaining = remaining[BLOCK_SIZE:]
+
+                        fh_w.write(to_send)
+
+                if os.path.isfile(outfile):
+                    try:
+                        os.remove(outfile)
+                    except OSError as e:
+                        self.emit(QtCore.SIGNAL('update(QString)'), "Can't delete temp file {}".format(outfile))
+
+
+
 
 
     def tiffstack_from_slices(self, in_dir, outfile):
@@ -733,7 +763,6 @@ def getfilelist(input_folder, files_to_use_regx, files_to_ignore_regex):
         if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in files_to_ignore_regex):
             continue
         if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in files_to_use_regx):
-            print fn
             files.append(os.path.join(input_folder, fn))
 
     return sorted(files)
