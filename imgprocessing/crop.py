@@ -97,6 +97,7 @@ class Crop():
 
         else:
             cropbox = self.calc_manual_crop()
+            cropbox = [cropbox[1], cropbox[3], cropbox[0], cropbox[2]]  # rearrange for numpy slicing
 
         first = True
         outpathslist = []
