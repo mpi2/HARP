@@ -126,6 +126,8 @@ class MainWindow(QtGui.QMainWindow):
         # Use Old crop (disable buttons)
         self.ui.radioButtonUseOldCrop.clicked.connect(self.man_crop_off)
 
+        self.ui.actionReset_screen_size.triggered.connect(self.reset_screen)
+
         # Man crop (enable buttons).
         self.ui.radioButtonMan.clicked.connect(self.man_crop_on)
 
@@ -156,12 +158,6 @@ class MainWindow(QtGui.QMainWindow):
         # Get scan file manually
         self.ui.checkBoxPixel.clicked.connect(self.scale_by_pixel_on)
 
-        # Resize for smaller monitors
-        self.ui.actionResize.triggered.connect(self.resize_screen)
-
-        # Reset screen size to standard
-        self.ui.actionReset_screen_size.triggered.connect(self.reset_screen)
-
         # Start processing recons
         self.ui.pushButtonStart.clicked.connect(self.start_processing)
 
@@ -176,9 +172,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Documentation PDF
         self.ui.actionPDF_user_guide.triggered.connect(self.user_guide)
-
-        # Example Data for testing purposes
-        self.ui.actionExample_data.triggered.connect(self.example_data)
 
         # need to monitor when the tab is changed as it determines what qtable uses key commands
         self.connect(self.ui.tabWidget, SIGNAL('currentChanged(int)'), self.tab_change)
@@ -296,12 +289,6 @@ l
             # i.e. key press is linked to the function delete_rows()
             self.ui.tableWidget.__class__.keyPressEvent = self.delete_rows
 
-    def example_data(self):
-        """ TESTING PURPOSES ONLY: Loads in example data """
-        self.ui.lineEditInput.setText(os.path.join("D:", "fakedata", "recons", "20140408_RCAS_17_18.4e_wt_rec"))
-        self.reset_inputs()
-        self.autofill_pipe()
-
     def about_message(self):
         """ Short description about what HARP is and its version"""
         QtGui.QMessageBox.information(self, 'Message', (
@@ -324,15 +311,11 @@ l
             opener = "evince"
             subprocess.call([opener, user_man])
 
-    def resize_screen(self):
-        """ Resize screen for smaller monitors"""
-        self.resize(1280, 488)
-        self.ui.scrollArea.setFixedSize(1255, 400)
+
 
     def reset_screen(self):
         """ Reset screen back to default"""
-        self.resize(1305, 924)
-        self.ui.scrollArea.setFixedSize(1281, 831)
+        self.showMaximized()
 
     def select_file_out(self):
         """ Selects output folder manually
