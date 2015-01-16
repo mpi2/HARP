@@ -99,9 +99,9 @@ class Crop():
             cropbox = self.calc_manual_crop()
 
         first = True
+        outpathslist = []
 
         for count, file_ in enumerate(imglist):
-            print file_
 
             try:
                 im = imread(file_)
@@ -139,8 +139,10 @@ class Crop():
                 raise HarpDataError("Crop box out of range. Is {} corrupted?".format(filename))
 
             imwrite(crop_out, imcrop)
+            outpathslist.append(crop_out)
 
         self.callback("success")
+        return outpathslist
 
     def auto_bounding_box(self, filelist):
 

@@ -201,6 +201,7 @@ def errorCheck(self):
 
 def remove_folder_contents(self, outputFolder):
 
+    print "Removing output folder"
     # WARNING: this function will delete the folder and its contents, before creating a new folder
     try:
         shutil.rmtree(outputFolder)

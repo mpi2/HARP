@@ -13,10 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-"""
-from __future__ import division
 
-"""
 Part of the HARP package.
 Scale a stack of 2D images.
 For an integer factor, use SimpleITK's binshrink.
@@ -24,7 +21,10 @@ For an arbitrary voxel output size we scale in XY and then in XY using opencv.re
 
 For scaling to an arbitray pixel value, a memory-mapped numpy array is created, which needs a raw file creating that
 resides on disk during processing. This will take up (volume size / scale factor)
+
 """
+from __future__ import division
+
 
 import numpy as np
 import SimpleITK as sitk
@@ -33,9 +33,10 @@ import shutil
 import cv2
 import lib.nrrd as nrrd
 from imgprocessing.io import imread
+from multiprocessing import Value
 
 
-def resample(images, scale, outpath, scaleby_int, thread_terminate_flag):
+def resample(images, scale, outpath, scaleby_int, thread_terminate_flag=Value('i', 0)):
     """
     :param images: iterable or a directory
     :param scale: int. Factor to scale by
@@ -44,8 +45,10 @@ def resample(images, scale, outpath, scaleby_int, thread_terminate_flag):
     :return:
     """
 
-    temp_xy = 'tempXYscaled.raw'
-    temp_xyz = 'tempXYZscaled.raw'
+    outdir = os.path.split(outpath)[0]
+    print outdir
+    temp_xy = os.path.join(outdir, 'tempXYscaled.raw')
+    temp_xyz = os.path.join(outdir, 'tempXYZscaled.raw')
 
     #Just in case they didn't previously get deleted
     _remove_temp_files([temp_xy, temp_xyz])

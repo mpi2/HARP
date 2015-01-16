@@ -41,6 +41,8 @@ except ImportError:
     import pickle
 import shutil
 import tarfile
+import bz2
+from lib import nrrd
 import datetime
 import copy
 from multiprocessing import freeze_support
@@ -148,7 +150,7 @@ class ProcessingThread(QtCore.QThread):
             #===============================================
             # Cropping
             #===============================================
-            self.cropping()
+            cropped_imgs_list = self.cropping()
             # A callback function is used to monitor if autocrop was run sucessfully. This modifies the self.crop_status
             # instance variable. Has to be success to continue
             if self.crop_status != "success":
@@ -168,7 +170,7 @@ class ProcessingThread(QtCore.QThread):
             if self.configOb.crop_option == "Old_crop":
                 self.show_files()
 
-            self.compression()
+            self.compression(cropped_imgs_list)
 
             if self.scale_error:
                 self.emit(QtCore.SIGNAL('update(QString)'),
@@ -295,7 +297,7 @@ class ProcessingThread(QtCore.QThread):
                                            repeat_crop=derived_cropbox)
 
         # WindowsError is an execption only available on Windows need to make a fake WindowsError exception for linux
-        # Neil: What's this for?
+
         if not getattr(__builtins__, "WindowsError", None):
             class WindowsError(OSError): pass
 
@@ -303,7 +305,7 @@ class ProcessingThread(QtCore.QThread):
         # It may be better to add the execptions closer to the event as these can catch a broad range
         try:
             # Run autocrop and catch errors
-            cropper.run(auto=doauto)  # James - new version of autocrop
+            croppedlist = cropper.run(auto=doauto)  # James - new version of autocrop
 
         except WindowsError as e:
             self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the "
@@ -331,33 +333,7 @@ class ProcessingThread(QtCore.QThread):
             self.emit(QtCore.SIGNAL('update(QString)'), "error:(see log): " + str(e))
 
         self.session_log.flush()
-
-    def tiffstack_from_slices(self, in_dir, outfile):
-        """
-        Create a tiff stack a directory containing single 2D images
-        :param in_dir, str, directory where single images are
-        :param outfile, str, path to output tiff stack
-        :return:
-        """
-        array_3d = None
-        for file_ in sorted(os.listdir(in_dir)):
-            if any(file_.endswith(x) for x in self.extensions_to_ignore):
-                continue
-            if file_.endswith(('tiff', 'tif', 'TIFF', 'TIF', 'BMP', 'bmp')):
-                array_2d = imread(os.path.join(in_dir, file_))
-                if array_3d is None:
-                    array_3d = array_2d
-                    continue
-
-
-                array_3d = np.dstack((array_3d, array_2d))
-
-        # Need to do some swapping of axes as cv2/numpy treat them differently to sitk
-        array_3d = np.swapaxes(array_3d, 0, 2)
-        array_3d = np.swapaxes(array_3d, 1, 2)
-
-        image_3d = GetImageFromArray(array_3d)
-        WriteImage(image_3d, outfile)
+        return croppedlist
 
 
     def autocrop_update_slot(self, msg):
@@ -614,7 +590,7 @@ class ProcessingThread(QtCore.QThread):
                 shutil.copy(file, self.configOb.cropped_path)
                 self.session_log.write("File copied:" + file + "\n")
 
-    def compression(self):
+    def compression(self, cropped_img_list):
         """ Compresses either scans and the original recons or the cropped folder
 
         :ivar int self.kill_check: if 1 it means HARP has been stopped via the GUI. Not modified here.
@@ -667,34 +643,83 @@ class ProcessingThread(QtCore.QThread):
 
         if self.configOb.crop_comp == "yes":
             if self.configOb.crop_option != "No_crop":
-                #============================================
-                # compression for cropped image sequence
-                #============================================
-                self.emit(QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started")
+                # #============================================
+                # # compression for cropped image sequence
+                # #============================================
+                # self.emit(QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started")
+                #
+                #
+                # temp_stack_path = os.path.join(self.configOb.tmp_dir, 'tiffstack_temp.nrrd')
+                # self.tiffstack_from_slices(self.configOb.cropped_path, temp_stack_path)
+                #
+                # #Now compress the tiff and add to the archive
+                # out = tarfile.open(os.path.join(self.configOb.output_folder, 'IMPC_{}.tar.bz2'.format(
+                #     self.configOb.full_name)), mode='w:bz2')
+                #
+                # out.add(temp_stack_path, arcname='{}_cropped.tiff'.format(self.configOb.full_name))
+                # # remove the tem tiff stack
+                # try:
+                #     os.remove(temp_stack_path)
+                # except Exception:
+                #     pass # Not sure which excption to catch if temp file is gone
+                #
+                # # Add the recon log file
+                # log_name = os.path.basename(self.configOb.recon_log_file)
+                # try:
+                #     out.add(self.configOb.recon_log_file, arcname=log_name)
+                # except OSError:
+                #     pass  # No recon log available
+                #
+                # out.close()
 
-                # Create a tiff stack from the individual tiff slices
-                temp_stack_path = os.path.join(self.configOb.tmp_dir, 'tiffstack_temp.nrrd')
-                self.tiffstack_from_slices(self.configOb.cropped_path, temp_stack_path)
+                outfile = os.path.join(
+                    self.configOb.output_folder, 'IMPC_{}.nrrd'.format(self.configOb.full_name))
 
-                #Now compress the tiff and add to the archive
-                out = tarfile.open(os.path.join(self.configOb.output_folder, 'IMPC_{}.tar.bz2'.format(
-                    self.configOb.full_name)), mode='w:bz2')
+                first_image = imread(cropped_img_list[0])
+                shape = list(first_image.shape)
+                shape = [shape[1], shape[0]]
+                shape.append(len(cropped_img_list))
 
-                out.add(temp_stack_path, arcname='{}_cropped.tiff'.format(self.configOb.full_name))
-                # remove the tem tiff stack
-                try:
-                    os.remove(temp_stack_path)
-                except Exception:
-                    pass # Not sure which excption to catch if temp file is gone
+                options = {'encoding': 'bz2'}
+                nrrd_filehandle = nrrd.get_nrrd_filehandle(outfile, shape, first_image.dtype, options)
 
-                # Add the recon log file
-                log_name = os.path.basename(self.configOb.recon_log_file)
-                try:
-                    out.add(self.configOb.recon_log_file, arcname=log_name)
-                except OSError:
-                    pass  # No recon log available
+                bz2fileobj = bz2.BZ2File(fileobj=nrrd_filehandle)
+                bz2fileobj.write(rawdata)
 
-                out.close()
+                for f in cropped_img_list:
+                    img_arr = imread(f)
+                    rawdata = img_arr.T.tostring(order='F')
+                    #nrrd_filehandle.write(rawdata)
+                    bz2fileobj.write
+                nrrd_filehandle.close()
+                bz2fileobj.close()
+
+
+    def tiffstack_from_slices(self, in_dir, outfile):
+        """
+        Create a tiff stack a directory containing single 2D images
+        :param in_dir, str, directory where single images are
+        :param outfile, str, path to output tiff stack
+        :return:
+        """
+        array_3d = None
+        for file_ in sorted(os.listdir(in_dir)):
+            if any(file_.endswith(x) for x in self.extensions_to_ignore):
+                continue
+            if file_.endswith(('tiff', 'tif', 'TIFF', 'TIF', 'BMP', 'bmp')):
+                array_2d = imread(os.path.join(in_dir, file_))
+                if array_3d is None:
+                    array_3d = array_2d
+                    continue
+
+                array_3d = np.dstack((array_3d, array_2d))
+
+        # Need to do some swapping of axes as cv2/numpy treat them differently to sitk
+        array_3d = np.swapaxes(array_3d, 0, 2)
+        array_3d = np.swapaxes(array_3d, 1, 2)
+
+        image_3d = GetImageFromArray(array_3d)
+        WriteImage(image_3d, outfile)
 
 
 
