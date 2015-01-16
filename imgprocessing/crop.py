@@ -103,8 +103,8 @@ class Crop():
 
             else:
                 if im.shape != dimcheck:
-                    raise HarpDataError("Cropping. First file had shape of {}. {} has shape {}".
-                                        format(dimcheck, file_, im.shape))
+                    raise HarpDataError("Input files have different shapes {} and {}".
+                                        format(dimcheck, imglist[0], file_))
                 # try:
                 #     pass
                 #     #im[dimcheck] Check for indexing error as .shape is derived from header only
@@ -123,9 +123,7 @@ class Crop():
             except IndexError as e:
                 raise HarpDataError("Crop box out of range. Is {} corrupted?".format(filename))
 
-
             imwrite(crop_out, imcrop)
-
 
         self.callback("success")
 
@@ -143,7 +141,7 @@ class Crop():
         try:
             testimg = imread(filelist[0])
         except IOError as e:
-            raise HarpDataError('Failed to read {}. Is it corrupt'.format(imglist[0]))
+            raise HarpDataError('Failed to read {}. Is it corrupt'.format(filelist[0]))
 
         datatype = testimg.dtype
         if datatype is np.uint16:
@@ -161,6 +159,12 @@ class Crop():
         label_stats = sitk.LabelStatisticsImageFilter()
         label_stats.Execute(zp_im, seg)
         bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
+
+        # Padding
+        self.imdims = testimg.shape
+        padding = int(np.mean(self.imdims) * 0.025)
+        bbox = self.pad_bounding_box(bbox, padding)
+
         return bbox
 
 
@@ -172,7 +176,7 @@ class Crop():
 
         bbox[1] += padding  # xmax
         if bbox[1] > self.imdims[0] - 1:
-            bbox[1] = 0
+            bbox[1] = self.imdims[0] - 1
 
         bbox[2] -= padding  # ymin
         if bbox[2] < 0:
@@ -180,7 +184,7 @@ class Crop():
 
         bbox[3] += padding  # ymax
         if bbox[3] > self.imdims[1] - 1:
-            bbox[3] = 0
+            bbox[3] = self.imdims[1]
 
         return bbox
 
