@@ -26,6 +26,7 @@ associated modules.
 
 -------------------------------------------------------
 """
+
 from PyQt4 import QtGui, QtCore
 import sys
 import subprocess
@@ -235,6 +236,7 @@ class ProcessingThread(QtCore.QThread):
 
         # Cropping option: MANUAL CROP
         if self.configOb.crop_option == "Manual":
+            doauto = False
             self.session_log.write("manual crop\n")
             self.emit(QtCore.SIGNAL('update(QString)'), "Performing manual crop")
             # Get the dimensions from the config object
@@ -245,6 +247,7 @@ class ProcessingThread(QtCore.QThread):
 
         # Setup for automatic
         if self.configOb.crop_option == "Automatic":
+            doauto = True
             self.session_log.write("autocrop\n")
             self.emit(QtCore.SIGNAL('update(QString)'), "Performing autocrop")
             # cropbox is not derived and dimensions will be determined in autocrop
@@ -253,6 +256,7 @@ class ProcessingThread(QtCore.QThread):
 
         # setup for derived crop
         if self.configOb.crop_option == "Derived":
+            doauto = False
             self.session_log.write("Derived crop\n")
             self.emit(QtCore.SIGNAL('update(QString)'), "Performing crop from derived cropbox")
             dimensions_tuple = None
@@ -299,7 +303,7 @@ class ProcessingThread(QtCore.QThread):
         # It may be better to add the execptions closer to the event as these can catch a broad range
         try:
             # Run autocrop and catch errors
-            cropper.run(auto=True)  # James - new version of autocrop
+            cropper.run(auto=doauto)  # James - new version of autocrop
 
         except WindowsError as e:
             self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the "
