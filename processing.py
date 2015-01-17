@@ -126,12 +126,12 @@ class ProcessingThread(QtCore.QThread):
             self.update.emit("Started Processing")
 
             filehandler = open(job, 'r')
-            self.configOb = copy.deepcopy(pickle.load(filehandler))
+            self.config = copy.deepcopy(pickle.load(filehandler))
 
             #===============================================
             # Setup logging files
             #===============================================
-            session_log_path = os.path.join(self.configOb.meta_path, "session.log")
+            session_log_path = os.path.join(self.config.meta_path, "session.log")
             self.session_log = open(session_log_path, 'w+')
 
             self.session_log.write("########################################\n")
@@ -155,12 +155,12 @@ class ProcessingThread(QtCore.QThread):
 
             # Cropping function only copies over image files. Need to copy over other files now scaling and cropping
             # finished
-            if self.configOb.crop_option == "Automatic" or self.configOb.crop_option == "Manual":
+            if self.config.crop_option == "Automatic" or self.config.crop_option == "Manual":
                 self.copying()
 
             # If the old crop was used the non valid image files will have been hid in self.cropping. Now scaling and
             # cropping finished, files can be shown again (taken out of temp folder).
-            if self.configOb.crop_option == "Old_crop":
+            if self.config.crop_option == "Old_crop":
                 self.show_files()
 
             try:
@@ -203,19 +203,19 @@ class ProcessingThread(QtCore.QThread):
         # Cropping setup
         #===============================================
         # Also setup the scaling folder here as well. Defaulted to the cropped folder
-        self.folder_for_scaling = self.configOb.cropped_path
+        self.folder_for_scaling = self.config.cropped_path
 
         # Cropping option: NO CROP
-        if self.configOb.crop_option == "No_crop":
+        if self.config.crop_option == "No_crop":
             # Do not perform any crop as user specified
             self.update.emit("No Crop carried out")
             self.session_log.write("No crop carried out\n")
             self.autocrop_update_slot("success")
-            self.folder_for_scaling = self.configOb.input_folder
+            self.folder_for_scaling = self.config.input_folder
             return
 
         # Cropping option: OLD CROP
-        if self.configOb.crop_option == "Old_crop":
+        if self.config.crop_option == "Old_crop":
             # Use a previous folder already ran through HARP. No cropping needed here.
             self.update.emit("No Crop carried out")
             # Need to hide non recon files. Puts them in a temp folder until scaling has finished
@@ -225,22 +225,22 @@ class ProcessingThread(QtCore.QThread):
             return
 
         # Make new crop directory
-        if not os.path.exists(self.configOb.cropped_path):
-            os.makedirs(self.configOb.cropped_path)
+        if not os.path.exists(self.config.cropped_path):
+            os.makedirs(self.config.cropped_path)
 
         # Cropping option: MANUAL CROP
-        if self.configOb.crop_option == "Manual":
+        if self.config.crop_option == "Manual":
             doauto = False
             self.session_log.write("manual crop\n")
             self.update.emit("Performing manual crop")
             # Get the dimensions from the config object
             dimensions_tuple = (
-                int(self.configOb.xcrop), int(self.configOb.ycrop), int(self.configOb.wcrop), int(self.configOb.hcrop))
+                int(self.config.xcrop), int(self.config.ycrop), int(self.config.wcrop), int(self.config.hcrop))
             # The cropbox is not derived so should be None when given to the autocrop
             derived_cropbox = None
 
         # Setup for automatic
-        if self.configOb.crop_option == "Automatic":
+        if self.config.crop_option == "Automatic":
             doauto = True
             self.session_log.write("autocrop\n")
             self.update.emit("Performing autocrop")
@@ -249,14 +249,14 @@ class ProcessingThread(QtCore.QThread):
             derived_cropbox = None
 
         # setup for derived crop
-        if self.configOb.crop_option == "Derived":
+        if self.config.crop_option == "Derived":
             doauto = False
             self.session_log.write("Derived crop\n")
             self.update.emit("Performing crop from derived cropbox")
             dimensions_tuple = None
             try:
                 # Cropbox dimensions are stored as pickle object. So need to extract
-                filehandler = open(self.configOb.cropbox_path, 'r')
+                filehandler = open(self.config.cropbox_path, 'r')
                 cropbox_object = copy.deepcopy(pickle.load(filehandler))
                 derived_cropbox = cropbox_object.cropbox
             except IOError as e:
@@ -281,8 +281,8 @@ class ProcessingThread(QtCore.QThread):
 
         # make autocrop object
 
-        cropper = crop.Crop(self.configOb.input_folder, self.configOb.cropped_path,
-                                           self.autocrop_update_slot, self.configOb,
+        cropper = crop.Crop(self.config.input_folder, self.config.cropped_path,
+                                           self.autocrop_update_slot, self.config,
                                            self.thread_terminate_flag, self.app_data, def_crop=dimensions_tuple,
                                            repeat_crop=derived_cropbox)
 
@@ -349,7 +349,7 @@ class ProcessingThread(QtCore.QThread):
             crop_box_ob = ConfigClass()
 
             # get path
-            crop_box_path = os.path.join(self.configOb.meta_path, "cropbox.txt")
+            crop_box_path = os.path.join(self.config.meta_path, "cropbox.txt")
 
             # save cropbox tuple to cropbox object
             crop_box_ob.cropbox = msg
@@ -395,27 +395,27 @@ class ProcessingThread(QtCore.QThread):
         self.session_log.write(str(datetime.datetime.now()) + "\n")
 
         # First make subfolder for scaled stacks
-        if not os.path.exists(self.configOb.scale_path):
-            os.makedirs(self.configOb.scale_path)
+        if not os.path.exists(self.config.scale_path):
+            os.makedirs(self.config.scale_path)
 
         # Perform scaling for all options used.
-        if self.configOb.SF2 == "yes":
+        if self.config.SF2 == "yes":
             self.downsample(2)
 
-        if self.configOb.SF3 == "yes":
+        if self.config.SF3 == "yes":
             self.downsample(3)
 
-        if self.configOb.SF4 == "yes":
+        if self.config.SF4 == "yes":
             self.downsample(4)
 
-        if self.configOb.SF5 == "yes":
+        if self.config.SF5 == "yes":
             self.downsample(5)
 
-        if self.configOb.SF6 == "yes":
+        if self.config.SF6 == "yes":
             self.downsample(6)
 
-        if self.configOb.pixel_option == "yes":
-            scale_factor = self.configOb.SFX_pixel
+        if self.config.pixel_option == "yes":
+            scale_factor = self.config.SFX_pixel
             self.downsample(scale_factor, scaleby_int=False)
 
 
@@ -429,18 +429,18 @@ class ProcessingThread(QtCore.QThread):
         # Setup
         #===============================================================================
         # Setup a logging file specifically for this scaling
-        self.scale_log_path = os.path.join(self.configOb.meta_path, str(scale) + "_scale.log")
+        self.scale_log_path = os.path.join(self.config.meta_path, str(scale) + "_scale.log")
         self.session_scale = open(self.scale_log_path, 'w+')
 
  
-        if (self.configOb.recon_pixel_size) and scale != "Pixel":
-            new_pixel = float(self.configOb.recon_pixel_size) * float(scale)
+        if (self.config.recon_pixel_size) and scale != "Pixel":
+            new_pixel = float(self.config.recon_pixel_size) * float(scale)
             new_pixel = str(round(new_pixel, 4))
             interpolation = "default"
 
-        elif self.configOb.pixel_option == "yes":
-            scale = self.configOb.SFX_pixel
-            new_pixel = self.configOb.user_specified_pixel
+        elif self.config.pixel_option == "yes":
+            scale = self.config.SFX_pixel
+            new_pixel = self.config.user_specified_pixel
 
             interpolation = "yes"
         else:
@@ -461,8 +461,8 @@ class ProcessingThread(QtCore.QThread):
         #===============================================================================
         print "normal scaling"
 
-        out_name = os.path.join(self.configOb.scale_path,
-                                self.configOb.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".nrrd")
+        out_name = os.path.join(self.config.scale_path,
+                                self.config.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".nrrd")
 
         try:
             files_for_scaling = getfilelist(self.folder_for_scaling,
@@ -488,7 +488,7 @@ class ProcessingThread(QtCore.QThread):
         # mv non recon image files into a temp folder
         print "hide files"
 
-        crop_path = self.configOb.cropped_path
+        crop_path = self.config.cropped_path
         # Make a temp folder
         tmp_crop = os.path.join(crop_path, "tmp")
 
@@ -533,7 +533,7 @@ class ProcessingThread(QtCore.QThread):
 
         :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified here.
         """
-        crop_path = self.configOb.cropped_path
+        crop_path = self.config.cropped_path
         tmp_crop = os.path.join(crop_path, "tmp")
 
         # for loop through list of temp files
@@ -569,18 +569,18 @@ class ProcessingThread(QtCore.QThread):
         self.session_log.write(str(datetime.datetime.now()) + "\n")
 
         # For loop through the input folder
-        for file in os.listdir(self.configOb.input_folder):
+        for file in os.listdir(self.config.input_folder):
 
             #check if folder before copying
-            if os.path.isdir(os.path.join(self.configOb.input_folder, file)):
+            if os.path.isdir(os.path.join(self.config.input_folder, file)):
                 # Dont copy the sub directory move to the next itereration
                 continue
 
-            elif not os.path.exists(os.path.join(self.configOb.cropped_path, file)):
+            elif not os.path.exists(os.path.join(self.config.cropped_path, file)):
                 # File exists so copy it over to the crop folder
                 # Need to get full path of original file though
-                file = os.path.join(self.configOb.input_folder, file)
-                shutil.copy(file, self.configOb.cropped_path)
+                file = os.path.join(self.config.input_folder, file)
+                shutil.copy(file, self.config.cropped_path)
                 self.session_log.write("File copied:" + file + "\n")
 
     def compression(self, cropped_img_list):
@@ -593,23 +593,23 @@ class ProcessingThread(QtCore.QThread):
         if self.thread_terminate_flag.value == 1:
             return
 
-        if self.configOb.scans_recon_comp == "yes" or self.configOb.crop_comp == "yes":
+        if self.config.scans_recon_comp == "yes" or self.config.crop_comp == "yes":
             self.session_log.write("***Performing Compression***")
             self.session_log.write(str(datetime.datetime.now()) + "\n")
 
-        if self.configOb.scans_recon_comp == "yes":
+        if self.config.scans_recon_comp == "yes":
 
-            if self.configOb.scan_folder:
+            if self.config.scan_folder:
                 #============================================
                 # Compression for scan
                 #============================================
                 self.update.emit("Performing compression of scan folder")
                 self.session_log.write("Compression of scan folder")
-                scan_list = getfilelist(self.configOb.scan_folder,
+                scan_list = getfilelist(self.config.scan_folder,
                                         self.app_data.files_to_use, self.app_data.files_to_ignore)
 
-                scan_name = os.path.split(self.configOb.scan_folder)[1]
-                scan_nrrd = os.path.join(self.configOb.output_folder, '{}.nrrd'.format(scan_name))
+                scan_name = os.path.split(self.config.scan_folder)[1]
+                scan_nrrd = os.path.join(self.config.output_folder, '{}.nrrd'.format(scan_name))
                 self.write_bz2(scan_list, scan_nrrd)
 
                 self.update.emit("Compression of scan folder finished")
@@ -634,15 +634,15 @@ class ProcessingThread(QtCore.QThread):
         if self.thread_terminate_flag.value == 1:
             return
 
-        if self.configOb.crop_comp == "yes":
-            if self.configOb.crop_option != "No_crop":
+        if self.config.crop_comp == "yes":
+            if self.config.crop_option != "No_crop":
                 # #============================================
                 # # compression for cropped image sequence
                 # #============================================
 
                 self.update.emit("Compression of cropped recon started")
                 outfile = os.path.join(
-                    self.configOb.output_folder, 'IMPC_cropped_{}.nrrd'.format(self.configOb.full_name))
+                    self.config.output_folder, 'IMPC_cropped_{}.nrrd'.format(self.config.full_name))
 
                 self.write_bz2(cropped_img_list, outfile, 'Compressing cropped recon')
 
@@ -676,7 +676,7 @@ class ProcessingThread(QtCore.QThread):
         nrrd_filehandle.close()
 
         BLOCK_SIZE = 52428800 # Around 20 MB in memory at one time
-        # TODO: Chack its smaller than image size
+        # TODO: Check its smaller than image size
         compressed_name = outfile + '.bz2'
 
         file_size = os.path.getsize(outfile)

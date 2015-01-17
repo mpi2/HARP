@@ -45,7 +45,7 @@ import tempfile
 import uuid
 from PyQt4.QtCore import pyqtSlot, SIGNAL
 import autofill
-import addtolist
+import queuejob
 import Queue
 from ui.mainwindow import Ui_MainWindow
 from processing import ProcessingThread, getfilelist
@@ -874,7 +874,8 @@ l
         .. seealso::
             :func:`addtolist.start()`
         """
-        addtolist.start(self)
+        qj = queuejob.Queuejob(self)
+        qj.start()
 
     def start_processing(self):
         """ Starts a thread for processing after the user has pressed the 'start button' (GUI click only)
