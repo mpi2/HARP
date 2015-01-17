@@ -19,7 +19,6 @@ import cv2
 import sys
 
 
-
 def imread(imgpath):
     if sys.platform == "win32" or sys.platform == "win64":
         return _read_cv2(imgpath)

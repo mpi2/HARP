@@ -653,7 +653,7 @@ class ProcessingThread(QtCore.QThread):
 
 
 
-    def write_bz2(self, img_list, outfile):
+    def write_bz2(self, img_list, outfile, compress_name):
         """
         Create a tiff stack a directory containing single 2D images
         :param in_dir, str, directory where single images are

@@ -56,12 +56,12 @@ class Zproject(QtCore.QThread):
             print "Computing z-projection..."
 
             if len(self.imglist) < 1:
-                self.emit(QtCore.SIGNAL('update(QString)'),  "No recon images found!")
+                self.update.emit("No recon images found!")
             try:
                 print self.imglist[0]
                 im = imread(self.imglist[0])
             except IOError as e:
-                self.emit(QtCore.SIGNAL('update(QString)'), "Cant load {}. Is it corrupted?".format(self.imglist[0]))
+                self.update.emit("Cant load {}. Is it corrupted?".format(self.imglist[0]))
 
             imdims = im.shape
             dtype = im.dtype
@@ -74,7 +74,7 @@ class Zproject(QtCore.QThread):
             max_array = self.max_projection(sparse_filelist, imdims, dtype)
             imwrite(self.zprojection_output, max_array)
 
-        self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
+        self.update.emit("Z-projection finished")
 
     def max_projection(self, filelist, imdims, bit_depth):
 
@@ -84,13 +84,10 @@ class Zproject(QtCore.QThread):
 
             im_array = imread(file_)
 
-            #im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
-            #max_ = np.maximum(max_, im_array[:][:])
             inds = im_array > maxi
             maxi[inds] = im_array[inds]
-            status_str = "Z-project: " + str(count * 10) + "/" + str(len(self.imglist)) + " images processed"
-            self.emit(QtCore.SIGNAL('update(QString)'), status_str)
-            self.callback("Determining crop box ({:.1%})".format(count / len(filelist)))
+            self.update.emit("Z projection ({:.1%})".format(count / len(filelist)))
+
         return maxi
 
     def z_callback(self, msg):  # this is just a dummy callback

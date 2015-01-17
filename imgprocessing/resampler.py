@@ -120,7 +120,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
             if count % 50 == 0:
                 if thread_terminate_flag.value == 1:
                     return
-                pcnt_done = int(((100 / len(img_path_list)) * count) / 2) + 50
+                pcnt_done = int(((100 / xy_scaled_mmap.shape[1]) * count) / 2) + 50
                 update_signal.emit("rescaling by {}: {}% done".format(scale, pcnt_done))
 
             xz_plane = xy_scaled_mmap[:, y, :]
