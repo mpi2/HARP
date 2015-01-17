@@ -17,11 +17,13 @@ limitations under the License.
 from __future__ import division
 import os
 from PyQt4 import QtCore
+import numpy as np
 import sys
 import numpy as np
 import cv2
 
 sys.path.append('..')
+from appdata import HarpDataError
 from imgprocessing.io import imread, imwrite
 
 
@@ -56,12 +58,14 @@ class Zproject(QtCore.QThread):
             print "Computing z-projection..."
 
             if len(self.imglist) < 1:
-                self.update.emit("No recon images found!")
+                self.emit(QtCore.SIGNAL('update(QString)'),  "No recon images found!")
+
             try:
                 print self.imglist[0]
                 im = imread(self.imglist[0])
-            except IOError as e:
-                self.update.emit("Cant load {}. Is it corrupted?".format(self.imglist[0]))
+            except HarpDataError as e:
+                self.update.emit(e.message)  # emit back to differnt thread. or...
+                raise   # reraise for autocrop, on same thread
 
             imdims = im.shape
             dtype = im.dtype
@@ -74,7 +78,7 @@ class Zproject(QtCore.QThread):
             max_array = self.max_projection(sparse_filelist, imdims, dtype)
             imwrite(self.zprojection_output, max_array)
 
-        self.update.emit("Z-projection finished")
+        self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
 
     def max_projection(self, filelist, imdims, bit_depth):
 
@@ -82,12 +86,19 @@ class Zproject(QtCore.QThread):
 
         for count, file_ in enumerate(filelist):
 
-            im_array = imread(file_)
+            try:
+                im_array = imread(file_)
+            except HarpDataError as e:
+                self.update.emit(e.message)
+                raise
 
+            #im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
+            #max_ = np.maximum(max_, im_array[:][:])
             inds = im_array > maxi
             maxi[inds] = im_array[inds]
-            self.update.emit("Z projection ({:.1%})".format(count / len(filelist)))
-
+            status_str = "Z-project: " + str(count * 10) + "/" + str(len(self.imglist)) + " images processed"
+            self.emit(QtCore.SIGNAL('update(QString)'), status_str)
+            self.callback("Determining crop box ({:.1%})".format(count / len(filelist)))
         return maxi
 
     def z_callback(self, msg):  # this is just a dummy callback

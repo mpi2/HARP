@@ -40,7 +40,6 @@ try:
 except ImportError:
     import pickle
 import shutil
-import tarfile
 import bz2
 from lib import nrrd
 import datetime
@@ -101,7 +100,6 @@ class ProcessingThread(QtCore.QThread):
         :param obj self:
             Although not technically part of the class, can still use this method as if it was part of the HARP class.
         :ivar obj self.session_log: python file object. Used to record the log of what has happened.
-        :ivar boolean self.scale_error: Initialised scale_error to none here. If an error will be True
         :ivar str self.crop_status: The crop status modified in the autocrop_update_slot.
 
         .. seealso::
@@ -136,9 +134,6 @@ class ProcessingThread(QtCore.QThread):
             session_log_path = os.path.join(self.configOb.meta_path, "session.log")
             self.session_log = open(session_log_path, 'w+')
 
-            #logging if there is an error with scaling
-            self.scale_error = None
-
             self.session_log.write("########################################\n")
             self.session_log.write("### HARP Session Log                 ###\n")
             self.session_log.write("########################################\n")
@@ -168,13 +163,13 @@ class ProcessingThread(QtCore.QThread):
             if self.configOb.crop_option == "Old_crop":
                 self.show_files()
 
-            self.compression(cropped_imgs_list)
-
-            if self.scale_error:
-                self.update.emit( "Processing finished (problems creating some of the scaled stacks, see log file)")
+            try:
+                self.compression(cropped_imgs_list)
+            except HarpDataError as e:
+                self.update.emit("compression failed")
+                self.session_log.write("compression failed: {}".format(e))
             else:
                 self.update.emit("Processing finished")
-
 
             self.session_log.write("Processing finished\n")
             self.session_log.write("########################################\n")
@@ -320,6 +315,7 @@ class ProcessingThread(QtCore.QThread):
         except HarpDataError as e:
             self.session_log.write("Error: {}".format(e))
             self.update.emit("error: {}".format(e))
+            return
 
         except Exception as e:
             self.session_log.write("error: Unknown exception. Exception message:\n"
@@ -648,12 +644,12 @@ class ProcessingThread(QtCore.QThread):
                 outfile = os.path.join(
                     self.configOb.output_folder, 'IMPC_cropped_{}.nrrd'.format(self.configOb.full_name))
 
-                self.write_bz2(cropped_img_list, outfile)
+                self.write_bz2(cropped_img_list, outfile, 'Compressing cropped recon')
 
 
 
 
-    def write_bz2(self, img_list, outfile, compress_name):
+    def write_bz2(self, img_list, outfile, scan_name):
         """
         Create a tiff stack a directory containing single 2D images
         :param in_dir, str, directory where single images are
@@ -666,11 +662,13 @@ class ProcessingThread(QtCore.QThread):
         shape = [shape[1], shape[0]]
         shape.append(len(img_list))
 
-
         nrrd_filehandle = nrrd.get_nrrd_filehandle(outfile, shape, first_image.dtype, 3)
         compressor = bz2.BZ2Compressor()
 
-        for f in img_list:
+        for i, f in enumerate(img_list):
+            if i % 20 == 0:
+                done = int((50.0 / len(img_list)) * i)
+                self.update.emit('{} {}%'.format(scan_name, done))
             img_arr = imread(f)
             rawdata = img_arr.T.tostring(order='F')
             nrrd_filehandle.write(rawdata)
@@ -681,12 +679,20 @@ class ProcessingThread(QtCore.QThread):
         # TODO: Chack its smaller than image size
         compressed_name = outfile + '.bz2'
 
+        file_size = os.path.getsize(outfile)
+        bytes_read = 0
+
         with open(compressed_name, 'wb') as fh_w, open(outfile, 'rb') as fh_r:
             while True:
                 block = fh_r.read(BLOCK_SIZE)
+                bytes_read += BLOCK_SIZE
+                done = int(50 + (50.0 / file_size) * bytes_read)
+                if done >= 100: # The getsize might not be accurate?
+                    done = 99
+                self.update.emit('{} {}%'.format(scan_name, done))
+
                 if not block:
                     break
-
                 compressed = compressor.compress(block)
                 if compressed:
                     fh_w.write(compressed)
