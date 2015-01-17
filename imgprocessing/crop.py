@@ -37,6 +37,7 @@ class HarpDataError(Exception):
 
 
 class Crop():
+
     def __init__(self, in_dir, out_dir, callback, configOb,
                  thread_terminate_flag, app_data, def_crop=None, repeat_crop=None):
         """
@@ -154,6 +155,7 @@ class Crop():
 
         # Start with a z-projection
         zp = zproject.Zproject(filelist, z_proj_path, force=True)
+        zp.update.connect(self.update_slot)
         zp.run_onthisthread()
 
         zp_im = sitk.ReadImage(z_proj_path)
@@ -221,7 +223,7 @@ class Crop():
         y1 = xywh[1] + xywh[3]
         return xywh[0], xywh[1], x1, y1
 
-    def update(self, msg):
+    def update_slot(self, msg):
         self.callback(msg)
 
 

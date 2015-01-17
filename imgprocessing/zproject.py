@@ -27,6 +27,8 @@ from imgprocessing.io import imread, imwrite
 
 class Zproject(QtCore.QThread):
 
+    update = QtCore.pyqtSignal(str, name='update')
+
     def __init__(self, imglist, zprojection_output, callback=None, force=False):
         super(Zproject, self).__init__()
         self.skip = 10
