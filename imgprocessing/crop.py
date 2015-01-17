@@ -221,6 +221,9 @@ class Crop():
         y1 = xywh[1] + xywh[3]
         return xywh[0], xywh[1], x1, y1
 
+    def update(self, msg):
+        self.callback(msg)
+
 
 def dummy_callback(msg):
     """use for cli running"""

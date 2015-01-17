@@ -49,9 +49,6 @@ from multiprocessing import freeze_support
 import traceback
 import fnmatch
 from config import ConfigClass
-import numpy as np
-import cv2
-from SimpleITK import GetImageFromArray, WriteImage
 from imgprocessing import resampler, crop
 from imgprocessing.io import imread
 from appdata import HarpDataError
@@ -64,6 +61,7 @@ class ProcessingThread(QtCore.QThread):
     on this QThread.
 
     """
+    update = QtCore.pyqtSignal(QtCore.QString, name='update')
 
     def __init__(self, config_paths, thread_terminate_flag, appdata, parent=None):
         """Gets the pickle config file and initialises some instance variables
@@ -127,7 +125,7 @@ class ProcessingThread(QtCore.QThread):
 
             print job
 
-            self.emit(QtCore.SIGNAL('update(QString)'), "Started Processing")
+            self.update.emit("Started Processing")
 
             filehandler = open(job, 'r')
             self.configOb = copy.deepcopy(pickle.load(filehandler))
@@ -173,10 +171,9 @@ class ProcessingThread(QtCore.QThread):
             self.compression(cropped_imgs_list)
 
             if self.scale_error:
-                self.emit(QtCore.SIGNAL('update(QString)'),
-                          "Processing finished (problems creating some of the scaled stacks, see log file)")
+                self.update.emit( "Processing finished (problems creating some of the scaled stacks, see log file)")
             else:
-                self.emit(QtCore.SIGNAL('update(QString)'), "Processing finished")
+                self.update.emit("Processing finished")
 
 
             self.session_log.write("Processing finished\n")
@@ -216,7 +213,7 @@ class ProcessingThread(QtCore.QThread):
         # Cropping option: NO CROP
         if self.configOb.crop_option == "No_crop":
             # Do not perform any crop as user specified
-            self.emit(QtCore.SIGNAL('update(QString)'), "No Crop carried out")
+            self.update.emit("No Crop carried out")
             self.session_log.write("No crop carried out\n")
             self.autocrop_update_slot("success")
             self.folder_for_scaling = self.configOb.input_folder
@@ -225,7 +222,7 @@ class ProcessingThread(QtCore.QThread):
         # Cropping option: OLD CROP
         if self.configOb.crop_option == "Old_crop":
             # Use a previous folder already ran through HARP. No cropping needed here.
-            self.emit(QtCore.SIGNAL('update(QString)'), "No Crop carried out")
+            self.update.emit("No Crop carried out")
             # Need to hide non recon files. Puts them in a temp folder until scaling has finished
             self.hide_files()
             self.session_log.write("No crop carried out\n")
@@ -240,7 +237,7 @@ class ProcessingThread(QtCore.QThread):
         if self.configOb.crop_option == "Manual":
             doauto = False
             self.session_log.write("manual crop\n")
-            self.emit(QtCore.SIGNAL('update(QString)'), "Performing manual crop")
+            self.update.emit("Performing manual crop")
             # Get the dimensions from the config object
             dimensions_tuple = (
                 int(self.configOb.xcrop), int(self.configOb.ycrop), int(self.configOb.wcrop), int(self.configOb.hcrop))
@@ -251,7 +248,7 @@ class ProcessingThread(QtCore.QThread):
         if self.configOb.crop_option == "Automatic":
             doauto = True
             self.session_log.write("autocrop\n")
-            self.emit(QtCore.SIGNAL('update(QString)'), "Performing autocrop")
+            self.update.emit("Performing autocrop")
             # cropbox is not derived and dimensions will be determined in autocrop
             dimensions_tuple = None
             derived_cropbox = None
@@ -260,7 +257,7 @@ class ProcessingThread(QtCore.QThread):
         if self.configOb.crop_option == "Derived":
             doauto = False
             self.session_log.write("Derived crop\n")
-            self.emit(QtCore.SIGNAL('update(QString)'), "Performing crop from derived cropbox")
+            self.update.emit("Performing crop from derived cropbox")
             dimensions_tuple = None
             try:
                 # Cropbox dimensions are stored as pickle object. So need to extract
@@ -271,14 +268,12 @@ class ProcessingThread(QtCore.QThread):
                 self.session_log.write("error: Cropbox not available for derived dimension crop:\n"
                                        + "Exception traceback:" +
                                        traceback.format_exc() + "\n")
-                self.emit(QtCore.SIGNAL('update(QString)'), "error: Could not open cropbox dimension file for "
-                                                            "derived dimension crop: " + str(e))
+                self.update.emit("error: Could not open cropbox dimension file for derived dimension crop: " + str(e))
             except Exception as e:
                 self.session_log.write("error: Unknown exception trying to get derived dimension:\n"
                                        + "Exception traceback:" +
                                        traceback.format_exc() + "\n")
-                self.emit(QtCore.SIGNAL('update(QString)'), "error: Unknown exception trying to get derived dimension"
-                                                            " (see log): " + str(e))
+                self.update.emit("error: Unknown exception trying to get derived dimension (see log): " + str(e))
 
             print "Derived cropbox: ", derived_cropbox
 
@@ -311,7 +306,7 @@ class ProcessingThread(QtCore.QThread):
             self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the "
                                    "network. Exception message:\n Exception traceback:" +
                                    traceback.format_exc() + "\n")
-            self.emit(QtCore.SIGNAL('update(QString)'), "error: HARP can't find the folder, see log file")
+            self.update.emit("error: HARP can't find the folder, see log file")
 
         except TypeError as e:
             # This is referring to an error in either the functions run or init_cropping. P
@@ -320,21 +315,20 @@ class ProcessingThread(QtCore.QThread):
                                    " to the network. Exception message:\n Exception traceback:" +
                                    traceback.format_exc() + "\n")
             self.session_log.flush()
-            self.emit(QtCore.SIGNAL('update(QString)'), "error: HARP can't find the files, see log file")
+            self.update.emit("error: HARP can't find the files, see log file")
 
         except HarpDataError as e:
             self.session_log.write("Error: {}".format(e))
-            self.emit(QtCore.SIGNAL('update(QString)'), "error: {}".format(e))
+            self.update.emit("error: {}".format(e))
 
         except Exception as e:
             self.session_log.write("error: Unknown exception. Exception message:\n"
                                    + "Exception traceback:" +
                                    traceback.format_exc() + "\n")
-            self.emit(QtCore.SIGNAL('update(QString)'), "error:(see log): " + str(e))
+            self.update.emit("error:(see log): " + str(e))
 
         self.session_log.flush()
         return croppedlist
-
 
     def autocrop_update_slot(self, msg):
         """ Listens to autocrop.
@@ -373,7 +367,7 @@ class ProcessingThread(QtCore.QThread):
 
         else:
             # Message not a tuple so send a message to display on the HARP
-            self.emit(QtCore.SIGNAL('update(QString)'), msg)
+            self.update.emit(msg)
 
         # Check what the message says
         if msg == "success":
@@ -463,7 +457,8 @@ class ProcessingThread(QtCore.QThread):
         # detail scaling in log
         self.session_log.write("Scale by factor:\n")
         self.session_log.write(str(scale))
-        self.emit(QtCore.SIGNAL('update(QString)'), "Performing scaling ({})".format(str(scale)))
+
+        self.update.emit("Performing scaling ({})".format(str(scale)))
 
         #===============================================================================
         # Normal scaling
@@ -477,13 +472,15 @@ class ProcessingThread(QtCore.QThread):
             files_for_scaling = getfilelist(self.folder_for_scaling,
                                             self.app_data.files_to_use, self.app_data.files_to_ignore)
             if len(files_for_scaling) < 1:
-                self.emit(QtCore.SIGNAL('update(QString)'), "Rescaling failed. No images found: {}")
+                self.update.emit("Rescaling failed. No images found: {}")
 
-            resampler.resample(files_for_scaling, scale, out_name, scaleby_int, self.thread_terminate_flag)
+            resampler.resample(files_for_scaling, scale, out_name, scaleby_int, self.update,
+                               self.thread_terminate_flag)
         except HarpDataError as e:
-            self.emit(QtCore.SIGNAL('update(QString)'), "Rescaling the image failed: {}".format(e))
+            self.update.emit("Rescaling the image failed: {}".format(e))
 
-
+    def resampler_callback(self, msg):
+        self.update.emit(msg)
 
 
     def hide_files(self):
@@ -569,7 +566,7 @@ class ProcessingThread(QtCore.QThread):
             return
 
         # Tell the GUI what's going on
-        self.emit(QtCore.SIGNAL('update(QString)'), "Copying files\n")
+        self.update.emit("Copying files")
 
         # Record the log
         self.session_log.write("***Copying other files from original recon***\n")
@@ -600,7 +597,6 @@ class ProcessingThread(QtCore.QThread):
         if self.thread_terminate_flag.value == 1:
             return
 
-        # Record the log
         if self.configOb.scans_recon_comp == "yes" or self.configOb.crop_comp == "yes":
             self.session_log.write("***Performing Compression***")
             self.session_log.write(str(datetime.datetime.now()) + "\n")
@@ -611,33 +607,34 @@ class ProcessingThread(QtCore.QThread):
                 #============================================
                 # Compression for scan
                 #============================================
-                self.emit(QtCore.SIGNAL('update(QString)'), "Performing compression of scan folder")
+                self.update.emit("Performing compression of scan folder")
                 self.session_log.write("Compression of scan folder")
-                path_scan, folder_name_scan = os.path.split(self.configOb.scan_folder)
+                scan_list = getfilelist(self.configOb.scan_folder,
+                                        self.app_data.files_to_use, self.app_data.files_to_ignore)
 
-                out = tarfile.open(str(self.configOb.scan_folder) + ".tar.bz2", mode='w:bz2')
-                out.add(path_scan, arcname="Scan_folder")
-                out.close()
-                self.emit(QtCore.SIGNAL('update(QString)'), "Compression of scan folder finished")
+                scan_name = os.path.split(self.configOb.scan_folder)[1]
+                scan_nrrd = os.path.join(self.configOb.output_folder, '{}.nrrd'.format(scan_name))
+                self.write_bz2(scan_list, scan_nrrd)
+
+                self.update.emit("Compression of scan folder finished")
 
                 # Check if stop button pressed on GUI
                 if self.thread_terminate_flag.value == 1:
                     return
-
+                return # For now. Don't know how to get recon folder
                 #============================================
                 # compression for original recon
                 #============================================
-                self.emit(QtCore.SIGNAL('update(QString)'), "Performing compression of original recon folder")
+                self.update.emit("Performing compression of original recon folder")
                 self.session_log.write("Compression of original recon folder")
-                path_scan, folder_name_scan = os.path.split(self.configOb.input_folder)
+                recon_list = getfilelist(self.configOb.input_folder,
+                                        self.app_data.files_to_use, self.app_data.files_to_ignore)
+                recon_name = os.path.split(self.configOb.input_folder)[1]
+                recon_nrrd = os.path.join(self.configOb.input_folder, '{}.nrrd'.format(recon_name))
+                self.write_bz2(recon_list, recon_nrrd)
 
-                out = tarfile.open(str(self.configOb.input_folder) + ".tar.bz2", mode='w:bz2')
-                out.add(path_scan, arcname="Input_folder")
-                out.close()
-                self.emit(QtCore.SIGNAL('update(QString)'), "Compression of recon folder finished")
+                self.update.emit("Compression of recon folder finished")
 
-        # compression for crop folder
-        # Check if stop button pressed on GUI
         if self.thread_terminate_flag.value == 1:
             return
 
@@ -646,111 +643,67 @@ class ProcessingThread(QtCore.QThread):
                 # #============================================
                 # # compression for cropped image sequence
                 # #============================================
-                # self.emit(QtCore.SIGNAL('update(QString)'), "Compression of cropped recon started")
-                #
-                #
-                # temp_stack_path = os.path.join(self.configOb.tmp_dir, 'tiffstack_temp.nrrd')
-                # self.tiffstack_from_slices(self.configOb.cropped_path, temp_stack_path)
-                #
-                # #Now compress the tiff and add to the archive
-                # out = tarfile.open(os.path.join(self.configOb.output_folder, 'IMPC_{}.tar.bz2'.format(
-                #     self.configOb.full_name)), mode='w:bz2')
-                #
-                # out.add(temp_stack_path, arcname='{}_cropped.tiff'.format(self.configOb.full_name))
-                # # remove the tem tiff stack
-                # try:
-                #     os.remove(temp_stack_path)
-                # except Exception:
-                #     pass # Not sure which excption to catch if temp file is gone
-                #
-                # # Add the recon log file
-                # log_name = os.path.basename(self.configOb.recon_log_file)
-                # try:
-                #     out.add(self.configOb.recon_log_file, arcname=log_name)
-                # except OSError:
-                #     pass  # No recon log available
-                #
-                # out.close()
 
+                self.update.emit("Compression of cropped recon started")
                 outfile = os.path.join(
-                    self.configOb.output_folder, 'IMPC_{}.nrrd'.format(self.configOb.full_name))
+                    self.configOb.output_folder, 'IMPC_cropped_{}.nrrd'.format(self.configOb.full_name))
 
-                first_image = imread(cropped_img_list[0])
-                shape = list(first_image.shape)
-                shape = [shape[1], shape[0]]
-                shape.append(len(cropped_img_list))
-
-
-                nrrd_filehandle = nrrd.get_nrrd_filehandle(outfile, shape, first_image.dtype, 3)
-                compressor = bz2.BZ2Compressor()
-
-                print 'hdhdhdhd', len(cropped_img_list)
-
-                for f in cropped_img_list:
-                    img_arr = imread(f)
-                    rawdata = img_arr.T.tostring(order='F')
-                    nrrd_filehandle.write(rawdata)
-
-                nrrd_filehandle.close()
-
-                BLOCK_SIZE = 52428800 # Around 20 MB in memory at one time
-                # TODOO: Chack its smaller than image size
-                compressed_name = outfile + '.bz2'
-
-                with open(compressed_name, 'wb') as fh_w, open(outfile, 'rb') as fh_r:
-                    while True:
-                        block = fh_r.read(BLOCK_SIZE)
-                        if not block:
-                            break
-
-                        compressed = compressor.compress(block)
-                        if compressed:
-                            fh_w.write(compressed)
-
-                    # Send any data being buffered by the compressor
-                    remaining = compressor.flush()
-                    while remaining:
-                        to_send = remaining[:BLOCK_SIZE]
-                        remaining = remaining[BLOCK_SIZE:]
-
-                        fh_w.write(to_send)
-
-                if os.path.isfile(outfile):
-                    try:
-                        os.remove(outfile)
-                    except OSError as e:
-                        self.emit(QtCore.SIGNAL('update(QString)'), "Can't delete temp file {}".format(outfile))
+                self.write_bz2(cropped_img_list, outfile)
 
 
 
 
-
-    def tiffstack_from_slices(self, in_dir, outfile):
+    def write_bz2(self, img_list, outfile):
         """
         Create a tiff stack a directory containing single 2D images
         :param in_dir, str, directory where single images are
         :param outfile, str, path to output tiff stack
         :return:
         """
-        array_3d = None
-        for file_ in sorted(os.listdir(in_dir)):
-            if any(file_.endswith(x) for x in self.extensions_to_ignore):
-                continue
-            if file_.endswith(('tiff', 'tif', 'TIFF', 'TIF', 'BMP', 'bmp')):
-                array_2d = imread(os.path.join(in_dir, file_))
-                if array_3d is None:
-                    array_3d = array_2d
-                    continue
 
-                array_3d = np.dstack((array_3d, array_2d))
+        first_image = imread(img_list[0])
+        shape = list(first_image.shape)
+        shape = [shape[1], shape[0]]
+        shape.append(len(img_list))
 
-        # Need to do some swapping of axes as cv2/numpy treat them differently to sitk
-        array_3d = np.swapaxes(array_3d, 0, 2)
-        array_3d = np.swapaxes(array_3d, 1, 2)
 
-        image_3d = GetImageFromArray(array_3d)
-        WriteImage(image_3d, outfile)
+        nrrd_filehandle = nrrd.get_nrrd_filehandle(outfile, shape, first_image.dtype, 3)
+        compressor = bz2.BZ2Compressor()
 
+        for f in img_list:
+            img_arr = imread(f)
+            rawdata = img_arr.T.tostring(order='F')
+            nrrd_filehandle.write(rawdata)
+
+        nrrd_filehandle.close()
+
+        BLOCK_SIZE = 52428800 # Around 20 MB in memory at one time
+        # TODO: Chack its smaller than image size
+        compressed_name = outfile + '.bz2'
+
+        with open(compressed_name, 'wb') as fh_w, open(outfile, 'rb') as fh_r:
+            while True:
+                block = fh_r.read(BLOCK_SIZE)
+                if not block:
+                    break
+
+                compressed = compressor.compress(block)
+                if compressed:
+                    fh_w.write(compressed)
+
+            # Send any data being buffered by the compressor
+            remaining = compressor.flush()
+            while remaining:
+                to_send = remaining[:BLOCK_SIZE]
+                remaining = remaining[BLOCK_SIZE:]
+
+                fh_w.write(to_send)
+
+        if os.path.isfile(outfile):
+            try:
+                os.remove(outfile)
+            except OSError as e:
+                self.update.emit("Can't delete temp file {}".format(outfile))
 
 
 def getfilelist(input_folder, files_to_use_regx, files_to_ignore_regex):
