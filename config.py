@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-class ConfigClass :
+class Config :
     '''
     A simple Class is used to transfer config information
     '''

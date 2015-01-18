@@ -47,7 +47,7 @@ import copy
 from multiprocessing import freeze_support
 import traceback
 import fnmatch
-from config import ConfigClass
+from config import Config
 from imgprocessing import resampler, crop
 from imgprocessing.io import imread
 from appdata import HarpDataError
@@ -346,7 +346,7 @@ class ProcessingThread(QtCore.QThread):
         # a pickle object of the object so it can be used again if derived crop option is used
         if type(msg) == tuple:
             # create our generic class for pickles
-            crop_box_ob = ConfigClass()
+            crop_box_ob = Config()
 
             # get path
             crop_box_path = os.path.join(self.config.meta_path, "cropbox.txt")
