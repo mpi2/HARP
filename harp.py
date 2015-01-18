@@ -90,6 +90,8 @@ class MainWindow(QtGui.QMainWindow):
         self.app_data = AppData()
         self.opttab_populate_patterns()
 
+        self.autofill = autofill.Autofill(self)
+
         # Initialise various switches
         self.modality = "MicroCT"
         self.stop = None
@@ -294,7 +296,7 @@ l
             :func:`delete_rows()`
         """
         # Update OPT Channel list. As something may have changed on the processing list
-        autofill.get_channels(self)
+        self.autofill.get_channels()
 
         # Check tab status
         if self.ui.tabWidget.currentIndex() == 0:
@@ -444,23 +446,23 @@ l
         # Perform autofill of parameter settings
         # ###################################################
         # check if uCT or opt data
-        autofill.opt_uCT_check(self, self.app_data.suppress_modality_warnings)
+        self.autofill.opt_uCT_check(self.app_data.suppress_modality_warnings)
         # Autocomplete the name
-        autofill.get_name(self, str(self.ui.lineEditInput.text()), self.app_data.suppress_name_warnings)
+        self.autofill.get_name(str(self.ui.lineEditInput.text()), self.app_data.suppress_name_warnings)
         # Get the reconLog and associated pixel size
-        autofill.get_recon_log(self)
+        self.autofill.get_recon_log()
         # Get the output folder location
-        autofill.auto_file_out(self)
+        self.autofill.auto_file_out()
         # See what OPT channels are available
         if self.modality == "OPT":
-            autofill.get_channels(self)
-            autofill.auto_get_derived(self)
+            self.autofill.get_channels()
+            self.autofill.auto_get_derived()
         # Automatically identify scan folder
-        autofill.auto_get_scan(self)
+        self.autofill.auto_get_scan()
         # Automatically get SPR file
-        autofill.auto_get_SPR(self)
+        self.autofill.auto_get_SPR()
         # Determine size of input folder
-        autofill.folder_size_approx(self)
+        self.autofill.folder_size_approx()
 
     def reset_inputs(self):
         """ Reset the parameter inputs to blank"""
@@ -587,8 +589,8 @@ l
         if self.ui.radioButtonDerived.isChecked():
             self.ui.lineEditDerivedChnName.setEnabled(True)
         # Autofill operations that OPT modality effects
-        autofill.get_recon_log(self)
-        autofill.get_channels(self)
+        self.autofill.get_recon_log()
+        self.autofill.get_channels()
 
     def get_uCT_only(self):
         """ Updates parameters options to be uCT only and updates uCT specific autofill operations.
@@ -608,7 +610,7 @@ l
         self.ui.lineEditDerivedChnName.setEnabled(False)
         self.ui.checkBoxInd.setEnabled(False)
         # Autofill operations that uCT modality effects
-        autofill.get_recon_log(self)
+        self.autofill.get_recon_log()
 
     def update_name(self):
         """ Update the name of the file and folder if the user has changed the name in the "identification" section
@@ -624,7 +626,7 @@ l
         # Get the input name with directory
         name = str(self.ui.lineEditName.text())
         # Run the get_name method which updates the identification section
-        autofill.get_name(self, name)
+        self.autofill.get_name(name)
         # Get output folder name, to start off with this will just be the input name
         output = str(self.ui.lineEditOutput.text())
         path, output_folder_name = os.path.split(output)
@@ -660,7 +662,7 @@ l
                 # Open the log file as read only
                 recon_log_file = open(self.recon_log_path, 'r')
                 # Get pixel size from log file
-                self.pixel_size = autofill.get_pixel(self.modality, recon_log_file)
+                self.pixel_size = self.autofill.get_pixel(self.modality, recon_log_file)
                 # Display the number on the lcd display
                 self.ui.lcdNumberPixel.display(self.pixel_size)
                 # Set recon log text
@@ -1001,7 +1003,7 @@ l
             self.current_row += 1  # we instead need to increment the row count as we're moving onto the next
 
             # update the opt channels table
-            autofill.get_channels(self)
+            self.autofill.get_channels()
 
         # Depending on the name of files and status update columns may need to be resized
         self.ui.tableWidget.resizeColumnsToContents()
