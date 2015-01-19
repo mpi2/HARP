@@ -49,7 +49,6 @@ import traceback
 import fnmatch
 from config import Config
 from imgprocessing import resampler, crop
-from imgprocessing.io import imread
 from appdata import HarpDataError
 
 
@@ -95,23 +94,10 @@ class ProcessingThread(QtCore.QThread):
             * Scaling
             * copying
             * compression
-
-        Overrides the run method in QThread
-        :param obj self:
-            Although not technically part of the class, can still use this method as if it was part of the HARP class.
-        :ivar obj self.session_log: python file object. Used to record the log of what has happened.
-        :ivar str self.crop_status: The crop status modified in the autocrop_update_slot.
-
-        .. seealso::
-            :func:`cropping()`,
-            :func:`scaling()`,
-            :func:`copying()`,
-            :func:`show_files()`,
-            :func:`compression()`,
         """
 
         # Get the directory of the script
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, 'frozen', False): # Do we need this? NH
             self.dir = os.path.dirname(sys.executable)
         elif __file__:
             self.dir = os.path.dirname(__file__)
@@ -143,14 +129,15 @@ class ProcessingThread(QtCore.QThread):
             #===============================================
             # Cropping
             #===============================================
-            cropped_imgs_list = self.cropping()
-            # A callback function is used to monitor if autocrop was run sucessfully. This modifies the self.crop_status
-            # instance variable. Has to be success to continue
-            if self.crop_status != "success":
-                print "Cropping failed!"
-                print ""
+            try:
+                cropped_imgs_list = self.cropping()
+            except Exception:
+                continue
 
-            self.scaling()
+            try:
+                self.scaling()
+            except Exception:
+                continue
 
             # Cropping function only copies over image files. Need to copy over other files now scaling and cropping
             # finished
@@ -167,6 +154,7 @@ class ProcessingThread(QtCore.QThread):
             except HarpDataError as e:
                 self.update.emit("compression failed")
                 self.session_log.write("compression failed: {}".format(e))
+                continue
             else:
                 self.update.emit("Processing finished")
 
@@ -301,29 +289,26 @@ class ProcessingThread(QtCore.QThread):
                                    "network. Exception message:\n Exception traceback:" +
                                    traceback.format_exc() + "\n")
             self.update.emit("error: HARP can't find the folder, see log file")
-
-        except TypeError as e:
-            # This is referring to an error in either the functions run or init_cropping. P
-            # ossibly the exception would be more beneficial placed directly in autocrop....
-            self.session_log.write("error: HARP most likely can't find the folder, maybe a temporary problem connecting"
-                                   " to the network. Exception message:\n Exception traceback:" +
-                                   traceback.format_exc() + "\n")
             self.session_log.flush()
-            self.update.emit("error: HARP can't find the files, see log file")
+            raise
 
         except HarpDataError as e:
             self.session_log.write("Error: {}".format(e))
             self.update.emit("error: {}".format(e))
-            return
+            self.session_log.flush()
+            raise
 
         except Exception as e:
             self.session_log.write("error: Unknown exception. Exception message:\n"
                                    + "Exception traceback:" +
                                    traceback.format_exc() + "\n")
             self.update.emit("error:(see log): " + str(e))
+            self.session_log.flush()
+            raise
+        else:
+            return croppedlist
 
-        self.session_log.flush()
-        return croppedlist
+
 
     def autocrop_update_slot(self, msg):
         """ Listens to autocrop.
@@ -473,6 +458,9 @@ class ProcessingThread(QtCore.QThread):
                                self.thread_terminate_flag)
         except HarpDataError as e:
             self.update.emit("Rescaling the image failed: {}".format(e))
+            raise
+
+
 
     def resampler_callback(self, msg):
         self.update.emit(msg)

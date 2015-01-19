@@ -33,7 +33,7 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
     compressed_name = outfile + '.bz2'
 
     file_size = os.fstat(tempnrrd.fileno()).st_size
-    tempnrrd.seek(0)  # Move pointer to start of file again
+    tempnrrd.seek(0)
     bytes_read = 0
 
     with open(compressed_name, 'wb') as fh_w:
@@ -51,7 +51,6 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
             if compressed:
                 fh_w.write(compressed)
 
-        tempnrrd.close()
         # Send any data being buffered by the compressor
         remaining = compressor.flush()
         while remaining:
@@ -59,6 +58,12 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
             remaining = remaining[BLOCK_SIZE:]
 
             fh_w.write(to_send)
+
+    # if os.path.isfile(outfile):
+    #     try:
+    #         os.remove(outfile)
+    #     except OSError as e:
+    #         update.emit("Can't delete temp file {}".format(outfile))
 
 
 def bz2_dir(dir_, outfile, update, update_name, terminate):
