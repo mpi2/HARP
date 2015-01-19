@@ -25,7 +25,7 @@ def imread(imgpath):
         return _read_cv2(imgpath)
     else:
         return _read_cv2(imgpath)
-        return _read_ndimage(imgpath)
+        #return _read_ndimage(imgpath) problems reading in 16 bit images
 
 
 def _read_cv2(imgpath):
