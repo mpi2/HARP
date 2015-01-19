@@ -149,7 +149,6 @@ class ProcessingThread(QtCore.QThread):
             if self.crop_status != "success":
                 print "Cropping failed!"
                 print ""
-                return
 
             self.scaling()
 
@@ -468,7 +467,7 @@ class ProcessingThread(QtCore.QThread):
             files_for_scaling = getfilelist(self.folder_for_scaling,
                                             self.app_data.files_to_use, self.app_data.files_to_ignore)
             if len(files_for_scaling) < 1:
-                self.update.emit("Rescaling failed. No images found: {}")
+                self.update.emit("Rescaling failed. No images found:")
 
             resampler.resample(files_for_scaling, scale, out_name, scaleby_int, self.update,
                                self.thread_terminate_flag)
