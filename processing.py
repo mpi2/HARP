@@ -33,7 +33,7 @@ import subprocess
 import os
 import signal
 import re
-
+from imgprocessing import compress
 
 try:
     import cPickle as pickle
@@ -605,29 +605,35 @@ class ProcessingThread(QtCore.QThread):
                 #============================================
                 self.update.emit("Performing compression of scan folder")
                 self.session_log.write("Compression of scan folder")
-                scan_list = getfilelist(self.config.scan_folder,
-                                        self.app_data.files_to_use, self.app_data.files_to_ignore)
+                #scan_list = getfilelist(self.config.scan_folder,
+                #                        self.app_data.files_to_use, self.app_data.files_to_ignore)
 
                 scan_name = os.path.split(self.config.scan_folder)[1]
-                scan_nrrd = os.path.join(self.config.output_folder, '{}.nrrd'.format(scan_name))
-                self.write_bz2(scan_list, scan_nrrd)
+                outfile = os.path.join(
+                    self.config.output_folder, 'IMPC_scan{}'.format(self.config.full_name))
+
+                compress.bz2_dir(self.config.scan_folder, outfile, self.update, 'scan',
+                                 self.thread_terminate_flag)
+                #scan_nrrd = os.path.join(self.config.output_folder, '{}.nrrd'.format(scan_name))
+                #compress.bz2_nnrd(scan_list, scan_nrrd, "Compressing scan", self.update)
 
                 self.update.emit("Compression of scan folder finished")
 
                 # Check if stop button pressed on GUI
                 if self.thread_terminate_flag.value == 1:
                     return
-                return # For now. Don't know how to get recon folder
+
                 #============================================
                 # compression for original recon
                 #============================================
                 self.update.emit("Performing compression of original recon folder")
                 self.session_log.write("Compression of original recon folder")
-                recon_list = getfilelist(self.configOb.input_folder,
-                                        self.app_data.files_to_use, self.app_data.files_to_ignore)
-                recon_name = os.path.split(self.configOb.input_folder)[1]
-                recon_nrrd = os.path.join(self.configOb.input_folder, '{}.nrrd'.format(recon_name))
-                self.write_bz2(recon_list, recon_nrrd)
+                # recon_list = getfilelist(self.config.input_folder,
+                #                         self.app_data.files_to_use, self.app_data.files_to_ignore)
+                recon_outfile = os.path.join(
+                    self.config.output_folder, 'IMPC_recon{}'.format(self.config.full_name))
+                compress.bz2_dir(self.config.input_folder, recon_outfile, self.update, 'recon',
+                                 self.thread_terminate_flag)
 
                 self.update.emit("Compression of recon folder finished")
 
@@ -644,72 +650,7 @@ class ProcessingThread(QtCore.QThread):
                 outfile = os.path.join(
                     self.config.output_folder, 'IMPC_cropped_{}.nrrd'.format(self.config.full_name))
 
-                self.write_bz2(cropped_img_list, outfile, 'Compressing cropped recon')
-
-
-
-
-    def write_bz2(self, img_list, outfile, scan_name):
-        """
-        Create a tiff stack a directory containing single 2D images
-        :param in_dir, str, directory where single images are
-        :param outfile, str, path to output tiff stack
-        :return:
-        """
-
-        first_image = imread(img_list[0])
-        shape = list(first_image.shape)
-        shape = [shape[1], shape[0]]
-        shape.append(len(img_list))
-
-        nrrd_filehandle = nrrd.get_nrrd_filehandle(outfile, shape, first_image.dtype, 3)
-        compressor = bz2.BZ2Compressor()
-
-        for i, f in enumerate(img_list):
-            if i % 20 == 0:
-                done = int((50.0 / len(img_list)) * i)
-                self.update.emit('{} {}%'.format(scan_name, done))
-            img_arr = imread(f)
-            rawdata = img_arr.T.tostring(order='F')
-            nrrd_filehandle.write(rawdata)
-
-        nrrd_filehandle.close()
-
-        BLOCK_SIZE = 52428800 # Around 20 MB in memory at one time
-        # TODO: Check its smaller than image size
-        compressed_name = outfile + '.bz2'
-
-        file_size = os.path.getsize(outfile)
-        bytes_read = 0
-
-        with open(compressed_name, 'wb') as fh_w, open(outfile, 'rb') as fh_r:
-            while True:
-                block = fh_r.read(BLOCK_SIZE)
-                bytes_read += BLOCK_SIZE
-                done = int(50 + (50.0 / file_size) * bytes_read)
-                if done >= 100: # The getsize might not be accurate?
-                    done = 99
-                self.update.emit('{} {}%'.format(scan_name, done))
-
-                if not block:
-                    break
-                compressed = compressor.compress(block)
-                if compressed:
-                    fh_w.write(compressed)
-
-            # Send any data being buffered by the compressor
-            remaining = compressor.flush()
-            while remaining:
-                to_send = remaining[:BLOCK_SIZE]
-                remaining = remaining[BLOCK_SIZE:]
-
-                fh_w.write(to_send)
-
-        if os.path.isfile(outfile):
-            try:
-                os.remove(outfile)
-            except OSError as e:
-                self.update.emit("Can't delete temp file {}".format(outfile))
+                compress.bz2_nnrd(cropped_img_list, outfile, 'Compressing cropped recon', self.update)
 
 
 def getfilelist(input_folder, files_to_use_regx, files_to_ignore_regex):

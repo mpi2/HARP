@@ -88,6 +88,8 @@ class Queuejob(object):
         # First reset this instance variable (used later)
         self.mainwindow.derived_output_name = None
 
+        self.mainwindow.scan_folder = str(self.mainwindow.ui.lineEditScan.text())
+
         # get folder names
         in_dir = str(self.mainwindow.ui.lineEditInput.text())
         path, folder_name = os.path.split(in_dir)
@@ -111,8 +113,6 @@ class Queuejob(object):
             recon_log = self.mainwindow.ui.lineEditCTRecon.text()
             # SPR (should prob get rid of this
             spr = self.mainwindow.ui.lineEditCTSPR.text()
-            # Scan folder
-            scan = self.mainwindow.ui.lineEditScan.text()
             # Output folder
             out_dir_original = self.mainwindow.ui.lineEditOutput.text()
             # Input folder
@@ -188,7 +188,7 @@ class Queuejob(object):
             # SPR (should prob get rid of this
             self.mainwindow.ui.lineEditCTSPR.setText(spr)
             # Scan folder
-            self.mainwindow.ui.lineEditScan.setText(scan)
+            self.mainwindow.ui.lineEditScan.setText(self.scan_folder)
             # Output folder
             self.mainwindow.ui.lineEditOutput.setText(out_dir_original)
             # derived name

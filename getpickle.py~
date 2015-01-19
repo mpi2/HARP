@@ -25,7 +25,7 @@ except ImportError:
 from config import Config
 
 
-def get_pickle(self):
+def get_pickle(mainwindow):
     """ Creates the python pickle config file for future processing. Also creates a more readable text file of the
     same information.
     """
@@ -37,7 +37,7 @@ def get_pickle(self):
     path_out, folder_name = os.path.split(outputFolder)
 
     #### Write to config file ####
-    self.configOb = Config()
+    config = Config()
 
     # Create a folder for the metadata
     self.meta_path = os.path.join(outputFolder, "Metadata")
@@ -55,141 +55,141 @@ def get_pickle(self):
     #========================================================================================
     # Get cropping options
     if not self.ui.checkBoxCropYes.isChecked():
-        self.configOb.cropbox_path = "Not_applicable"
-        self.configOb.crop_manual = "Not_applicable"
-        self.configOb.crop_option = "No_crop"
+        config.cropbox_path = "Not_applicable"
+        config.crop_manual = "Not_applicable"
+        config.crop_option = "No_crop"
     elif self.ui.radioButtonMan.isChecked() :
-        self.configOb.xcrop = str(self.ui.lineEditX.text())
-        self.configOb.ycrop = str(self.ui.lineEditY.text())
-        self.configOb.wcrop = str(self.ui.lineEditW.text())
-        self.configOb.hcrop = str(self.ui.lineEditH.text())
-        self.configOb.crop_option = "Manual"
-        self.configOb.crop_manual = self.configOb.xcrop+" "+self.configOb.ycrop+" "+self.configOb.wcrop+" "+self.configOb.hcrop
-        self.configOb.cropbox_path = "Not_applicable"
+        config.xcrop = str(self.ui.lineEditX.text())
+        config.ycrop = str(self.ui.lineEditY.text())
+        config.wcrop = str(self.ui.lineEditW.text())
+        config.hcrop = str(self.ui.lineEditH.text())
+        config.crop_option = "Manual"
+        config.crop_manual = config.xcrop+" "+config.ycrop+" "+config.wcrop+" "+config.hcrop
+        config.cropbox_path = "Not_applicable"
     elif self.ui.radioButtonAuto.isChecked() :
-        self.configOb.cropbox_path = "Not_applicable"
-        self.configOb.crop_manual = "Not_applicable"
-        self.configOb.crop_option = "Automatic"
+        config.cropbox_path = "Not_applicable"
+        config.crop_manual = "Not_applicable"
+        config.crop_option = "Automatic"
     elif self.ui.radioButtonUseOldCrop.isChecked() :
-        self.configOb.crop_manual = "Not_applicable"
-        self.configOb.crop_option = "Old_crop"
-        self.configOb.cropbox_path = "Not_applicable"
+        config.crop_manual = "Not_applicable"
+        config.crop_option = "Old_crop"
+        config.cropbox_path = "Not_applicable"
     elif self.ui.radioButtonDerived.isChecked() and self.ui.radioButtonOPT.isChecked:
-        self.configOb.crop_manual = "Not_applicable"
-        self.configOb.crop_option = "Derived"
+        config.crop_manual = "Not_applicable"
+        config.crop_option = "Derived"
         if self.derived_output_name:
             d_path = os.path.join(path_out, str(self.derived_output_name),"Metadata","cropbox.txt")
         else:
             d_path =os.path.join(path_out, str(self.ui.lineEditDerivedChnName.text()),"Metadata","cropbox.txt")
         self.crop_pickle_path = d_path
-        self.configOb.cropbox_path = self.crop_pickle_path
+        config.cropbox_path = self.crop_pickle_path
 
     ##### Get Scaling factors ####
     if self.ui.checkBoxSF2.isChecked():
-        self.configOb.SF2 = "yes"
+        config.SF2 = "yes"
     else :
-        self.configOb.SF2 = "no"
+        config.SF2 = "no"
 
     if self.ui.checkBoxSF3.isChecked():
-        self.configOb.SF3 = "yes"
+        config.SF3 = "yes"
     else :
-        self.configOb.SF3 = "no"
+        config.SF3 = "no"
 
     if self.ui.checkBoxSF4.isChecked():
-        self.configOb.SF4 = "yes"
+        config.SF4 = "yes"
     else :
-        self.configOb.SF4 = "no"
+        config.SF4 = "no"
 
     if self.ui.checkBoxSF5.isChecked():
-        self.configOb.SF5 = "yes"
+        config.SF5 = "yes"
     else :
-        self.configOb.SF5 = "no"
+        config.SF5 = "no"
 
     if self.ui.checkBoxSF6.isChecked():
-        self.configOb.SF6 = "yes"
+        config.SF6 = "yes"
     else :
-        self.configOb.SF6 = "no"
+        config.SF6 = "no"
 
     if self.ui.checkBoxPixel.isChecked():
-        self.configOb.pixel_option = "yes"
-        self.configOb.user_specified_pixel = str(self.ui.lineEditPixel.text())
-        self.configOb.SF_pixel = float(self.pixel_size) / float(self.ui.lineEditPixel.text())
-        self.configOb.SF_pixel = round(self.configOb.SF_pixel,4)
-        self.configOb.SFX_pixel = float(self.ui.lineEditPixel.text())/float(self.pixel_size)
-        self.configOb.SFX_pixel = round(self.configOb.SFX_pixel,4)
+        config.pixel_option = "yes"
+        config.user_specified_pixel = str(self.ui.lineEditPixel.text())
+        config.SF_pixel = float(self.pixel_size) / float(self.ui.lineEditPixel.text())
+        config.SF_pixel = round(config.SF_pixel,4)
+        config.SFX_pixel = float(self.ui.lineEditPixel.text())/float(self.pixel_size)
+        config.SFX_pixel = round(config.SFX_pixel,4)
     else :
-        self.configOb.user_specified_pixel = "Not applicable"
-        self.configOb.pixel_option = "no"
-        self.configOb.SF_pixel = "Not applicable"
-        self.configOb.SFX_pixel = "Not applicable"
+        config.user_specified_pixel = "Not applicable"
+        config.pixel_option = "no"
+        config.SF_pixel = "Not applicable"
+        config.SFX_pixel = "Not applicable"
 
     if self.ui.checkBoxScansReconComp.isChecked():
-        self.configOb.scans_recon_comp = "yes"
+        config.scans_recon_comp = "yes"
     else :
-        self.configOb.scans_recon_comp = "No"
+        config.scans_recon_comp = "No"
 
     if self.ui.checkBoxCropComp.isChecked():
-        self.configOb.crop_comp = "yes"
+        config.crop_comp = "yes"
     else :
-        self.configOb.crop_comp  = "No"
+        config.crop_comp  = "No"
 
     # ID for session
-    self.configOb.unique_ID = str(self.unique_ID)
-    self.configOb.config_path = self.config_path
-    self.configOb.tmp_dir = self.tmp_dir
-    self.configOb.full_name = self.full_name
-    self.configOb.input_folder = inputFolder
-    self.configOb.output_folder = outputFolder
-    self.configOb.scan_folder = self.scan_folder
-    self.configOb.meta_path = self.meta_path
-    self.configOb.recon_log_file = self.recon_log_path
-    self.configOb.recon_folder_size = self.f_size_out_gb
-    self.configOb.recon_pixel_size = self.pixel_size
+    config.unique_ID = str(self.unique_ID)
+    config.config_path = self.config_path
+    config.tmp_dir = self.tmp_dir
+    config.full_name = self.full_name
+    config.input_folder = inputFolder
+    config.output_folder = outputFolder
+    config.scan_folder = self.scan_folder
+    config.meta_path = self.meta_path
+    config.recon_log_file = self.recon_log_path
+    config.recon_folder_size = self.f_size_out_gb
+    config.recon_pixel_size = self.pixel_size
 
     # If using windows it is important to put \ at the end of folder name
     # Combining scaling and SF into input for imageJ macro
-    self.configOb.cropped_path = os.path.join(self.configOb.output_folder,"cropped")
-    self.configOb.scale_path = os.path.join(self.configOb.output_folder,"scaled_stacks")
-    if self.configOb.crop_option == "No_crop":
-        self.configOb.imageJ = self.configOb.input_folder+os.sep+'^'+self.configOb.scale_path+os.sep+'^'+self.configOb.full_name
+    config.cropped_path = os.path.join(config.output_folder,"cropped")
+    config.scale_path = os.path.join(config.output_folder,"scaled_stacks")
+    if config.crop_option == "No_crop":
+        config.imageJ = config.input_folder+os.sep+'^'+config.scale_path+os.sep+'^'+config.full_name
     else :
-        self.configOb.imageJ = self.configOb.cropped_path+os.sep+'^'+self.configOb.scale_path+os.sep+'^'+self.configOb.full_name
+        config.imageJ = config.cropped_path+os.sep+'^'+config.scale_path+os.sep+'^'+config.full_name
 
     #========================================================================================
     # Write the config more readable version
     #========================================================================================
-    log.write("Session_ID    "+self.configOb.unique_ID+"\n")
-    log.write("full_name    "+self.configOb.full_name+"\n")
-    log.write("Input_folder    "+self.configOb.input_folder+"\n")
-    log.write("Output_folder    "+self.configOb.output_folder+"\n")
-    log.write("Scan_folder    "+self.configOb.scan_folder+"\n")
-    log.write("Crop_option    "+self.configOb.crop_option+"\n")
-    log.write("Crop_manual    "+self.configOb.crop_manual+"\n")
-    log.write("Crop_folder    "+self.configOb.cropped_path+"\n")
-    log.write("Cropbox_location "+self.configOb.cropbox_path+"\n")
-    log.write("Downsize_by_factor_2?    "+self.configOb.SF2+"\n")
-    log.write("Downsize_by_factor_3?    "+self.configOb.SF3+"\n")
-    log.write("Downsize_by_factor_4?    "+self.configOb.SF4+"\n")
-    log.write("Downsize_by_factor_5?    "+self.configOb.SF5+"\n")
-    log.write("Downsize_by_factor_6?    "+self.configOb.SF6+"\n")
-    log.write("Downsize_by_pixel?    "+self.configOb.pixel_option+"\n")
-    log.write("User_specified_pixel_size?    "+self.configOb.user_specified_pixel+"\n")
-    log.write("Downsize_value_for_pixel    "+str(self.configOb.SF_pixel)+"\n")
-    log.write("Compression_of_scans_and_original_recon?    "+self.configOb.scans_recon_comp+"\n")
-    log.write("Compression_of_cropped_recon?    "+self.configOb.crop_comp+"\n")
-    log.write("ImageJconfig    "+self.configOb.imageJ+"\n")
-    log.write("Recon_log_file    "+self.configOb.recon_log_file+"\n")
-    log.write("Recon_folder_size   "+self.configOb.recon_folder_size+"\n")
-    log.write("Recon_pixel_size  "+self.configOb.recon_pixel_size+"\n")
-
+    log.write("Session_ID    "+config.unique_ID+"\n")
+    log.write("full_name    "+config.full_name+"\n")
+    log.write("Input_folder    "+config.input_folder+"\n")
+    log.write("Output_folder    "+config.output_folder+"\n")
+    log.write("Scan_folder    "+config.scan_folder+"\n")
+    log.write("Crop_option    "+config.crop_option+"\n")
+    log.write("Crop_manual    "+config.crop_manual+"\n")
+    log.write("Crop_folder    "+config.cropped_path+"\n")
+    log.write("Cropbox_location "+config.cropbox_path+"\n")
+    log.write("Downsize_by_factor_2?    "+config.SF2+"\n")
+    log.write("Downsize_by_factor_3?    "+config.SF3+"\n")
+    log.write("Downsize_by_factor_4?    "+config.SF4+"\n")
+    log.write("Downsize_by_factor_5?    "+config.SF5+"\n")
+    log.write("Downsize_by_factor_6?    "+config.SF6+"\n")
+    log.write("Downsize_by_pixel?    "+config.pixel_option+"\n")
+    log.write("User_specified_pixel_size?    "+config.user_specified_pixel+"\n")
+    log.write("Downsize_value_for_pixel    "+str(config.SF_pixel)+"\n")
+    log.write("Compression_of_scans_and_original_recon?    "+config.scans_recon_comp+"\n")
+    log.write("Compression_of_cropped_recon?    "+config.crop_comp+"\n")
+    log.write("ImageJconfig    "+config.imageJ+"\n")
+    log.write("Recon_log_file    "+config.recon_log_file+"\n")
+    log.write("Recon_folder_size   "+config.recon_folder_size+"\n")
+    log.write("Recon_pixel_size  "+config.recon_pixel_size+"\n")
+    self.configOb = config
     # Pickle the class to a file
     with open(self.config_path, 'w+') as fh:
-        pickle.dump(self.configOb, fh)
+        pickle.dump(config, fh)
 
     # Copy temp files
-    if self.configOb.crop_option == "Manual" :
-        if os.path.exists(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif")):
-            shutil.copyfile(os.path.join(self.configOb.tmp_dir,"max_intensity_z.tif"), os.path.join(self.configOb.meta_path,"max_intensity_z.tif"))
+    if config.crop_option == "Manual" :
+        if os.path.exists(os.path.join(config.tmp_dir,"max_intensity_z.tif")):
+            shutil.copyfile(os.path.join(config.tmp_dir,"max_intensity_z.tif"), os.path.join(config.meta_path,"max_intensity_z.tif"))
 
     log.close()
 

@@ -82,10 +82,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.app = app
 
-
-        # Make unique ID if this is the first time mainwindow has been called
-        self.unique_ID = uuid.uuid1()
-
         # Store app-specific data such as last directory browsed
         self.app_data = AppData()
         self.opttab_populate_patterns()
@@ -849,10 +845,10 @@ l
             :func:`crop.Crop()`
             :func:`crop_call_back()`
         """
-        cropper = manualcrop.Crop(self.crop_call_back, img_path, self)
+        cropper = manualcrop.Crop(self.crop_ui_callback, img_path, self)
         cropper.show()
 
-    def crop_call_back(self, box):
+    def crop_ui_callback(self, box):
         """ Method to get crop dimension (crop box) from z projecion image.
 
         Saves the crop dimensions to the line edit boxes on the GUI.

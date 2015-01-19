@@ -18,10 +18,6 @@ limitations under the License.
 
 The following functions are used to update the parameters tab based on the input file used.
 
-NOTE:
-The methods here are not technically part of the HARP class but can be used as if they are. They are separated from
-the harp.py file just for convenience. To run a method from this module in harp.py the following notation can be
-used start(self.mainwindow) rather than self.mainwindow.start().
 
 --------------
 """
