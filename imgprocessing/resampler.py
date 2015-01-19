@@ -34,6 +34,7 @@ import cv2
 import lib.nrrd as nrrd
 from imgprocessing.io import imread
 from multiprocessing import Value
+import tempfile
 
 
 def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminate_flag=Value('i', 0)):
@@ -45,18 +46,10 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     :return:
     """
 
-    outdir = os.path.split(outpath)[0]
-    temp_xy = os.path.join(outdir, 'tempXYscaled.raw')
-    temp_xyz = os.path.join(outdir, 'tempXYZscaled.raw')
+    temp_xy = tempfile.TemporaryFile(mode='wb+')
 
-    #Just in case they didn't previously get deleted
-    _remove_temp_files([temp_xy, temp_xyz])
+    temp_xyz = tempfile.TemporaryFile(mode='wb+')
 
-    if os.path.isfile(temp_xy):
-        os.remove(temp_xy)
-
-    if os.path.isfile(temp_xyz):
-        os.remove(temp_xyz)
 
     #Check if we have a directory with images or a list with images
     if type(images) is str:
@@ -76,33 +69,32 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
     img_path_list = sorted(img_path_list)
 
-    datatype = 'uint8'
+    datatype = 'uint8'  # default
 
-    with open(temp_xy, 'ab') as xy_fh:
-        first = True
-        count = 0
-        for img_path in img_path_list:
-            count += 1
-            if count % 50 == 0:
-                if thread_terminate_flag.value == 1:
-                    return
-                pcnt_done = int(((100 / len(img_path_list)) * count) / 2)
-                update_signal.emit("rescaling by {}: {}% done".format(scale, pcnt_done))
+    first = True
+    count = 0
+    for img_path in img_path_list:
+        count += 1
+        if count % 50 == 0:
+            if thread_terminate_flag.value == 1:
+                return
+            pcnt_done = int(((100 / len(img_path_list)) * count) / 2)
+            update_signal.emit("rescaling by {}: {}% done".format(scale, pcnt_done))
 
-            # Rescale the z slices
-            z_slice_arr = imread(img_path)
+        # Rescale the z slices
+        z_slice_arr = imread(img_path)
 
-            # This might slow things doen by reasigning to the original array. Maybe we jsut need a differnt view on it
-            if scaleby_int:
-                z_slice_arr = _droppixels(z_slice_arr, scale, scale)
+        # This might slow things doen by reasigning to the original array. Maybe we jsut need a differnt view on it
+        if scaleby_int:
+            z_slice_arr = _droppixels(z_slice_arr, scale, scale)
 
-            z_slice_resized = cv2.resize(z_slice_arr, (0, 0), fx=1/scale, fy=1/scale, interpolation=cv2.INTER_AREA)
+        z_slice_resized = cv2.resize(z_slice_arr, (0, 0), fx=1/scale, fy=1/scale, interpolation=cv2.INTER_AREA)
 
-            if first:
-                xy_scaled_dims.extend(z_slice_resized.shape)
-                datatype = z_slice_resized.dtype
-                first = False
-            z_slice_resized.tofile(xy_fh)
+        if first:
+            xy_scaled_dims.extend(z_slice_resized.shape)
+            datatype = z_slice_resized.dtype
+            first = False
+        z_slice_resized.tofile(temp_xy)
 
     #create memory mapped version of the temporary xy scaled slices
     xy_scaled_mmap = np.memmap(temp_xy, dtype=datatype, mode='r', shape=tuple(xy_scaled_dims))
@@ -113,39 +105,39 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
     final_scaled_slices = []
 
-    with open(temp_xyz, 'ab') as xyz_fh:
-        count = 0
-        for y in range(xy_scaled_mmap.shape[1]):
-            count += 1
-            if count % 50 == 0:
-                if thread_terminate_flag.value == 1:
-                    return
-                pcnt_done = int(((100 / xy_scaled_mmap.shape[1]) * count) / 2) + 50
-                update_signal.emit("rescaling by {}: {}% done".format(scale, pcnt_done))
 
-            xz_plane = xy_scaled_mmap[:, y, :]
+    #Scale in x_z plane
+    count = 0
+    for y in range(xy_scaled_mmap.shape[1]):
+        count += 1
+        if count % 50 == 0:
+            if thread_terminate_flag.value == 1:
+                return
+            pcnt_done = int(((100 / xy_scaled_mmap.shape[1]) * count) / 2) + 50
+            update_signal.emit("rescaling by {}: {}% done".format(scale, pcnt_done))
 
-            if scaleby_int:
-                xz_plane = _droppixels(xz_plane, 1, scale)
+        xz_plane = xy_scaled_mmap[:, y, :]
 
-            scaled_xz = cv2.resize(xz_plane, (0, 0), fx=1, fy=1/scale, interpolation=cv2.INTER_AREA)
+        if scaleby_int:
+            xz_plane = _droppixels(xz_plane, 1, scale)
 
-            if first:
-                first = False
-                xyz_scaled_dims.append(xy_scaled_mmap.shape[1])
-                xyz_scaled_dims.append(scaled_xz.shape[0])
-                xyz_scaled_dims.append(scaled_xz.shape[1])
+        scaled_xz = cv2.resize(xz_plane, (0, 0), fx=1, fy=1/scale, interpolation=cv2.INTER_AREA)
 
-            final_scaled_slices.append(scaled_xz)
-            scaled_xz.tofile(xyz_fh)
+        if first:
+            first = False
+            xyz_scaled_dims.append(xy_scaled_mmap.shape[1])
+            xyz_scaled_dims.append(scaled_xz.shape[0])
+            xyz_scaled_dims.append(scaled_xz.shape[1])
+
+        final_scaled_slices.append(scaled_xz)
+        scaled_xz.tofile(temp_xyz)
 
     #create memory mapped version of the temporary xy scaled slices
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
     nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
-
-    _remove_temp_files([temp_xy, temp_xyz])
-
+    temp_xyz.close() # deletes temp file
+    temp_xyz.close()
 
 def _remove_temp_files(file_list):
     for file_ in file_list:
