@@ -17,7 +17,9 @@ limitations under the License.
 import scipy.ndimage
 import cv2
 import sys
-
+import os
+sys.path.append('..')
+from appdata import HarpDataError
 
 
 def imread(imgpath):
@@ -29,7 +31,12 @@ def imread(imgpath):
 
 
 def _read_cv2(imgpath):
-    return cv2.imread(imgpath, cv2.CV_LOAD_IMAGE_UNCHANGED)
+    im = cv2.imread(imgpath, cv2.CV_LOAD_IMAGE_UNCHANGED)
+    if im == None:
+        im_name = os.path.basename(imgpath)
+        raise HarpDataError('failed to load {}'.format(im_name))
+    else:
+        return im
 
 
 def _read_ndimage(imgpath):

@@ -29,14 +29,11 @@ from imgprocessing.io import imread, imwrite
 from appdata import HarpDataError
 
 
-class HarpDataError(Exception):
-    """
-    Raised when some of the supplied data is found to be faulty
-    """
-    pass
+
 
 
 class Crop():
+
     def __init__(self, in_dir, out_dir, callback, configOb,
                  thread_terminate_flag, app_data, def_crop=None, repeat_crop=None):
         """
@@ -91,7 +88,7 @@ class Crop():
 
         if auto:
             cb = self.auto_bounding_box(imglist)
-            print cb
+
             #rearange as dims come in a differenbt order from the different methods
             cropbox = (cb[2], cb[3], cb[0], cb[1])
 
@@ -154,7 +151,10 @@ class Crop():
 
         # Start with a z-projection
         zp = zproject.Zproject(filelist, z_proj_path, force=True)
+        zp.update.connect(self.update_slot)
+
         zp.run_onthisthread()
+        print 'crop.py not raised'
 
         zp_im = sitk.ReadImage(z_proj_path)
 
@@ -220,6 +220,9 @@ class Crop():
         x1 = xywh[0] + xywh[2]
         y1 = xywh[1] + xywh[3]
         return xywh[0], xywh[1], x1, y1
+
+    def update_slot(self, msg):
+        self.callback(msg)
 
 
 def dummy_callback(msg):

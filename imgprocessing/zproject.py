@@ -17,15 +17,19 @@ limitations under the License.
 from __future__ import division
 import os
 from PyQt4 import QtCore
+import numpy as np
 import sys
 import numpy as np
 import cv2
 
 sys.path.append('..')
+from appdata import HarpDataError
 from imgprocessing.io import imread, imwrite
 
 
 class Zproject(QtCore.QThread):
+
+    update = QtCore.pyqtSignal(str, name='update')
 
     def __init__(self, imglist, zprojection_output, callback=None, force=False):
         super(Zproject, self).__init__()
@@ -55,11 +59,13 @@ class Zproject(QtCore.QThread):
 
             if len(self.imglist) < 1:
                 self.emit(QtCore.SIGNAL('update(QString)'),  "No recon images found!")
+
             try:
                 print self.imglist[0]
                 im = imread(self.imglist[0])
-            except IOError as e:
-                self.emit(QtCore.SIGNAL('update(QString)'), "Cant load {}. Is it corrupted?".format(self.imglist[0]))
+            except HarpDataError as e:
+                self.update.emit(e.message)  # emit back to differnt thread. or...
+                raise   # reraise for autocrop, on same thread
 
             imdims = im.shape
             dtype = im.dtype
@@ -80,7 +86,11 @@ class Zproject(QtCore.QThread):
 
         for count, file_ in enumerate(filelist):
 
-            im_array = imread(file_)
+            try:
+                im_array = imread(file_)
+            except HarpDataError as e:
+                self.update.emit(e.message)
+                raise
 
             #im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
             #max_ = np.maximum(max_, im_array[:][:])

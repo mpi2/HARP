@@ -36,7 +36,7 @@ from imgprocessing.io import imread
 from multiprocessing import Value
 
 
-def resample(images, scale, outpath, scaleby_int, thread_terminate_flag=Value('i', 0)):
+def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminate_flag=Value('i', 0)):
     """
     :param images: iterable or a directory
     :param scale: int. Factor to scale by
@@ -46,7 +46,6 @@ def resample(images, scale, outpath, scaleby_int, thread_terminate_flag=Value('i
     """
 
     outdir = os.path.split(outpath)[0]
-    print outdir
     temp_xy = os.path.join(outdir, 'tempXYscaled.raw')
     temp_xyz = os.path.join(outdir, 'tempXYZscaled.raw')
 
@@ -87,6 +86,8 @@ def resample(images, scale, outpath, scaleby_int, thread_terminate_flag=Value('i
             if count % 50 == 0:
                 if thread_terminate_flag.value == 1:
                     return
+                pcnt_done = int(((100 / len(img_path_list)) * count) / 2)
+                update_signal.emit("rescaling by {}: {}% done".format(scale, pcnt_done))
 
             # Rescale the z slices
             z_slice_arr = imread(img_path)
@@ -119,6 +120,8 @@ def resample(images, scale, outpath, scaleby_int, thread_terminate_flag=Value('i
             if count % 50 == 0:
                 if thread_terminate_flag.value == 1:
                     return
+                pcnt_done = int(((100 / xy_scaled_mmap.shape[1]) * count) / 2) + 50
+                update_signal.emit("rescaling by {}: {}% done".format(scale, pcnt_done))
 
             xz_plane = xy_scaled_mmap[:, y, :]
 
