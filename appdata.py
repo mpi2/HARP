@@ -115,6 +115,8 @@ class AppData(object):
                 if not self.app_data.get('suppress_name_warnings'):
                     self.app_data['suppress_name_warnings'] = False
                 return self.app_data['suppress_name_warnings']
+        else:
+            return False
 
     @suppress_name_warnings.setter
     def suppress_name_warnings(self, suppress):
@@ -128,6 +130,8 @@ class AppData(object):
                 if not self.app_data.get('suppress_modality_warnings'):
                     self.app_data['suppress_modality_warnings'] = False
                 return self.app_data['suppress_modality_warnings']
+        else:
+            return False
 
     @suppress_modality_warnings.setter
     def suppress_modality_warnings(self, suppress):

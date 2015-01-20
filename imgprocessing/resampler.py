@@ -30,7 +30,12 @@ import numpy as np
 import SimpleITK as sitk
 import os
 import shutil
-import cv2
+import sys
+sys.path.append('..')
+if sys.platform == "win32" or sys.platform == "win64":
+    from lib import cv2
+else:
+    import cv2
 import lib.nrrd as nrrd
 from imgprocessing.io import Imreader
 from multiprocessing import Value

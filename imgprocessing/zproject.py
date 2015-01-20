@@ -91,8 +91,6 @@ class Zproject(QtCore.QThread):
                 self.update.emit(e.message)
                 raise
 
-            #im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
-            #max_ = np.maximum(max_, im_array[:][:])
             inds = im_array > maxi
             maxi[inds] = im_array[inds]
             status_str = "Z-project: " + str(count * 10) + "/" + str(len(self.imglist)) + " images processed"

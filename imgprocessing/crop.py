@@ -17,14 +17,11 @@ limitations under the License.
 
 import argparse
 import os
-import fnmatch
 import sys
 import numpy as np
-import cv2
 import SimpleITK as sitk
 from imgprocessing import zproject
 sys.path.append("..")
-import processing
 from imgprocessing.io import Imreader, imwrite
 from appdata import HarpDataError
 
