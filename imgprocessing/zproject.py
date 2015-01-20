@@ -21,10 +21,10 @@ import numpy as np
 import sys
 import numpy as np
 import cv2
-
 sys.path.append('..')
 from appdata import HarpDataError
-from imgprocessing.io import imread, imwrite
+from imgprocessing.io import Imreader, imwrite
+
 
 
 class Zproject(QtCore.QThread):
@@ -60,9 +60,9 @@ class Zproject(QtCore.QThread):
             if len(self.imglist) < 1:
                 self.emit(QtCore.SIGNAL('update(QString)'),  "No recon images found!")
 
+            reader = Imreader(self.imglist)
             try:
-                print self.imglist[0]
-                im = imread(self.imglist[0])
+                im = reader.imread(self.imglist[0])
             except HarpDataError as e:
                 self.update.emit(e.message)  # emit back to differnt thread. or...
                 raise   # reraise for autocrop, on same thread
@@ -84,10 +84,11 @@ class Zproject(QtCore.QThread):
 
         maxi = np.zeros(imdims, dtype=bit_depth)
 
+        reader = Imreader(filelist)
         for count, file_ in enumerate(filelist):
 
             try:
-                im_array = imread(file_)
+                im_array = reader.imread(file_)
             except HarpDataError as e:
                 self.update.emit(e.message)
                 raise
@@ -103,8 +104,5 @@ class Zproject(QtCore.QThread):
 
     def z_callback(self, msg):  # this is just a dummy callback
         pass
-
-
-
 
 

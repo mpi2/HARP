@@ -25,11 +25,8 @@ import SimpleITK as sitk
 from imgprocessing import zproject
 sys.path.append("..")
 import processing
-from imgprocessing.io import imread, imwrite
+from imgprocessing.io import Imreader, imwrite
 from appdata import HarpDataError
-
-
-
 
 
 class Crop():
@@ -81,7 +78,7 @@ class Crop():
         """
         # Get list of files
         #imglist = processing.getfilelist(self.in_dir)
-        imglist = processing.getfilelist(self.in_dir, self.app_data.files_to_use, self.app_data.files_to_ignore)
+        imglist = getfilelist(self.in_dir, self.app_data.files_to_use, self.app_data.files_to_ignore)
 
         if len(imglist) < 1:
             raise HarpDataError("no image files found in " + self.in_dir)
@@ -99,10 +96,12 @@ class Crop():
         first = True
         outpathslist = []
 
+        reader = Imreader(imglist)
+
         for count, file_ in enumerate(imglist):
 
             try:
-                im = imread(file_)
+                im = reader.imread(file_)
             except IOError as e:
                 raise HarpDataError("failed to read {}".format(file_))
 
@@ -154,12 +153,11 @@ class Crop():
         zp.update.connect(self.update_slot)
 
         zp.run_onthisthread()
-        print 'crop.py not raised'
 
         zp_im = sitk.ReadImage(z_proj_path)
-
+        reader = Imreader(filelist)
         try:
-            testimg = imread(filelist[0])
+            testimg = reader.imread(filelist[0])
         except IOError as e:
             raise HarpDataError('Failed to read {}. Is it corrupt'.format(filelist[0]))
 
@@ -244,8 +242,6 @@ def cli_run():
     args = parser.parse_args()
     ac = Crop(args.in_dir, args.out_dir, args.num_proc, args.def_crop)
     ac.run()
-
-#sys.exit()
 
 
 if __name__ == '__main__':

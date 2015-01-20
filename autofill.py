@@ -27,6 +27,7 @@ import sys
 import os
 import re
 import datetime
+from appdata import getfilelist
 
 
 class Autofill(object):
@@ -346,6 +347,17 @@ class Autofill(object):
         except Exception as e:
             # Should potentially add some other error catching
             message = QtGui.QMessageBox.warning(self.mainwindow, "Message", "Unexpected error in folder size calc: {0}".format(e))
+
+    # def contiguous_naming(self):
+    #
+    #     indir = str(self.mainwindow.ui.lineEditInput.text())
+    #     filelist = sorted(processing.gefilelist(indir))
+    #
+    #     numb_re = re.compile("\D+\..+$",re.IGNORECASE)
+    #     for file_ in filelist:
+    #         if numb_re.match(file_):
+    #             print numb_re.groups
+    #
 
 
 

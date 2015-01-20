@@ -48,7 +48,7 @@ import autofill
 import queuejob
 import Queue
 from ui.mainwindow import Ui_MainWindow
-from processing import ProcessingThread, getfilelist
+from processing import ProcessingThread
 from imgprocessing import zproject
 import manualcrop
 from appdata import AppData
@@ -459,6 +459,7 @@ l
         self.autofill.auto_get_SPR()
         # Determine size of input folder
         self.autofill.folder_size_approx()
+        #self.autofill.contiguous_naming()
 
     def reset_inputs(self):
         """ Reset the parameter inputs to blank"""
@@ -811,7 +812,7 @@ l
         """
         # Get input folder
         input_folder = str(self.ui.lineEditInput.text())
-        imglist = getfilelist(input_folder, self.app_data.files_to_use, self.app_data.files_to_ignore)
+        imglist = self.app_data.getfilelist(input_folder)
 
         #TODO check for empty list`
         self.z_thread = zproject.Zproject(imglist, self.zprojection_output)
