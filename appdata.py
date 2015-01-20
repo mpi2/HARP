@@ -135,9 +135,24 @@ class AppData(object):
         if self.using_appdata:
             self.app_data['suppress_modality_warnings'] = suppress
 
+    def getfilelist(self, input_folder):
+        """
+        Get the list of files from filedir. Exclude known non slice files
+        """
+        files = []
+
+        for fn in os.listdir(input_folder):
+            if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in self.files_to_ignore):
+                continue
+            if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in self.files_to_use_regx):
+                files.append(os.path.join(input_folder, fn))
+
+        return sorted(files)
 
 class HarpDataError(Exception):
     """
     Raised when some of the supplied data is found to be faulty
     """
     pass
+
+

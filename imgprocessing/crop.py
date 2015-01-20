@@ -29,9 +29,6 @@ from imgprocessing.io import Imreader, imwrite
 from appdata import HarpDataError
 
 
-
-
-
 class Crop():
 
     def __init__(self, in_dir, out_dir, callback, configOb,
@@ -81,7 +78,7 @@ class Crop():
         """
         # Get list of files
         #imglist = processing.getfilelist(self.in_dir)
-        imglist = processing.getfilelist(self.in_dir, self.app_data.files_to_use, self.app_data.files_to_ignore)
+        imglist = getfilelist(self.in_dir, self.app_data.files_to_use, self.app_data.files_to_ignore)
 
         if len(imglist) < 1:
             raise HarpDataError("no image files found in " + self.in_dir)
@@ -156,7 +153,6 @@ class Crop():
         zp.update.connect(self.update_slot)
 
         zp.run_onthisthread()
-        print 'crop.py not raised'
 
         zp_im = sitk.ReadImage(z_proj_path)
         reader = Imreader(filelist)

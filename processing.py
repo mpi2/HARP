@@ -33,7 +33,9 @@ import subprocess
 import os
 import signal
 import re
+
 from imgprocessing import compress
+
 
 try:
     import cPickle as pickle
@@ -309,6 +311,9 @@ class ProcessingThread(QtCore.QThread):
             return croppedlist
 
 
+    def logger(self, message):
+        pass
+
 
     def autocrop_update_slot(self, msg):
         """ Listens to autocrop.
@@ -449,8 +454,7 @@ class ProcessingThread(QtCore.QThread):
                                 self.config.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".nrrd")
 
         try:
-            files_for_scaling = getfilelist(self.folder_for_scaling,
-                                            self.app_data.files_to_use, self.app_data.files_to_ignore)
+            files_for_scaling = self.app_data.getfilelist(self.folder_for_scaling)
             if len(files_for_scaling) < 1:
                 self.update.emit("Rescaling failed. No images found:")
 
@@ -640,19 +644,7 @@ class ProcessingThread(QtCore.QThread):
                 compress.bz2_nnrd(cropped_img_list, outfile, 'Compressing cropped recon', self.update)
 
 
-def getfilelist(input_folder, files_to_use_regx, files_to_ignore_regex):
-    """
-    Get the list of files from filedir. Exclude known non slice files
-    """
-    files = []
 
-    for fn in os.listdir(input_folder):
-        if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in files_to_ignore_regex):
-            continue
-        if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in files_to_use_regx):
-            files.append(os.path.join(input_folder, fn))
-
-    return sorted(files)
 
 
 def main():
