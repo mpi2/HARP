@@ -1111,8 +1111,8 @@ l
         Read the patterns to ignore from the user appdata
         :return:
         """
-        self.ui.textEditIgnoreFiles.setText('  '.join(self.app_data.files_to_ignore))
-        self.ui.textEditUseFile.setText('  '.join(self.app_data.files_to_use))
+        # self.ui.textEditIgnoreFiles.setText('  '.join(self.app_data.files_to_ignore)) # Windows temp fix
+        # self.ui.textEditUseFile.setText('  '.join(self.app_data.files_to_use))
         self.ui.checkBoxSuppressModalityWarning.setChecked(self.app_data.suppress_modality_warnings)
         self.ui.checkBoxSuppressNameWarnings.setChecked(self.app_data.suppress_name_warnings)
 
