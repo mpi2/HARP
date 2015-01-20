@@ -27,7 +27,6 @@ import sys
 import os
 import re
 import datetime
-from appdata import getfilelist
 
 
 class Autofill(object):
