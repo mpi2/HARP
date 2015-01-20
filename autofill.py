@@ -62,7 +62,7 @@ class Autofill(object):
                 recon_log_path = os.path.join(path,folder_name,folder_name+".log")
             elif os.path.exists(os.path.join(path,folder_name,folder_name+"_rec.log")):
                 recon_log_path = os.path.join(path,folder_name,folder_name+"_rec.log")
-            else :
+            else:
                 raise Exception('No log file')
             # To make sure the path is in the correct format (prob not necessary..)
             self.mainwindow.recon_log_path = os.path.abspath(recon_log_path)
@@ -390,13 +390,32 @@ class Autofill(object):
         """
         # Get in file
         file_in = str(self.mainwindow.ui.lineEditInput.text())
+        log_OPT = False
+        log_uCT = False
 
-        # get comilied regex thing
+        # Scan log file for evidence of OPT or uCT
+        try:
+            opt_terms = ['OPT', 'Skyscan3001', 'UV']
+            uCT_terms = ['MicroCT', 'Skyscan1172']
+            log_file = str(self.mainwindow.recon_log_path)
+            with open(log_file, "r") as f:
+                search_lines = f.readlines()
+                for k, line in enumerate(search_lines):
+                    if any(term in line for term in opt_terms):
+                        log_OPT = True
+                        break
+                    if any(term in line for term in uCT_terms):
+                        log_uCT = True
+                        break
+        except IOError:
+            print "Failed to read log file for OPT/uCT check"
+
+        # Create compiled regex
         p_opt = re.compile("OPT",re.IGNORECASE)
         p_uCT = re.compile("MicroCT",re.IGNORECASE)
 
         # Check if OPT and enable relevant options
-        if p_opt.search(file_in):
+        if log_OPT or p_opt.search(file_in):
             self.mainwindow.modality = "OPT"
             self.mainwindow.ui.radioButtonOPT.setChecked(True)
             self.mainwindow.ui.lineEditChannel.setEnabled(True)
@@ -408,7 +427,7 @@ class Autofill(object):
             self.mainwindow.ui.checkBoxInd.setEnabled(True)
 
         # Check if uCT and enable relevant options
-        elif p_uCT.search(file_in):
+        elif log_uCT or p_uCT.search(file_in):
             self.mainwindow.modality = "MicroCT"
             self.mainwindow.ui.radioButtonuCT.setChecked(True)
             self.mainwindow.ui.lineEditChannel.setEnabled(False)

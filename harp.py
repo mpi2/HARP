@@ -441,12 +441,12 @@ l
         # ###################################################
         # Perform autofill of parameter settings
         # ###################################################
-        # check if uCT or opt data
-        self.autofill.opt_uCT_check(self.app_data.suppress_modality_warnings)
         # Autocomplete the name
         self.autofill.get_name(str(self.ui.lineEditInput.text()), self.app_data.suppress_name_warnings)
         # Get the reconLog and associated pixel size
         self.autofill.get_recon_log()
+        # check if uCT or opt data
+        self.autofill.opt_uCT_check(self.app_data.suppress_modality_warnings)
         # Get the output folder location
         self.autofill.auto_file_out()
         # See what OPT channels are available
