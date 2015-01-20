@@ -51,6 +51,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     :return:
     """
 
+
     temp_xy = tempfile.TemporaryFile(mode='wb+')
 
     temp_xyz = tempfile.TemporaryFile(mode='wb+')
@@ -101,7 +102,8 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
             xy_scaled_dims.extend(z_slice_resized.shape)
             datatype = z_slice_resized.dtype
             first = False
-        z_slice_resized.tofile(temp_xy)
+
+        z_slice_resized.tofile(temp_xy.file) # temp_xy.file instead of just temp_xy for windows
 
     #create memory mapped version of the temporary xy scaled slices
     xy_scaled_mmap = np.memmap(temp_xy, dtype=datatype, mode='r', shape=tuple(xy_scaled_dims))
@@ -137,12 +139,13 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
             xyz_scaled_dims.append(scaled_xz.shape[1])
 
         final_scaled_slices.append(scaled_xz)
-        scaled_xz.tofile(temp_xyz)
+        scaled_xz.tofile(temp_xyz.file)
 
     #create memory mapped version of the temporary xy scaled slices
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
     nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
+
     temp_xyz.close() # deletes temp file
     temp_xyz.close()
 

@@ -136,7 +136,7 @@ class Crop():
             outpathslist.append(crop_out)
 
         self.callback("success")
-        print "++++++++++++++++", len(outpathslist)
+
         return outpathslist
 
 
