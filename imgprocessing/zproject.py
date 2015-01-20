@@ -21,11 +21,9 @@ import numpy as np
 import sys
 import numpy as np
 import cv2
-
-
 sys.path.append('..')
 from appdata import HarpDataError
-from imgprocessing.io import Imreader, imwrite, imread
+from imgprocessing.io import Imreader, imwrite
 
 
 

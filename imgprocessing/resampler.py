@@ -32,7 +32,7 @@ import os
 import shutil
 import cv2
 import lib.nrrd as nrrd
-from imgprocessing.io import imread
+from imgprocessing.io import Imreader
 from multiprocessing import Value
 import tempfile
 
@@ -73,6 +73,8 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
     first = True
     count = 0
+    reader = Imreader(img_path_list)
+
     for img_path in img_path_list:
         count += 1
         if count % 50 == 0:
@@ -82,7 +84,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
             update_signal.emit("rescaling by {}: {}% done".format(scale, pcnt_done))
 
         # Rescale the z slices
-        z_slice_arr = imread(img_path)
+        z_slice_arr = reader.imread(img_path)
 
         # This might slow things doen by reasigning to the original array. Maybe we jsut need a differnt view on it
         if scaleby_int:
@@ -209,19 +211,6 @@ def _binshrink(img_dir, scale_factor, outpath):
     #Write the image
     imgout = sitk.GetImageFromArray(assembled)
     sitk.WriteImage(imgout, outpath)
-
-
-
-def get_dimensions(img_path_list):
-    array = imread(img_path_list[0])
-    dims = (len(img_path_list), array.shape[0], array.shape[1])
-    return dims
-
-
-def array_generator(file_list):
-    for impath in file_list:
-        array = imread(impath)
-        yield array
 
 
 def get_img_paths(folder):

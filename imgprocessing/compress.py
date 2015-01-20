@@ -1,5 +1,5 @@
 import os
-from imgprocessing.io import imread
+from imgprocessing.io import Imreader
 from lib import nrrd
 import bz2
 import tarfile
@@ -9,8 +9,8 @@ import tempfile
 def bz2_nnrd(img_list, outfile, scan_name, update):
     """
     """
-
-    first_image = imread(img_list[0])
+    reader = Imreader(img_list)
+    first_image = reader.imread(img_list[0])
     shape = list(first_image.shape)
     shape = [shape[1], shape[0]]
     shape.append(len(img_list))
@@ -24,7 +24,7 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
         if i % 20 == 0:
             done = int((50.0 / len(img_list)) * i)
             update.emit('{} {}%'.format(scan_name, done))
-        img_arr = imread(f)
+        img_arr = reader.imread(f)
         rawdata = img_arr.T.tostring(order='F')
         tempnrrd.write(rawdata)
 
