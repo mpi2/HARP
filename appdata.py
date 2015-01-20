@@ -114,33 +114,30 @@ class AppData(object):
 
     @property
     def suppress_name_warnings(self):
-        if self.using_appdata:
-            if self.app_data:
-                if not self.app_data.get('suppress_name_warnings'):
-                    self.app_data['suppress_name_warnings'] = False
-                return self.app_data['suppress_name_warnings']
-        else:
-            return False
+
+        if not self.app_data.get('suppress_name_warnings'):
+            self.app_data['suppress_name_warnings'] = False
+
+        return self.app_data['suppress_name_warnings']
+
 
     @suppress_name_warnings.setter
     def suppress_name_warnings(self, suppress):
-        if self.using_appdata:
-            self.app_data['suppress_name_warnings'] = suppress
+
+        self.app_data['suppress_name_warnings'] = suppress
 
     @property
     def suppress_modality_warnings(self):
-        if self.using_appdata:
-            if self.app_data:
-                if not self.app_data.get('suppress_modality_warnings'):
-                    self.app_data['suppress_modality_warnings'] = False
-                return self.app_data['suppress_modality_warnings']
-        else:
-            return False
+
+        if not self.app_data.get('suppress_modality_warnings'):
+            self.app_data['suppress_modality_warnings'] = False
+        return self.app_data['suppress_modality_warnings']
+
 
     @suppress_modality_warnings.setter
     def suppress_modality_warnings(self, suppress):
-        if self.using_appdata:
-            self.app_data['suppress_modality_warnings'] = suppress
+
+        self.app_data['suppress_modality_warnings'] = suppress
 
     def getfilelist(self, input_folder):
         """
