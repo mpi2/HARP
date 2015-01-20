@@ -78,7 +78,7 @@ class Crop():
         """
         # Get list of files
         #imglist = processing.getfilelist(self.in_dir)
-        imglist = getfilelist(self.in_dir, self.app_data.files_to_use, self.app_data.files_to_ignore)
+        imglist = self.app_data.getfilelist(self.in_dir)
 
         if len(imglist) < 1:
             raise HarpDataError("no image files found in " + self.in_dir)

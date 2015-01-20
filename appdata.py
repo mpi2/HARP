@@ -19,11 +19,10 @@ Creates a YAMl file in app directory that stores details such as last directory 
 
 """
 from lib import appdirs
-import os
 import yaml
 from os.path import expanduser
 import os
-import collections
+import fnmatch
 
 default_ignore = ['*spr.bmp', '*spr.tif', '*spr.tiff', '*spr.jpg', '*spr.jpeg', '*.txt', '*.text', '*.log', '*.crv']
 default_use = ['*rec*.bmp', '*rec*.tif', '*rec*.tiff', '*rec*.jpg', '*rec*.jpeg']
@@ -144,7 +143,7 @@ class AppData(object):
         for fn in os.listdir(input_folder):
             if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in self.files_to_ignore):
                 continue
-            if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in self.files_to_use_regx):
+            if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in self.files_to_use):
                 files.append(os.path.join(input_folder, fn))
 
         return sorted(files)

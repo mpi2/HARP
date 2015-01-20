@@ -17,10 +17,8 @@ limitations under the License.
 from __future__ import division
 import os
 from PyQt4 import QtCore
-import numpy as np
 import sys
 import numpy as np
-import cv2
 sys.path.append('..')
 from appdata import HarpDataError
 from imgprocessing.io import Imreader, imwrite

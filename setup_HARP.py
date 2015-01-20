@@ -22,7 +22,7 @@ print "Downloading dependencies..."
 # easy_install first
 try:
     from setuptools.command import easy_install
-    dependencies = ["SimpleITK", "numpy"]
+    dependencies = ["SimpleITK", "numpy", "skimage"]
 
     for dep in dependencies:
 
