@@ -16,13 +16,13 @@ limitations under the License.
 
 """
 
-print "=== Harwell Automatic Reconstruction Processor (HARP) ===\n"
+print "=== Harwell Automatic Recon Processor (HARP) ===\n"
 print "Downloading dependencies..."
 
 # easy_install first
 try:
     from setuptools.command import easy_install
-    dependencies = ["SimpleITK", "numpy"]
+    dependencies = ["six," "numpy", "scikit-image", "pyyaml", "PIL", "SimpleITK"]
 
     for dep in dependencies:
 
@@ -37,6 +37,6 @@ try:
             print "done."
 
 except ImportError:
-    print "Couldn't locate 'easy_install'."
+    print "Couldn't locate 'easy_install'. Do you have setuptools installed on your machine? Try sudo apt-get install python-setuptools."
 
 
