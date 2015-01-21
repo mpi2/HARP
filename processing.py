@@ -33,10 +33,7 @@ import subprocess
 import os
 import signal
 import re
-
 from imgprocessing import compress
-
-
 try:
     import cPickle as pickle
 except ImportError:
