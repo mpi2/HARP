@@ -25,7 +25,7 @@ resides on disk during processing. This will take up (volume size / scale factor
 """
 from __future__ import division
 import numpy as np
-import SimpleITK as sitk
+from SimpleITK import ReadImage, WriteImage, BinShrink, GetImageFromArray, GetArrayFromImage
 import os
 import shutil
 import sys
@@ -211,13 +211,13 @@ def _binshrink(img_dir, scale_factor, outpath):
 
     for i in range(scale_factor, len(img_path_list) + scale_factor, scale_factor):
         slice_paths = [x for x in img_path_list[last_img_index: i + 1]]
-        slice_imgs = sitk.ReadImage(slice_paths)
-        z_chuncks.append(sitk.BinShrink(slice_imgs, [scale_factor, scale_factor, scale_factor]))
+        slice_imgs = ReadImage(slice_paths)
+        z_chuncks.append(BinShrink(slice_imgs, [scale_factor, scale_factor, scale_factor]))
         last_img_index = i
 
     first_chunk = True
     for j in z_chuncks:
-        array = sitk.GetArrayFromImage(j)
+        array = GetArrayFromImage(j)
         if first_chunk:
             assembled = array
             first_chunk = False
@@ -225,8 +225,8 @@ def _binshrink(img_dir, scale_factor, outpath):
             assembled = np.vstack((assembled, array))
 
     #Write the image
-    imgout = sitk.GetImageFromArray(assembled)
-    sitk.WriteImage(imgout, outpath)
+    imgout = GetImageFromArray(assembled)
+    WriteImage(imgout, outpath)
 
 
 def get_img_paths(folder):

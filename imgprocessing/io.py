@@ -20,7 +20,7 @@ if sys.platform == "win32" or sys.platform == "win64":
 else:
     import cv2
 import os
-import lib.skimage.io as io
+import skimage.io as io
 
 from appdata import HarpDataError
 
