@@ -14,7 +14,7 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
     shape = list(first_image.shape)
     shape = [shape[1], shape[0]]
     shape.append(len(img_list))
-
+    print '++++==== bzp'
     tempnrrd = tempfile.TemporaryFile(mode="wb+")
     nrrd.write_nrrd_header(tempnrrd, shape, first_image.dtype, 3)
 

@@ -13,13 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
-#import scipy.ndimage
-#import cv2
 import sys
+sys.path.append('..')
+if sys.platform == "win32" or sys.platform == "win64":
+    from lib import cv2
+else:
+    import cv2
 import os
 import skimage.io as io
-sys.path.append('..')
+
 from appdata import HarpDataError
 
 

@@ -17,10 +17,8 @@ limitations under the License.
 from __future__ import division
 import os
 from PyQt4 import QtCore
-import numpy as np
 import sys
 import numpy as np
-import cv2
 sys.path.append('..')
 from appdata import HarpDataError
 from imgprocessing.io import Imreader, imwrite
@@ -93,8 +91,6 @@ class Zproject(QtCore.QThread):
                 self.update.emit(e.message)
                 raise
 
-            #im_array = cv2.imread(file_, cv2.CV_LOAD_IMAGE_UNCHANGED)
-            #max_ = np.maximum(max_, im_array[:][:])
             inds = im_array > maxi
             maxi[inds] = im_array[inds]
             status_str = "Z-project: " + str(count * 10) + "/" + str(len(self.imglist)) + " images processed"

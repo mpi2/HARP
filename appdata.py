@@ -19,11 +19,10 @@ Creates a YAMl file in app directory that stores details such as last directory 
 
 """
 from lib import appdirs
-import os
 import yaml
 from os.path import expanduser
 import os
-import collections
+import fnmatch
 
 default_ignore = ['*spr.bmp', '*spr.tif', '*spr.tiff', '*spr.jpg', '*spr.jpeg', '*.txt', '*.text', '*.log', '*.crv']
 default_use = ['*rec*.bmp', '*rec*.tif', '*rec*.tiff', '*rec*.jpg', '*rec*.jpeg']
@@ -84,6 +83,8 @@ class AppData(object):
                 if not self.app_data.get('files_to_ignore'):
                     self.app_data['files_to_ignore'] = default_ignore
                 return self.app_data['files_to_ignore']
+        else:
+            return default_ignore
 
     @files_to_ignore.setter
     def files_to_ignore(self, pattern_list):
@@ -97,6 +98,8 @@ class AppData(object):
                 if not self.app_data.get('files_to_use'):
                     self.app_data['files_to_use'] = default_use
                 return self.app_data['files_to_use']
+        else:
+            return default_use
 
     @files_to_use.setter
     def files_to_use(self, pattern_list):
@@ -111,29 +114,30 @@ class AppData(object):
 
     @property
     def suppress_name_warnings(self):
-        if self.using_appdata:
-            if self.app_data:
-                if not self.app_data.get('suppress_name_warnings'):
-                    self.app_data['suppress_name_warnings'] = False
-                return self.app_data['suppress_name_warnings']
+
+        if not self.app_data.get('suppress_name_warnings'):
+            self.app_data['suppress_name_warnings'] = False
+
+        return self.app_data['suppress_name_warnings']
+
 
     @suppress_name_warnings.setter
     def suppress_name_warnings(self, suppress):
-        if self.using_appdata:
-            self.app_data['suppress_name_warnings'] = suppress
+
+        self.app_data['suppress_name_warnings'] = suppress
 
     @property
     def suppress_modality_warnings(self):
-        if self.using_appdata:
-            if self.app_data:
-                if not self.app_data.get('suppress_modality_warnings'):
-                    self.app_data['suppress_modality_warnings'] = False
-                return self.app_data['suppress_modality_warnings']
+
+        if not self.app_data.get('suppress_modality_warnings'):
+            self.app_data['suppress_modality_warnings'] = False
+        return self.app_data['suppress_modality_warnings']
+
 
     @suppress_modality_warnings.setter
     def suppress_modality_warnings(self, suppress):
-        if self.using_appdata:
-            self.app_data['suppress_modality_warnings'] = suppress
+
+        self.app_data['suppress_modality_warnings'] = suppress
 
     def getfilelist(self, input_folder):
         """
@@ -144,7 +148,7 @@ class AppData(object):
         for fn in os.listdir(input_folder):
             if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in self.files_to_ignore):
                 continue
-            if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in self.files_to_use_regx):
+            if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in self.files_to_use):
                 files.append(os.path.join(input_folder, fn))
 
         return sorted(files)

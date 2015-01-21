@@ -17,14 +17,11 @@ limitations under the License.
 
 import argparse
 import os
-import fnmatch
 import sys
 import numpy as np
-import cv2
-import SimpleITK as sitk
+from SimpleITK import ReadImage, OtsuThreshold, ConnectedComponent, RelabelComponent, LabelStatisticsImageFilter
 from imgprocessing import zproject
 sys.path.append("..")
-import processing
 from imgprocessing.io import Imreader, imwrite
 from appdata import HarpDataError
 
@@ -78,7 +75,7 @@ class Crop():
         """
         # Get list of files
         #imglist = processing.getfilelist(self.in_dir)
-        imglist = getfilelist(self.in_dir, self.app_data.files_to_use, self.app_data.files_to_ignore)
+        imglist = self.app_data.getfilelist(self.in_dir)
 
         if len(imglist) < 1:
             raise HarpDataError("no image files found in " + self.in_dir)
@@ -139,7 +136,7 @@ class Crop():
             outpathslist.append(crop_out)
 
         self.callback("success")
-        print "++++++++++++++++", len(outpathslist)
+
         return outpathslist
 
 
@@ -154,7 +151,7 @@ class Crop():
 
         zp.run_onthisthread()
 
-        zp_im = sitk.ReadImage(z_proj_path)
+        zp_im = ReadImage(z_proj_path)
         reader = Imreader(filelist)
         try:
             testimg = reader.imread(filelist[0])
@@ -168,13 +165,13 @@ class Crop():
             outval = 255
 
         # Apply otsu threshold and remove all but largest component
-        seg = sitk.OtsuThreshold(zp_im, insideValue=0, outsideValue=outval, numberOfHistogramBins=128)
-        seg = sitk.ConnectedComponent(seg)  # label non-background pixels
-        seg = sitk.RelabelComponent(seg)  # relabel components in order of ascending size
+        seg = OtsuThreshold(zp_im, insideValue=0, outsideValue=outval, numberOfHistogramBins=128)
+        seg = ConnectedComponent(seg)  # label non-background pixels
+        seg = RelabelComponent(seg)  # relabel components in order of ascending size
         # seg = seg == 1  # discard all but largest component
 
         # Get bounding box
-        label_stats = sitk.LabelStatisticsImageFilter()
+        label_stats = LabelStatisticsImageFilter()
         label_stats.Execute(zp_im, seg)
         bbox = list(label_stats.GetBoundingBox(1))  # xmin, xmax, ymin, ymax (I think)
 

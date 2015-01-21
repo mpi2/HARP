@@ -24,13 +24,20 @@ resides on disk during processing. This will take up (volume size / scale factor
 
 """
 from __future__ import division
-
-
 import numpy as np
-import SimpleITK as sitk
+from SimpleITK import ReadImage, WriteImage, BinShrink, GetImageFromArray, GetArrayFromImage
 import os
 import shutil
-import cv2
+import sys
+sys.path.append('..')
+if sys.platform == "win32" or sys.platform == "win64":
+    windows = True
+else:
+    windows = False
+if windows:
+    from lib import cv2
+else:
+    import cv2
 import lib.nrrd as nrrd
 from imgprocessing.io import Imreader
 from multiprocessing import Value
@@ -45,6 +52,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     :param scaleby_int bool: True-> scale by binning. False-> use cv2 interpolated scaling
     :return:
     """
+
 
     temp_xy = tempfile.TemporaryFile(mode='wb+')
 
@@ -96,7 +104,11 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
             xy_scaled_dims.extend(z_slice_resized.shape)
             datatype = z_slice_resized.dtype
             first = False
-        z_slice_resized.tofile(temp_xy)
+
+        if windows:
+            z_slice_resized.tofile(temp_xy.file)
+        else:
+            z_slice_resized.tofile(temp_xy)
 
     #create memory mapped version of the temporary xy scaled slices
     xy_scaled_mmap = np.memmap(temp_xy, dtype=datatype, mode='r', shape=tuple(xy_scaled_dims))
@@ -132,12 +144,16 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
             xyz_scaled_dims.append(scaled_xz.shape[1])
 
         final_scaled_slices.append(scaled_xz)
-        scaled_xz.tofile(temp_xyz)
+        if windows:
+            scaled_xz.tofile(temp_xyz.file)
+        else:
+            scaled_xz.tofile(temp_xyz)
 
     #create memory mapped version of the temporary xy scaled slices
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
     nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
+
     temp_xyz.close() # deletes temp file
     temp_xyz.close()
 
@@ -195,13 +211,13 @@ def _binshrink(img_dir, scale_factor, outpath):
 
     for i in range(scale_factor, len(img_path_list) + scale_factor, scale_factor):
         slice_paths = [x for x in img_path_list[last_img_index: i + 1]]
-        slice_imgs = sitk.ReadImage(slice_paths)
-        z_chuncks.append(sitk.BinShrink(slice_imgs, [scale_factor, scale_factor, scale_factor]))
+        slice_imgs = ReadImage(slice_paths)
+        z_chuncks.append(BinShrink(slice_imgs, [scale_factor, scale_factor, scale_factor]))
         last_img_index = i
 
     first_chunk = True
     for j in z_chuncks:
-        array = sitk.GetArrayFromImage(j)
+        array = GetArrayFromImage(j)
         if first_chunk:
             assembled = array
             first_chunk = False
@@ -209,8 +225,8 @@ def _binshrink(img_dir, scale_factor, outpath):
             assembled = np.vstack((assembled, array))
 
     #Write the image
-    imgout = sitk.GetImageFromArray(assembled)
-    sitk.WriteImage(imgout, outpath)
+    imgout = GetImageFromArray(assembled)
+    WriteImage(imgout, outpath)
 
 
 def get_img_paths(folder):
