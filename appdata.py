@@ -78,13 +78,9 @@ class AppData(object):
 
     @property
     def files_to_ignore(self):
-        if self.using_appdata:
-            if self.app_data:
-                if not self.app_data.get('files_to_ignore'):
-                    self.app_data['files_to_ignore'] = default_ignore
-                return self.app_data['files_to_ignore']
-        else:
-            return default_ignore
+        if not self.app_data.get('files_to_ignore'):
+            self.app_data['files_to_ignore'] = default_ignore
+        return self.app_data['files_to_ignore']
 
     @files_to_ignore.setter
     def files_to_ignore(self, pattern_list):
