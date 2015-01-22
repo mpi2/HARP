@@ -131,11 +131,13 @@ class ProcessingThread(QtCore.QThread):
             try:
                 cropped_imgs_list = self.cropping()
             except Exception:
+                self.emit("Cropping failed!")
                 continue
 
             try:
                 self.scaling()
             except Exception:
+                self.emit("Scaling failed!")
                 continue
 
             # Cropping function only copies over image files. Need to copy over other files now scaling and cropping
@@ -203,12 +205,14 @@ class ProcessingThread(QtCore.QThread):
         # Cropping option: OLD CROP
         if self.config.crop_option == "Old_crop":
             # Use a previous folder already ran through HARP. No cropping needed here.
-            self.update.emit("No Crop carried out")
+            self.update.emit("No crop carried out")
             # Need to hide non recon files. Puts them in a temp folder until scaling has finished
             self.hide_files()
             self.session_log.write("No crop carried out\n")
             self.autocrop_update_slot("success")
-            return
+            # Still need the cropped files list for compression (if it is to take place)
+            cropped_list = self.app_data.getfilelist(self.config.cropped_path)
+            return cropped_list
 
         # Make new crop directory
         if not os.path.exists(self.config.cropped_path):
@@ -278,7 +282,7 @@ class ProcessingThread(QtCore.QThread):
             class WindowsError(OSError): pass
 
         # Catch all the potential errors which may come
-        # It may be better to add the execptions closer to the event as these can catch a broad range
+        # It may be better to add the exceptions closer to the event as these can catch a broad range
         try:
             # Run autocrop and catch errors
             croppedlist = cropper.run(auto=doauto)  # James - new version of autocrop
