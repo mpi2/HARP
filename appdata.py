@@ -63,44 +63,36 @@ class AppData(object):
 
     @property
     def last_dir_browsed(self):
-        if self.using_appdata:
-            if self.app_data:
-                if not self.app_data.get('last_dir_browsed'):
-                    self.app_data['last_dir_browsed'] = expanduser("~")
-                return self.app_data['last_dir_browsed']
+        if not self.app_data.get('last_dir_browsed'):
+            self.app_data['last_dir_browsed'] = expanduser("~")
+        return self.app_data['last_dir_browsed']
 
     @last_dir_browsed.setter
     def last_dir_browsed(self, path):
-        if not self.app_data:
-            self.app_data = {}
-        if self.using_appdata:
-            self.app_data['last_dir_browsed'] = path
+         self.app_data['last_dir_browsed'] = path
 
     @property
     def files_to_ignore(self):
+
         if not self.app_data.get('files_to_ignore'):
             self.app_data['files_to_ignore'] = default_ignore
         return self.app_data['files_to_ignore']
 
+
     @files_to_ignore.setter
     def files_to_ignore(self, pattern_list):
-        if self.using_appdata:
-            self.app_data['files_to_ignore'] = pattern_list
+
+        self.app_data['files_to_ignore'] = pattern_list
 
     @property
     def files_to_use(self):
-        if self.using_appdata:
-            if self.app_data:
-                if not self.app_data.get('files_to_use'):
-                    self.app_data['files_to_use'] = default_use
-                return self.app_data['files_to_use']
-        else:
-            return default_use
+        if not self.app_data.get('files_to_use'):
+            self.app_data['files_to_use'] = default_use
+        return self.app_data['files_to_use']
 
     @files_to_use.setter
     def files_to_use(self, pattern_list):
-        if self.using_appdata:
-            self.app_data['files_to_use'] = pattern_list
+        self.app_data['files_to_use'] = pattern_list
 
     def reset_ignore_file(self):
         self.app_data['files_to_ignore'] = default_ignore
