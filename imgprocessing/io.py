@@ -27,10 +27,12 @@ from appdata import HarpDataError
 
 class Imreader():
     def __init__(self, pathlist):
-        if sys.platform == "win32" or sys.platform == "win64":
+        if sys.platform in ["win32", "win64"]:
             self.reader = self._read_skimage
-        else:
+        elif sys.platform in ["linux", 'linux2', 'linux3']:
             self.reader = self._read_skimage
+        elif sys.platform in ['darwin']:
+            self.reader = self._read_cv2
 
         self.expected_shape = self.imread(pathlist[0], False)
 
@@ -45,13 +47,17 @@ class Imreader():
         else:
             return im.shape
 
-    # def _read_cv2(self, imgpath):
-    #     im = cv2.imread(imgpath, cv2.CV_LOAD_IMAGE_UNCHANGED)
-    #     if im == None:
-    #         im_name = os.path.basename(imgpath)
-    #         raise HarpDataError('failed to load {}'.format(im_name))
-    #     else:
-    #         return im
+    def _read_cv2(self, imgpath):
+        try:
+            im = cv2.imread(imgpath, cv2.CV_LOAD_IMAGE_UNCHANGED)
+        except Exception:
+            raise HarpDataError('failed to load {}'.format(im_name))
+
+        if im == None:  #CV2 fails silently sometimes
+            im_name = os.path.basename(imgpath)
+            raise HarpDataError('failed to load {}'.format(im_name))
+        else:
+            return im
 
     def _read_skimage(self, imgpath):
         try:
