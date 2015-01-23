@@ -104,7 +104,7 @@ class MainWidget(QtGui.QWidget):
         layout.addWidget(self.view)
         self.setLayout(layout)
 
-        im = QtCore.QString(image_path)
+
         img = QtGui.QImage(image_path)
         #print '============', img.height()
         self.image = QtGui.QPixmap(img)
@@ -174,9 +174,9 @@ class MainWidget(QtGui.QWidget):
 
 
     def mouseMove(self, event):
-        '''
+        """
         Called when mouse is moved with button pressed
-        '''
+        """
         #print "frame ", self.parent.geometry().width()
         #print "widget ", self.geometry().width()
         pos = (event.pos().x() + self.img_dist_left, event.pos().y() + self.img_dist_top)
@@ -185,7 +185,15 @@ class MainWidget(QtGui.QWidget):
             self.x = pos[0]
             self.y = pos[1]
             self.cornerSet = True
-            #print "corner: ",self.x, " ", self.y
+
+            #bodge
+            self.height = pos[1] - self.y
+            self.width = pos[0] - self.x
+            if self.width < 20:
+                self.width = 20
+            if self.height < 20:
+                self.height = 20
+            self.pixmap_item.rubberBand.setGeometry(self.x, self.y, self.width, self.height)
             return
 
         #print "event: ", pos
@@ -194,6 +202,10 @@ class MainWidget(QtGui.QWidget):
             #print self.x, ":", self.y
             self.height = pos[1] - self.y
             self.width = pos[0] - self.x
+            if self.width < 20:
+                self.width = 20
+            if self.height < 20:
+                self.height = 20
             self.pixmap_item.rubberBand.setGeometry(self.x, self.y, self.width, self.height)
         else:#Band has been drawn, bow resize it
             self.resizeRect(event)

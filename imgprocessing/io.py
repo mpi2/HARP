@@ -65,6 +65,7 @@ class Imreader():
         try:
             im = cv2.imread(imgpath, cv2.CV_LOAD_IMAGE_UNCHANGED)
         except Exception as e:
+            im_name = os.path.basename(imgpath)
             raise HarpDataError('failed to load {}'.format(im_name))
 
         if im == None:  #CV2 fails silently sometimes
