@@ -220,6 +220,7 @@ class Autofill(object):
         :param obj self.mainwindow:
             Although not technically part of the class, can still use this method as if it was part of the HARP class.
         """
+
         try:
             input = str(self.mainwindow.ui.lineEditInput.text())
             path, folder_name = os.path.split(input)
@@ -229,6 +230,7 @@ class Autofill(object):
                 output_full = os.path.join(output_path, self.mainwindow.full_name)
                 self.mainwindow.ui.lineEditOutput.setText(os.path.abspath(output_full))
             else:
+                print "autofill set output folder"
                 output_full = os.path.join(path, "processed_recons", folder_name)
 
                 self.mainwindow.ui.lineEditOutput.setText(os.path.abspath(output_full))

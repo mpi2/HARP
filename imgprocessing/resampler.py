@@ -39,6 +39,7 @@ if windows:
 else:
     import cv2
 import lib.nrrd as nrrd
+
 from imgprocessing.io import Imreader
 from multiprocessing import Value
 import tempfile
@@ -256,6 +257,10 @@ class HarpDataError(Exception):
 
 if __name__ == '__main__':
 
+    class DummyUpdate():
+        def emit(self, msg):
+            print msg
+
     import argparse
     if __name__ == "__main__":
 
@@ -267,5 +272,6 @@ if __name__ == '__main__':
 
         args = parser.parse_args()
 
+        update = DummyUpdate()
         #scale_by_integer_factor(args.input_dir, int(args.scale_factor), args.output_path)
-        resample(args.input_dir, args.scale_factor, args.output_path, args.scaleby_int)
+        resample(args.input_dir, args.scale_factor, args.output_path, args.scaleby_int, update)

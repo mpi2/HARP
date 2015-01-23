@@ -20,7 +20,7 @@ if sys.platform == "win32" or sys.platform == "win64":
 else:
     import cv2
 import os
-import skimage.io as io
+import skimage
 
 from appdata import HarpDataError
 
@@ -30,7 +30,7 @@ class Imreader():
         if sys.platform in ["win32", "win64"]:
             self.reader = self._read_skimage
         elif sys.platform in ["linux", 'linux2', 'linux3']:
-            self.reader = self._read_skimage
+            self.reader = self._read_cv2
         elif sys.platform in ['darwin']:
             self.reader = self._read_cv2
 
@@ -61,7 +61,7 @@ class Imreader():
 
     def _read_skimage(self, imgpath):
         try:
-            im = io.imread(imgpath)
+            im = skimage.io.imread(imgpath)
         except Exception:
             im_name = os.path.basename(imgpath)
             raise HarpDataError('failed to load {}'.format(im_name))
