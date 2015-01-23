@@ -20,17 +20,35 @@ if sys.platform == "win32" or sys.platform == "win64":
 else:
     import cv2
 import os
-import skimage
-
+#import skimage
+import skimage.io as io
+import lib.tifffile as tifffile
+from PIL import Image
+import matplotlib.pyplot as plt
+import numpy as np
 from appdata import HarpDataError
 
 
 class Imreader():
     def __init__(self, pathlist):
+
+        if pathlist[0].lower().endswith(('tif', 'tiff')):
+            self.usetiffile = True
+        else:
+            self.usetiffile = False
+
         if sys.platform in ["win32", "win64"]:
-            self.reader = self._read_skimage
+            if self.usetiffile:
+                self.reader = self._read_skimage_tiff
+            else:
+                self.reader = self._read_skimage
+
         elif sys.platform in ["linux", 'linux2', 'linux3']:
-            self.reader = self._read_cv2
+            if self.usetiffile:
+                self.reader = self._read_skimage_tiff
+            else:
+                self.reader = self._read_skimage
+
         elif sys.platform in ['darwin']:
             self.reader = self._read_cv2
 
@@ -43,34 +61,40 @@ class Imreader():
             if im.shape == self.expected_shape:
                 return im
             else:
-                raise HarpDataError("{} has unexpected dimensions").format(imgpath)
+                raise HarpDataError("{} has unexpected dimensions".format(imgpath))
         else:
             return im.shape
 
     def _read_cv2(self, imgpath):
         try:
             im = cv2.imread(imgpath, cv2.CV_LOAD_IMAGE_UNCHANGED)
-        except Exception:
+        except Exception as e:
             raise HarpDataError('failed to load {}'.format(im_name))
 
         if im == None:  #CV2 fails silently sometimes
             im_name = os.path.basename(imgpath)
-            raise HarpDataError('failed to load {}'.format(im_name))
+            raise HarpDataError('failed to load {}: {}'.format(im_name, e))
         else:
             return im
 
     def _read_skimage(self, imgpath):
         try:
-            im = skimage.io.imread(imgpath)
-        except Exception:
+            im = io.imread(imgpath, plugin='tifffile')
+        except Exception as e:
             im_name = os.path.basename(imgpath)
-            raise HarpDataError('failed to load {}'.format(im_name))
+            raise HarpDataError('failed to load {}: {}'.format(im_name, e))
         else:
             return im
 
+    def _read_skimage_tiff(self, imgpath):
+        try:
+            im = tifffile.imread(imgpath)
+        except Exception as e:
+            im_name = os.path.basename(imgpath)
+            raise HarpDataError('failed to load {}: {}'.format(im_name, e))
+        else:
+            return im
 
-    # def _read_ndimage(self, imgpath):
-    #     return scipy.ndimage.imread(imgpath)
 
 
 def imwrite(imgpath, img):
