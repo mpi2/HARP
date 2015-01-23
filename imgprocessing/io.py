@@ -20,12 +20,8 @@ if sys.platform == "win32" or sys.platform == "win64":
 else:
     import cv2
 import os
-#import skimage
 import skimage.io as io
 import lib.tifffile as tifffile
-from PIL import Image
-import matplotlib.pyplot as plt
-import numpy as np
 from appdata import HarpDataError
 
 

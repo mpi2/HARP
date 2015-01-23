@@ -1,5 +1,5 @@
 # -*- mode: python -*-
-a = Analysis(['harp.py'],
+a = Analysis(['.\\harp.py'],
              pathex=['C:\\Users\\n.horner\\HARP'],
              hiddenimports=[],
              hookspath=None,
