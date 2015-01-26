@@ -37,6 +37,6 @@ try:
             print "done."
 
 except ImportError:
-    print "Couldn't locate 'easy_install'. Do you have setuptools installed on your machine? Try sudo apt-get install python-setuptools."
+    print "Couldn't locate 'easy_install'. Do you have setuptools installed on your machine? Try sudo apt-get install python-setuptools (Linux) or use Homebrew (Mac)."
 
 
