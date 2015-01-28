@@ -1,2 +1,12 @@
 *.pyc
-ImageJ/
+docs/
+.idea/
+
+.idea/
+*.db
+*.raw
+*.tif
+*.tiff
+*.nrrd
+dist/
+build/
