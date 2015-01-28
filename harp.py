@@ -80,10 +80,12 @@ class MainWindow(QtGui.QMainWindow):
         :ivar str self.pixel_size: Pixel size. Initialized as '' to indicate no data
         """
         # Standard setup of class from qt designer Ui class
+
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.app = app
+        self.HARP_VERSION = '2.0.1'
 
         # Store app-specific data such as last directory browsed
         self.app_data = AppData()
@@ -310,8 +312,8 @@ l
     def about_message(self):
         """ Short description about what HARP is and its version"""
         QtGui.QMessageBox.information(self, 'Message', (
-            'HARP v1.0.1: Harwell Automated Recon Processor\n\n'
-            'Crop, scale and compress reconstructed images from microCT or OPT data.\n'))
+            'HARP v{}: Harwell Automated Recon Processor/ Crop, scale and compress reconstructed images from microCT"'
+            ' or OPT data.\n'.format(self.HARP_VERSION)))
 
     def user_guide(self):
         """ Loads up pdf help file
