@@ -31,20 +31,21 @@ from appdata import HarpDataError
 class Imreader():
     def __init__(self, pathlist):
 
+
         if pathlist[0].lower().endswith(('tif', 'tiff')):
-            self.usetiffile = True
+            usetiffile = True
         else:
-            self.usetiffile = False
+            usetiffile = False
 
         if sys.platform in ["win32", "win64"]:
-            if self.usetiffile:
-                self.reader = self._read_skimage_tiff
+            if usetiffile:
+                self.reader = self._read_tifffile
             else:
                 self.reader = self._read_skimage
 
         elif sys.platform in ["linux", 'linux2', 'linux3']:
-            if self.usetiffile:
-                self.reader = self._read_skimage_tiff
+            if usetiffile:
+                self.reader = self._read_tifffile
             else:
                 self.reader = self._read_skimage
 
@@ -61,6 +62,7 @@ class Imreader():
                 return im
             else:
                 raise HarpDataError("{} has unexpected dimensions".format(imgpath))
+
         else:
             return im.shape
 
@@ -79,14 +81,14 @@ class Imreader():
 
     def _read_skimage(self, imgpath):
         try:
-            im = io.imread(imgpath, plugin='tifffile')
+            im = io.imread(imgpath)
         except Exception as e:
             im_name = os.path.basename(imgpath)
             raise HarpDataError('failed to load {}: {}'.format(im_name, e))
         else:
             return im
 
-    def _read_skimage_tiff(self, imgpath):
+    def _read_tifffile(self, imgpath):
         try:
             im = tifffile.imread(imgpath)
         except Exception as e:
