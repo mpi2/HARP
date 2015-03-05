@@ -191,7 +191,7 @@ class Queuejob(object):
             # SPR (should prob get rid of this
             self.mainwindow.ui.lineEditCTSPR.setText(spr)
             # Scan folder
-            self.mainwindow.ui.lineEditScan.setText(self.scan_folder)
+            self.mainwindow.ui.lineEditScan.setText(self.mainwindow.scan_folder)
             # Output folder
             self.mainwindow.ui.lineEditOutput.setText(out_dir_original)
             # derived name
