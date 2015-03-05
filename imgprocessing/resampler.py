@@ -123,8 +123,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
     final_scaled_slices = []
 
-
-    #Scale in x_z plane
+    # Scale in x_z plane
     count = 0
     for y in range(xy_scaled_mmap.shape[1]):
         count += 1
@@ -158,7 +157,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
     nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
 
-    temp_xyz.close() # deletes temp file
+    temp_xy.close()  # deletes temp file
     temp_xyz.close()
 
 def _remove_temp_files(file_list):

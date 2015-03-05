@@ -135,6 +135,8 @@ class AppData(object):
         """
         files = []
 
+        print 'folder ', os.listdir(input_folder)
+
         for fn in os.listdir(input_folder):
             if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in self.files_to_ignore):
                 continue
