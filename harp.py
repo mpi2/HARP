@@ -320,12 +320,12 @@ l
 
         For windows computers uses *os.startfile*. For linux requires *Evince* installed to view the pdf.
         """
-        user_man = os.path.join(self.dir, "HARP_user_guide.pdf")
+        user_man = os.path.join(self.dir, "HARP_v2.0_user_guide.pdf")
 
         if sys.platform == "win32" or sys.platform == "win64":
             if not os.path.exists(user_man):
                 # if HARP run from exe
-                user_man = os.path.join("..", "..", "HARP_user_guide.pdf")
+                user_man = os.path.join("..", "..", "HARP_v2.0_user_guide.pdf")
             os.startfile(user_man)
         else:
             opener = "evince"
