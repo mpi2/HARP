@@ -85,7 +85,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.app = app
-        self.HARP_VERSION = '2.0.2'
+        self.HARP_VERSION = '2.0.3'
 
         # Store app-specific data such as last directory browsed
         self.app_data = AppData()
