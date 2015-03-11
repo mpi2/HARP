@@ -24,8 +24,8 @@ else:
     import cv2
 import os
 import skimage.io as io
-import lib.tifffile as tifffile
 from appdata import HarpDataError
+from libtiff import TIFF
 
 
 class Imreader():
@@ -89,8 +89,15 @@ class Imreader():
             return im
 
     def _read_tifffile(self, imgpath):
+        # try:
+        #     im = tifffile.imread(imgpath)
+        # except Exception as e:
+        #     im_name = os.path.basename(imgpath)
+        #     raise HarpDataError('failed to load {}: {}'.format(im_name, e))
+        # else:
+        #     return im
         try:
-            im = tifffile.imread(imgpath)
+            im = TIFF.open(imgpath).read_image()
         except Exception as e:
             im_name = os.path.basename(imgpath)
             raise HarpDataError('failed to load {}: {}'.format(im_name, e))

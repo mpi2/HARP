@@ -133,14 +133,16 @@ class ProcessingThread(QtCore.QThread):
             #===============================================
             try:
                 cropped_imgs_list = self.cropping()
-            except Exception:
-                self.emit("Cropping failed!")
+            except Exception as e:
+                self.update.emit("Cropping failed!: {}".format(e))
+                self.session_log.write("Cropping failed!: {}\n".format(e))
                 continue
 
             try:
                 self.scaling()
-            except Exception:
-                self.emit("Scaling failed!")
+            except Exception as e:
+                self.update.emit("Scaling failed!: {}".format(e))
+                self.session_log.write("Scaling failed!: {}\n".format(e))
                 continue
 
             # Cropping function only copies over image files. Need to copy over other files now scaling and cropping
