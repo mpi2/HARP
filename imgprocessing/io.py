@@ -97,7 +97,7 @@ class Imreader():
         # else:
         #     return im
         try:
-            im = TIFF.open(imgpath).read_image()
+            im = io.imread(imgpath)
         except Exception as e:
             im_name = os.path.basename(imgpath)
             raise HarpDataError('failed to load {}: {}'.format(im_name, e))
