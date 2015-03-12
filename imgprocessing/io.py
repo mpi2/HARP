@@ -25,7 +25,7 @@ else:
 import os
 import skimage.io as io
 from appdata import HarpDataError
-from libtiff import TIFF
+# from libtiff import TIFF
 
 
 class Imreader():
