@@ -121,8 +121,6 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     xyz_scaled_dims = []
     first = True
 
-    final_scaled_slices = []
-
     # Scale in x_z plane
     count = 0
     for y in range(xy_scaled_mmap.shape[1]):
@@ -146,13 +144,12 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
             xyz_scaled_dims.append(scaled_xz.shape[0])
             xyz_scaled_dims.append(scaled_xz.shape[1])
 
-        final_scaled_slices.append(scaled_xz)
         if windows:
             scaled_xz.tofile(temp_xyz.file)
         else:
             scaled_xz.tofile(temp_xyz)
 
-    #create memory mapped version of the temporary xy scaled slices
+    #create memory mapped version of the temporary xyz scaled slices
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
     nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
