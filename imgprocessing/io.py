@@ -112,17 +112,12 @@ class Imwriter():
         tifffile.imsave(path, img)
 
     def png_writer(self, img, path):
-        print img
-        print path
-        io.imsave(path, img)
+        print 'png write'
+        cv2.imwrite(path, img)
 
     def imwrite(self, img, path):
         self.writer(img, path)
 
-
-
-def imwrite(imgpath, img):
-    cv2.imwrite(imgpath, img)
 
 def imread():
     pass

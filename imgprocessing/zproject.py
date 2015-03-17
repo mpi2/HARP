@@ -77,7 +77,6 @@ class Zproject(QtCore.QThread):
             print "performing z-projection on sparse file list"
 
             max_array = self.max_projection(sparse_filelist, imdims, dtype)
-            max_array = max_array.astype(np.uint8)
             imwriter = Imwriter(self.zprojection_output)
             imwriter.imwrite(max_array, self.zprojection_output)
 
