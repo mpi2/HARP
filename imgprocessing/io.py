@@ -107,7 +107,7 @@ class Imreader():
 
 
 def imwrite(imgpath, img):
-    cv2.imwrite(imgpath, img)
+    io.imsave(imgpath, img)
 
 def imread():
     pass
