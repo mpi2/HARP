@@ -88,6 +88,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     reader = Imreader(img_path_list)
 
     for img_path in img_path_list:
+        print img_path
         count += 1
         if count % 50 == 0:
             if thread_terminate_flag.value == 1:

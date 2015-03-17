@@ -24,7 +24,7 @@ import numpy as np
 from SimpleITK import ReadImage, OtsuThreshold, ConnectedComponent, RelabelComponent, LabelStatisticsImageFilter
 from imgprocessing import zproject
 sys.path.append("..")
-from imgprocessing.io import Imreader, imwrite
+from imgprocessing.io import Imreader, Imwriter
 from appdata import HarpDataError
 
 
@@ -78,6 +78,8 @@ class Crop():
         # Get list of files
         #imglist = processing.getfilelist(self.in_dir)
         imglist = self.app_data.getfilelist(self.in_dir)
+
+
 
         if len(imglist) < 1:
             raise HarpDataError("no image files found in " + self.in_dir)
@@ -134,7 +136,10 @@ class Crop():
             except IndexError as e:
                 raise HarpDataError("Crop box out of range. Is {} corrupted?".format(filename))
 
-            imwrite(crop_out, imcrop)
+            if count < 1:
+                # Set up the correct writer based on the first image to be written
+                imwriter = Imwriter(crop_out)
+            imwriter.imwrite(imcrop, crop_out)
             outpathslist.append(crop_out)
 
         self.callback("success")

@@ -24,7 +24,7 @@ import sys
 import numpy as np
 sys.path.append('..')
 from appdata import HarpDataError
-from imgprocessing.io import Imreader, imwrite
+from imgprocessing.io import Imreader, Imwriter
 
 
 
@@ -77,7 +77,9 @@ class Zproject(QtCore.QThread):
             print "performing z-projection on sparse file list"
 
             max_array = self.max_projection(sparse_filelist, imdims, dtype)
-            imwrite(self.zprojection_output, max_array)
+            max_array = max_array.astype(np.uint8)
+            imwriter = Imwriter(self.zprojection_output)
+            imwriter.imwrite(max_array, self.zprojection_output)
 
         self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
 

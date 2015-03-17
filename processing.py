@@ -143,6 +143,7 @@ class ProcessingThread(QtCore.QThread):
             except Exception as e:
                 self.update.emit("Scaling failed!: {}".format(e))
                 self.session_log.write("Scaling failed!: {}\n".format(e))
+                raise # To see the stack trace
                 continue
 
             # Cropping function only copies over image files. Need to copy over other files now scaling and cropping

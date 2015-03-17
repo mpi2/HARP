@@ -18,14 +18,14 @@ E-mail the developers: sig@har.mrc.ac.uk
 """
 import sys
 sys.path.append('..')
+import skimage.io as io
 if sys.platform == "win32" or sys.platform == "win64":
     from lib import cv2
 else:
     import cv2
 import os
-import skimage.io as io
 from appdata import HarpDataError
-# from libtiff import TIFF
+from lib import tifffile
 
 
 class Imreader():
@@ -39,13 +39,13 @@ class Imreader():
 
         if sys.platform in ["win32", "win64"]:
             if usetiffile:
-                self.reader = self._read_tifffile
+                self.reader = self._read_tiffs
             else:
                 self.reader = self._read_skimage
 
         elif sys.platform in ["linux", 'linux2', 'linux3']:
             if usetiffile:
-                self.reader = self._read_tifffile
+                self.reader = self._read_tiffs
             else:
                 self.reader = self._read_skimage
 
@@ -88,16 +88,9 @@ class Imreader():
         else:
             return im
 
-    def _read_tifffile(self, imgpath):
-        # try:
-        #     im = tifffile.imread(imgpath)
-        # except Exception as e:
-        #     im_name = os.path.basename(imgpath)
-        #     raise HarpDataError('failed to load {}: {}'.format(im_name, e))
-        # else:
-        #     return im
+    def _read_tiffs(self, imgpath):
         try:
-            im = io.imread(imgpath)
+            im = tifffile.imread(imgpath)
         except Exception as e:
             im_name = os.path.basename(imgpath)
             raise HarpDataError('failed to load {}: {}'.format(im_name, e))
@@ -106,8 +99,30 @@ class Imreader():
 
 
 
+class Imwriter():
+    def __init__(self, img_path):
+        if img_path.lower().endswith(('tif', 'tiff')):
+            self.writer = self.tiff_writer
+        elif img_path.lower().endswith('png'):
+            self.writer = self.png_writer
+        else:
+            self.writer = self.skimage_write
+
+    def tiff_writer(self, img, path):
+        tifffile.imsave(path, img)
+
+    def png_writer(self, img, path):
+        print img
+        print path
+        io.imsave(path, img)
+
+    def imwrite(self, img, path):
+        self.writer(img, path)
+
+
+
 def imwrite(imgpath, img):
-    io.imsave(imgpath, img)
+    cv2.imwrite(imgpath, img)
 
 def imread():
     pass
