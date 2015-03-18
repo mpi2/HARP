@@ -115,6 +115,9 @@ class Imwriter():
         print 'png write'
         cv2.imwrite(path, img)
 
+    def skimage_write(self, img, path):
+        io.imsave(path, img)
+
     def imwrite(self, img, path):
         self.writer(img, path)
 
