@@ -51,21 +51,27 @@ class Autofill(object):
         input = str(self.mainwindow.ui.lineEditInput.text())
 
         # Get the folder name and path name
-        path, folder_name = os.path.split(input)
+        # path, folder_name = os.path.split(input)
 
         try:
-            # I think some times the log file is .txt and sometimes .log, a check for both types and other
-            # old formats of log files is checked as follows:
-            if os.path.exists(os.path.join(path,folder_name,folder_name+".txt")):
-                recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
-            elif os.path.exists(os.path.join(path,folder_name,folder_name+"_rec.txt")):
-                recon_log_path = os.path.join(path,folder_name,folder_name+"_rec.txt")
-            elif os.path.exists(os.path.join(path,folder_name,folder_name+".log")):
-                recon_log_path = os.path.join(path,folder_name,folder_name+".log")
-            elif os.path.exists(os.path.join(path,folder_name,folder_name+"_rec.log")):
-                recon_log_path = os.path.join(path,folder_name,folder_name+"_rec.log")
-            else:
-                raise Exception('No log file')
+            # # I think some times the log file is .txt and sometimes .log, a check for both types and other
+            # # old formats of log files is checked as follows:
+            # if os.path.exists(os.path.join(path,folder_name,folder_name+".txt")):
+            #     recon_log_path = os.path.join(path,folder_name,folder_name+".txt")
+            # elif os.path.exists(os.path.join(path,folder_name,folder_name+"_rec.txt")):
+            #     recon_log_path = os.path.join(path,folder_name,folder_name+"_rec.txt")
+            # elif os.path.exists(os.path.join(path,folder_name,folder_name+".log")):
+            #     recon_log_path = os.path.join(path,folder_name,folder_name+".log")
+            # elif os.path.exists(os.path.join(path,folder_name,folder_name+"_rec.log")):
+            #     recon_log_path = os.path.join(path,folder_name,folder_name+"_rec.log")
+            # else:
+            #     raise Exception('No log file')
+
+            log_paths = [f for f in os.listdir(input) if f.endswith("_rec.log")]
+
+            if len(log_paths) == 1:
+                recon_log_path = os.path.join(input, log_paths[0])
+
             # To make sure the path is in the correct format (prob not necessary..)
             self.mainwindow.recon_log_path = os.path.abspath(recon_log_path)
 
@@ -107,10 +113,10 @@ class Autofill(object):
         :return:
         """
         # Regex is different for opt and uct as they have different recon files
-        if modality == "OPT":
-            prog = re.compile("^Image Pixel Size \(um\)=(\w+.\w+)")
-        else:
-            prog = re.compile("^Pixel Size \(um\)\=(\w+.\w+)")
+        # if modality == "OPT":
+        prog = re.compile("^Image Pixel Size \(um\)=\s*(\w+.\w+)")
+        # else:
+        #     prog = re.compile("^Pixel Size \(um\)\=(\w+.\w+)")
 
         # for loop to go through the recon log file
         for line in recon_log_file:

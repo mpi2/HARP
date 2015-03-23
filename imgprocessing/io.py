@@ -31,6 +31,7 @@ from lib import tifffile
 class Imreader():
     def __init__(self, pathlist):
 
+        print "\n".join(pathlist)
 
         if pathlist[0].lower().endswith(('tif', 'tiff')):
             usetiffile = True
