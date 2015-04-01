@@ -25,7 +25,7 @@ print "Downloading dependencies..."
 # easy_install first
 try:
     from setuptools.command import easy_install
-    dependencies = ["six," "numpy", "scikit-image", "pyyaml", "PIL", "SimpleITK"]
+    dependencies = ["six", "numpy", "scikit-image", "pyyaml", "PIL", "SimpleITK"]
 
     for dep in dependencies:
 
