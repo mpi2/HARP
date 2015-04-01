@@ -36,6 +36,8 @@ class Imreader():
         else:
             usetiffile = False
 
+        print "utf", usetiffile
+
         if sys.platform in ["win32", "win64"]:
             if usetiffile:
                 self.reader = self._read_tiffs

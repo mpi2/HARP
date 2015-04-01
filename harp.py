@@ -56,6 +56,8 @@ from imgprocessing import zproject
 import manualcrop
 from appdata import AppData
 import multiprocessing as mp
+import version
+
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -85,7 +87,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.app = app
-        self.HARP_VERSION = '2.0.7'
+
 
         # Store app-specific data such as last directory browsed
         self.app_data = AppData()
@@ -313,7 +315,7 @@ l
         """ Short description about what HARP is and its version"""
         QtGui.QMessageBox.information(self, 'Message', (
             'HARP v{}: Harwell Automated Recon Processor/ Crop, scale and compress reconstructed images from microCT"'
-            ' or OPT data.\n'.format(self.HARP_VERSION)))
+            ' or OPT data.\n'.format(version.__version__)))
 
     def user_guide(self):
         """ Loads up pdf help file
