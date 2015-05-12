@@ -2,8 +2,6 @@
 .py~
 docs/
 .idea/
-
-.idea/
 *.db
 *.raw
 *.tif
@@ -11,3 +9,4 @@ docs/
 *.nrrd
 dist/
 build/
+*.spec

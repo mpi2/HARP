@@ -21,7 +21,8 @@ import argparse
 import os
 import sys
 import numpy as np
-from SimpleITK import ReadImage, OtsuThreshold, ConnectedComponent, RelabelComponent, LabelStatisticsImageFilter
+from SimpleITK import ReadImage, WriteImage, GetImageFromArray, GetArrayFromImage, OtsuThreshold, ConnectedComponent, \
+    RelabelComponent, LabelStatisticsImageFilter
 from imgprocessing import zproject
 sys.path.append("..")
 from imgprocessing.io import Imreader, Imwriter
@@ -79,15 +80,13 @@ class Crop():
         #imglist = processing.getfilelist(self.in_dir)
         imglist = self.app_data.getfilelist(self.in_dir)
 
-
-
         if len(imglist) < 1:
             raise HarpDataError("no image files found in " + self.in_dir)
 
         if auto:
             cb = self.auto_bounding_box(imglist)
 
-            #rearange as dims come in a differenbt order from the different methods
+            #rearange as dims come in a different order from the different methods
             cropbox = (cb[2], cb[3], cb[0], cb[1])
 
         else:
@@ -142,7 +141,7 @@ class Crop():
             imwriter.imwrite(imcrop, crop_out)
             outpathslist.append(crop_out)
 
-        self.callback("success")
+        self.callback("Success")
 
         return outpathslist
 
@@ -186,6 +185,11 @@ class Crop():
         self.imdims = testimg.shape
         padding = int(np.mean(self.imdims) * 0.025)
         bbox = self.pad_bounding_box(bbox, padding)
+
+        # Crop the z-projection and write to metadata
+        zp_arr = GetArrayFromImage(zp_im)
+        zp_crop = GetImageFromArray(zp_arr[bbox[2]:bbox[3], bbox[0]:bbox[1]])
+        WriteImage(zp_crop, os.path.join(self.configOb.meta_path, "crop_result.png"))
 
         return bbox
 
