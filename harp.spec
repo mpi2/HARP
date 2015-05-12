@@ -1,6 +1,6 @@
 # -*- mode: python -*-
-a = Analysis(['.\\harp.py'],
-             pathex=['C:\\Users\\n.horner\\HARP'],
+a = Analysis(['harp.py'],
+             pathex=['C:\\Users\\james.brown\\Documents\\GitHub\\mrchsig\\HARP'],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None)
@@ -12,9 +12,11 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=True )
+          console=False , icon='harp.ico')
 coll = COLLECT(exe,
-               a.binaries,
+               a.binaries + [('msvcp100.dll', 'C:\\Windows\\System32\\msvcp100.dll', 'BINARY'),
+							 ('msvcr100.dll', 'C:\\Windows\\System32\\msvcr100.dll', 'BINARY')]
+			   if sys.platform == 'win32' else a.binaries,
                a.zipfiles,
                a.datas,
                strip=None,
