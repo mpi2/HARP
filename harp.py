@@ -271,6 +271,13 @@ l
         # JAMES - new feature - switch back to "Parameters" tab if necessary so the user can modify options
         self.ui.tabWidget.setCurrentIndex(0)
 
+        # Clear z-projection data from temp file
+        try:
+            if os.path.isfile(self.zprojection_output):
+                os.remove(self.zprojection_output)
+        except OSError as e:
+            print "OSError: problem deleting z-projection - ", e
+
     def dragEnterEvent(self, event):
         """ Handles *drag* section for drag and drop of folders.
 
