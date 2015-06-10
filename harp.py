@@ -88,7 +88,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.app = app
 
-
         # Store app-specific data such as last directory browsed
         self.app_data = AppData()
         self.opttab_populate_patterns()
@@ -103,6 +102,7 @@ class MainWindow(QtGui.QMainWindow):
         self.current_row = 0
         # Set to "" or NA so that HARP can record in the log and GUI there is no data for these parameters. Will be
         # updated later if parameters are identified.
+        self.input_folder = None
         self.scan_folder = "NA"
         self.recon_log_path = "NA"
         self.f_size_out_gb = ""
@@ -660,16 +660,18 @@ l
             :func:`autofill.get_pixel()`,
         """
         # Get the information from the dialog box
-        file_dialog = QtGui.QFileDialog(self)
-        file = file_dialog.getOpenFileName()
+        if self.input_folder:
+            recon_log_path = QtGui.QFileDialog.getOpenFileName(self, 'Select recon log', self.input_folder)
+        else:
+            recon_log_path = QtGui.QFileDialog.getOpenFileName(self, 'Select recon log')
 
         # If a file was chosen get pixel size and update paramaters
-        if file:
+        if recon_log_path:
             try:
                 # Set the text on the recon file box on the GUI
-                self.ui.lineEditCTRecon.setText(file)
+                self.ui.lineEditCTRecon.setText(recon_log_path)
                 # Check it is an actual path (prob not required)
-                self.recon_log_path = os.path.abspath(str(file))
+                self.recon_log_path = os.path.abspath(str(recon_log_path))
                 # Open the log file as read only
                 recon_log_file = open(self.recon_log_path, 'r')
                 # Get pixel size from log file
