@@ -204,7 +204,7 @@ class ProcessingThread(QtCore.QThread):
             # Do not perform any crop as user specified
             self.update.emit("No Crop carried out")
             self.session_log.write("No crop carried out\n")
-            self.autocrop_update_slot("success")
+            self.autocrop_update_slot("Success")
             self.folder_for_scaling = self.config.input_folder
             return
 
@@ -215,7 +215,7 @@ class ProcessingThread(QtCore.QThread):
             # Need to hide non recon files. Puts them in a temp folder until scaling has finished
             self.hide_files()
             self.session_log.write("No crop carried out\n")
-            self.autocrop_update_slot("success")
+            self.autocrop_update_slot("Success")
             # Still need the cropped files list for compression (if it is to take place)
             cropped_list = self.app_data.getfilelist(self.config.cropped_path)
             return cropped_list
@@ -362,7 +362,7 @@ class ProcessingThread(QtCore.QThread):
             self.update.emit(msg)
 
         # Check what the message says
-        if msg == "success":
+        if msg == "Success":
             print "crop finished"
             print msg
             # The run() checks crop_status variable, if "success" lets other processing occur
@@ -537,7 +537,9 @@ class ProcessingThread(QtCore.QThread):
         # for loop through list of temp files
         for line in os.listdir(tmp_crop):
             # copy files back to cropped path
-            shutil.copy(os.path.join(tmp_crop, line), crop_path)
+            file_ = os.path.join(tmp_crop, line)
+            if not os.path.isdir(file_):
+                shutil.copy(file_, crop_path)
 
         # remove temp folder
         shutil.rmtree(tmp_crop)
