@@ -152,10 +152,11 @@ import numpy
 try:
     import _tifffile
 except ImportError:
-    warnings.warn(
-        "failed to import the optional _tifffile C extension module.\n"
-        "Loading of some compressed images will be slow.\n"
-        "Tifffile.c can be obtained at http://www.lfd.uci.edu/~gohlke/")
+    pass
+	#warnings.warn(
+    #    "failed to import the optional _tifffile C extension module.\n"
+    #    "Loading of some compressed images will be slow.\n"
+    #    "Tifffile.c can be obtained at http://www.lfd.uci.edu/~gohlke/")
 
 __version__ = '2014.08.24'
 __docformat__ = 'restructuredtext en'

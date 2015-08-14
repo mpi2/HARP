@@ -61,7 +61,8 @@ def get_pickle(mainwindow):
         config.cropbox_path = "Not_applicable"
         config.crop_manual = "Not_applicable"
         config.crop_option = "No_crop"
-    elif mainwindow.ui.radioButtonMan.isChecked() :
+        config.single_volume = "Not applicable"
+    elif mainwindow.ui.radioButtonMan.isChecked():
         config.xcrop = str(mainwindow.ui.lineEditX.text())
         config.ycrop = str(mainwindow.ui.lineEditY.text())
         config.wcrop = str(mainwindow.ui.lineEditW.text())
@@ -69,50 +70,39 @@ def get_pickle(mainwindow):
         config.crop_option = "Manual"
         config.crop_manual = config.xcrop+" "+config.ycrop+" "+config.wcrop+" "+config.hcrop
         config.cropbox_path = "Not_applicable"
-    elif mainwindow.ui.radioButtonAuto.isChecked() :
+    elif mainwindow.ui.radioButtonAuto.isChecked():
         config.cropbox_path = "Not_applicable"
         config.crop_manual = "Not_applicable"
         config.crop_option = "Automatic"
-    elif mainwindow.ui.radioButtonUseOldCrop.isChecked() :
+    elif mainwindow.ui.radioButtonUseOldCrop.isChecked():
         config.crop_manual = "Not_applicable"
         config.crop_option = "Old_crop"
         config.cropbox_path = "Not_applicable"
     elif mainwindow.ui.radioButtonDerived.isChecked() and mainwindow.ui.radioButtonOPT.isChecked:
         config.crop_manual = "Not_applicable"
         config.crop_option = "Derived"
+
         if mainwindow.derived_output_name:
-            d_path = os.path.join(path_out, str(mainwindow.derived_output_name),"Metadata","cropbox.txt")
+            d_path = os.path.join(path_out, str(mainwindow.derived_output_name), "Metadata", "cropbox.txt")
         else:
-            d_path =os.path.join(path_out, str(mainwindow.ui.lineEditDerivedChnName.text()),"Metadata","cropbox.txt")
+            d_path =os.path.join(path_out, str(mainwindow.ui.lineEditDerivedChnName.text()), "Metadata", "cropbox.txt")
         mainwindow.crop_pickle_path = d_path
         config.cropbox_path = mainwindow.crop_pickle_path
 
-    ##### Get Scaling factors ####
-    if mainwindow.ui.checkBoxSF2.isChecked():
-        config.SF2 = "yes"
-    else :
-        config.SF2 = "no"
+    # Native resolution stack
+    if mainwindow.ui.checkBoxCreateStack.isChecked() and config.crop_option != 'No_crop':
+        config.single_volume = mainwindow.ui.comboBoxStackType.currentText()
+    else:
+        config.single_volume = "Not_applicable"
 
-    if mainwindow.ui.checkBoxSF3.isChecked():
-        config.SF3 = "yes"
-    else :
-        config.SF3 = "no"
+    ##### Get scaling factors ####
+    config.SF2 = "yes" if mainwindow.ui.checkBoxSF2.isChecked() else "no"
+    config.SF3 = "yes" if mainwindow.ui.checkBoxSF3.isChecked() else "no"
+    config.SF4 = "yes" if mainwindow.ui.checkBoxSF4.isChecked() else "no"
+    config.SF5 = "yes" if mainwindow.ui.checkBoxSF5.isChecked() else "no"
+    config.SF6 = "yes" if mainwindow.ui.checkBoxSF6.isChecked() else "no"
 
-    if mainwindow.ui.checkBoxSF4.isChecked():
-        config.SF4 = "yes"
-    else :
-        config.SF4 = "no"
-
-    if mainwindow.ui.checkBoxSF5.isChecked():
-        config.SF5 = "yes"
-    else :
-        config.SF5 = "no"
-
-    if mainwindow.ui.checkBoxSF6.isChecked():
-        config.SF6 = "yes"
-    else :
-        config.SF6 = "no"
-
+    # Arbitrary rescaling
     if mainwindow.ui.checkBoxPixel.isChecked():
         config.pixel_option = "yes"
         config.user_specified_pixel = str(mainwindow.ui.lineEditPixel.text())
@@ -134,7 +124,7 @@ def get_pickle(mainwindow):
     if mainwindow.ui.checkBoxCropComp.isChecked():
         config.crop_comp = "yes"
     else :
-        config.crop_comp  = "No"
+        config.crop_comp = "No"
 
     config.config_path = mainwindow.config_path
     config.tmp_dir = mainwindow.tmp_dir
@@ -150,11 +140,11 @@ def get_pickle(mainwindow):
 
     # If using windows it is important to put \ at the end of folder name
     # Combining scaling and SF into input for imageJ macro
-    config.cropped_path = os.path.join(config.output_folder,"cropped")
-    config.scale_path = os.path.join(config.output_folder,"scaled_stacks")
+    config.cropped_path = os.path.join(config.output_folder, "cropped")
+    config.scale_path = os.path.join(config.output_folder, "scaled_stacks")
     if config.crop_option == "No_crop":
         config.imageJ = config.input_folder+os.sep+'^'+config.scale_path+os.sep+'^'+config.full_name
-    else :
+    else:
         config.imageJ = config.cropped_path+os.sep+'^'+config.scale_path+os.sep+'^'+config.full_name
 
     #========================================================================================
@@ -167,7 +157,8 @@ def get_pickle(mainwindow):
     log.write("Crop_option    "+config.crop_option+"\n")
     log.write("Crop_manual    "+config.crop_manual+"\n")
     log.write("Crop_folder    "+config.cropped_path+"\n")
-    log.write("Cropbox_location "+config.cropbox_path+"\n")
+    log.write("Cropped_volume_type    "+config.single_volume+"\n")
+    log.write("Cropbox_location    "+config.cropbox_path+"\n")
     log.write("Downsize_by_factor_2?    "+config.SF2+"\n")
     log.write("Downsize_by_factor_3?    "+config.SF3+"\n")
     log.write("Downsize_by_factor_4?    "+config.SF4+"\n")
@@ -188,9 +179,9 @@ def get_pickle(mainwindow):
         pickle.dump(config, fh)
 
     # Copy temp files
-    if config.crop_option == "Manual" :
-        if os.path.exists(os.path.join(config.tmp_dir,"max_intensity_z.tif")):
-            shutil.copyfile(os.path.join(config.tmp_dir,"max_intensity_z.tif"), os.path.join(config.meta_path,"max_intensity_z.tif"))
+    if config.crop_option == "Manual":
+        if os.path.exists(os.path.join(config.tmp_dir, "max_intensity_z.tif")):
+            shutil.copyfile(os.path.join(config.tmp_dir, "max_intensity_z.tif"), os.path.join(config.meta_path,"max_intensity_z.tif"))
 
     log.close()
 

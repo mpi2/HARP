@@ -395,6 +395,11 @@ class ProcessingThread(QtCore.QThread):
             os.makedirs(self.config.scale_path)
 
         # Perform scaling for all options used.
+        if self.config.single_volume in ['NRRD', 'TIFF']:
+            ext = str(self.config.single_volume).lower()
+            print ext
+            self.downsample(1, ext=ext)
+
         if self.config.SF2 == "yes":
             self.downsample(2)
 
@@ -414,8 +419,7 @@ class ProcessingThread(QtCore.QThread):
             scale_factor = self.config.SFX_pixel
             self.downsample(scale_factor, scaleby_int=False)
 
-
-    def downsample(self, scale, scaleby_int=True):
+    def downsample(self, scale, scaleby_int=True, ext='nrrd'):
         """
         """
         if self.thread_terminate_flag.value == 1:
@@ -428,7 +432,6 @@ class ProcessingThread(QtCore.QThread):
         self.scale_log_path = os.path.join(self.config.meta_path, str(scale) + "_scale.log")
         self.session_scale = open(self.scale_log_path, 'w+')
 
- 
         if (self.config.recon_pixel_size) and scale != "Pixel":
             new_pixel = float(self.config.recon_pixel_size) * float(scale)
             new_pixel = str(round(new_pixel, 4))
@@ -455,10 +458,15 @@ class ProcessingThread(QtCore.QThread):
         #===============================================================================
         # Normal scaling
         #===============================================================================
-        print "normal scaling"
+        print "Normal scaling"
 
-        out_name = os.path.join(self.config.scale_path,
-                                self.config.full_name + "_scaled_" + str(scale) + "_pixel_" + new_pixel + ".nrrd")
+        # To account for non-scaling
+        if scaleby_int and scale == 1:
+            print ext
+            out_name = os.path.join(self.config.output_folder, self.config.full_name + "." + ext)
+        else:
+            out_name = os.path.join(self.config.scale_path, self.config.full_name + "_scaled_" + str(scale) + "_pixel_"
+                                    + new_pixel + "." + ext)
 
         try:
             files_for_scaling = self.app_data.getfilelist(self.folder_for_scaling)

@@ -50,7 +50,8 @@ from PyQt4.QtCore import pyqtSlot, SIGNAL
 import autofill
 import queuejob
 import Queue
-from ui.mainwindow import Ui_MainWindow
+# from ui.mainwindow import Ui_MainWindow
+from ui.mainwindow_new import Ui_MainWindow
 from processing import ProcessingThread
 from imgprocessing import zproject
 import manualcrop
@@ -144,6 +145,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # Crop button on
         self.ui.checkBoxCropYes.clicked.connect(self.crop_switch)
+
+        # Stack type combo box enabled
+        self.ui.checkBoxCreateStack.clicked.connect(self.create_stack)
 
         # Use Old crop (disable buttons)
         self.ui.radioButtonUseOldCrop.clicked.connect(self.man_crop_off)
@@ -340,8 +344,6 @@ l
             opener = "evince"
             subprocess.call([opener, user_man])
 
-
-
     def reset_screen(self):
         """ Reset screen back to default"""
         self.showMaximized()
@@ -522,6 +524,14 @@ l
         else:
             self.ui.lineEditPixel.setEnabled(False)
 
+    def create_stack(self):
+        """ Turns stack generation (native resolution) on or off
+        """
+        if self.ui.checkBoxCreateStack.isChecked():
+            self.ui.comboBoxStackType.setEnabled(True)
+        else:
+            self.ui.comboBoxStackType.setEnabled(False)
+
     def crop_switch(self):
         """ Turns crop options on or off
 
@@ -532,6 +542,8 @@ l
             self.ui.radioButtonAuto.setEnabled(True)
             self.ui.radioButtonMan.setEnabled(True)
             self.ui.radioButtonUseOldCrop.setEnabled(True)
+            self.ui.checkBoxCreateStack.setEnabled(True)
+
             # Check if OPT modality is selected
             if self.ui.radioButtonOPT.isChecked():
                 self.ui.radioButtonDerived.setEnabled(True)
@@ -550,6 +562,7 @@ l
             self.ui.radioButtonAuto.setEnabled(False)
             self.ui.radioButtonMan.setEnabled(False)
             self.ui.radioButtonUseOldCrop.setEnabled(False)
+            self.ui.checkBoxCreateStack.setEnabled(False)
             self.ui.radioButtonDerived.setEnabled(False)
             self.ui.lineEditDerivedChnName.setEnabled(False)
             self.ui.lineEditX.setEnabled(False)
