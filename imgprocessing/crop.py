@@ -171,7 +171,7 @@ class Crop():
             outval = 255
 
         # Apply otsu threshold and remove all but largest component
-        seg = OtsuThreshold(zp_im, insideValue=0, outsideValue=outval, numberOfHistogramBins=128)
+        seg = OtsuThreshold(zp_im, 0, outval, 128)
         seg = ConnectedComponent(seg)  # label non-background pixels
         seg = RelabelComponent(seg)  # relabel components in order of ascending size
         # seg = seg == 1  # discard all but largest component

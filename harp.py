@@ -181,8 +181,8 @@ class MainWindow(QtGui.QMainWindow):
         # Update name
         self.ui.pushButtonUpdate.clicked.connect(self.update_name)
 
-        # Get scan file manually
-        self.ui.checkBoxPixel.clicked.connect(self.scale_by_pixel_on)
+        # Add arbitrary pixel scaling option to list
+        self.ui.buttonAddPixelSize.clicked.connect(self.add_pixel_scale)
 
         # Start processing recons
         self.ui.pushButtonStart.clicked.connect(self.start_processing)
@@ -204,6 +204,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # Decide which channel to be used for autocrop (this table is on the first tab)
         self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
+
+        self.ui.tableWidgetPixelScales.__class__.keyPressEvent = self.remove_pixel_scale
 
         # When user double clicks on OPT alternative channel open it on the parameter tab
         self.ui.tableWidgetOPT.doubleClicked.connect(self.change_opt_chn)
@@ -317,6 +319,7 @@ l
             # if on tab 0 (parameters) the keyPressEvent is required for choosing
             # the crop channel for OPT. i.e. key press is linked to the function choose_channel_for_crop()
             self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
+            self.ui.tableWidgetPixelScales.__class__.keyPressEvent = self.remove_pixel_scale
         elif self.ui.tabWidget.currentIndex() == 1:
             # if on tab 1 (processing) the keyPressEvent is required for deleting rows
             # i.e. key press is linked to the function delete_rows()
@@ -517,12 +520,34 @@ l
         """
         self.output_folder = text
 
-    def scale_by_pixel_on(self):
+    def add_pixel_scale(self):
         """ Enables boxes for scaling by pixel"""
-        if self.ui.checkBoxPixel.isChecked():
-            self.ui.lineEditPixel.setEnabled(True)
-        else:
-            self.ui.lineEditPixel.setEnabled(False)
+        # if self.ui.checkBoxPixel.isChecked():
+        #     self.ui.lineEditPixel.setEnabled(True)
+        # else:
+        #     self.ui.lineEditPixel.setEnabled(False)
+
+        scale_pixel = str(self.ui.spinPixelSize.value())
+        row_count = self.ui.tableWidgetPixelScales.rowCount()
+
+        for i in range(0, row_count):
+
+            row = self.ui.tableWidgetPixelScales.item(i, 0).text()
+            if row == scale_pixel:
+                QtGui.QMessageBox.warning(self, 'Downsample', "Pixel size {} um already in list.".format(scale_pixel))
+                return
+            elif self.pixel_size and scale_pixel < float(self.pixel_size):
+                QtGui.QMessageBox.warning(self, 'Downsample', "Pixel size must be larger than the native pixel size ({} um)".format(self.pixel_size))
+                return
+
+        self.ui.tableWidgetPixelScales.insertRow(row_count)
+        self.ui.tableWidgetPixelScales.setItem(row_count, 0, QtGui.QTableWidgetItem(scale_pixel))
+
+    def remove_pixel_scale(self, event):
+
+        if event.key() == QtCore.Qt.Key_Delete:
+            selected = self.ui.tableWidgetPixelScales.currentRow()
+            self.ui.tableWidgetPixelScales.removeRow(selected)
 
     def create_stack(self):
         """ Turns stack generation (native resolution) on or off
@@ -1102,6 +1127,7 @@ l
         self.ui.pushButtonStop.setEnabled(False)
 
         self.stop_pro_switch = 1
+
 
     def delete_rows(self, event):
         """ Deletes a row from the processing list on the processing tab

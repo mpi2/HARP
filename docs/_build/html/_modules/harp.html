@@ -195,7 +195,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pushButtonUpdate</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_name</span><span class="p">)</span>
 
         <span class="c"># Get scan file manually</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxPixel</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_by_pixel_on</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxPixel</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_pixel_scale</span><span class="p">)</span>
 
         <span class="c"># Resize for smaller monitors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">actionResize</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resize_screen</span><span class="p">)</span>
@@ -487,7 +487,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span> <span class="o">=</span> <span class="n">text</span>
 </div>
-<div class="viewcode-block" id="MainWindow.scale_by_pixel_on"><a class="viewcode-back" href="../harp.html#harp.MainWindow.scale_by_pixel_on">[docs]</a>    <span class="k">def</span> <span class="nf">scale_by_pixel_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MainWindow.add_pixel_scale"><a class="viewcode-back" href="../harp.html#harp.MainWindow.add_pixel_scale">[docs]</a>    <span class="k">def</span> <span class="nf">add_pixel_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Enables boxes for scaling by pixel&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">checkBoxPixel</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">lineEditPixel</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>

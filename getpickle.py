@@ -103,14 +103,21 @@ def get_pickle(mainwindow):
     config.SF6 = "yes" if mainwindow.ui.checkBoxSF6.isChecked() else "no"
 
     # Arbitrary rescaling
-    if mainwindow.ui.checkBoxPixel.isChecked():
+    # if mainwindow.ui.checkBoxPixel.isChecked():
+    #     config.pixel_option = "yes"
+    #     config.user_specified_pixel = str(mainwindow.ui.lineEditPixel.text())
+    #     config.SF_pixel = float(mainwindow.pixel_size) / float(mainwindow.ui.lineEditPixel.text())
+    #     config.SF_pixel = round(config.SF_pixel,4)
+    #     config.SFX_pixel = float(mainwindow.ui.lineEditPixel.text())/float(mainwindow.pixel_size)
+    #     config.SFX_pixel = round(config.SFX_pixel,4)
+
+    num_rows = mainwindow.ui.tableWidgetPixelScales.rowCount()
+    if num_rows > 0:
         config.pixel_option = "yes"
-        config.user_specified_pixel = str(mainwindow.ui.lineEditPixel.text())
-        config.SF_pixel = float(mainwindow.pixel_size) / float(mainwindow.ui.lineEditPixel.text())
-        config.SF_pixel = round(config.SF_pixel,4)
-        config.SFX_pixel = float(mainwindow.ui.lineEditPixel.text())/float(mainwindow.pixel_size)
-        config.SFX_pixel = round(config.SFX_pixel,4)
-    else :
+        config.user_specified_pixel = [mainwindow.ui.tableWidgetPixelScales.item(i, 0).text() for i in range(0, num_rows)]
+        config.SF_pixel = [round(float(mainwindow.pixel_size) / float(pixel_size), 4) for pixel_size in config.user_specified_pixel]
+        config.SFX_pixel = [round(float(pixel_size)/float(mainwindow.pixel_size), 4) for pixel_size in config.user_specified_pixel]
+    else:
         config.user_specified_pixel = "Not applicable"
         config.pixel_option = "no"
         config.SF_pixel = "Not applicable"
@@ -165,8 +172,8 @@ def get_pickle(mainwindow):
     log.write("Downsize_by_factor_5?    "+config.SF5+"\n")
     log.write("Downsize_by_factor_6?    "+config.SF6+"\n")
     log.write("Downsize_by_pixel?    "+config.pixel_option+"\n")
-    log.write("User_specified_pixel_size?    "+config.user_specified_pixel+"\n")
-    log.write("Downsize_value_for_pixel    "+str(config.SF_pixel)+"\n")
+    log.write("User_specified_pixel_size?    "+", ".join(map(str, config.user_specified_pixel))+"\n")
+    log.write("Downsize_value_for_pixel    "+", ".join(map(str, config.SF_pixel))+"\n")
     log.write("Compression_of_scans_and_original_recon?    "+config.scans_recon_comp+"\n")
     log.write("Compression_of_cropped_recon?    "+config.crop_comp+"\n")
     log.write("ImageJconfig    "+config.imageJ+"\n")

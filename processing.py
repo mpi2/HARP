@@ -416,8 +416,8 @@ class ProcessingThread(QtCore.QThread):
             self.downsample(6)
 
         if self.config.pixel_option == "yes":
-            scale_factor = self.config.SFX_pixel
-            self.downsample(scale_factor, scaleby_int=False)
+            for scale_factor in self.config.SFX_pixel:
+                self.downsample(scale_factor, scaleby_int=False)
 
     def downsample(self, scale, scaleby_int=True, ext='nrrd'):
         """

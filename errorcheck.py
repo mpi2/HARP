@@ -105,27 +105,36 @@ def errorCheck(mainwindow):
             return
 
     # Check pixel size is a number
-    if mainwindow.ui.checkBoxPixel.isChecked() :
-
-        try:
-            float(mainwindow.ui.lineEditPixel.text())
-        except ValueError:
-            if not mainwindow.ui.lineEditPixel.text():
-                QtGui.QMessageBox.warning(mainwindow, 'Message', 'Warning: User has not specified a new pixel size value')
-                mainwindow.stop = True
-                return
-            else :
-                QtGui.QMessageBox.warning(mainwindow, 'Message', 'Warning: User defined pixel is not a numerical value')
-                mainwindow.stop = True
-                return
+    # if mainwindow.ui.checkBoxPixel.isChecked() :
+    #
+    #     try:
+    #         float(mainwindow.ui.lineEditPixel.text())
+    #     except ValueError:
+    #         if not mainwindow.ui.lineEditPixel.text():
+    #             QtGui.QMessageBox.warning(mainwindow, 'Message', 'Warning: User has not specified a new pixel size value')
+    #             mainwindow.stop = True
+    #             return
+    #         else :
+    #             QtGui.QMessageBox.warning(mainwindow, 'Message', 'Warning: User defined pixel is not a numerical value')
+    #             mainwindow.stop = True
+    #             return
 
     # Check user has not selected to scale by pixel without having a recon folder
-    if mainwindow.ui.checkBoxPixel.isChecked() and mainwindow.pixel_size == "":
-        QtGui.QMessageBox.warning(mainwindow, 'Unable to scale by pixel',
-                                  'Pixel size could not be obtained from original recon log. Unable to scale '
-                                  '"By Pixel (um)"')
-        mainwindow.stop = True
-        return
+    pixel_size_count = mainwindow.ui.tableWidgetPixelScales.rowCount()
+    if pixel_size_count > 0:
+        if mainwindow.pixel_size == "":
+            QtGui.QMessageBox.warning(mainwindow, 'Unable to scale by pixel',
+                                      'Pixel size could not be obtained from original recon log. Unable to scale '
+                                      '"By Pixel (um)"')
+            mainwindow.stop = True
+            return
+        elif any(float(mainwindow.pixel_size) > mainwindow.ui.tableWidgetPixelScales.item(i, 0).text()
+                 for i in range(0, pixel_size_count)):
+            QtGui.QMessageBox.warning(mainwindow, 'Unable to scale by pixel',
+                                      'Specified pixel sizes must be greater than '
+                                      'the recon pixel size ({} um)'.format(mainwindow.pixel_size))
+            mainwindow.stop = True
+            return
 
     # Check cropping parameters ok
     if mainwindow.ui.radioButtonMan.isChecked():
@@ -204,6 +213,7 @@ def remove_folder_contents(mainwindow, outputFolder):
 
     print "Removing output folder"
     # WARNING: this function will delete the folder and its contents, before creating a new folder
+
     try:
         shutil.rmtree(outputFolder)
         os.makedirs(outputFolder)
