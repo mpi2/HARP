@@ -172,8 +172,12 @@ def get_pickle(mainwindow):
     log.write("Downsize_by_factor_5?    "+config.SF5+"\n")
     log.write("Downsize_by_factor_6?    "+config.SF6+"\n")
     log.write("Downsize_by_pixel?    "+config.pixel_option+"\n")
-    log.write("User_specified_pixel_size?    "+", ".join(map(str, config.user_specified_pixel))+"\n")
-    log.write("Downsize_value_for_pixel    "+", ".join(map(str, config.SF_pixel))+"\n")
+
+    pixel_size_log = ", ".join(map(str, config.user_specified_pixel)) if config.user_specified_pixel == list else config.user_specified_pixel
+    downsize_log = ", ".join(map(str, config.SF_pixel)) if config.SF_pixel == list else config.SF_pixel
+    log.write("User_specified_pixel_size?    " + pixel_size_log + "\n")
+    log.write("Downsize_value_for_pixel    " + downsize_log + "\n")
+
     log.write("Compression_of_scans_and_original_recon?    "+config.scans_recon_comp+"\n")
     log.write("Compression_of_cropped_recon?    "+config.crop_comp+"\n")
     log.write("ImageJconfig    "+config.imageJ+"\n")

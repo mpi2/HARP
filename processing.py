@@ -266,8 +266,6 @@ class ProcessingThread(QtCore.QThread):
                                        traceback.format_exc() + "\n")
                 self.update.emit("error: Unknown exception trying to get derived dimension (see log): " + str(e))
 
-            print "Derived cropbox: ", derived_cropbox
-
         #===============================================
         # Perform the crop!
         #===============================================
@@ -364,7 +362,6 @@ class ProcessingThread(QtCore.QThread):
         # Check what the message says
         if msg == "Success":
             print "crop finished"
-            print msg
             # The run() checks crop_status variable, if "success" lets other processing occur
             self.crop_status = "success"
             self.session_log.write("Crop finished\n")

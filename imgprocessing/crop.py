@@ -70,7 +70,6 @@ class Crop():
             return
         return self.crop_box
 
-
     def run(self, auto=False):
         """
         Perform a crop based on previously selected bounding box
@@ -83,15 +82,11 @@ class Crop():
         if len(imglist) < 1:
             raise HarpDataError("no image files found in " + self.in_dir)
 
-        if auto:
-            cb = self.auto_bounding_box(imglist)
+        # Get cropbox either automatically or manually
+        cb = self.auto_bounding_box(imglist) if auto else self.calc_manual_crop()
 
-            #rearange as dims come in a different order from the different methods
-            cropbox = (cb[2], cb[3], cb[0], cb[1])
-
-        else:
-            cropbox = self.calc_manual_crop()
-            cropbox = [cropbox[1], cropbox[3], cropbox[0], cropbox[2]]  # rearrange for numpy slicing
+        # Rearrange dimensions for numpy slicing
+        cropbox = (cb[2], cb[3], cb[0], cb[1])
 
         first = True
         outpathslist = []
@@ -138,13 +133,13 @@ class Crop():
             if count < 1:
                 # Set up the correct writer based on the first image to be written
                 imwriter = Imwriter(crop_out)
+
             imwriter.imwrite(imcrop, crop_out)
             outpathslist.append(crop_out)
 
         self.callback("Success")
 
         return outpathslist
-
 
     def auto_bounding_box(self, filelist):
 
@@ -185,6 +180,9 @@ class Crop():
         self.imdims = testimg.shape
         padding = int(np.mean(self.imdims) * 0.025)
         bbox = self.pad_bounding_box(bbox, padding)
+
+        # Callback!
+        self.callback(tuple(bbox))
 
         # Crop the z-projection and write to metadata
         zp_arr = GetArrayFromImage(zp_im)

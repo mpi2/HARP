@@ -205,7 +205,8 @@ class MainWindow(QtGui.QMainWindow):
         # Decide which channel to be used for autocrop (this table is on the first tab)
         self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
 
-        self.ui.tableWidgetPixelScales.__class__.keyPressEvent = self.remove_pixel_scale
+        # Set action for key press with pixel scales table
+        # self.ui.tableWidgetPixelScales.__class__.keyPressEvent = self.remove_pixel_scale
 
         # When user double clicks on OPT alternative channel open it on the parameter tab
         self.ui.tableWidgetOPT.doubleClicked.connect(self.change_opt_chn)
@@ -324,7 +325,7 @@ l
             # if on tab 0 (parameters) the keyPressEvent is required for choosing
             # the crop channel for OPT. i.e. key press is linked to the function choose_channel_for_crop()
             self.ui.tableWidgetOPT.__class__.keyPressEvent = self.choose_channel_for_crop
-            self.ui.tableWidgetPixelScales.__class__.keyPressEvent = self.remove_pixel_scale
+            # self.ui.tableWidgetPixelScales.__class__.keyPressEvent = self.remove_pixel_scale
         elif self.ui.tabWidget.currentIndex() == 1:
             # if on tab 1 (processing) the keyPressEvent is required for deleting rows
             # i.e. key press is linked to the function delete_rows()
