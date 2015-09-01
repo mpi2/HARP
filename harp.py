@@ -242,9 +242,14 @@ class MainWindow(QtGui.QMainWindow):
 
         # Uncheck downscaling checkboxes
         scale_scheck_boxes = [self.ui.checkBoxSF2, self.ui.checkBoxSF3, self.ui.checkBoxSF4, self.ui.checkBoxSF5,
-                              self.ui.checkBoxSF6, self.ui.checkBoxPixel]
+                              self.ui.checkBoxSF6]
         for cb in scale_scheck_boxes:
             cb.setChecked(False)
+
+        # Remove pixel sizes from table
+        num_rows = self.ui.tableWidgetPixelScales.rowCount()
+        for i in range(0, num_rows):
+            self.ui.tableWidgetPixelScales.removeRow(0)
 
         # Set scaling for croppped recon
         self.ui.checkBoxCropComp.setChecked(True)
