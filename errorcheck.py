@@ -122,13 +122,14 @@ def errorCheck(mainwindow):
     # Check user has not selected to scale by pixel without having a recon folder
     pixel_size_count = mainwindow.ui.tableWidgetPixelScales.rowCount()
     if pixel_size_count > 0:
+
         if mainwindow.pixel_size == "":
             QtGui.QMessageBox.warning(mainwindow, 'Unable to scale by pixel',
                                       'Pixel size could not be obtained from original recon log. Unable to scale '
                                       '"By Pixel (um)"')
             mainwindow.stop = True
             return
-        elif any(float(mainwindow.pixel_size) > mainwindow.ui.tableWidgetPixelScales.item(i, 0).text()
+        elif any(float(mainwindow.pixel_size) > float(mainwindow.ui.tableWidgetPixelScales.item(i, 0).text())
                  for i in range(0, pixel_size_count)):
             QtGui.QMessageBox.warning(mainwindow, 'Unable to scale by pixel',
                                       'Specified pixel sizes must be greater than '
