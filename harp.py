@@ -184,6 +184,9 @@ class MainWindow(QtGui.QMainWindow):
         # Add arbitrary pixel scaling option to list
         self.ui.buttonAddPixelSize.clicked.connect(self.add_pixel_scale)
 
+        # Remove arbitrary pixel scaling option to list
+        self.ui.buttonRemovePixelSize.clicked.connect(self.remove_pixel_scale)
+
         # Start processing recons
         self.ui.pushButtonStart.clicked.connect(self.start_processing)
 
@@ -551,9 +554,8 @@ l
 
     def remove_pixel_scale(self, event):
 
-        if event.key() == QtCore.Qt.Key_Delete:
-            selected = self.ui.tableWidgetPixelScales.currentRow()
-            self.ui.tableWidgetPixelScales.removeRow(selected)
+        selected = self.ui.tableWidgetPixelScales.currentRow()
+        self.ui.tableWidgetPixelScales.removeRow(selected)
 
     def create_stack(self):
         """ Turns stack generation (native resolution) on or off
