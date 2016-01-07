@@ -84,9 +84,11 @@ class Crop():
 
         # Get cropbox either automatically or manually
         cb = self.auto_bounding_box(imglist) if auto else self.calc_manual_crop()
+        print cb
 
         # Rearrange dimensions for numpy slicing
         cropbox = (cb[2], cb[3], cb[0], cb[1])
+        print cropbox
 
         first = True
         outpathslist = []
@@ -223,7 +225,7 @@ class Crop():
         """
         x1 = xywh[0] + xywh[2]
         y1 = xywh[1] + xywh[3]
-        return xywh[0], xywh[1], x1, y1
+        return xywh[0], x1, xywh[1], y1  # James fix - Jan 2016
 
     def update_slot(self, msg):
         self.callback(msg)
