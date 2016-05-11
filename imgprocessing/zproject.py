@@ -25,7 +25,7 @@ import numpy as np
 sys.path.append('..')
 from appdata import HarpDataError
 from imgprocessing.io import Imreader, Imwriter
-
+import math
 
 
 class Zproject(QtCore.QThread):
@@ -34,10 +34,9 @@ class Zproject(QtCore.QThread):
 
     def __init__(self, imglist, zprojection_output, callback=None, force=False):
         super(Zproject, self).__init__()
-        self.skip = 10
         self.imglist = imglist
-        self.zprojection_output = zprojection_output
-        self.skip_num = 10
+        # self.zprojection_output = zprojection_output
+        self.skip_num = int(math.floor(float(len(imglist)) * .01))
         self.force = force
         if callback is None:
             self.callback = self.z_callback
@@ -73,6 +72,7 @@ class Zproject(QtCore.QThread):
 
             # make a new list by removing every nth image
             sparse_filelist = sorted(self.imglist)[0::self.skip_num]
+            print "No. z-projection images: {}".format(len(sparse_filelist))
 
             print "performing z-projection on sparse file list"
 
