@@ -35,7 +35,7 @@ class Zproject(QtCore.QThread):
     def __init__(self, imglist, zprojection_output, callback=None, force=False):
         super(Zproject, self).__init__()
         self.imglist = imglist
-        # self.zprojection_output = zprojection_output
+        self.zprojection_output = zprojection_output
         self.skip_num = int(math.floor(float(len(imglist)) * .01))
         self.force = force
         if callback is None:
