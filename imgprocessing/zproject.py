@@ -36,7 +36,7 @@ class Zproject(QtCore.QThread):
         super(Zproject, self).__init__()
         self.imglist = imglist
         self.zprojection_output = zprojection_output
-        self.skip_num = int(math.floor(float(len(imglist)) * .01))
+        self.skip_num = int(np.floor(len(imglist) / 500)) if len(imglist) > 500 else 1
         self.force = force
         if callback is None:
             self.callback = self.z_callback
@@ -98,7 +98,7 @@ class Zproject(QtCore.QThread):
 
             inds = im_array > maxi
             maxi[inds] = im_array[inds]
-            status_str = "Z-project: " + str(count * 10) + "/" + str(len(self.imglist)) + " images processed"
+            status_str = "Z-project: {}/{} images processed".format(count, len(filelist))
             self.emit(QtCore.SIGNAL('update(QString)'), status_str)
             self.callback("Determining crop box ({:.1%})".format(count / len(filelist)))
         return maxi

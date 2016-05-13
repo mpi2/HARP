@@ -180,7 +180,7 @@ class Crop():
 
         # Padding
         self.imdims = testimg.shape
-        padding = int(np.mean(self.imdims) * 0.025)
+        padding = int(np.mean(self.imdims) * 0.04)
         bbox = self.pad_bounding_box(bbox, padding)
 
         # Callback!
