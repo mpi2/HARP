@@ -394,11 +394,10 @@ class ProcessingThread(QtCore.QThread):
             os.makedirs(self.config.scale_path)
 
         # Perform scaling for all options used.
-        print 'jdvhsjdhfusdh', self.config.single_volume
         if self.config.single_volume in ['NRRD', 'TIFF']:
             ext = str(self.config.single_volume).lower()
             print ext
-            self.downsample(1, ext=ext)
+            self.downsample(1, ext=ext, compress=True)
 
         if self.config.SF2 == "yes":
             self.downsample(2)
@@ -419,7 +418,7 @@ class ProcessingThread(QtCore.QThread):
             for scale_factor in self.config.SFX_pixel:
                 self.downsample(scale_factor, scaleby_int=False)
 
-    def downsample(self, scale, scaleby_int=True, ext='nrrd'):
+    def downsample(self, scale, scaleby_int=True, ext='nrrd', compress=False):
         """
         """
 
@@ -474,12 +473,11 @@ class ProcessingThread(QtCore.QThread):
 
         try:
             files_for_scaling = self.app_data.getfilelist(self.folder_for_scaling)
-            print 'qqqqqqqqqqqqq', files_for_scaling
             if len(files_for_scaling) < 1:
                 self.update.emit("Rescaling failed. No images found:")
 
             resampler.resample(files_for_scaling, scale, out_name, scaleby_int, self.update,
-                               self.thread_terminate_flag)
+                               self.thread_terminate_flag, compress=compress)
         except HarpDataError as e:
             self.update.emit("Rescaling the image failed: {}".format(e))
             raise
