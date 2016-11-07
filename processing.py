@@ -206,6 +206,7 @@ class ProcessingThread(QtCore.QThread):
             self.session_log.write("No crop carried out\n")
             self.autocrop_update_slot("Success")
             self.folder_for_scaling = self.config.input_folder
+            print 'ppppppppppppppppp', self.folder_for_scaling
             return
 
         # Cropping option: OLD CROP
@@ -378,6 +379,7 @@ class ProcessingThread(QtCore.QThread):
         """
 
         """
+
         # Check if HARP has been stopped
         if self.thread_terminate_flag.value == 1:
             return
@@ -395,7 +397,7 @@ class ProcessingThread(QtCore.QThread):
         if self.config.single_volume in ['NRRD', 'TIFF']:
             ext = str(self.config.single_volume).lower()
             print ext
-            self.downsample(1, ext=ext)
+            self.downsample(1, ext=ext, compress=True)
 
         if self.config.SF2 == "yes":
             self.downsample(2)
@@ -416,9 +418,13 @@ class ProcessingThread(QtCore.QThread):
             for scale_factor in self.config.SFX_pixel:
                 self.downsample(scale_factor, scaleby_int=False)
 
-    def downsample(self, scale, scaleby_int=True, ext='nrrd'):
+    def downsample(self, scale, scaleby_int=True, ext='nrrd', compress=False):
         """
         """
+
+
+        # Bodge for OCT. Does crop folder exist, if not point to original
+
         if self.thread_terminate_flag.value == 1:
             return
 
@@ -471,7 +477,7 @@ class ProcessingThread(QtCore.QThread):
                 self.update.emit("Rescaling failed. No images found:")
 
             resampler.resample(files_for_scaling, scale, out_name, scaleby_int, self.update,
-                               self.thread_terminate_flag)
+                               self.thread_terminate_flag, compress=compress)
         except HarpDataError as e:
             self.update.emit("Rescaling the image failed: {}".format(e))
             raise

@@ -48,7 +48,7 @@ from multiprocessing import Value
 import tempfile
 
 
-def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminate_flag=Value('i', 0)):
+def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminate_flag=Value('i', 0), compress=False):
     """
     :param images: iterable or a directory
     :param scale: int. Factor to scale by
@@ -153,7 +153,10 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     #create memory mapped version of the temporary xyz scaled slices
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
-    nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2))
+    options = {}
+    # if compress:
+    #     options['encoding'] = 'gzip'  # Does not work. We get a header NRRD with no data
+    nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2), options)
 
     temp_xy.close()  # deletes temp file
     temp_xyz.close()
