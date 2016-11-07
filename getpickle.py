@@ -90,7 +90,8 @@ def get_pickle(mainwindow):
         config.cropbox_path = mainwindow.crop_pickle_path
 
     # Native resolution stack
-    if mainwindow.ui.checkBoxCreateStack.isChecked() and config.crop_option != 'No_crop':
+    # if mainwindow.ui.checkBoxCreateStack.isChecked() and config.crop_option != 'No_crop':
+    if mainwindow.ui.checkBoxCreateStack.isChecked():  # Neil: fix to get OPT images to work
         config.single_volume = mainwindow.ui.comboBoxStackType.currentText()
     else:
         config.single_volume = "Not_applicable"

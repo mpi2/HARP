@@ -595,7 +595,7 @@ l
             self.ui.radioButtonAuto.setEnabled(False)
             self.ui.radioButtonMan.setEnabled(False)
             self.ui.radioButtonUseOldCrop.setEnabled(False)
-            self.ui.checkBoxCreateStack.setEnabled(False)
+            self.ui.checkBoxCreateStack.setEnabled(True)
             self.ui.radioButtonDerived.setEnabled(False)
             self.ui.lineEditDerivedChnName.setEnabled(False)
             self.ui.lineEditX.setEnabled(False)

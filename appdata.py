@@ -57,6 +57,9 @@ class AppData(object):
             if os.path.isfile(self.app_data_file):
                 with open(self.app_data_file, 'r') as fh:
                     self.app_data = yaml.load(fh)
+                # In case loading failed
+                if not self.app_data:
+                    self.app_data = {}
 
     def save(self):
         if self.using_appdata:

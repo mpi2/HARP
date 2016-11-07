@@ -206,6 +206,7 @@ class ProcessingThread(QtCore.QThread):
             self.session_log.write("No crop carried out\n")
             self.autocrop_update_slot("Success")
             self.folder_for_scaling = self.config.input_folder
+            print 'ppppppppppppppppp', self.folder_for_scaling
             return
 
         # Cropping option: OLD CROP
@@ -378,6 +379,7 @@ class ProcessingThread(QtCore.QThread):
         """
 
         """
+
         # Check if HARP has been stopped
         if self.thread_terminate_flag.value == 1:
             return
@@ -392,6 +394,7 @@ class ProcessingThread(QtCore.QThread):
             os.makedirs(self.config.scale_path)
 
         # Perform scaling for all options used.
+        print 'jdvhsjdhfusdh', self.config.single_volume
         if self.config.single_volume in ['NRRD', 'TIFF']:
             ext = str(self.config.single_volume).lower()
             print ext
@@ -419,6 +422,10 @@ class ProcessingThread(QtCore.QThread):
     def downsample(self, scale, scaleby_int=True, ext='nrrd'):
         """
         """
+
+
+        # Bodge for OCT. Does crop folder exist, if not point to original
+
         if self.thread_terminate_flag.value == 1:
             return
 
@@ -467,6 +474,7 @@ class ProcessingThread(QtCore.QThread):
 
         try:
             files_for_scaling = self.app_data.getfilelist(self.folder_for_scaling)
+            print 'qqqqqqqqqqqqq', files_for_scaling
             if len(files_for_scaling) < 1:
                 self.update.emit("Rescaling failed. No images found:")
 

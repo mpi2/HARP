@@ -58,6 +58,10 @@ class Imreader():
     def imread(self, imgpath, shapecheck=True):
 
         im = self.reader(imgpath)
+
+        # Fix ofr RGBA OCT images where all the color values are the same and the opacity chaneel is ignored
+        if len(im.shape) > 2:
+            im = im[:, :, 0]  # Assuming we have RGBA and all the color values are the same, extract the R component
         if shapecheck:
             if im.shape == self.expected_shape:
                 return im
