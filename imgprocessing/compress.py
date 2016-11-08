@@ -68,7 +68,12 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
                 break
             compressed = compressor.compress(block)
             if compressed:
-                fh_w.write(compressed)
+
+                try:
+                    fh_w.write(compressed)
+                except IOError:
+                    update.emit("Error in compression - job terminated")
+                    return
 
         # Send any data being buffered by the compressor
         remaining = compressor.flush()
