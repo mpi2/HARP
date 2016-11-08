@@ -73,7 +73,7 @@ def batch(recon_list, mount=None):
                 sf = float(scale) / float(original_pixel_size)
                 new_pixel_size = sf * original_pixel_size
 
-            out_name = join(scaled_dir, '{}_scaled_{}_pixel_{:.2f}.{}'.format(recon_name, sf, new_pixel_size, ext))
+            out_name = join(scaled_dir, '{}_scaled_{:.4f}_pixel_{:.2f}.{}'.format(recon_name, sf, new_pixel_size, ext))
 
             if scaled_stack_exists(scaled_dir, sf, new_pixel_size):
                 continue
@@ -123,7 +123,7 @@ def scaled_stack_exists(folder, sf, pixel_size):
     for im_path in listdir(folder):
 
         im_name, im_ext = splitext(im_path)
-        if im_ext != '.nrrd':
+        if im_ext not in ['.nrrd', '.tiff', '.tif']:
             continue
 
         split_path = im_name.split('_')
