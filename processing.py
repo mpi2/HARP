@@ -115,7 +115,8 @@ class ProcessingThread(QtCore.QThread):
             session_log_path = os.path.join(self.config.meta_path, "session.log")
             logging.basicConfig(filename=session_log_path,
                                 level=logging.DEBUG,
-                                format='%(asctime)s %(message)s')
+                                format='%(asctime)s %(message)s',
+                                stream=sys.stdout)
             logging.info(job)
 
             self.update.emit("Started Processing")
@@ -452,6 +453,7 @@ class ProcessingThread(QtCore.QThread):
         except HarpDataError as e:
             self.update.emit("Rescaling the image failed: {}".format(e))
             raise
+        logging.info("Scaling finished")
 
     def resampler_callback(self, msg):
         self.update.emit(msg)
