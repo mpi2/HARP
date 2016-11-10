@@ -42,13 +42,12 @@ try:
 except ImportError:
     import pickle
 import shutil
-import bz2
-from lib import nrrd
 import datetime
 import copy
 from multiprocessing import freeze_support
 import traceback
 import fnmatch
+import logging
 from config import Config
 from imgprocessing import resampler, crop
 from appdata import HarpDataError
@@ -83,7 +82,7 @@ class ProcessingThread(QtCore.QThread):
 
 
     def __del__(self):
-        print "Processing stopped"
+        logging.warn("Processing stopped")
 
     def run(self):
         """ Starts the QThread, processing then performed.
@@ -109,24 +108,19 @@ class ProcessingThread(QtCore.QThread):
         #=================================================
         for job in iter(self.config_paths.get, None):
 
-            print job
-
-            self.update.emit("Started Processing")
-
             filehandler = open(job, 'r')
             self.config = copy.deepcopy(pickle.load(filehandler))
 
-            #===============================================
-            # Setup logging files
-            #===============================================
+            # Setup the logger
             session_log_path = os.path.join(self.config.meta_path, "session.log")
-            self.session_log = open(session_log_path, 'w+')
+            logging.basicConfig(filename=session_log_path,
+                                level=logging.DEBUG,
+                                format='%(asctime)s %(message)s')
+            logging.info(job)
 
-            self.session_log.write("########################################\n")
-            self.session_log.write("### HARP Session Log                 ###\n")
-            self.session_log.write("########################################\n")
-            # start time
-            self.session_log.write(str(datetime.datetime.now()) + "\n")
+            self.update.emit("Started Processing")
+
+
 
             #===============================================
             # Cropping
@@ -135,15 +129,14 @@ class ProcessingThread(QtCore.QThread):
                 cropped_imgs_list = self.cropping()
             except Exception as e:
                 self.update.emit("Cropping failed!: {}".format(e))
-                self.session_log.write("Cropping failed!: {}\n".format(e))
+                logging.info("Cropping failed!: {}".format(e))
                 continue
 
             try:
                 self.scaling()
             except Exception as e:
                 self.update.emit("Scaling failed!: {}".format(e))
-                self.session_log.write("Scaling failed!: {}\n".format(e))
-                raise # To see the stack trace
+                logging.error("Scaling failed!: {}".format(e))
                 continue
 
             # Cropping function only copies over image files. Need to copy over other files now scaling and cropping
@@ -160,15 +153,12 @@ class ProcessingThread(QtCore.QThread):
                 self.compression(cropped_imgs_list)
             except HarpDataError as e:
                 self.update.emit("compression failed")
-                self.session_log.write("compression failed: {}".format(e))
+                logging.error("compression failed: {}".format(e))
                 continue
             else:
                 self.update.emit("Processing finished")
 
-            self.session_log.write("Processing finished\n")
-            self.session_log.write("########################################\n")
-            self.session_log.close()
-
+            logging.info("Processing finished")
         return
 
     def cropping(self):
@@ -180,7 +170,6 @@ class ProcessingThread(QtCore.QThread):
         Once the cropping is setup the crop.py module is called and a callback autocrop_update_slot method
         is used to monitor progress
 
-        :ivar obj self.session_log: python file object. Used to record the log of what has happened.
         :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.
         :ivar str self.folder_for_scaling: Updated here, depending on the cropping option this will change.
 
@@ -191,7 +180,7 @@ class ProcessingThread(QtCore.QThread):
             :func:`autocrop.run()`
         """
         # document in log
-        self.session_log.write("*****Performing cropping******\n")
+        logging.info("*****Performing cropping******")
 
         #===============================================
         # Cropping setup
@@ -203,10 +192,9 @@ class ProcessingThread(QtCore.QThread):
         if self.config.crop_option == "No_crop":
             # Do not perform any crop as user specified
             self.update.emit("No Crop carried out")
-            self.session_log.write("No crop carried out\n")
+            logging.info("No crop carried out")
             self.autocrop_update_slot("Success")
             self.folder_for_scaling = self.config.input_folder
-            print 'ppppppppppppppppp', self.folder_for_scaling
             return
 
         # Cropping option: OLD CROP
@@ -215,7 +203,7 @@ class ProcessingThread(QtCore.QThread):
             self.update.emit("No crop carried out")
             # Need to hide non recon files. Puts them in a temp folder until scaling has finished
             self.hide_files()
-            self.session_log.write("No crop carried out\n")
+            logging.info("No crop carried out")
             self.autocrop_update_slot("Success")
             # Still need the cropped files list for compression (if it is to take place)
             cropped_list = self.app_data.getfilelist(self.config.cropped_path)
@@ -228,7 +216,7 @@ class ProcessingThread(QtCore.QThread):
         # Cropping option: MANUAL CROP
         if self.config.crop_option == "Manual":
             doauto = False
-            self.session_log.write("manual crop\n")
+            logging.info("manual crop")
             self.update.emit("Performing manual crop")
             # Get the dimensions from the config object
             dimensions_tuple = (
@@ -239,7 +227,7 @@ class ProcessingThread(QtCore.QThread):
         # Setup for automatic
         if self.config.crop_option == "Automatic":
             doauto = True
-            self.session_log.write("autocrop\n")
+            logging.info("autocrop")
             self.update.emit("Performing autocrop")
             # cropbox is not derived and dimensions will be determined in autocrop
             dimensions_tuple = None
@@ -248,7 +236,7 @@ class ProcessingThread(QtCore.QThread):
         # setup for derived crop
         if self.config.crop_option == "Derived":
             doauto = False
-            self.session_log.write("Derived crop\n")
+            logging.info("Derived crop")
             self.update.emit("Performing crop from derived cropbox")
             dimensions_tuple = None
             try:
@@ -257,12 +245,12 @@ class ProcessingThread(QtCore.QThread):
                 cropbox_object = copy.deepcopy(pickle.load(filehandler))
                 derived_cropbox = cropbox_object.cropbox
             except IOError as e:
-                self.session_log.write("error: Cropbox not available for derived dimension crop:\n"
+                logging.error("error: Cropbox not available for derived dimension crop:\n"
                                        + "Exception traceback:" +
                                        traceback.format_exc() + "\n")
                 self.update.emit("error: Could not open cropbox dimension file for derived dimension crop: " + str(e))
             except Exception as e:
-                self.session_log.write("error: Unknown exception trying to get derived dimension:\n"
+                logging.error("error: Unknown exception trying to get derived dimension:\n"
                                        + "Exception traceback:" +
                                        traceback.format_exc() + "\n")
                 self.update.emit("error: Unknown exception trying to get derived dimension (see log): " + str(e))
@@ -271,8 +259,7 @@ class ProcessingThread(QtCore.QThread):
         # Perform the crop!
         #===============================================
         # Can now finally perform the crop
-        self.session_log.write("Crop started\n")
-        self.session_log.write(str(datetime.datetime.now()) + "\n")
+        logging.info("Crop started")
 
         # make autocrop object
 
@@ -293,33 +280,25 @@ class ProcessingThread(QtCore.QThread):
             croppedlist = cropper.run(auto=doauto)  # James - new version of autocrop
 
         except WindowsError as e:
-            self.session_log.write("error: HARP can't find the folder, maybe a temporary problem connecting to the "
+            logging.error("error: HARP can't find the folder, maybe a temporary problem connecting to the "
                                    "network. Exception message:\n Exception traceback:" +
                                    traceback.format_exc() + "\n")
             self.update.emit("error: HARP can't find the folder, see log file")
-            self.session_log.flush()
             raise
 
         except HarpDataError as e:
-            self.session_log.write("Error: {}".format(e))
+            logging.error("Error: {}".format(e))
             self.update.emit("error: {}".format(e))
-            self.session_log.flush()
             raise
 
         except Exception as e:
-            self.session_log.write("error: Unknown exception. Exception message:\n"
+            logging.error("error: Unknown exception. Exception message:\n"
                                    + "Exception traceback:" +
                                    traceback.format_exc() + "\n")
             self.update.emit("error:(see log): " + str(e))
-            self.session_log.flush()
             raise
         else:
             return croppedlist
-
-
-    def logger(self, message):
-        pass
-
 
     def autocrop_update_slot(self, msg):
         """ Listens to autocrop.
@@ -332,7 +311,6 @@ class ProcessingThread(QtCore.QThread):
         Also takes the cropping box used by the autocrop and saves it as a pickle file.
 
         :param str/tuple msg: A message sent back from the autocrop. Will either be a string or a tuple (the crop box)
-        :ivar obj self.session_log: python file object. Used to record the log of what has happened.
         :ivar str self.crop_status: The crop status used to assess whether any more processing should occur.
         :ivar obj self.configOb: Simple Object which contains all the parameter information. Not modified.
         """
@@ -362,15 +340,13 @@ class ProcessingThread(QtCore.QThread):
 
         # Check what the message says
         if msg == "Success":
-            print "crop finished"
             # The run() checks crop_status variable, if "success" lets other processing occur
             self.crop_status = "success"
-            self.session_log.write("Crop finished\n")
+            logging.info("Crop finished")
         elif re.search("error", msg):
             # Somethings gone wrong, don't let any other processing occur.
-            self.session_log.write("Error in cropping see below:\n")
-            self.session_log.write(msg)
-            self.session_log.close()
+            logging.info("Error in cropping see below:")
+            logging.info(msg)
             self.crop_status = "error"
         elif re.search("Cancelled", msg):
             self.crop_status = "error"
@@ -385,9 +361,7 @@ class ProcessingThread(QtCore.QThread):
             return
 
         # Record started
-        print "Scaling started"
-        self.session_log.write("*****Performing scaling******\n")
-        self.session_log.write(str(datetime.datetime.now()) + "\n")
+        logging.info("*****Performing scaling******")
 
         # First make subfolder for scaled stacks
         if not os.path.exists(self.config.scale_path):
@@ -396,7 +370,6 @@ class ProcessingThread(QtCore.QThread):
         # Perform scaling for all options used.
         if self.config.single_volume in ['NRRD', 'TIFF']:
             ext = str(self.config.single_volume).lower()
-            print ext
             self.downsample(1, ext=ext, compress=True)
 
         if self.config.SF2 == "yes":
@@ -453,19 +426,17 @@ class ProcessingThread(QtCore.QThread):
         dec_sf = round((1.0 / scale), 4)
 
         # detail scaling in log
-        self.session_log.write("Scale by factor:\n")
-        self.session_log.write(str(scale))
+        logging.info("Scale by factor: {}".format(str(scale)))
 
         self.update.emit("Performing scaling ({})".format(str(scale)))
 
         #===============================================================================
         # Normal scaling
         #===============================================================================
-        print "Normal scaling"
+        logging.info("Normal scaling")
 
         # To account for non-scaling
         if scaleby_int and scale == 1:
-            print ext
             out_name = os.path.join(self.config.output_folder, self.config.full_name + "." + ext)
         else:
             out_name = os.path.join(self.config.scale_path, self.config.full_name + "_scaled_" + str(scale) + "_pixel_"
@@ -482,8 +453,6 @@ class ProcessingThread(QtCore.QThread):
             self.update.emit("Rescaling the image failed: {}".format(e))
             raise
 
-
-
     def resampler_callback(self, msg):
         self.update.emit(msg)
 
@@ -495,8 +464,6 @@ class ProcessingThread(QtCore.QThread):
         :raises OSError: Raised if the temp folder can't be made
         """
         # mv non recon image files into a temp folder
-        print "hide files"
-
         crop_path = self.config.cropped_path
         # Make a temp folder
         tmp_crop = os.path.join(crop_path, "tmp")
@@ -509,17 +476,14 @@ class ProcessingThread(QtCore.QThread):
             #(if a tmp file is there remove as well)
             if os.path.exists(tmp_crop):
                 os.remove(tmp_crop)
-
-            print "make temp folder"
             os.makedirs(tmp_crop)
 
         except OSError as e:
-            print "OSError Problem making temp folder", e
+            logging.error("OSError Problem making temp folder:\n{}".format(e))
             return
 
         # loop through crop path
         for fn in os.listdir(crop_path):
-            #print fn
             fnlc = fn.lower()
             full_fn = os.path.join(crop_path, fn)
             # Known non image files
@@ -555,12 +519,6 @@ class ProcessingThread(QtCore.QThread):
         # remove temp folder
         shutil.rmtree(tmp_crop)
 
-
-    def masking(self):
-        """ todo """
-        print "masking"
-
-
     def copying(self):
         """ Copys the non-image and non-valid images files from the original recon and places them into the cropped
         folder
@@ -576,8 +534,7 @@ class ProcessingThread(QtCore.QThread):
         self.update.emit("Copying files")
 
         # Record the log
-        self.session_log.write("***Copying other files from original recon***\n")
-        self.session_log.write(str(datetime.datetime.now()) + "\n")
+        logging.info("***Copying other files from original recon***")
 
         # For loop through the input folder
         for file in os.listdir(self.config.input_folder):
@@ -592,7 +549,7 @@ class ProcessingThread(QtCore.QThread):
                 # Need to get full path of original file though
                 file = os.path.join(self.config.input_folder, file)
                 shutil.copy(file, self.config.cropped_path)
-                self.session_log.write("File copied:" + file + "\n")
+                logging.info("File copied:" + file)
 
     def compression(self, cropped_img_list):
         """ Compresses either scans and the original recons or the cropped folder
@@ -605,8 +562,7 @@ class ProcessingThread(QtCore.QThread):
             return
 
         if self.config.scans_recon_comp == "yes" or self.config.crop_comp == "yes":
-            self.session_log.write("***Performing Compression***")
-            self.session_log.write(str(datetime.datetime.now()) + "\n")
+            logging.info("***Performing Compression***")
 
         if self.config.scans_recon_comp == "yes":
 
@@ -615,7 +571,7 @@ class ProcessingThread(QtCore.QThread):
                 # Compression for scan
                 #============================================
                 self.update.emit("Performing compression of scan folder")
-                self.session_log.write("Compression of scan folder")
+                logging.info("Compression of scan folder")
                 #scan_list = getfilelist(self.config.scan_folder,
                 #                        self.app_data.files_to_use, self.app_data.files_to_ignore)
 
@@ -638,7 +594,7 @@ class ProcessingThread(QtCore.QThread):
                 # compression for original recon
                 #============================================
                 self.update.emit("Performing compression of original recon folder")
-                self.session_log.write("Compression of original recon folder")
+                logging.info("Compression of original recon folder")
                 # recon_list = getfilelist(self.config.input_folder,
                 #                         self.app_data.files_to_use, self.app_data.files_to_ignore)
                 recon_outfile = os.path.join(
