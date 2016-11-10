@@ -24,15 +24,11 @@ Crop.py open an image (probably a max intensity z-projection)
 User draws a cropping box. returns the coordinates
 """
 
-
-import sys
-import logging
 from PyQt4 import QtCore, QtGui
 import math
 import operator
 import sys
 import os
-import numpy as np
 try:
     import Image
 except ImportError:
@@ -171,7 +167,6 @@ class MainWidget(QtGui.QWidget):
 
         ijCropBox = (x1, y1, width, height)
         #print "ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox))
-        logging.info("ImageJ friendly cropbox: makeRectangle({0})".format(str(ijCropBox)))
         self.parent.cropbox = (x1, y1, width, height)
         self.parent.close()
 
