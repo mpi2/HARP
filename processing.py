@@ -118,7 +118,7 @@ class ProcessingThread(QtCore.QThread):
                                 format='%(asctime)s %(message)s',
                                 stream=sys.stdout)
             logging.info(job)
-            print 'pppppppppppppppppppppppppppppppppp'
+
             self.update.emit("Started Processing")
 
 

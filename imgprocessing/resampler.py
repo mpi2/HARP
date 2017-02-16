@@ -115,10 +115,10 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
         else:
             z_slice_resized.tofile(temp_xy)
 
-    #create memory mapped version of the temporary xy scaled slices
+    # create memory mapped version of the temporary xy scaled slices
     xy_scaled_mmap = np.memmap(temp_xy, dtype=datatype, mode='r', shape=tuple(xy_scaled_dims))
 
-    #Get dimensions for the memory mapped raw xyz file
+    # Get dimensions for the memory mapped raw xyz file
     xyz_scaled_dims = []
     first = True
 
@@ -150,7 +150,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
         else:
             scaled_xz.tofile(temp_xyz)
 
-    #create memory mapped version of the temporary xyz scaled slices
+    # create memory mapped version of the temporary xyz scaled slices
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
     options = {}
