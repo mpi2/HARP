@@ -16,6 +16,12 @@ ext = 'nrrd'
 
 
 def batch(recon_list, mount=None):
+    """
+    Script to automatically generate crops, scled images and compressed files
+    :param recon_list:
+    :param mount:
+    :return:
+    """
 
     app = AppData()
     auto = Autofill(None)
@@ -36,8 +42,8 @@ def batch(recon_list, mount=None):
 
         input_dir = input_dir.replace('\\', '/')
 
-        # if mount:
-        #     input_dir = find_recon(mount, input_dir.replace('\\', '/'))
+        if mount:
+            input_dir = find_recon(mount, input_dir.replace('\\', '/'))
 
         # Performing cropping if directory does not exist or is empty
         if len(listdir(cropped_dir)) == 0:
@@ -54,6 +60,9 @@ def batch(recon_list, mount=None):
 
         # Get recon log and pixel size
         log_paths = [f for f in listdir(cropped_dir) if f.endswith("_rec.log")]
+        if len(log_paths) < 1:
+            print('Cannot find log in cropped directory')
+            continue
         log = join(cropped_dir, log_paths[0])
 
         with open(log, 'rb') as log_file:
@@ -87,11 +96,10 @@ def batch(recon_list, mount=None):
         if not isfile(bz2_file + '.bz2'):
 
             print "Generating missing bz2 file for '{}'".format(recon_name)
-            # try:
-            bz2_nnrd(img_list, bz2_file, 'Compressing cropped recon', update)
-            # except IOError as e:
-            # print('Failed to write the compressed bzp2 file')
-            # print(e, bz2_file)
+            try:
+                bz2_nnrd(img_list, bz2_file, 'Compressing cropped recon', update)
+            except IOError:
+                print('Failed to write the compressed bzp2 file. Network issues?')
 
 
 def find_recon(search_path, head):

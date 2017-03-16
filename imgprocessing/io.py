@@ -26,6 +26,7 @@ else:
 import os
 from appdata import HarpDataError
 from lib import tifffile
+import time
 
 
 class Imreader():
@@ -57,7 +58,19 @@ class Imreader():
 
     def imread(self, imgpath, shapecheck=True):
 
-        im = self.reader(imgpath)
+        attempts = 0
+
+        while True:
+            try:
+                im = self.reader(imgpath)
+            except HarpDataError:
+                if attempts < 4:
+                    attempts += 1
+                    time.sleep(5)
+                else:
+                    raise HarpDataError("Cannot load: {}. Network problems/courrpted file?".format(imgpath))
+            else:
+                break
 
         # Fix ofr RGBA OCT images where all the color values are the same and the opacity chaneel is ignored
         if len(im.shape) > 2:
