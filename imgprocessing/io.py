@@ -79,7 +79,8 @@ class Imreader():
             if im.shape == self.expected_shape:
                 return im
             else:
-                raise HarpDataError("{} has unexpected dimensions".format(imgpath))
+                raise HarpDataError("{} has unexpected dimensions\nShould be: {}, got {}".format(
+                    imgpath, self.expected_shape, im.shape))
 
         else:
             return im.shape
