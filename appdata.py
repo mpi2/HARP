@@ -56,9 +56,21 @@ class AppData(object):
 
             if os.path.isfile(self.app_data_file):
                 with open(self.app_data_file, 'r') as fh:
-                    self.app_data = yaml.load(fh)
+                    try:
+                        self.app_data = yaml.load(fh)
+                    except yaml.reader.ReaderError as e:
+                        # try to remove file
+                        try:
+                            os.remove(self.app_data_file)
+                        except OSError as e:
+                            print('the harp app data config file at {} is corrupt, nad it cannot be deleted. '
+                                  'Please remove it before restarting'.format(self.app_data_file))
+                            yaml_load_error = True
+                        else:
+                            yaml_load_error = False
+
                 # In case loading failed
-                if not self.app_data:
+                if not self.app_data or not isinstance(self.app_data, dict) or yaml_load_error:
                     self.app_data = {}
 
     def save(self):
