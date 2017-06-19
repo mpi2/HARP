@@ -94,14 +94,14 @@ def batch(recon_root, proc_recon_root, csv_path):
             resample(img_list, sf, out_name, scale_by_int, update)
 
         # Compression
-        bz2_file = join(recon_path, 'IMPC_cropped_{}.nrrd'.format(recon_id))
+        bz2_file = join(proc_recon_path, 'IMPC_cropped_{}.nrrd'.format(recon_id))
         if not isfile(bz2_file + '.bz2'):
 
             print "Generating missing bz2 file for '{}'".format(recon_id)
             try:
                 bz2_nnrd(img_list, bz2_file, 'Compressing cropped recon', update)
-            except IOError:
-                print('Failed to write the compressed bzp2 file. Network issues?')
+            except IOError as e:
+                print('Failed to write the compressed bzp2 file. Network issues?\n{}'.format(e))
 
 
 # def find_recon(search_path, head):
