@@ -99,7 +99,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
         # Rescale the z slices
         z_slice_arr = reader.imread(img_path)
 
-        # This might slow things doen by reasigning to the original array. Maybe we jsut need a differnt view on it
+        # This might slow things down by reasigning to the original array. Maybe we just need a different view on it
         if scaleby_int:
             z_slice_arr = _droppixels(z_slice_arr, scale, scale)
 
@@ -171,7 +171,7 @@ def _remove_temp_files(file_list):
 
 def _droppixels(a, scaley, scalex):
     """
-    Make an array divisible by integar scale factors by dropping pixels from the right and bottom of the image
+    Make an array divisible by integer scale factors by dropping pixels from the right and bottom of the image
     """
 
     #If New dimension not integral factors of original, drop pixels to make it so they are
