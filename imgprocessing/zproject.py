@@ -24,7 +24,7 @@ import sys
 import numpy as np
 sys.path.append('..')
 from appdata import HarpDataError
-from imgprocessing.io import Imreader, Imwriter
+from imgprocessing.io_ import Imreader, Imwriter
 import math
 
 

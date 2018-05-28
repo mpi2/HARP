@@ -25,7 +25,7 @@ from SimpleITK import ReadImage, WriteImage, GetImageFromArray, GetArrayFromImag
     RelabelComponent, LabelStatisticsImageFilter
 from imgprocessing import zproject
 sys.path.append("..")
-from imgprocessing.io import Imreader, Imwriter
+from imgprocessing.io_ import Imreader, Imwriter
 from appdata import HarpDataError
 
 
