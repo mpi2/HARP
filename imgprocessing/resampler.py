@@ -43,7 +43,7 @@ else:
     import cv2
 import lib.nrrd as nrrd
 
-from imgprocessing.io import Imreader
+from imgprocessing.io_ import Imreader
 from multiprocessing import Value
 import tempfile
 
@@ -154,8 +154,8 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
     options = {}
-    options['space'] = 'right - anterior - superior'
-    options['space directions'] =  '(1,0,0) (0,1,0) (0,0,1)'
+    options['space'] = 'right-anterior-superior'
+    options['space directions'] =  [(1,0,0) (0,1,0) (0,0,1)]
 
 
     # Do some flipping to get into RAS

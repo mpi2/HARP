@@ -18,11 +18,16 @@ E-mail the developers: sig@har.mrc.ac.uk
 """
 
 import os
-from imgprocessing.io import Imreader
+from imgprocessing.io_ import Imreader
 from lib import nrrd
 import bz2
 import tarfile
 import tempfile
+
+options ={
+'space': 'right - anterior - superior',
+'space directions': '(1,0,0) (0,1,0) (0,0,1)'
+}
 
 
 def bz2_nnrd(img_list, outfile, scan_name, update):
@@ -35,11 +40,11 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
     shape.append(len(img_list))
     print '++++==== bzp'
     tempnrrd = tempfile.TemporaryFile(mode="wb+")
-    nrrd.write_nrrd_header(tempnrrd, shape, first_image.dtype, 3)
+    nrrd.write_nrrd_header(tempnrrd, shape, first_image.dtype, 3, options=options)
 
     compressor = bz2.BZ2Compressor()
 
-    for i, f in enumerate(img_list):
+    for i, f in reversed(enumerate(img_list)):
         if i % 20 == 0:
             done = int((50.0 / len(img_list)) * i)
             update.emit('{} {}%'.format(scan_name, done))
