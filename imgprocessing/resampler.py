@@ -154,9 +154,13 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
     options = {}
-    # if compress:
-    #     options['encoding'] = 'gzip'  # Does not work. We get a header NRRD with no data
-    nrrd.write(outpath, np.swapaxes(xyz_scaled_mmap.T, 1, 2), options)
+    options['space'] = 'right - anterior - superior'
+    options['space directions'] =  '(1,0,0) (0,1,0) (0,0,1)'
+
+
+    # Do some flipping to get into RAS
+    ras_volume = np.swapaxes(xyz_scaled_mmap.T, 1, 2)[::-1, :, :]
+    nrrd.write(outpath, ras_volume, options)
 
     temp_xy.close()  # deletes temp file
     temp_xyz.close()
