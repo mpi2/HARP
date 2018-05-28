@@ -18,7 +18,7 @@ E-mail the developers: sig@har.mrc.ac.uk
 """
 import sys
 sys.path.append('..')
-import skimage.io as io
+import skimage.io as skim_io
 if sys.platform == "win32" or sys.platform == "win64":
     from lib import cv2
 else:
@@ -59,7 +59,8 @@ class Imreader():
     def imread(self, imgpath, shapecheck=True):
 
         attempts = 0
-
+        if not os.path.isfile(imgpath):
+            raise HarpDataError("Cannot find file {}".format(imgpath))
         while True:
             try:
                 im = self.reader(imgpath)
@@ -100,7 +101,7 @@ class Imreader():
 
     def _read_skimage(self, imgpath):
         try:
-            im = io.imread(imgpath)
+            im = skim_io.imread(imgpath)
         except Exception as e:
             im_name = os.path.basename(imgpath)
             raise HarpDataError('failed to load {}: {}'.format(im_name, e))
@@ -135,7 +136,7 @@ class Imwriter():
         cv2.imwrite(path, img)
 
     def skimage_write(self, img, path):
-        io.imsave(path, img)
+        skim_io.imsave(path, img)
 
     def imwrite(self, img, path):
         self.writer(img, path)

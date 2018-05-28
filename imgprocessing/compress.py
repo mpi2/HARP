@@ -18,36 +18,32 @@ E-mail the developers: sig@har.mrc.ac.uk
 """
 
 import os
-from imgprocessing.io import Imreader
+from imgprocessing.io_ import Imreader
 from lib import nrrd
 import bz2
 import tarfile
 import tempfile
 
+BLOCK_SIZE = 52428800  # Around 20 MB in memory at one time
+
 
 def bz2_nnrd(img_list, outfile, scan_name, update):
     """
+    Turn and bunch of 2D images into a 3D nrrd and then bzp2 it
+
+    Parameters
+    ----------
+
     """
-    reader = Imreader(img_list)
-    first_image = reader.imread(img_list[0])
-    shape = list(first_image.shape)
-    shape = [shape[1], shape[0]]
-    shape.append(len(img_list))
-    print '++++==== bzp'
-    tempnrrd = tempfile.TemporaryFile(mode="wb+")
-    nrrd.write_nrrd_header(tempnrrd, shape, first_image.dtype, 3)
+
+    tempnrrd = _create_temp_nrrd(img_list, scan_name, update)
+    _write_bzp2(outfile, tempnrrd, scan_name, update)
+
+
+def _write_bzp2(outfile, tempnrrd, scan_name, update):
 
     compressor = bz2.BZ2Compressor()
 
-    for i, f in enumerate(img_list):
-        if i % 20 == 0:
-            done = int((50.0 / len(img_list)) * i)
-            update.emit('{} {}%'.format(scan_name, done))
-        img_arr = reader.imread(f)
-        rawdata = img_arr.T.tostring(order='F')
-        tempnrrd.write(rawdata)
-
-    BLOCK_SIZE = 52428800 # Around 20 MB in memory at one time
     # TODO: Check its smaller than image size
     compressed_name = outfile + '.bz2'
 
@@ -60,7 +56,7 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
             block = tempnrrd.read(BLOCK_SIZE)
             bytes_read += BLOCK_SIZE
             done = int(50 + (50.0 / file_size) * bytes_read)
-            if done >= 100: # The getsize might not be accurate?
+            if done >= 100:  # The getsize might not be accurate?
                 done = 99
             update.emit('{} {}%'.format(scan_name, done))
 
@@ -84,11 +80,25 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
 
             fh_w.write(to_send)
 
-    # if os.path.isfile(outfile):
-    #     try:
-    #         os.remove(outfile)
-    #     except OSError as e:
-    #         update.emit("Can't delete temp file {}".format(outfile))
+
+def _create_temp_nrrd(img_list, scan_name, update):
+    reader = Imreader(img_list)
+    first_image = reader.imread(img_list[0])
+    shape = list(first_image.shape)
+    shape = [shape[1], shape[0]]
+    shape.append(len(img_list))
+    print '++++==== bzp'
+    tempnrrd = tempfile.TemporaryFile(mode="wb+")
+    nrrd.write_nrrd_header(tempnrrd, shape, first_image.dtype, 3)
+
+    for i, f in enumerate(img_list):
+        if i % 20 == 0:
+            done = int((50.0 / len(img_list)) * i)
+            update.emit('{} {}%'.format(scan_name, done))
+        img_arr = reader.imread(f)
+        rawdata = img_arr.T.tostring(order='F')
+        tempnrrd.write(rawdata)
+    return tempnrrd
 
 
 def bz2_dir(dir_, outfile, update, update_name, terminate):
@@ -106,5 +116,3 @@ def bz2_dir(dir_, outfile, update, update_name, terminate):
 
         tar.add(file_, arcname=name)
     tar.close()
-
-
