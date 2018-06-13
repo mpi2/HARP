@@ -63,7 +63,7 @@ def batch(recon_root, proc_recon_root, csv_path):
         # Get recon log and pixel size
         log_paths = [f for f in listdir(cropped_dir) if f.endswith("_rec.log")]
         if len(log_paths) < 1:
-            print('Cannot find log in cropped directory')
+            print('Cannot find log in cropped directory for {}'.format(recon_id))
             continue
         log = join(cropped_dir, log_paths[0])
 
@@ -160,8 +160,8 @@ def scaled_stack_exists(folder, sf, pixel_size):
         try:
             float(im_sf)
         except ValueError:
-            print("Scaled image has a non-deafult scaling format within its name")
-            sys.exit()
+            print("Scaled image {} has a non-deafult scaling format within its name".format(im_name))
+            return False
         im_pixel = float(split_path[pixel_index])
 
         if abs(im_sf - sf) < 0.1 and abs(im_pixel - pixel_size) < 0.1:
