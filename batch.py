@@ -12,7 +12,7 @@ from autofill import Autofill
 import sys
 
 
-SCALING = {'E9.5': None, 'E14.5': (2, 14.0), 'E18.5': (28.0, 56.0)}
+SCALING = {'E9.5': None, 'E14.5': (2, 14.0), 'E18.5': (28.0)}
 ext = 'nrrd'
 
 
@@ -153,8 +153,15 @@ def scaled_stack_exists(folder, sf, pixel_size):
 
         split_path = im_name.split('_')
 
-        sf_index = split_path.index('scaled') + 1
-        pixel_index = split_path.index('pixel') + 1
+        try:
+            sf_index = split_path.index('scaled') + 1
+        except ValueError:
+            raise ValueError("'_scaled_ is not in the filename: {}".format(im_name))
+
+        try:
+            pixel_index = split_path.index('pixel') + 1
+        except ValueError:
+            raise ValueError("'_pixel_' is not in the filename: {}".format(im_name))
 
         im_sf = strconv.convert(split_path[sf_index])
         try:
