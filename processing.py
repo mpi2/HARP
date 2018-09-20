@@ -106,6 +106,7 @@ class ProcessingThread(QtCore.QThread):
         #=================================================
         # Start for loop, loading each config file in turn
         #=================================================
+
         for job in iter(self.config_paths.get, None):
 
             filehandler = open(job, 'r')
@@ -449,7 +450,7 @@ class ProcessingThread(QtCore.QThread):
                 self.update.emit("Rescaling failed. No images found:")
 
             resampler.resample(files_for_scaling, scale, out_name, scaleby_int, self.update,
-                               self.thread_terminate_flag, compress=compress)
+                               self.thread_terminate_flag, center=self.app_data.center)
         except HarpDataError as e:
             self.update.emit("Rescaling the image failed: {}".format(e))
             raise

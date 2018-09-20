@@ -29,6 +29,8 @@ import fnmatch
 default_ignore = ['*spr.bmp', '*spr.tif', '*spr.tiff', '*spr.jpg', '*spr.jpeg', '*.txt', '*.text', '*.log', '*.crv']
 default_use = ['*rec*.bmp', '*rec*.tif', '*rec*.tiff', '*rec*.jpg', '*rec*.jpeg']
 
+default_center = 'HAR'
+
 
 class AppData(object):
     def __init__(self):
@@ -75,6 +77,16 @@ class AppData(object):
         if self.using_appdata:
             with open(self.app_data_file, 'w') as fh:
                 fh.write(yaml.dump(self.app_data))
+
+    @property
+    def center(self):
+        if not self.app_data.get('center'):
+            self.app_data['center'] = default_center
+        return self.app_data['center']
+
+    @center.setter
+    def center(self, cen):
+        self.app_data['center'] = cen
 
     @property
     def last_dir_browsed(self):

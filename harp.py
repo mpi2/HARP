@@ -222,6 +222,19 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.pushButtonResetIgnoreFiles.clicked.connect(self.opttab_reset_ignore_file)
         self.ui.pushButtonResetUSeFiles.clicked.connect(self.opttab_reset_use_files)
 
+        self.center_buttons = [
+            self.ui.TCP,
+            self.ui.JAX,
+            self.ui.UCD,
+            self.ui.BCM,
+            self.ui.HAR
+        ]
+
+        cen = self.app_data.center
+        for x in self.center_buttons:
+            if cen == x.text():
+                x.setChecked(True)
+
         # Accept drag and drop
         self.setAcceptDrops(True)
 
@@ -235,6 +248,7 @@ class MainWindow(QtGui.QMainWindow):
         self.thread_terminate_flag = mp.Value("i", 0)
 
         self.showMaximized()
+
 
     @pyqtSlot()
     def impc_button(self):
@@ -1179,6 +1193,7 @@ l
         self.ui.checkBoxSuppressModalityWarning.setChecked(self.app_data.suppress_modality_warnings)
         self.ui.checkBoxSuppressNameWarnings.setChecked(self.app_data.suppress_name_warnings)
 
+
     def opttab_save(self):
 
         ignore_patterns = str(self.ui.textEditIgnoreFiles.toPlainText()).split()
@@ -1190,6 +1205,9 @@ l
         self.app_data.suppress_name_warnings = self.ui.checkBoxSuppressNameWarnings.isChecked()
         self.app_data.suppress_modality_warnings = self.ui.checkBoxSuppressModalityWarning.isChecked()
 
+        for x in self.center_buttons:
+            if x.isChecked():
+                self.app_data.center = str(x.text())
 
     def opttab_reset_ignore_file(self):
         self.app_data.reset_ignore_file()

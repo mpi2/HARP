@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow_new.ui'
 #
-# Created: Thu Oct  8 14:38:00 2015
-#      by: PyQt4 UI code generator 4.11.2
+# Created by: PyQt4 UI code generator 4.12.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -44,14 +43,16 @@ class Ui_MainWindow(object):
         self.tab = QtGui.QWidget()
         self.tab.setObjectName(_fromUtf8("tab"))
         self.horizontalLayout_2 = QtGui.QHBoxLayout(self.tab)
+        self.horizontalLayout_2.setMargin(0)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.scrollArea = QtGui.QScrollArea(self.tab)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents_2 = QtGui.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 1377, 1028))
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(-61, 0, 1369, 969))
         self.scrollAreaWidgetContents_2.setObjectName(_fromUtf8("scrollAreaWidgetContents_2"))
         self.gridLayout_2 = QtGui.QGridLayout(self.scrollAreaWidgetContents_2)
+        self.gridLayout_2.setMargin(0)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
         self.groupBoxModality = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
         font = QtGui.QFont()
@@ -226,6 +227,11 @@ class Ui_MainWindow(object):
         self.gridLayout.addItem(spacerItem2, 1, 0, 1, 1)
         self.gridLayout_4 = QtGui.QGridLayout()
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
+        self.line_2 = QtGui.QFrame(self.groupBoxOptions)
+        self.line_2.setFrameShape(QtGui.QFrame.HLine)
+        self.line_2.setFrameShadow(QtGui.QFrame.Sunken)
+        self.line_2.setObjectName(_fromUtf8("line_2"))
+        self.gridLayout_4.addWidget(self.line_2, 19, 0, 1, 5)
         self.line = QtGui.QFrame(self.groupBoxOptions)
         self.line.setFrameShape(QtGui.QFrame.HLine)
         self.line.setFrameShadow(QtGui.QFrame.Sunken)
@@ -381,11 +387,6 @@ class Ui_MainWindow(object):
         self.line_3.setFrameShadow(QtGui.QFrame.Sunken)
         self.line_3.setObjectName(_fromUtf8("line_3"))
         self.gridLayout_4.addWidget(self.line_3, 10, 0, 1, 5)
-        self.line_2 = QtGui.QFrame(self.groupBoxOptions)
-        self.line_2.setFrameShape(QtGui.QFrame.HLine)
-        self.line_2.setFrameShadow(QtGui.QFrame.Sunken)
-        self.line_2.setObjectName(_fromUtf8("line_2"))
-        self.gridLayout_4.addWidget(self.line_2, 19, 0, 1, 5)
         self.checkBoxCropComp = QtGui.QCheckBox(self.groupBoxOptions)
         self.checkBoxCropComp.setEnabled(True)
         font = QtGui.QFont()
@@ -921,14 +922,16 @@ class Ui_MainWindow(object):
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName(_fromUtf8("tab_2"))
         self.gridLayout_9 = QtGui.QGridLayout(self.tab_2)
+        self.gridLayout_9.setMargin(0)
         self.gridLayout_9.setObjectName(_fromUtf8("gridLayout_9"))
         self.scrollArea_2 = QtGui.QScrollArea(self.tab_2)
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1321, 838))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1321, 848))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.scrollAreaWidgetContents)
+        self.horizontalLayout.setMargin(0)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.tableWidget = QtGui.QTableWidget(self.scrollAreaWidgetContents)
         self.tableWidget.setEnabled(True)
@@ -992,6 +995,26 @@ class Ui_MainWindow(object):
         self.checkBoxSuppressModalityWarning = QtGui.QCheckBox(self.tab_3)
         self.checkBoxSuppressModalityWarning.setGeometry(QtCore.QRect(770, 50, 251, 26))
         self.checkBoxSuppressModalityWarning.setObjectName(_fromUtf8("checkBoxSuppressModalityWarning"))
+        self.groupBoxCenter = QtGui.QGroupBox(self.tab_3)
+        self.groupBoxCenter.setGeometry(QtCore.QRect(780, 120, 91, 180))
+        self.groupBoxCenter.setObjectName(_fromUtf8("groupBoxCenter"))
+        self.gridLayout_7 = QtGui.QGridLayout(self.groupBoxCenter)
+        self.gridLayout_7.setObjectName(_fromUtf8("gridLayout_7"))
+        self.UCD = QtGui.QRadioButton(self.groupBoxCenter)
+        self.UCD.setObjectName(_fromUtf8("UCD"))
+        self.gridLayout_7.addWidget(self.UCD, 0, 0, 1, 1)
+        self.TCP = QtGui.QRadioButton(self.groupBoxCenter)
+        self.TCP.setObjectName(_fromUtf8("TCP"))
+        self.gridLayout_7.addWidget(self.TCP, 1, 0, 1, 1)
+        self.BCM = QtGui.QRadioButton(self.groupBoxCenter)
+        self.BCM.setObjectName(_fromUtf8("BCM"))
+        self.gridLayout_7.addWidget(self.BCM, 2, 0, 1, 1)
+        self.HAR = QtGui.QRadioButton(self.groupBoxCenter)
+        self.HAR.setObjectName(_fromUtf8("HAR"))
+        self.gridLayout_7.addWidget(self.HAR, 3, 0, 1, 1)
+        self.JAX = QtGui.QRadioButton(self.groupBoxCenter)
+        self.JAX.setObjectName(_fromUtf8("JAX"))
+        self.gridLayout_7.addWidget(self.JAX, 4, 0, 1, 1)
         self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
         self.gridLayout_10.addWidget(self.tabWidget, 0, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -999,7 +1022,7 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         MainWindow.setStatusBar(self.statusbar)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1363, 28))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1363, 27))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuMore_Options = QtGui.QMenu(self.menubar)
         self.menuMore_Options.setObjectName(_fromUtf8("menuMore_Options"))
@@ -1072,7 +1095,7 @@ class Ui_MainWindow(object):
         self.label_14.setText(_translate("MainWindow", "Cropping", None))
         self.radioButtonDerived.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Derive dimensions (OPT only)</span></p><p>This option provides additional functionality that for most instances should not be required.</p><p>This option allows dimensions for the crop to be derived from a previous processed channel. </p><p>The channel from which the crop dimensions can be derived can be chosen in the OPT channels section. In the OPT channels section the user should select &quot;Return&quot; on the keyboard on the appropiate channel.</p></body></html>", None))
         self.radioButtonDerived.setText(_translate("MainWindow", "Derive dimensions", None))
-        self.radioButtonUseOldCrop.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Use old</span></p><p>If HARP has previously been used to perform the cropping of a recon the cropped image can be used to perform additional processes such as downsizing.</p></body></html>", None))
+        self.radioButtonUseOldCrop.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Use old</span></p><p>reprocess previously cropped slices. This will aplly the latest transforms to the output stacks so that it is in the correct format for submission to  the DCC.</p></body></html>", None))
         self.radioButtonUseOldCrop.setText(_translate("MainWindow", "Use old", None))
         self.lineEditDerivedChnName.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Derive dimensions (OPT only)</span></p><p>This option provides additional functionality that for most instances should not be required.</p><p>This option allows dimensions for the crop to be derived from a previous processed channel. </p><p>The channel from which the crop dimensions can be derived can be chosen in the OPT channels section. In the OPT channels section the user should select &quot;Return&quot; on the keyboard on the appropiate channel.</p></body></html>", None))
         self.checkBoxCropComp.setText(_translate("MainWindow", "Cropped recon", None))
@@ -1168,26 +1191,32 @@ class Ui_MainWindow(object):
         self.textBrowser.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Cantarell\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; font-weight:600;\">File names to ignore</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">The patterns wensure that only recon files get processed and not other generated images. The default settings work for Skyscan xxx</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">Example: &quot;*spr.bmp&quot;  This entry will ensure no files that end in spr.bmp will get processeed</span></p></body></html>", None))
+"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Cantarell\'; font-size:10pt; font-weight:600;\">File names to ignore</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Cantarell\'; font-size:10pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Cantarell\'; font-size:10pt;\">The patterns wensure that only recon files get processed and not other generated images. The default settings work for Skyscan xxx</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Cantarell\'; font-size:10pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Cantarell\'; font-size:10pt;\">Example: &quot;*spr.bmp&quot;  This entry will ensure no files that end in spr.bmp will get processeed</span></p></body></html>", None))
         self.pushButtonSaveOptions.setText(_translate("MainWindow", "save options", None))
         self.pushButtonResetIgnoreFiles.setText(_translate("MainWindow", "reset", None))
         self.textBrowser_2.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Cantarell\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; font-weight:600;\">File names to use</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">The patterns here are used to select files for use in processing. The default settings work for Skyscan xxx</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">Example: &quot;*rec.bmp&quot; </span></p></body></html>", None))
+"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Cantarell\'; font-size:10pt; font-weight:600;\">File names to use</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Cantarell\'; font-size:10pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Cantarell\'; font-size:10pt;\">The patterns here are used to select files for use in processing. The default settings work for Skyscan xxx</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Cantarell\'; font-size:10pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Cantarell\'; font-size:10pt;\">Example: &quot;*rec.bmp&quot; </span></p></body></html>", None))
         self.pushButtonResetUSeFiles.setText(_translate("MainWindow", "reset", None))
         self.checkBoxSuppressNameWarnings.setText(_translate("MainWindow", "Supress file name warnings", None))
         self.checkBoxSuppressModalityWarning.setText(_translate("MainWindow", "Supress modality warnings", None))
+        self.groupBoxCenter.setTitle(_translate("MainWindow", "Center", None))
+        self.UCD.setText(_translate("MainWindow", "UCD", None))
+        self.TCP.setText(_translate("MainWindow", "TCP", None))
+        self.BCM.setText(_translate("MainWindow", "BCM", None))
+        self.HAR.setText(_translate("MainWindow", "HAR", None))
+        self.JAX.setText(_translate("MainWindow", "JAX", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Options", None))
         self.menuMore_Options.setTitle(_translate("MainWindow", "View", None))
         self.menuHelp.setTitle(_translate("MainWindow", "Help", None))

@@ -46,9 +46,10 @@ import lib.nrrd as nrrd
 from imgprocessing.io_ import Imreader
 from multiprocessing import Value
 import tempfile
+import orientations
 
 
-def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminate_flag=Value('i', 0), compress=False):
+def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminate_flag=Value('i', 0), center=None):
     """
     :param images: iterable or a directory
     :param scale: int. Factor to scale by
@@ -124,7 +125,9 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
     # Scale in x_z plane
     count = 0
+
     for y in range(xy_scaled_mmap.shape[1]):
+
         count += 1
         if count % 50 == 0:
             if thread_terminate_flag.value == 1:
@@ -153,13 +156,13 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     # create memory mapped version of the temporary xyz scaled slices
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
-    options = {}
-    options['space'] = 'right-anterior-superior'
-    options['space directions'] =  [(1,0,0) (0,1,0) (0,0,1)]
+    options = {
+        'space': orientations.SPACE,
+        'space directions': orientations.SPACE_DIRECTIONS
+    }
 
+    ras_volume = orientations.orient_for_impc(xyz_scaled_mmap, center)
 
-    # Do some flipping to get into RAS
-    ras_volume = np.swapaxes(xyz_scaled_mmap.T, 1, 2)[::-1, :, :]
     nrrd.write(outpath, ras_volume, options)
 
     temp_xy.close()  # deletes temp file
