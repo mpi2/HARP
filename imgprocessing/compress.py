@@ -23,32 +23,51 @@ from lib import nrrd
 import bz2
 import tarfile
 import tempfile
+import orientations
+import numpy as np
+from skimage.io import imshow
+import matplotlib.pyplot as plt
 
-options ={
-'space': 'right - anterior - superior',
-'space directions': '(1,0,0) (0,1,0) (0,0,1)'
-}
+# options ={
+# 'space': 'right - anterior - superior',
+# 'space directions': '(1,0,0) (0,1,0) (0,0,1)'
+# }
 
+# Todo
+# Get correct header
+# Add appropriate flips
 
-def bz2_nnrd(img_list, outfile, scan_name, update):
+def bz2_nnrd(img_list, outfile, scan_name, update, center=None):
     """
     """
     reader = Imreader(img_list)
-    first_image = reader.imread(img_list[0])
-    shape = list(first_image.shape)
-    shape = [shape[1], shape[0]]
-    shape.append(len(img_list))
     print '++++==== bzp'
     tempnrrd = tempfile.TemporaryFile(mode="wb+")
-    nrrd.write_nrrd_header(tempnrrd, shape, first_image.dtype, 3, options=options)
 
     compressor = bz2.BZ2Compressor()
 
-    for i, f in reversed(enumerate(img_list)):
+    first = True
+    for i, f in enumerate(img_list):
+
         if i % 20 == 0:
             done = int((50.0 / len(img_list)) * i)
             update.emit('{} {}%'.format(scan_name, done))
+
         img_arr = reader.imread(f)
+        img_arr = orientations.orient_slice_for_impc(img_arr, center, i)
+
+        if first:
+            shape = [img_arr.shape[1], img_arr.shape[0], len(img_list)]
+            nrrd.write_nrrd_header(tempnrrd, shape, img_arr.dtype, 3)
+            first = False
+
+
+
+        # if t:
+        #     imshow(img_arr)
+        #     plt.show()
+
+        #     t = False
         rawdata = img_arr.T.tostring(order='F')
         tempnrrd.write(rawdata)
 
@@ -71,7 +90,9 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
 
             if not block:
                 break
+
             compressed = compressor.compress(block)
+
             if compressed:
 
                 try:
@@ -88,12 +109,6 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
             remaining = remaining[BLOCK_SIZE:]
 
             fh_w.write(to_send)
-
-    # if os.path.isfile(outfile):
-    #     try:
-    #         os.remove(outfile)
-    #     except OSError as e:
-    #         update.emit("Can't delete temp file {}".format(outfile))
 
 
 def bz2_dir(dir_, outfile, update, update_name, terminate):

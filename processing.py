@@ -620,7 +620,7 @@ class ProcessingThread(QtCore.QThread):
                 outfile = os.path.join(
                     self.config.output_folder, 'IMPC_cropped_{}.nrrd'.format(self.config.full_name))
 
-                compress.bz2_nnrd(cropped_img_list, outfile, 'Compressing cropped recon', self.update)
+                compress.bz2_nnrd(cropped_img_list, outfile, 'Compressing cropped recon', self.update, center=self.app_data.center)
 
 
 

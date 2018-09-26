@@ -130,7 +130,7 @@ def _format_nrrdvector(v) :
 
 
 def _format_optional_nrrdvector(v):
-    if (v == 'none') :
+    if (v is 'none') :
         return 'none'
     else :
         return _format_nrrdvector(v)

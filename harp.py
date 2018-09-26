@@ -1208,6 +1208,7 @@ l
         for x in self.center_buttons:
             if x.isChecked():
                 self.app_data.center = str(x.text())
+        self.app_data.save()
 
     def opttab_reset_ignore_file(self):
         self.app_data.reset_ignore_file()

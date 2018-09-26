@@ -106,6 +106,14 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
         z_slice_resized = cv2.resize(z_slice_arr, (0, 0), fx=1/scale, fy=1/scale, interpolation=cv2.INTER_AREA)
 
+        if center.lower() == 'tcp':
+            z_slice_resized = np.rot90(z_slice_resized, k=3)
+
+        elif center.lower() == 'ucd':
+            z_slice_resized = np.rot90(z_slice_resized, k=2)
+            z_slice_resized = np.fliplr(z_slice_resized)
+
+
         if first:
             xy_scaled_dims.extend(z_slice_resized.shape)
             datatype = z_slice_resized.dtype
@@ -161,7 +169,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
         'space directions': orientations.SPACE_DIRECTIONS
     }
 
-    ras_volume = orientations.orient_for_impc(xyz_scaled_mmap, center)
+    ras_volume = orientations.orient_for_impc(xyz_scaled_mmap)
 
     nrrd.write(outpath, ras_volume, options)
 
@@ -209,7 +217,7 @@ def _binshrink(img_dir, scale_factor, outpath):
     """
     Shrink the image by an integer factor. Confirmed only on even-dimension images currently. May need to add
     padding. This is working!
-    Produces almost exactly sane output as CV2 method but seems to round 0.5 values down to 0
+    Produces almost exactly same output as CV2 method but seems to round 0.5 values down to 0
     :param scale_factor:
     :return:
     """
