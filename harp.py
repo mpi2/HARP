@@ -59,7 +59,8 @@ from appdata import AppData
 import multiprocessing as mp
 import version
 
-
+# 260918 testing
+TEST_REPROCESS = True
 
 class MainWindow(QtGui.QMainWindow):
     """  Class to provide the GUI end of HARP.

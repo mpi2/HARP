@@ -113,7 +113,6 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
             z_slice_resized = np.rot90(z_slice_resized, k=2)
             z_slice_resized = np.fliplr(z_slice_resized)
 
-
         if first:
             xy_scaled_dims.extend(z_slice_resized.shape)
             datatype = z_slice_resized.dtype

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1363</width>
+    <width>1438</width>
     <height>1007</height>
    </rect>
   </property>
@@ -44,9 +44,9 @@
           <widget class="QWidget" name="scrollAreaWidgetContents_2">
            <property name="geometry">
             <rect>
-             <x>-61</x>
+             <x>-11</x>
              <y>0</y>
-             <width>1369</width>
+             <width>1394</width>
              <height>969</height>
             </rect>
            </property>
@@ -1037,6 +1037,13 @@ QGroupBox::title
                    </item>
                   </layout>
                  </item>
+                 <item row="20" column="4">
+                  <widget class="QCheckBox" name="checkBoxReprocessToRas">
+                   <property name="text">
+                    <string>reprocess to RAS</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </item>
               </layout>
@@ -1892,8 +1899,8 @@ QGroupBox::title
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1321</width>
-             <height>848</height>
+             <width>98</width>
+             <height>93</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout">
@@ -2163,7 +2170,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1363</width>
+     <width>1438</width>
      <height>27</height>
     </rect>
    </property>
