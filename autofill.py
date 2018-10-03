@@ -222,26 +222,35 @@ class Autofill(object):
                 QtGui.QMessageBox.warning(self.mainwindow, 'Message', 'Warning (Naming not canonical):'+os.linesep+error_string)
 
 
-    def auto_file_out(self):
+    def auto_file_out(self, reprocess_mode):
         """ Auto fill to make output folder name. Just replaces 'recons' to 'processed recons' if possible
 
         :param obj self.mainwindow:
             Although not technically part of the class, can still use this method as if it was part of the HARP class.
+        :param reprocess_mode
+            bool
+            If True keep the output folder the same as input
         """
 
+        input_path = str(self.mainwindow.ui.lineEditInput.text())
+        path, folder_name = os.path.split(input_path)
+
+        if reprocess_mode:
+            output_path = input_path
+            self.mainwindow.ui.lineEditOutput.setText(os.path.abspath(output_path))
+            return
+
         try:
-            input = str(self.mainwindow.ui.lineEditInput.text())
-            path, folder_name = os.path.split(input)
             pattern = re.compile("recons", re.IGNORECASE)
-            if re.search(pattern, input):
+            if re.search(pattern, input_path):
                 output_path = pattern.sub("processed_recons", path)
-                output_full = os.path.join(output_path, self.mainwindow.full_name)
-                self.mainwindow.ui.lineEditOutput.setText(os.path.abspath(output_full))
+                output_path = os.path.join(output_path, self.mainwindow.full_name)
+                self.mainwindow.ui.lineEditOutput.setText(os.path.abspath(output_path))
             else:
                 print "autofill set output folder"
-                output_full = os.path.join(path, "processed_recons", folder_name)
+                output_path = os.path.join(path, "processed_recons", folder_name)
 
-                self.mainwindow.ui.lineEditOutput.setText(os.path.abspath(output_full))
+                self.mainwindow.ui.lineEditOutput.setText(os.path.abspath(output_path))
         except:
             QtGui.QMessageBox.warning(self.mainwindow, 'Message', 'Warning: Unexpected getting and auto file out', sys.exc_info()[0])
 

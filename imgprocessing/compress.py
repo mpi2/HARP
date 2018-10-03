@@ -58,16 +58,9 @@ def bz2_nnrd(img_list, outfile, scan_name, update, center=None):
 
         if first:
             shape = [img_arr.shape[1], img_arr.shape[0], len(img_list)]
-            nrrd.write_nrrd_header(tempnrrd, shape, img_arr.dtype, 3)
+            nrrd.write_nrrd_header(tempnrrd, shape, img_arr.dtype, 3, options=orientations.RAS_HEADER_OPTIONS)
             first = False
 
-
-
-        # if t:
-        #     imshow(img_arr)
-        #     plt.show()
-
-        #     t = False
         rawdata = img_arr.T.tostring(order='F')
         tempnrrd.write(rawdata)
 

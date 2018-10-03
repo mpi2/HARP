@@ -59,8 +59,6 @@ from appdata import AppData
 import multiprocessing as mp
 import version
 
-# 260918 testing
-TEST_REPROCESS = True
 
 class MainWindow(QtGui.QMainWindow):
     """  Class to provide the GUI end of HARP.
@@ -248,8 +246,45 @@ class MainWindow(QtGui.QMainWindow):
         # Shared variable for passing between threads. Not sure if best option. NH
         self.thread_terminate_flag = mp.Value("i", 0)
 
+        # Reprocess mode stuff.
+        self.do_reprocess = False
+        self.ui.checkBoxReprocessToRas.clicked.connect(self.reporcess_slot)
+
         self.showMaximized()
 
+    def reporcess_slot(self, checked):
+        """
+        Revieves signal from the reproces checkbox being pressed.
+        If there is a path int the input lineedit, make sure the output path is set to the same directory
+
+
+        Returns
+        -------
+
+        """
+
+        buttons_to_activate = [
+            self.ui.radioButtonUseOldCrop
+        ]
+
+        buttons_to_deactivate = [
+
+        ]
+
+
+
+        if checked:
+            in_path = self.ui.lineEditInput.text()
+            self.ui.lineEditOutput.setText(in_path)
+            self.do_reprocess = True
+            for button in buttons_to_activate:
+                button.setChecked(True)
+                button.setDisabled(True)
+            # self.
+        else:
+            self.do_reprocess = False
+            for button in buttons_to_activate:
+                button.setDisabled(False)
 
     @pyqtSlot()
     def impc_button(self):
@@ -491,7 +526,7 @@ l
         # check if uCT or opt data
         self.autofill.opt_uCT_check(self.app_data.suppress_modality_warnings)
         # Get the output folder location
-        self.autofill.auto_file_out()
+        self.autofill.auto_file_out(self.do_reprocess)
         # See what OPT channels are available
         if self.modality == "OPT":
             self.autofill.get_channels()

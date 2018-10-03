@@ -78,6 +78,7 @@ class ProcessingThread(QtCore.QThread):
         self.thread_terminate_flag = thread_terminate_flag
         self.app_data = appdata
         self.crop_status = ''
+        self.reprocess_to_ras_mode = parent.reprocess_mode
          # List of file extensions to ignore
 
 
@@ -122,7 +123,8 @@ class ProcessingThread(QtCore.QThread):
 
             self.update.emit("Started Processing")
 
-
+            if self.reprocess_to_ras_mode:
+                self.cleanup_on_reprocess()
 
             #===============================================
             # Cropping
@@ -163,6 +165,25 @@ class ProcessingThread(QtCore.QThread):
             logging.info("Processing finished")
         return
 
+    def cleanup_on_reprocess(self):
+        """
+        If we are reprocessing data from a previous crop, delete any scaled stacks or bz2 cropped image stacks
+        This ensure that we don't have any old sty;e data lying around
+
+        """
+        # Remove scaled stacks
+        dir_ = self.config.scale_path
+        paths = [os.path.join(dir_, x) for x in os.listdir(dir_)]
+        for p in paths:
+            shutil.rmtree(p)
+
+        # Remove bz2 files
+        bz2_files = [os.path.join(self.config.output_folder, x) for x in os.listdir(self.config.output_folder)
+                                  if x.endswith('bz2')]
+        for b in bz2_files:
+            shutil.rmtree(b)
+
+
     def cropping(self):
         """ Performs cropping procedures. Decides what and how to crop based on the paramters in the config file
 
@@ -202,7 +223,7 @@ class ProcessingThread(QtCore.QThread):
         # Cropping option: OLD CROP
         if self.config.crop_option == "Old_crop":
             # Use a previous folder already ran through HARP. No cropping needed here.
-            self.update.emit("No crop carried out")
+            self.update.emit("No crop carried out, using previously-cropped images")
             # Need to hide non recon files. Puts them in a temp folder until scaling has finished
             self.hide_files()
             logging.info("No crop carried out")

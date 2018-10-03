@@ -163,14 +163,9 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     # create memory mapped version of the temporary xyz scaled slices
     xyz_scaled_mmap = np.memmap(temp_xyz, dtype=datatype, mode='r', shape=tuple(xyz_scaled_dims))
 
-    options = {
-        'space': orientations.SPACE,
-        'space directions': orientations.SPACE_DIRECTIONS
-    }
-
     ras_volume = orientations.orient_for_impc(xyz_scaled_mmap)
 
-    nrrd.write(outpath, ras_volume, options)
+    nrrd.write(outpath, ras_volume, orientations.RAS_HEADER_OPTIONS)
 
     temp_xy.close()  # deletes temp file
     temp_xyz.close()

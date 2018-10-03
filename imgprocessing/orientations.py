@@ -12,6 +12,11 @@ SPACE = 'right-anterior-superior'
 
 SPACE_DIRECTIONS = np.array([[1,0,0], [0,1,0], [0,0,1]])
 
+RAS_HEADER_OPTIONS = {
+        'space': SPACE,
+        'space directions': SPACE_DIRECTIONS
+    }
+
 
 def orient_for_impc(volume):
     """
