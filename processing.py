@@ -78,7 +78,7 @@ class ProcessingThread(QtCore.QThread):
         self.thread_terminate_flag = thread_terminate_flag
         self.app_data = appdata
         self.crop_status = ''
-        self.reprocess_to_ras_mode = parent.reprocess_mode
+        self.reprocess_to_ras_mode = parent.do_reprocess
          # List of file extensions to ignore
 
 
@@ -175,13 +175,13 @@ class ProcessingThread(QtCore.QThread):
         dir_ = self.config.scale_path
         paths = [os.path.join(dir_, x) for x in os.listdir(dir_)]
         for p in paths:
-            shutil.rmtree(p)
+            os.remove(p)
 
         # Remove bz2 files
         bz2_files = [os.path.join(self.config.output_folder, x) for x in os.listdir(self.config.output_folder)
                                   if x.endswith('bz2')]
         for b in bz2_files:
-            shutil.rmtree(b)
+            os.remove(b)
 
 
     def cropping(self):

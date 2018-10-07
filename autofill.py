@@ -225,6 +225,9 @@ class Autofill(object):
     def auto_file_out(self, reprocess_mode):
         """ Auto fill to make output folder name. Just replaces 'recons' to 'processed recons' if possible
 
+        if reprocess_mode is True the input folder should be a previous cropped folder
+        the output folder will then be set to the parent folder in order to remake the scaled stacks and bz2s
+
         :param obj self.mainwindow:
             Although not technically part of the class, can still use this method as if it was part of the HARP class.
         :param reprocess_mode
@@ -236,7 +239,7 @@ class Autofill(object):
         path, folder_name = os.path.split(input_path)
 
         if reprocess_mode:
-            output_path = input_path
+            output_path = os.path.abspath(os.path.join(input_path, os.pardir))
             self.mainwindow.ui.lineEditOutput.setText(os.path.abspath(output_path))
             return
 

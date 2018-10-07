@@ -268,22 +268,31 @@ class MainWindow(QtGui.QMainWindow):
         ]
 
         buttons_to_deactivate = [
-
+            self.ui.radioButtonAuto,
+            self.ui.checkBoxCropYes,
+            self.ui.radioButtonMan
         ]
 
 
 
         if checked:
-            in_path = self.ui.lineEditInput.text()
-            self.ui.lineEditOutput.setText(in_path)
+            self.autofill.auto_file_out(True)
             self.do_reprocess = True
+
             for button in buttons_to_activate:
                 button.setChecked(True)
                 button.setDisabled(True)
-            # self.
+
+            for button in buttons_to_deactivate:
+                button.setDisabled(True)
+
         else:
             self.do_reprocess = False
+
             for button in buttons_to_activate:
+                button.setDisabled(False)
+
+            for button in buttons_to_deactivate:
                 button.setDisabled(False)
 
     @pyqtSlot()
