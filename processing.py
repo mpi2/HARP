@@ -122,6 +122,7 @@ class ProcessingThread(QtCore.QThread):
             logging.info(job)
 
             self.update.emit("Started Processing")
+            logging.info('Center {}'.format(self.config.center))
 
             if self.reprocess_to_ras_mode:
                 self.cleanup_on_reprocess()
@@ -471,7 +472,7 @@ class ProcessingThread(QtCore.QThread):
                 self.update.emit("Rescaling failed. No images found:")
 
             resampler.resample(files_for_scaling, scale, out_name, scaleby_int, self.update,
-                               self.thread_terminate_flag, center=self.app_data.center)
+                               self.thread_terminate_flag, center=self.config.center)
         except HarpDataError as e:
             self.update.emit("Rescaling the image failed: {}".format(e))
             raise
@@ -641,7 +642,8 @@ class ProcessingThread(QtCore.QThread):
                 outfile = os.path.join(
                     self.config.output_folder, 'IMPC_cropped_{}.nrrd'.format(self.config.full_name))
 
-                compress.bz2_nnrd(cropped_img_list, outfile, 'Compressing cropped recon', self.update, center=self.app_data.center)
+                compress.bz2_nnrd(cropped_img_list, outfile, 'Compressing cropped recon', self.update,
+                                  self.config.center)
 
 
 

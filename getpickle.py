@@ -28,7 +28,7 @@ except ImportError:
 from config import Config
 
 
-def get_pickle(mainwindow):
+def get_pickle(mainwindow, center):
     """ Creates the python pickle config file for future processing. Also creates a more readable text file of the
     same information.
     """
@@ -41,6 +41,8 @@ def get_pickle(mainwindow):
 
     #### Write to config file ####
     config = Config()
+
+    config.center = center
 
     # Create a folder for the metadata
     mainwindow.meta_path = os.path.join(outputFolder, "Metadata")

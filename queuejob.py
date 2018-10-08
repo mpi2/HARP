@@ -39,8 +39,9 @@ import getpickle
 
 class Queuejob(object):
 
-    def __init__(self, mainwindow):
+    def __init__(self, mainwindow, center):
         self.mainwindow = mainwindow
+        self.center = center
 
     def start(self):
         """ Function to start the process of adding recon folders onto the processing list
@@ -249,7 +250,7 @@ class Queuejob(object):
         # If an error has occured self.mainwindow.stop will be defined. if None then no error.
         if not self.mainwindow.stop:
             # Get the parameters needed for processing
-            getpickle.get_pickle(self.mainwindow)
+            getpickle.get_pickle(self.mainwindow, self.center)
 
             # Set up the table. 300 rows should be enough!
             self.mainwindow.ui.tableWidget.setRowCount(300)

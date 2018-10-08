@@ -994,7 +994,7 @@ l
         .. seealso::
             :func:`addtolist.start()`
         """
-        qj = queuejob.Queuejob(self)
+        qj = queuejob.Queuejob(self, self.app_data.center)
         qj.start()
 
     def start_processing(self):
@@ -1067,8 +1067,13 @@ l
         # Reset instance variables
         self.stop_pro_switch = 0
         self.thread_terminate_flag.value = 0 # Terminate when set to 1
+
         # Finally! Perform the analysis in a thread (using the WorkThread class from Run_processing.py file)
-        self.workthread = ProcessingThread(job_queue, self.thread_terminate_flag, self.app_data, self)
+        self.workthread = ProcessingThread(job_queue,
+                                           self.thread_terminate_flag,
+                                           self.app_data,
+                                           self)
+
         # the update(QString) SENDS signals from the processing thread (wt) to the processing_slot
         self.connect(self.workthread, QtCore.SIGNAL("update(QString)"), self.processing_slot)
         # The kill(Qstring) SENDS signals from the GUI to the function "kill_slot" in the the processing thread
