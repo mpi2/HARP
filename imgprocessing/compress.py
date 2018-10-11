@@ -23,10 +23,21 @@ from lib import nrrd
 import bz2
 import tarfile
 import tempfile
+import time
 
 
 def bz2_nnrd(img_list, outfile, scan_name, update):
     """
+    Given a list of 2D image paths create nrrd in a temp file and then write this to a bz2 compressed nrrd.
+
+    Notes
+    -----
+    11/10/18
+    The final step involves flushing any remaining data in the commpressor buffer to file
+    This step intermittently fails with an IOError 5 (on linux)
+    A small sleep has been added between reading from the buffer to writing to file
+
+
     """
     reader = Imreader(img_list)
     first_image = reader.imread(img_list[0])
@@ -81,8 +92,14 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
         while remaining:
             to_send = remaining[:BLOCK_SIZE]
             remaining = remaining[BLOCK_SIZE:]
+            time.sleep(2)  # see notes in docstring
+            print(len(to_send))
+            try:
+                fh_w.write(to_send)
+            except IOError as e:
+                print(e.message)
+                print(to_send)
 
-            fh_w.write(to_send)
 
     # if os.path.isfile(outfile):
     #     try:
