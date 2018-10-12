@@ -26,7 +26,7 @@ import tempfile
 import time
 
 
-def bz2_nnrd(img_list, outfile, scan_name, update):
+def bz2_nnrd():
     """
     Given a list of 2D image paths create nrrd in a temp file and then write this to a bz2 compressed nrrd.
 
@@ -110,22 +110,5 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
                 tries -= 1
 
 
-
-
-def bz2_dir(dir_, outfile, update, update_name, terminate):
-
-    tar = tarfile.open(outfile + '.tar.bz2', mode='w:bz2')
-    file_names = os.listdir(dir_)
-    toadd = [os.path.join(dir_, x) for x in file_names]
-
-    for i, (file_, name) in enumerate(zip(toadd, file_names)):
-        if i % 5 == 0:
-            if terminate.value == 1:
-                return
-            done = int((100.0 / len(toadd)) * i)
-            update.emit("{} compression: {}%".format(update_name, done))
-
-        tar.add(file_, arcname=name)
-    tar.close()
-
+if __name__ == '__main__':
 

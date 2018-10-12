@@ -614,8 +614,9 @@ class ProcessingThread(QtCore.QThread):
                 # #============================================
                 # # compression for cropped image sequence
                 # #============================================
-
-                self.update.emit("Compression of cropped recon started")
+                msg = "Compression of cropped recon started"
+                self.update.emit("msg")
+                logging.info(msg)
                 outfile = os.path.join(
                     self.config.output_folder, 'IMPC_cropped_{}.nrrd'.format(self.config.full_name))
 
