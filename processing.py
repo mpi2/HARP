@@ -47,10 +47,11 @@ import copy
 from multiprocessing import freeze_support
 import traceback
 import fnmatch
-import logging
 from config import Config
 from imgprocessing import resampler, crop
 from appdata import HarpDataError
+from logzero import logger as logging
+import logzero
 
 
 class ProcessingThread(QtCore.QThread):
@@ -109,14 +110,19 @@ class ProcessingThread(QtCore.QThread):
         for job in iter(self.config_paths.get, None):
 
             filehandler = open(job, 'r')
+
             self.config = copy.deepcopy(pickle.load(filehandler))
 
-            # Setup the logger
             session_log_path = os.path.join(self.config.meta_path, "session.log")
-            logging.basicConfig(filename=session_log_path,
-                                level=logging.DEBUG,
-                                format='%(asctime)s %(message)s',
-                                stream=sys.stdout)
+
+            logzero.logfile(session_log_path)
+
+            logging.info("\n########################################\n"
+                           "### HARP Session Log                 ###\n"
+                           "########################################\n")
+            # start time
+            logging.info(str(datetime.datetime.now()) + "\n")
+
             logging.info(job)
 
             self.update.emit("Started Processing")
