@@ -24,6 +24,7 @@ import bz2
 import tarfile
 import tempfile
 import time
+from logzero import logger as logging
 
 
 def bz2_nnrd(img_list, outfile, scan_name, update):
@@ -104,7 +105,8 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
                     fh_w.write(to_send)
 
                 except IOError:
-                    print('IOError on wrting compression buffer will try {} more times'.format(tries))
+                    msg = 'IOError on wrting compression buffer will try {} more times'.format(tries)
+                    logging.warning(msg)
 
                 time.sleep(3)
                 tries -= 1
