@@ -89,24 +89,28 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
 
         # Send any data being buffered by the compressor
         remaining = compressor.flush()
+
         while remaining:
             to_send = remaining[:BLOCK_SIZE]
             remaining = remaining[BLOCK_SIZE:]
             time.sleep(2)  # see notes in docstring
             print(len(to_send))
-            try:
-                fh_w.write(to_send)
-            except IOError as e:
-                print(e.message)
-                print(to_send)
+
+            tries = 5
+
+            while tries != 0:
+
+                try:
+                    fh_w.write(to_send)
+
+                except IOError:
+                    print('IOError on wrting compression buffer will try {} more times'.format(tries))
+
+                time.sleep(3)
+                tries -= 1
 
 
-    # if os.path.isfile(outfile):
-    #     try:
-    #         os.remove(outfile)
-    #     except OSError as e:
-    #         update.emit("Can't delete temp file {}".format(outfile))
-
+                
 
 def bz2_dir(dir_, outfile, update, update_name, terminate):
 
