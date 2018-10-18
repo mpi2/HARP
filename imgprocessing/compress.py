@@ -40,61 +40,58 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
 
 
     """
-    attempts = 0
-    while True:
-        print('attemps {}'.format(attempts))
-        attempts += 1
-        reader = Imreader(img_list)
-        first_image = reader.imread(img_list[0])
-        shape = list(first_image.shape)
-        shape = [shape[1], shape[0]]
-        shape.append(len(img_list))
-        print '++++==== bzp'
-        tempnrrd = tempfile.TemporaryFile(mode="wb+")
-        nrrd.write_nrrd_header(tempnrrd, shape, first_image.dtype, 3)
 
-        compressor = bz2.BZ2Compressor()
+    reader = Imreader(img_list)
+    first_image = reader.imread(img_list[0])
+    shape = list(first_image.shape)
+    shape = [shape[1], shape[0]]
+    shape.append(len(img_list))
+    print '++++==== bzp'
+    tempnrrd = tempfile.TemporaryFile(mode="wb+")
+    nrrd.write_nrrd_header(tempnrrd, shape, first_image.dtype, 3)
 
-        for i, f in enumerate(img_list):
-            if i % 20 == 0:
-                done = int((50.0 / len(img_list)) * i)
-                update.emit('{} {}%'.format(scan_name, done))
-            img_arr = reader.imread(f)
-            rawdata = img_arr.T.tostring(order='F')
-            tempnrrd.write(rawdata)
+    compressor = bz2.BZ2Compressor()
 
-        BLOCK_SIZE = 52428800 # Around 20 MB in memory at one time  144731 TO send amount on failure   bs 52428800
-        # TODO: Check its smaller than image size
-        compressed_name = outfile + '.bz2'
+    for i, f in enumerate(img_list):
+        if i % 20 == 0:
+            done = int((50.0 / len(img_list)) * i)
+            update.emit('{} {}%'.format(scan_name, done))
+        img_arr = reader.imread(f)
+        rawdata = img_arr.T.tostring(order='F')
+        tempnrrd.write(rawdata)
 
-        file_size = os.fstat(tempnrrd.fileno()).st_size
-        tempnrrd.seek(0)
-        bytes_read = 0
+    BLOCK_SIZE = 52428800 # Around 20 MB in memory at one time  144731 TO send amount on failure   bs 52428800
+    # TODO: Check its smaller than image size
+    compressed_name = outfile + '.bz2'
 
-        with open(compressed_name, 'wb') as fh_w:
-            while True:
-                block = tempnrrd.read(BLOCK_SIZE)
-                bytes_read += BLOCK_SIZE
-                done = int(50 + (50.0 / file_size) * bytes_read)
-                if done >= 100: # The getsize might not be accurate?
-                    done = 99
-                update.emit('{} {}%'.format(scan_name, done))
+    file_size = os.fstat(tempnrrd.fileno()).st_size
+    tempnrrd.seek(0)
+    bytes_read = 0
 
-                if not block:
-                    break
-                compressed = compressor.compress(block)
-                if compressed:
+    with open(compressed_name, 'wb') as fh_w:
+        while True:
+            block = tempnrrd.read(BLOCK_SIZE)
+            bytes_read += BLOCK_SIZE
+            done = int(50 + (50.0 / file_size) * bytes_read)
+            if done >= 100: # The getsize might not be accurate?
+                done = 99
+            update.emit('{} {}%'.format(scan_name, done))
 
-                    try:
-                        fh_w.write(compressed)
-                    except IOError:
-                        update.emit("Error in compression - job terminated")
-                        print('failed to write bzp chunk')
-                        return
+            if not block:
+                break
+            compressed = compressor.compress(block)
+            if compressed:
 
-            # Send any data being buffered by the compressor
-            remaining = compressor.flush()
-            fh_w.write(remaining)
+                try:
+                    fh_w.write(compressed)
+                except IOError:
+                    update.emit("Error in compression - job terminated")
+                    print('failed to write bzp chunk')
+                    return
+
+        # Send any data being buffered by the compressor
+        remaining = compressor.flush()
+        fh_w.write(remaining)
 
 
 def bz2_dir(dir_, outfile, update, update_name, terminate):
