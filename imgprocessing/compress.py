@@ -22,23 +22,11 @@ from imgprocessing.io import Imreader
 from lib import nrrd
 import bz2
 import tarfile
-import tempfile
-import time
-from logzero import logger as logging
 
 
 def bz2_nnrd(img_list, outfile, scan_name, update):
     """
     Given a list of 2D image paths create nrrd in a temp file and then write this to a bz2 compressed nrrd.
-
-    Notes
-    -----
-    11/10/18
-    The final step involves flushing any remaining data in the commpressor buffer to file
-    This step intermittently fails with an IOError 5 (on linux)
-    A small sleep has been added between reading from the buffer to writing to file
-
-
     """
 
     reader = Imreader(img_list)
@@ -46,11 +34,6 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
     shape = list(first_image.shape)
     shape = [shape[1], shape[0]]
     shape.append(len(img_list))
-    print '++++==== bzp'
-
-    buffer = ''
-    # tempnrrd = tempfile.TemporaryFile(mode="wb+")
-    # nrrd.write_nrrd_header(tempnrrd, shape, first_image.dtype, 3)
 
     compressor = bz2.BZ2Compressor()
     compressed_name = outfile + '.bz2'
