@@ -242,6 +242,18 @@ def write(filename, data, options={}, separate_header=False):
             _write_data(data, filehandle, options)
 
 
+class GetNrrdHeader(object):
+    """
+    In order to get a nrrd hear rather than write. Use the write function to store the header which can then be got
+    """
+    def __init__(self, shape, npdtype, ndim=3, options={}):
+
+        self.header = ''
+        write_nrrd_header(self, shape, npdtype, ndim, options)
+
+    def write(self, line):
+        self.header += line
+
 def write_nrrd_header(filehandle, shape, npdtype, ndim=3, options={}):
     """Write the numpy data to a nrrd file. The nrrd header values to use are
     inferred from from the data. Additional options can be passed in the

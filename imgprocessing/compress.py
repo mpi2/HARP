@@ -47,52 +47,31 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
     shape = [shape[1], shape[0]]
     shape.append(len(img_list))
     print '++++==== bzp'
-    tempnrrd = tempfile.TemporaryFile(mode="wb+")
-    nrrd.write_nrrd_header(tempnrrd, shape, first_image.dtype, 3)
+
+    buffer = ''
+    # tempnrrd = tempfile.TemporaryFile(mode="wb+")
+    # nrrd.write_nrrd_header(tempnrrd, shape, first_image.dtype, 3)
 
     compressor = bz2.BZ2Compressor()
-
-    for i, f in enumerate(img_list):
-        if i % 20 == 0:
-            done = int((50.0 / len(img_list)) * i)
-            update.emit('{} {}%'.format(scan_name, done))
-        img_arr = reader.imread(f)
-        rawdata = img_arr.T.tostring(order='F')
-        tempnrrd.write(rawdata)
-
-    BLOCK_SIZE = 52428800 # Around 20 MB in memory at one time  144731 TO send amount on failure   bs 52428800
-    # TODO: Check its smaller than image size
     compressed_name = outfile + '.bz2'
 
-    file_size = os.fstat(tempnrrd.fileno()).st_size
-    tempnrrd.seek(0)
-    bytes_read = 0
-
     with open(compressed_name, 'wb') as fh_w:
-        while True:
-            block = tempnrrd.read(BLOCK_SIZE)
-            bytes_read += BLOCK_SIZE
-            done = int(50 + (50.0 / file_size) * bytes_read)
-            if done >= 100: # The getsize might not be accurate?
-                done = 99
-            update.emit('{} {}%'.format(scan_name, done))
 
-            if not block:
-                break
-            compressed = compressor.compress(block)
-            if compressed:
+        header_read = nrrd.GetNrrdHeader(shape, first_image.dtype, 3)
+        header = header_read.header
+        fh_w.write(compressor.compress(header))
 
-                try:
-                    fh_w.write(compressed)
-                except IOError:
-                    update.emit("Error in compression - job terminated")
-                    print('failed to write bzp chunk')
-                    return
-
-        # Send any data being buffered by the compressor
+        for i, f in enumerate(img_list):
+            if i % 20 == 0:
+                done = int((50.0 / len(img_list)) * i)
+                update.emit('{} {}%'.format(scan_name, done))
+            img_arr = reader.imread(f)
+            rawdata = img_arr.T.tostring(order='F')
+            compressed = compressor.compress(rawdata)
+            fh_w.write(compressed)
+            # Send any data being buffered by the compressor
         remaining = compressor.flush()
         fh_w.write(remaining)
-
 
 def bz2_dir(dir_, outfile, update, update_name, terminate):
 
