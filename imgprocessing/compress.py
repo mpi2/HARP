@@ -45,16 +45,19 @@ def bz2_nnrd(img_list, outfile, scan_name, update):
         fh_w.write(compressor.compress(header))
 
         for i, f in enumerate(img_list):
+
             if i % 20 == 0:
-                done = int((50.0 / len(img_list)) * i)
+                done = int((100.0 / len(img_list)) * i)
                 update.emit('{} {}%'.format(scan_name, done))
+
             img_arr = reader.imread(f)
             rawdata = img_arr.T.tostring(order='F')
             compressed = compressor.compress(rawdata)
             fh_w.write(compressed)
-            # Send any data being buffered by the compressor
+        # Send any data being buffered by the compressor
         remaining = compressor.flush()
-        fh_w.write(remaining)
+        if remaining:
+            fh_w.write(remaining)
 
 def bz2_dir(dir_, outfile, update, update_name, terminate):
 
@@ -73,3 +76,6 @@ def bz2_dir(dir_, outfile, update, update_name, terminate):
     tar.close()
 
 
+if __name__ == '__maim__':
+
+    bz2_nnrd()

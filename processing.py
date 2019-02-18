@@ -162,6 +162,10 @@ class ProcessingThread(QtCore.QThread):
                 self.update.emit("compression failed")
                 logging.error("compression failed: {}".format(e))
                 continue
+            except Exception as e:  # Try to catch the network errors
+                self.update.emit("compression failed, Possible network problems")
+                logging.error("compression failed. Possible network problems: {}".format(e))
+                continue
             else:
                 self.update.emit("Processing finished")
 

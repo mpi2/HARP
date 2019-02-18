@@ -244,7 +244,7 @@ def write(filename, data, options={}, separate_header=False):
 
 class GetNrrdHeader(object):
     """
-    In order to get a nrrd hear rather than write. Use the write function to store the header which can then be got
+    In order to get a nrrd hear rather than write. Use the write function to store the header which can then be got at
     """
     def __init__(self, shape, npdtype, ndim=3, options={}):
 

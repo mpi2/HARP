@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+
+[packages]
+SimpleITK = "==1.1.0"
+numpy = "==1.15.1"
+logzero = "*"
+ipython = "*"
+matplotlib = "*"
+opencv-python = "*"
+scikit-image = "*"
+PyYAML = "==3.13"
+pyqt4 = "*"
+
+[requires]
+python_version = "2.7"

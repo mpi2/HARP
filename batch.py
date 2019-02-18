@@ -1,4 +1,6 @@
 #!/usr/bin/python
+
+
 from argparse import ArgumentParser
 from os import listdir, mkdir
 from os.path import isdir, join, split, isfile, basename, splitext, realpath
@@ -12,7 +14,7 @@ from autofill import Autofill
 import sys
 
 
-SCALING = {'E9.5': None, 'E14.5': (2, 14.0), 'E18.5': (28.0)}
+SCALING = {'E9.5': None, 'E14.5': (2, 14.0), 'E18.5': (28.0, )}
 ext = 'nrrd'
 
 
