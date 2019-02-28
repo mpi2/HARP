@@ -77,7 +77,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     if len(img_path_list) < 1:
         raise HarpDataError("HARP Resampler: There are no images in the list or directory")
 
-    #Get dimensions for the memory mapped raw xy file
+    # Get dimensions for the memory mapped raw xy file
     xy_scaled_dims = [len(img_path_list)]
 
     img_path_list = sorted(img_path_list)

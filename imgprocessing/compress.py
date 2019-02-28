@@ -22,11 +22,6 @@ from imgprocessing.io_ import Imreader
 from lib import nrrd
 import bz2
 import tarfile
-import tempfile
-import orientations
-import numpy as np
-from skimage.io import imshow
-import matplotlib.pyplot as plt
 
 # options ={
 # 'space': 'right - anterior - superior',
@@ -39,70 +34,38 @@ import matplotlib.pyplot as plt
 
 def bz2_nnrd(img_list, outfile, scan_name, update, center=None):
     """
+    Given a list of 2D image paths create nrrd in a temp file and then write this to a bz2 compressed nrrd.
     """
+
     reader = Imreader(img_list)
-    print '++++==== bzp'
-    tempnrrd = tempfile.TemporaryFile(mode="wb+")
+    first_image = reader.imread(img_list[0])
+    shape = list(first_image.shape)
+    shape = [shape[1], shape[0]]
+    shape.append(len(img_list))
 
     compressor = bz2.BZ2Compressor()
-
-    first = True
-    for i, f in enumerate(img_list):
-
-        if i % 20 == 0:
-            done = int((50.0 / len(img_list)) * i)
-            update.emit('{} {}%'.format(scan_name, done))
-
-        img_arr = reader.imread(f)
-        img_arr = orientations.orient_slice_for_impc(img_arr, center, i)
-
-        if first:
-            shape = [img_arr.shape[1], img_arr.shape[0], len(img_list)]
-            nrrd.write_nrrd_header(tempnrrd, shape, img_arr.dtype, 3, options=orientations.RAS_HEADER_OPTIONS)
-            first = False
-
-        rawdata = img_arr.T.tostring(order='F')
-        tempnrrd.write(rawdata)
-
-    BLOCK_SIZE = 52428800 # Around 20 MB in memory at one time
-    # TODO: Check its smaller than image size
     compressed_name = outfile + '.bz2'
 
-    file_size = os.fstat(tempnrrd.fileno()).st_size
-    tempnrrd.seek(0)
-    bytes_read = 0
-
     with open(compressed_name, 'wb') as fh_w:
-        while True:
-            block = tempnrrd.read(BLOCK_SIZE)
-            bytes_read += BLOCK_SIZE
-            done = int(50 + (50.0 / file_size) * bytes_read)
-            if done >= 100: # The getsize might not be accurate?
-                done = 99
-            update.emit('{} {}%'.format(scan_name, done))
 
-            if not block:
-                break
+        header_read = nrrd.GetNrrdHeader(shape, first_image.dtype, 3)
+        header = header_read.header
+        fh_w.write(compressor.compress(header))
 
-            compressed = compressor.compress(block)
+        for i, f in enumerate(img_list):
 
-            if compressed:
+            if i % 20 == 0:
+                done = int((100.0 / len(img_list)) * i)
+                update.emit('{} {}%'.format(scan_name, done))
 
-                try:
-                    fh_w.write(compressed)
-                except IOError:
-                    update.emit("Error in compression - job terminated")
-                    print('failed to write bzp chunk')
-                    return
-
+            img_arr = reader.imread(f)
+            rawdata = img_arr.T.tostring(order='F')
+            compressed = compressor.compress(rawdata)
+            fh_w.write(compressed)
         # Send any data being buffered by the compressor
         remaining = compressor.flush()
-        while remaining:
-            to_send = remaining[:BLOCK_SIZE]
-            remaining = remaining[BLOCK_SIZE:]
-
-            fh_w.write(to_send)
-
+        if remaining:
+            fh_w.write(remaining)
 
 def bz2_dir(dir_, outfile, update, update_name, terminate):
 
@@ -121,3 +84,6 @@ def bz2_dir(dir_, outfile, update, update_name, terminate):
     tar.close()
 
 
+if __name__ == '__maim__':
+
+    bz2_nnrd()

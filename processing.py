@@ -47,10 +47,11 @@ import copy
 from multiprocessing import freeze_support
 import traceback
 import fnmatch
-import logging
 from config import Config
 from imgprocessing import resampler, crop
 from appdata import HarpDataError
+from logzero import logger as logging
+import logzero
 
 
 class ProcessingThread(QtCore.QThread):
@@ -111,14 +112,19 @@ class ProcessingThread(QtCore.QThread):
         for job in iter(self.config_paths.get, None):
 
             filehandler = open(job, 'r')
+
             self.config = copy.deepcopy(pickle.load(filehandler))
 
-            # Setup the logger
             session_log_path = os.path.join(self.config.meta_path, "session.log")
-            logging.basicConfig(filename=session_log_path,
-                                level=logging.DEBUG,
-                                format='%(asctime)s %(message)s',
-                                stream=sys.stdout)
+
+            logzero.logfile(session_log_path)
+
+            logging.info("\n########################################\n"
+                           "### HARP Session Log                 ###\n"
+                           "########################################\n")
+            # start time
+            logging.info(str(datetime.datetime.now()) + "\n")
+
             logging.info(job)
 
             self.update.emit("Started Processing")
@@ -159,6 +165,10 @@ class ProcessingThread(QtCore.QThread):
             except HarpDataError as e:
                 self.update.emit("compression failed")
                 logging.error("compression failed: {}".format(e))
+                continue
+            except Exception as e:  # Try to catch the network errors
+                self.update.emit("compression failed, Possible network problems")
+                logging.error("compression failed. Possible network problems: {}".format(e))
                 continue
             else:
                 self.update.emit("Processing finished")
@@ -637,8 +647,9 @@ class ProcessingThread(QtCore.QThread):
                 # #============================================
                 # # compression for cropped image sequence
                 # #============================================
-
-                self.update.emit("Compression of cropped recon started")
+                msg = "Compression of cropped recon started"
+                self.update.emit("msg")
+                logging.info(msg)
                 outfile = os.path.join(
                     self.config.output_folder, 'IMPC_cropped_{}.nrrd'.format(self.config.full_name))
 

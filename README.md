@@ -15,14 +15,14 @@ HARP can be downloaded as a standalone release which can be run simply by double
 
 ## Contributors
 
-HARP was developed by members the Systems Imaging Group at MRC Harwell (UK):
+HARP was developed by members the Bioimage Informatics Team at MRC Harwell (UK):
 
 Henrik Westerberg
 Neil Horner
 James Brown
 Thomas Lawson
 
-E-mail the developers: sig@har.mrc.ac.uk
+E-mail the developers: bit@har.mrc.ac.uk
 
 ## License
 

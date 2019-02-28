@@ -1,4 +1,6 @@
 #!/usr/bin/python
+
+
 from argparse import ArgumentParser
 from os import listdir, mkdir
 from os.path import isdir, join, split, isfile, basename, splitext, realpath
@@ -12,7 +14,7 @@ from autofill import Autofill
 import sys
 
 
-SCALING = {'E9.5': None, 'E14.5': (2, 14.0), 'E18.5': (28.0, 56.0)}
+SCALING = {'E9.5': None, 'E14.5': (2, 14.0), 'E18.5': (28.0, )}
 ext = 'nrrd'
 
 
@@ -63,7 +65,7 @@ def batch(recon_root, proc_recon_root, csv_path):
         # Get recon log and pixel size
         log_paths = [f for f in listdir(cropped_dir) if f.endswith("_rec.log")]
         if len(log_paths) < 1:
-            print('Cannot find log in cropped directory')
+            print('Cannot find log in cropped directory for {}'.format(recon_id))
             continue
         log = join(cropped_dir, log_paths[0])
 
@@ -153,15 +155,22 @@ def scaled_stack_exists(folder, sf, pixel_size):
 
         split_path = im_name.split('_')
 
-        sf_index = split_path.index('scaled') + 1
-        pixel_index = split_path.index('pixel') + 1
+        try:
+            sf_index = split_path.index('scaled') + 1
+        except ValueError:
+            raise ValueError("'_scaled_ is not in the filename: {}".format(im_name))
+
+        try:
+            pixel_index = split_path.index('pixel') + 1
+        except ValueError:
+            raise ValueError("'_pixel_' is not in the filename: {}".format(im_name))
 
         im_sf = strconv.convert(split_path[sf_index])
         try:
             float(im_sf)
         except ValueError:
-            print("Scaled image has a non-deafult scaling format within its name")
-            sys.exit()
+            print("Scaled image {} has a non-deafult scaling format within its name".format(im_name))
+            return False
         im_pixel = float(split_path[pixel_index])
 
         if abs(im_sf - sf) < 0.1 and abs(im_pixel - pixel_size) < 0.1:

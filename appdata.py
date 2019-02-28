@@ -42,7 +42,7 @@ class AppData(object):
         if not os.path.isdir(appdata_dir):
             try:
                 os.mkdir(appdata_dir)
-            except WindowsError:
+            except OSError:
                 #Can't find the AppData directory. So just make one in home directory
                 appdata_dir = os.path.join(expanduser("~"), '.' + appname)
                 if not os.path.isdir(appdata_dir):
@@ -161,8 +161,10 @@ class AppData(object):
         files = []
 
         for fn in os.listdir(input_folder):
+
             if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in self.files_to_ignore):
                 continue
+
             if any(fnmatch.fnmatch(fn.lower(), x.lower()) for x in self.files_to_use):
                 files.append(os.path.join(input_folder, fn))
 
