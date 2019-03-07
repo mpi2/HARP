@@ -63,7 +63,6 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
     temp_xyz = tempfile.TemporaryFile(mode='wb+')
 
-
     #Check if we have a directory with images or a list with images
     if type(images) is str:
         if os.path.isdir(images):

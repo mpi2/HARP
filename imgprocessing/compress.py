@@ -22,6 +22,9 @@ from imgprocessing.io_ import Imreader
 from lib import nrrd
 import bz2
 import tarfile
+import numpy as np
+from scipy.misc import imshow
+import orientations
 
 # options ={
 # 'space': 'right - anterior - superior',
@@ -41,6 +44,12 @@ def bz2_nnrd(img_list, outfile, scan_name, update, center=None):
     first_image = reader.imread(img_list[0])
     shape = list(first_image.shape)
     shape = [shape[1], shape[0]]
+
+    if center.lower() == 'tcp':
+        # The X and Y are determined from the dimensions of a Z slice
+        # UCD data is on it's side so we need to reverese these shape dimensions
+        shape.reverse()
+
     shape.append(len(img_list))
 
     compressor = bz2.BZ2Compressor()
@@ -48,9 +57,11 @@ def bz2_nnrd(img_list, outfile, scan_name, update, center=None):
 
     with open(compressed_name, 'wb') as fh_w:
 
-        header_read = nrrd.GetNrrdHeader(shape, first_image.dtype, 3)
+        header_read = nrrd.GetNrrdHeader(shape, first_image.dtype, 3, options=orientations.RAS_HEADER_OPTIONS)
         header = header_read.header
         fh_w.write(compressor.compress(header))
+
+        print(center)
 
         for i, f in enumerate(img_list):
 
@@ -59,13 +70,26 @@ def bz2_nnrd(img_list, outfile, scan_name, update, center=None):
                 update.emit('{} {}%'.format(scan_name, done))
 
             img_arr = reader.imread(f)
+
+            if center.lower() == 'tcp':
+                img_arr = np.rot90(img_arr, k=3)
+                img_arr = np.fliplr(img_arr)
+
+            if center.lower() == 'ucd':
+                img_arr = np.rot90(img_arr, k=2)
+
+            if i % 20 == 0:
+                imshow(img_arr)
+
             rawdata = img_arr.T.tostring(order='F')
+
             compressed = compressor.compress(rawdata)
             fh_w.write(compressed)
         # Send any data being buffered by the compressor
         remaining = compressor.flush()
         if remaining:
             fh_w.write(remaining)
+
 
 def bz2_dir(dir_, outfile, update, update_name, terminate):
 
