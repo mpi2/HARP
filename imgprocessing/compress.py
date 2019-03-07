@@ -78,6 +78,9 @@ def bz2_nnrd(img_list, outfile, scan_name, update, center=None):
             if center.lower() == 'ucd':
                 img_arr = np.rot90(img_arr, k=2)
 
+            else:
+                img_arr = np.fliplr(img_arr)
+
             rawdata = img_arr.T.tostring(order='F')
 
             compressed = compressor.compress(rawdata)
