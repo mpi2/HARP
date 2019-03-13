@@ -75,8 +75,11 @@ def bz2_nnrd(img_list, outfile, scan_name, update, center=None):
                 img_arr = np.rot90(img_arr, k=3)
                 img_arr = np.fliplr(img_arr)
 
-            if center.lower() == 'ucd':
+            elif center.lower() == 'ucd':
                 img_arr = np.rot90(img_arr, k=2)
+
+            elif center.lower() == 'ccp':
+                pass # No flip needed for compressor
 
             else: # Get the rest ofthe data into RAS format
                 img_arr = np.fliplr(img_arr)
