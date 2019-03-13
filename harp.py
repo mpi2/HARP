@@ -88,6 +88,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.app = app
 
+        # March 2019. Temp hide the reprocess to RAS button unyil it's working
+        self.ui.checkBoxReprocessToRas.hide()
+
         # Store app-specific data such as last directory browsed
         self.app_data = AppData()
         self.opttab_populate_patterns()
@@ -257,7 +260,7 @@ class MainWindow(QtGui.QMainWindow):
     def reporcess_slot(self, checked):
         """
         Revieves signal from the reproces checkbox being pressed.
-        If there is a path int the input lineedit, make sure the output path is set to the same directory
+        If there is a path in the input lineedit, make sure the output path is set to the same directory
 
 
         Returns

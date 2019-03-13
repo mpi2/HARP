@@ -82,7 +82,6 @@ class ProcessingThread(QtCore.QThread):
         self.reprocess_to_ras_mode = parent.do_reprocess
          # List of file extensions to ignore
 
-
     def __del__(self):
         logging.warn("Processing stopped")
 
@@ -179,7 +178,7 @@ class ProcessingThread(QtCore.QThread):
     def cleanup_on_reprocess(self):
         """
         If we are reprocessing data from a previous crop, delete any scaled stacks or bz2 cropped image stacks
-        This ensure that we don't have any old sty;e data lying around
+        This ensure that we don't have any old style data lying around
 
         """
         # Remove scaled stacks
