@@ -58,7 +58,6 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     :return:
     """
 
-
     temp_xy = tempfile.TemporaryFile(mode='wb+')
 
     temp_xyz = tempfile.TemporaryFile(mode='wb+')
@@ -81,7 +80,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
     img_path_list = sorted(img_path_list)
 
-    datatype = 'uint8'  # default
+    datatype = 'uint8'  # I think this can be deleted as it's overridden?
 
     first = True
     count = 0
@@ -110,6 +109,9 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
         elif center.lower() == 'ucd':
             z_slice_resized = np.rot90(z_slice_resized, k=2)
+            z_slice_resized = np.fliplr(z_slice_resized)
+
+        elif center.lower() == 'ccp':
             z_slice_resized = np.fliplr(z_slice_resized)
 
         if first:
@@ -168,6 +170,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
     temp_xy.close()  # deletes temp file
     temp_xyz.close()
+
 
 def _remove_temp_files(file_list):
     for file_ in file_list:

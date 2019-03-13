@@ -226,10 +226,12 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.JAX,
             self.ui.UCD,
             self.ui.BCM,
-            self.ui.HAR
+            self.ui.HAR,
+            self.ui.CCP
         ]
 
         cen = self.app_data.center
+
         for x in self.center_buttons:
             if cen == x.text():
                 x.setChecked(True)

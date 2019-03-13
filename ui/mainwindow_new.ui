@@ -29,7 +29,7 @@
     <item row="0" column="1">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -44,10 +44,10 @@
           <widget class="QWidget" name="scrollAreaWidgetContents_2">
            <property name="geometry">
             <rect>
-             <x>-11</x>
+             <x>0</x>
              <y>0</y>
-             <width>1394</width>
-             <height>969</height>
+             <width>1382</width>
+             <height>958</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_2">
@@ -279,7 +279,7 @@ QGroupBox::title
                    <property name="smallDecimalPoint">
                     <bool>true</bool>
                    </property>
-                   <property name="numDigits">
+                   <property name="digitCount">
                     <number>7</number>
                    </property>
                    <property name="value" stdset="0">
@@ -295,7 +295,7 @@ QGroupBox::title
                    <property name="smallDecimalPoint">
                     <bool>true</bool>
                    </property>
-                   <property name="numDigits">
+                   <property name="digitCount">
                     <number>7</number>
                    </property>
                    <property name="segmentStyle">
@@ -1899,8 +1899,8 @@ QGroupBox::title
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>98</width>
-             <height>93</height>
+             <width>88</width>
+             <height>88</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout">
@@ -2122,13 +2122,6 @@ p, li { white-space: pre-wrap; }
          <string>Center</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_7">
-         <item row="0" column="0">
-          <widget class="QRadioButton" name="UCD">
-           <property name="text">
-            <string>UCD</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="0">
           <widget class="QRadioButton" name="TCP">
            <property name="text">
@@ -2136,24 +2129,38 @@ p, li { white-space: pre-wrap; }
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="UCD">
+           <property name="text">
+            <string>UCD</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
           <widget class="QRadioButton" name="BCM">
            <property name="text">
             <string>BCM</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="4" column="0">
           <widget class="QRadioButton" name="HAR">
            <property name="text">
             <string>HAR</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
+         <item row="5" column="0">
           <widget class="QRadioButton" name="JAX">
            <property name="text">
             <string>JAX</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QRadioButton" name="CCP">
+           <property name="text">
+            <string>CCP</string>
            </property>
           </widget>
          </item>
@@ -2171,7 +2178,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1438</width>
-     <height>27</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMore_Options">
