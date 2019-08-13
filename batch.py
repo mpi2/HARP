@@ -4,7 +4,8 @@
 from argparse import ArgumentParser
 from os import listdir, mkdir
 from os.path import isdir, join, split, isfile, basename, splitext, realpath
-import csv
+from logzero import logger as logging
+import logzero
 import strconv
 from imgprocessing.resampler import resample
 from imgprocessing.compress import bz2_nnrd
@@ -17,6 +18,7 @@ import sys
 SCALING = {'E9.5': None, 'E14.5': (2, 14.0), 'E18.5': (28.0, )}
 ext = 'nrrd'
 
+LOG_NAME = 'reprocess.log'
 
 def batch(recon_root, proc_recon_root, csv_path):
     """
@@ -27,7 +29,7 @@ def batch(recon_root, proc_recon_root, csv_path):
     """
 
     with open(csv_path, 'r') as fh:
-        recon_list = [row[0] for row in csv.reader(fh)]
+        recon_list = [line.strip() for line in fh if line.strip()]
 
 
     app = AppData()
@@ -49,6 +51,9 @@ def batch(recon_root, proc_recon_root, csv_path):
         recon_id = get_input_id(join(metadata_dir, 'config4user.log'))
         recon_path = join(recon_root, recon_id)
 
+        log_path = join(metadata_dir, LOG_NAME)
+        logzero.logfile(log_path)
+
         # Performing cropping if directory does not exist or is empty
         if len(listdir(cropped_dir)) == 0:
 
@@ -65,7 +70,7 @@ def batch(recon_root, proc_recon_root, csv_path):
         # Get recon log and pixel size
         log_paths = [f for f in listdir(cropped_dir) if f.endswith("_rec.log")]
         if len(log_paths) < 1:
-            print('Cannot find log in cropped directory for {}'.format(recon_id))
+            logging.info('Cannot find log in cropped directory for {}'.format(recon_id))
             continue
         log = join(cropped_dir, log_paths[0])
 
@@ -91,19 +96,30 @@ def batch(recon_root, proc_recon_root, csv_path):
             out_name = join(scaled_dir, '{}_scaled_{:.4f}_pixel_{:.2f}.{}'.format(recon_id, sf, new_pixel_size, ext))
 
             if scaled_stack_exists(scaled_dir, sf, new_pixel_size):
+                logging.info("Scaled stack {} already exists. Not recreating".format(scale))
                 continue
 
-            resample(img_list, sf, out_name, scale_by_int, update)
+            try:
+                resample(img_list, sf, out_name, scale_by_int, update)
+            except Exception as e:
+                logging.error("resampling failed")
+                logging.exception(e)
+            else:
+                logging.info('######## Resmapling of at scale {} finished successfully ########'.format(scale))
 
         # Compression
         bz2_file = join(proc_recon_path, 'IMPC_cropped_{}.nrrd'.format(recon_id))
         if not isfile(bz2_file + '.bz2'):
 
-            print "Generating missing bz2 file for '{}'".format(recon_id)
+            logging.info("Generating missing bz2 file for '{}'".format(recon_id))
             try:
                 bz2_nnrd(img_list, bz2_file, 'Compressing cropped recon', update)
             except IOError as e:
-                print('Failed to write the compressed bzp2 file. Network issues?\n{}'.format(e))
+                logging.exception('Failed to write the compressed bzp2 file. Network issues?\n{}'.format(e))
+            else:
+                logging.info("######## bz2 file created successfully ########")
+        else:
+            logging.info('Bz2 file already exists. Not recreating')
 
 
 # def find_recon(search_path, head):

@@ -57,7 +57,6 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     :param scaleby_int bool: True-> scale by binning. False-> use cv2 interpolated scaling
     :return:
     """
-
     temp_xy = tempfile.TemporaryFile(mode='wb+')
 
     temp_xyz = tempfile.TemporaryFile(mode='wb+')

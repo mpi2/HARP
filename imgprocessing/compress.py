@@ -35,11 +35,11 @@ import orientations
 # Get correct header
 # Add appropriate flips
 
-def bz2_nnrd(img_list, outfile, scan_name, update, center=None):
+
+def bz2_nnrd(img_list, outfile, scan_name, update, center=''):
     """
     Given a list of 2D image paths create nrrd in a temp file and then write this to a bz2 compressed nrrd.
     """
-
     reader = Imreader(img_list)
     first_image = reader.imread(img_list[0])
     shape = list(first_image.shape)
@@ -47,7 +47,7 @@ def bz2_nnrd(img_list, outfile, scan_name, update, center=None):
 
     if center.lower() == 'tcp':
         # The X and Y are determined from the dimensions of a Z slice
-        # UCD data is on it's side so we need to reverese these shape dimensions
+        # TCP data is on it's side so we need to reverese these shape dimensions
         shape.reverse()
 
     shape.append(len(img_list))
