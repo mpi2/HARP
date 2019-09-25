@@ -20,12 +20,19 @@ ext = 'nrrd'
 
 LOG_NAME = 'reprocess.log'
 
-def batch(recon_root, proc_recon_root, csv_path):
+
+def batch(proc_recon_root, csv_path, recon_root=None):
     """
     Script to automatically generate crops, scled images and compressed files
-    :param recon_list:
-    :param mount:
-    :return:
+
+    Parameters
+    ----------
+    proc_recon_root: str
+        path to processed recons directory
+    csv_path: str
+        path to csv file with specimen name per line for processing
+    recon_root: str
+        path to recons directory. Only required if we are anticipating the need to regenerate cropped images
     """
 
     with open(csv_path, 'r') as fh:
@@ -39,6 +46,7 @@ def batch(recon_root, proc_recon_root, csv_path):
     for recon_id in recon_list:
 
         stage = get_stage(recon_id)
+
         proc_recon_path = join(proc_recon_root, recon_id)
         cropped_dir = join(proc_recon_path, 'cropped')
 
@@ -48,15 +56,13 @@ def batch(recon_root, proc_recon_root, csv_path):
         scaled_dir = join(proc_recon_path, 'scaled_stacks')
         metadata_dir = join(proc_recon_path, 'Metadata')
 
-        recon_id = get_input_id(join(metadata_dir, 'config4user.log'))
-        recon_path = join(recon_root, recon_id)
-
         log_path = join(metadata_dir, LOG_NAME)
         logzero.logfile(log_path)
 
         # Performing cropping if directory does not exist or is empty
-        if len(listdir(cropped_dir)) == 0:
-
+        if recon_root and len(listdir(cropped_dir)) == 0:
+            recon_id = get_input_id(join(metadata_dir, 'config4user.log'))
+            recon_path = join(recon_root, recon_id)
             fake_config = lambda: None
             fake_config.meta_path = metadata_dir
             fake_config.value = 0
@@ -200,6 +206,7 @@ class FakeUpdate(object):
     def emit(self, str_):
         print str_
 
+
 if __name__ == "__main__":
 
     parser = ArgumentParser()
@@ -208,4 +215,4 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--csv', help="path to csv with processed_recon_name", required=True, dest='csv_path')
 
     args = parser.parse_args()
-    batch(args.recons_path, args.proc_recons_path, args.csv_path)
+    batch(args.proc_recons_path, args.csv_path, args.recons_path)
