@@ -2,7 +2,7 @@
 
 
 from argparse import ArgumentParser
-from os import listdir, mkdir
+from os import listdir, mkdir, remove
 from os.path import isdir, join, split, isfile, basename, splitext, realpath
 from logzero import logger as logging
 import logzero
@@ -21,7 +21,7 @@ ext = 'nrrd'
 LOG_NAME = 'reprocess.log'
 
 
-def batch(proc_recon_root, csv_path, recon_root=None):
+def batch(proc_recon_root, csv_path, recon_root=None, clobber_bz2=False):
     """
     Script to automatically generate crops, scled images and compressed files
 
@@ -114,18 +114,16 @@ def batch(proc_recon_root, csv_path, recon_root=None):
                 logging.info('######## Resmapling of at scale {} finished successfully ########'.format(scale))
 
         # Compression
-        bz2_file = join(proc_recon_path, 'IMPC_cropped_{}.nrrd'.format(recon_id))
-        if not isfile(bz2_file + '.bz2'):
+        bz2_file = join(proc_recon_path, 'IMPC_cropped_{}.nrrd'.format(recon_id)) +'.bz2'
 
-            logging.info("Generating missing bz2 file for '{}'".format(recon_id))
-            try:
-                bz2_nnrd(img_list, bz2_file, 'Compressing cropped recon', update)
-            except IOError as e:
-                logging.exception('Failed to write the compressed bzp2 file. Network issues?\n{}'.format(e))
-            else:
-                logging.info("######## bz2 file created successfully ########")
+        if not isfile(bz2_file):
+            compress(bz2_file, img_list, recon_id, update, True)
+
+        elif isfile(bz2_file) and clobber_bz2:
+            remove(bz2_file)
+            compress(bz2_file, img_list, recon_id, update)
         else:
-            logging.info('Bz2 file already exists. Not recreating')
+            logging.info('Not replacing existing bz2 file')
 
 
 # def find_recon(search_path, head):
@@ -139,6 +137,19 @@ def batch(proc_recon_root, csv_path, recon_root=None):
 #         combined_path = join(search_path, *combined)
 #         if isdir(combined_path):
 #             return combined_path
+
+def compress(bz2_file, img_list, recon_id, update, missing=False):
+
+    if missing:
+        logging.info("Renerating missing bz2 file for '{}'".format(recon_id))
+    else:
+        logging.info("Overwriting bz2 file for '{}'".format(recon_id))
+    try:
+        bz2_nnrd(img_list, bz2_file, 'Compressing cropped recon', update)
+    except IOError as e:
+        logging.exception('Failed to write the compressed bzp2 file. Network issues?\n{}'.format(e))
+    else:
+        logging.info("######## bz2 file created successfully ########")
 
 
 def get_stage(recon_name):
@@ -211,8 +222,12 @@ if __name__ == "__main__":
 
     parser = ArgumentParser()
     parser.add_argument('-r', '--recons', help="path to recons folder", required=True, dest='recons_path')
-    parser.add_argument('-p', '--processed_recons', help="path to processed recons folder", required=True, dest='proc_recons_path')
+    parser.add_argument('-p', '--processed_recons', help="path to processed recons folder", required=True,
+                        dest='proc_recons_path')
     parser.add_argument('-c', '--csv', help="path to csv with processed_recon_name", required=True, dest='csv_path')
+    parser.add_argument('--clobber_bz2', help="Overwrite the bz2 if it exists", required=False, dest='clobber_bz2',
+                        default=False, action='store_true')
+
 
     args = parser.parse_args()
-    batch(args.proc_recons_path, args.csv_path, args.recons_path)
+    batch(args.proc_recons_path, args.csv_path, args.recons_path, args.clobber_bz2)
