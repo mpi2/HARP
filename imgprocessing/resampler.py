@@ -49,7 +49,7 @@ import tempfile
 import orientations
 
 
-def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminate_flag=Value('i', 0), center=None):
+def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminate_flag=Value('i', 0), center=''):
     """
     :param images: iterable or a directory
     :param scale: int. Factor to scale by

@@ -35,9 +35,15 @@ def batch(proc_recon_root, csv_path, recon_root=None, clobber_bz2=False):
         path to recons directory. Only required if we are anticipating the need to regenerate cropped images
     """
 
-    with open(csv_path, 'r') as fh:
-        recon_list = [line.strip() for line in fh if line.strip()]
+    # For debugging, just if csv_path is not a file see if it's a string of recon name
+    if not isfile(csv_path):
+        recon_list = [csv_path]
 
+    else:
+        with open(csv_path, 'r') as fh:
+            recon_list = [line.strip() for line in fh if line.strip()]
+
+    done_file = csv_path + '.done'
 
     app = AppData()
     auto = Autofill(None)
@@ -114,7 +120,7 @@ def batch(proc_recon_root, csv_path, recon_root=None, clobber_bz2=False):
                 logging.info('######## Resmapling of at scale {} finished successfully ########'.format(scale))
 
         # Compression
-        bz2_file = join(proc_recon_path, 'IMPC_cropped_{}.nrrd'.format(recon_id)) +'.bz2'
+        bz2_file = join(proc_recon_path, 'IMPC_cropped_{}.nrrd'.format(recon_id))
 
         if not isfile(bz2_file):
             compress(bz2_file, img_list, recon_id, update, True)
@@ -124,6 +130,9 @@ def batch(proc_recon_root, csv_path, recon_root=None, clobber_bz2=False):
             compress(bz2_file, img_list, recon_id, update)
         else:
             logging.info('Not replacing existing bz2 file')
+
+        with open(done_file, 'a') as dfh:
+            dfh.write(recon_id + '\n')
 
 
 # def find_recon(search_path, head):
@@ -221,13 +230,12 @@ class FakeUpdate(object):
 if __name__ == "__main__":
 
     parser = ArgumentParser()
-    parser.add_argument('-r', '--recons', help="path to recons folder", required=True, dest='recons_path')
+    parser.add_argument('-r', '--recons', help="path to recons folder", required=False, default=None, dest='recons_path')
     parser.add_argument('-p', '--processed_recons', help="path to processed recons folder", required=True,
                         dest='proc_recons_path')
     parser.add_argument('-c', '--csv', help="path to csv with processed_recon_name", required=True, dest='csv_path')
     parser.add_argument('--clobber_bz2', help="Overwrite the bz2 if it exists", required=False, dest='clobber_bz2',
                         default=False, action='store_true')
-
 
     args = parser.parse_args()
     batch(args.proc_recons_path, args.csv_path, args.recons_path, args.clobber_bz2)
