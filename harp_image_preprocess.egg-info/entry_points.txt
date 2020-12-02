@@ -1,0 +1,3 @@
+[console_scripts]
+harp_run = harp.run_harp:main
+

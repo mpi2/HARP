@@ -19,13 +19,10 @@ E-mail the developers: sig@har.mrc.ac.uk
 import sys
 sys.path.append('..')
 import skimage.io as skim_io
-if sys.platform == "win32" or sys.platform == "win64":
-    from harp.lib import cv2
-else:
-    import cv2
+import cv2
 import os
 from harp.appdata import HarpDataError
-from harp.lib import tifffile
+import tifffile
 import time
 
 
@@ -34,10 +31,9 @@ class Imreader():
 
         if pathlist[0].lower().endswith(('tif', 'tiff')):
             usetiffile = True
+            print("Using tiffile")
         else:
             usetiffile = False
-
-        print("utf", usetiffile)
 
         if sys.platform in ["win32", "win64"]:
             if usetiffile:

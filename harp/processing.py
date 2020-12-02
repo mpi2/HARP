@@ -274,7 +274,7 @@ class ProcessingThread(QtCore.QThread):
             dimensions_tuple = None
             try:
                 # Cropbox dimensions are stored as pickle object. So need to extract
-                filehandler = open(self.config.cropbox_path, 'r')
+                filehandler = open(self.config.cropbox_path, 'rb')
                 cropbox_object = copy.deepcopy(pickle.load(filehandler))
                 derived_cropbox = cropbox_object.cropbox
             except IOError as e:
@@ -361,7 +361,7 @@ class ProcessingThread(QtCore.QThread):
             crop_box_ob.cropbox = msg
 
             # save the pickle
-            with open(crop_box_path, 'w+') as config:
+            with open(crop_box_path, 'wb') as config:
                 pickle.dump(crop_box_ob, config)
 
             # that's the end of this callback

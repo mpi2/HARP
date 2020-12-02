@@ -37,11 +37,9 @@ if sys.platform == "win32" or sys.platform == "win64":
     windows = True
 else:
     windows = False
-if windows:
-    from harp.lib import cv2
-else:
-    import cv2
-import harp.lib.nrrd as nrrd
+
+import cv2
+import nrrd
 
 from harp.imgprocessing.io_ import Imreader
 from multiprocessing import Value

@@ -19,7 +19,7 @@ E-mail the developers: sig@har.mrc.ac.uk
 
 import os
 from harp.imgprocessing.io_ import Imreader
-from harp.lib import nrrd
+import nrrd
 import bz2
 import tarfile
 import numpy as np

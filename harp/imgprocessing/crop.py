@@ -238,7 +238,8 @@ def dummy_callback(msg):
 
 def cli_run():
     """
-    Parse the arguments
+    Parse the arguments.
+    This is not workign at the moment
     """
     parser = argparse.ArgumentParser(description='crop a stack of bitmaps')
     parser.add_argument('-i', dest='in_dir', help='dir with bmps to crop', required=True)

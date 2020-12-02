@@ -20,7 +20,7 @@ E-mail the developers: sig@har.mrc.ac.uk
 Creates a YAMl file in app directory that stores details such as last directory browsed
 
 """
-from .lib import appdirs
+import appdirs
 import yaml
 from os.path import expanduser
 import os

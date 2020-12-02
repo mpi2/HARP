@@ -1,0 +1,14 @@
+Metadata-Version: 1.1
+Name: harp-image-preprocess
+Version: 2.4.0.1
+Summary: Cross-platform application for automating the processing of μCT and OPT image data.
+Home-page: https://github.com/mpi2/HARP
+Author: Neil Horner
+Author-email: n.horner@har.mrc.ac.uk, bit@har.mrc.ac.uk
+License: Apache2
+Description: UNKNOWN
+Keywords: image processing,micro-CT
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
