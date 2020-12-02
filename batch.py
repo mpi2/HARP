@@ -233,7 +233,7 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--recons', help="path to recons folder", required=False, default=None, dest='recons_path')
     parser.add_argument('-p', '--processed_recons', help="path to processed recons folder", required=True,
                         dest='proc_recons_path')
-    parser.add_argument('-c', '--csv', help="path to csv with processed_recon_name", required=True, dest='csv_path')
+    parser.add_argument('-c', '--csv', help="path to csv with processed_recon_names", required=True, dest='csv_path')
     parser.add_argument('--clobber_bz2', help="Overwrite the bz2 if it exists", required=False, dest='clobber_bz2',
                         default=False, action='store_true')
 
