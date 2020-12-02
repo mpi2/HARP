@@ -7,11 +7,11 @@ from os.path import isdir, join, split, isfile, basename, splitext, realpath
 from logzero import logger as logging
 import logzero
 import strconv
-from imgprocessing.resampler import resample
-from imgprocessing.compress import bz2_nnrd
-from imgprocessing.crop import Crop
-from appdata import AppData
-from autofill import Autofill
+from .imgprocessing.resampler import resample
+from .imgprocessing.compress import bz2_nnrd
+from .imgprocessing.crop import Crop
+from .appdata import AppData
+from .autofill import Autofill
 import sys
 
 
@@ -163,7 +163,7 @@ def compress(bz2_file, img_list, recon_id, update, missing=False):
 
 def get_stage(recon_name):
 
-    for s in SCALING.keys():
+    for s in list(SCALING.keys()):
         if s in recon_name:
             return s
 
@@ -211,7 +211,7 @@ def scaled_stack_exists(folder, sf, pixel_size):
         try:
             float(im_sf)
         except ValueError:
-            print("Scaled image {} has a non-deafult scaling format within its name".format(im_name))
+            print(("Scaled image {} has a non-deafult scaling format within its name".format(im_name)))
             return False
         im_pixel = float(split_path[pixel_index])
 
@@ -224,7 +224,7 @@ def scaled_stack_exists(folder, sf, pixel_size):
 class FakeUpdate(object):
 
     def emit(self, str_):
-        print str_
+        print(str_)
 
 
 if __name__ == "__main__":

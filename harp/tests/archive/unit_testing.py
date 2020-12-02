@@ -27,9 +27,9 @@ import pickle
 import unittest
 import SimpleITK as sitk
 import numpy as np
-from PyQt4.QtGui import QApplication
-from PyQt4.QtTest import QTest
-from PyQt4.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtTest import QTest
+from PyQt5.QtCore import Qt, QTimer
 import harp
 
 
@@ -37,7 +37,7 @@ class BasicTest(unittest.TestCase):
 
     def setUp(self):
 
-        self.example_root = "C:\Users\james.brown\Desktop"
+        self.example_root = "C:\\Users\james.brown\Desktop"
 
         # Specify uCT test data paths
         self.lowres_uCT = os.path.join(self.example_root, "HARP_testing", "lowres_uCT",
@@ -62,7 +62,7 @@ class BasicTest(unittest.TestCase):
         self.default_OPT = self.single_channel_OPT
 
         # Create HARP instance
-        print '### Initialising test ###'
+        print('### Initialising test ###')
         self.app = QApplication(sys.argv)
         self.ex = harp.MainWindow(self.app)
 
@@ -186,7 +186,7 @@ class ScalingTests(BasicTest):
         self.process_example_data()
 
         # Get output dir and check it exists
-        print str(self.ex.output_folder)
+        print(str(self.ex.output_folder))
         scaled_dir = os.path.join(str(self.ex.output_folder), 'scaled_stacks')
         self.assertTrue(os.path.isdir(scaled_dir))
 
@@ -196,7 +196,7 @@ class ScalingTests(BasicTest):
 
         # Loop, load and check each one for dimensions
         for stack, true_dims in zip(scaled_stacks, ground_truth):
-            print stack
+            print(stack)
             im = sitk.ReadImage(os.path.join(scaled_dir, stack))
             self.assertEqual(sitk.GetArrayFromImage(im).shape, true_dims)
 
@@ -220,7 +220,7 @@ class GUIFeaturesTest(BasicTest):
     '''Test autofill'''
     def test_autofill(self):
 
-        print "Testing autofill..."
+        print("Testing autofill...")
 
         # Load the example data - this should autofill
         self.set_example_data(self.default_uCT)
@@ -249,7 +249,7 @@ class MiscellaneousTests(BasicTest):
     '''Resize the main window and reset it'''
     def test_resize_and_reset_screen(self):
 
-        print "Testing window resizing..."
+        print("Testing window resizing...")
 
         # Get the current window and scrollarea size
         window_size = self.ex.size()

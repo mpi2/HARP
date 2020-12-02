@@ -23,10 +23,10 @@ import sys
 import numpy as np
 from SimpleITK import ReadImage, WriteImage, GetImageFromArray, GetArrayFromImage, OtsuThreshold, ConnectedComponent, \
     RelabelComponent, LabelStatisticsImageFilter
-from imgprocessing import zproject
+from harp.imgprocessing import zproject
 sys.path.append("..")
-from imgprocessing.io_ import Imreader, Imwriter
-from appdata import HarpDataError
+from harp.imgprocessing.io_ import Imreader, Imwriter
+from harp.appdata import HarpDataError
 
 
 class Crop():
@@ -84,11 +84,11 @@ class Crop():
 
         # Get cropbox either automatically or manually
         cb = self.auto_bounding_box(imglist) if auto else self.calc_manual_crop()
-        print cb
+        print(cb)
 
         # Rearrange dimensions for numpy slicing
         cropbox = (cb[2], cb[3], cb[0], cb[1])
-        print cropbox
+        print(cropbox)
 
         first = True
         outpathslist = []
@@ -233,7 +233,7 @@ class Crop():
 
 def dummy_callback(msg):
     """use for cli running"""
-    print msg
+    print(msg)
 
 
 def cli_run():

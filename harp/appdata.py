@@ -20,7 +20,7 @@ E-mail the developers: sig@har.mrc.ac.uk
 Creates a YAMl file in app directory that stores details such as last directory browsed
 
 """
-from lib import appdirs
+from .lib import appdirs
 import yaml
 from os.path import expanduser
 import os
@@ -65,8 +65,8 @@ class AppData(object):
                         try:
                             os.remove(self.app_data_file)
                         except OSError as e:
-                            print('the harp app data config file at {} is corrupt, nad it cannot be deleted. '
-                                  'Please remove it before restarting'.format(self.app_data_file))
+                            print(('the harp app data config file at {} is corrupt, nad it cannot be deleted. '
+                                  'Please remove it before restarting'.format(self.app_data_file)))
                             yaml_load_error = True
 
                 # In case loading failed

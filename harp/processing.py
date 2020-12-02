@@ -30,15 +30,15 @@ associated modules.
 -------------------------------------------------------
 """
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 import subprocess
 import os
 import signal
 import re
-from imgprocessing import compress
+from .imgprocessing import compress
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 import shutil
@@ -47,9 +47,9 @@ import copy
 from multiprocessing import freeze_support
 import traceback
 import fnmatch
-from config import Config
-from imgprocessing import resampler, crop
-from appdata import HarpDataError
+from .config import Config
+from .imgprocessing import resampler, crop
+from .appdata import HarpDataError
 from logzero import logger as logging
 import logzero
 
@@ -61,7 +61,7 @@ class ProcessingThread(QtCore.QThread):
     on this QThread.
 
     """
-    update = QtCore.pyqtSignal(QtCore.QString, name='update')
+    update = QtCore.pyqtSignal('QString', name='update')
 
     def __init__(self, config_paths, thread_terminate_flag, appdata, parent=None):
         """Gets the pickle config file and initialises some instance variables
@@ -110,7 +110,7 @@ class ProcessingThread(QtCore.QThread):
 
         for job in iter(self.config_paths.get, None):
 
-            filehandler = open(job, 'r')
+            filehandler = open(job, 'rb')
 
             self.config = copy.deepcopy(pickle.load(filehandler))
 
@@ -660,7 +660,7 @@ class ProcessingThread(QtCore.QThread):
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     ex = Progress(configOb)
     sys.exit(app.exec_())
 

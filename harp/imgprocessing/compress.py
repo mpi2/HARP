@@ -18,13 +18,12 @@ E-mail the developers: sig@har.mrc.ac.uk
 """
 
 import os
-from imgprocessing.io_ import Imreader
-from lib import nrrd
+from harp.imgprocessing.io_ import Imreader
+from harp.lib import nrrd
 import bz2
 import tarfile
 import numpy as np
-from scipy.misc import imshow
-import orientations
+from harp.imgprocessing import orientations
 
 # options ={
 # 'space': 'right - anterior - superior',

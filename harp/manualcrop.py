@@ -24,7 +24,7 @@ Crop.py open an image (probably a max intensity z-projection)
 User draws a cropping box. returns the coordinates
 """
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 import math
 import operator
 import sys
@@ -35,7 +35,7 @@ except ImportError:
     import PIL
 
 
-class Crop(QtGui.QMainWindow):
+class Crop(QtWidgets.QMainWindow):
 
     def __init__(self, callback, image, parent=None):
         """
@@ -60,12 +60,12 @@ class Crop(QtGui.QMainWindow):
 
         #Menu bar
         self.menubar = self.menuBar()
-        self.closeAction = QtGui.QAction(self.tr("&close"), self)
+        self.closeAction = QtWidgets.QAction(self.tr("&close"), self)
         self.closeAction.triggered.connect(self.closeMenuAction)
         fileMenu = self.menubar.addMenu('&file')
         fileMenu.addAction(self.closeAction)
 
-        self.action = QtGui.QAction(self.tr("&crop (right click)"), self)
+        self.action = QtWidgets.QAction(self.tr("&crop (right click)"), self)
         self.action.triggered.connect(self.cropMenuAction)
         cropMenu = self.menubar.addMenu('&crop')
         cropMenu.addAction(self.action)
@@ -82,7 +82,7 @@ class Crop(QtGui.QMainWindow):
         event.accept()
 
 
-class MainWidget(QtGui.QWidget):
+class MainWidget(QtWidgets.QWidget):
     def __init__(self, parent, callback, image_path):
         """
         :param parent:
@@ -92,13 +92,13 @@ class MainWidget(QtGui.QWidget):
         """
         self.parent = parent
         super(MainWidget, self).__init__()
-        self.scene = QtGui.QGraphicsScene()
+        self.scene = QtWidgets.QGraphicsScene()
         self.scene.setSceneRect(0, 0, 950, 950)
 
         self.callback = callback
-        self.view = QtGui.QGraphicsView(self.scene)
+        self.view = QtWidgets.QGraphicsView(self.scene)
         self.view.setSceneRect(0, 0, 950, 950)
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
 
         layout.addWidget(self.view)
         self.setLayout(layout)
@@ -111,23 +111,24 @@ class MainWidget(QtGui.QWidget):
         # img = Image.open(image_path)
         # print 'PIL size', img.size
         if not os.path.isfile:
-            print 'wheres the file'
+            print('wheres the file')
         else:
-            print 'found the file {}'.format(image_path)
+            print('found the file {}'.format(image_path))
         #Scale the largest dimension to 950 pixs. Use same scaling for the other dimensions
         self.orig_width = self.image.width()
         if self.image.isNull():
             raise ValueError('the pixmap is null!!!!')
         self.orig_height = self.image.height()
         max_dimen = max([float(self.orig_width), float(self.orig_height)])
-        print float(self.orig_width), float(self.orig_height)
-        print "crop: dim", max_dimen
+        print(float(self.orig_width), float(self.orig_height))
+        print("crop: dim", max_dimen)
         self.scaleFact = 950.00 / max_dimen
         #print "jhg ", self.scaleFact
         x = self.orig_width * self.scaleFact
         y = self.orig_height * self.scaleFact
 
-        self.pixmap_item = QtGui.QGraphicsPixmapItem(self.image.scaled(x, y), None, self.scene)
+        self.pixmap_item = QtWidgets.QGraphicsPixmapItem(self.image.scaled(x, y), None)
+        self.scene.addItem(self.pixmap_item)
         self.pixmap_item.mousePressEvent = self.mousePress
         self.pixmap_item.mouseMoveEvent = self.mouseMove
         self.pixmap_item.mouseReleaseEvent = self.mouseRelease
@@ -144,7 +145,7 @@ class MainWidget(QtGui.QWidget):
         #TODO: set this dynamically
         self.img_dist_top = 15
         self.img_dist_left = 15
-        self.pixmap_item.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self.view)
+        self.pixmap_item.rubberBand = QtWidgets.QRubberBand(QtWidgets.QRubberBand.Rectangle, self.view)
         self.pixmap_item.rubberBand.setGeometry(QtCore.QRect(1, 1, 1, 1))
         self.pixmap_item.rubberBand.updatesEnabled()
         self.pixmap_item.rubberBand.show()
@@ -248,7 +249,7 @@ class MainWidget(QtGui.QWidget):
                  4: math.sqrt((pos[0] - topLx)**2 + (pos[1] - botRy)**2)}
 
         # Find minimum distance
-        corner = min(dists.iteritems(), key=operator.itemgetter(1))[0]
+        corner = min(iter(dists.items()), key=operator.itemgetter(1))[0]
         r = self.pixmap_item.rubberBand.geometry()
 
         # Modify rectangle according to selected corner and mouse position
@@ -307,7 +308,7 @@ class MainWidget(QtGui.QWidget):
 
 def run_from_cli(callback, image):
     #Need access to app to be able to exit gracefully from cli
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     window = Crop(callback, image)
     window.show()
     sys.exit(app.exec_())
@@ -317,7 +318,7 @@ def run(callback, image):
     window.show()
 
 def dummyCallback(output):
-    print output
+    print(output)
 
 if __name__ == "__main__":
     image = sys.argv[1]

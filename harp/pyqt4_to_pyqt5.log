@@ -1,0 +1,107 @@
+**  pyqt4_to_pyqt5.log  Wednesday 02. December 2020 08:10  **
+Args: ['/home/neil/.local/lib/python3.8/site-packages/pyqt4topyqt5_pkg/pyqt4topyqt5.py', '.']
+
+Beginning into: /home/neil/git/HARP_PyQt5
+
+Processing file: `/home/neil/git/HARP_PyQt5/__init__.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/appdata.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/autofill.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/batch.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/config.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/errorcheck.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/getpickle.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/harp.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/manualcrop.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/processing.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/queuejob.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/setup_HARP.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/version.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/tests/test_resampler.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/tests/archive/reader-writer_testing.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/tests/archive/unit_testing.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/docs/conf.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/ui/__init__.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/ui/mainwindow.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/ui/mainwindow_new.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/imgprocessing/__init__.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/imgprocessing/compress.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/imgprocessing/compress_debug.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/imgprocessing/crop.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/imgprocessing/io_.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/imgprocessing/orientations.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/imgprocessing/resampler.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/imgprocessing/test_compress.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/imgprocessing/zproject.py`
+  File updated.
+
+Processing file: `/home/neil/git/HARP_PyQt5/lib/__init__.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/lib/appdirs.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/lib/nrrd.py`
+  No changes needed.
+
+Processing file: `/home/neil/git/HARP_PyQt5/lib/tifffile.py`
+  No changes needed.
+
+**  pyqt4_to_pyqt5.log  Wednesday 02. December 2020 08:12  **
+Args: ['/home/neil/.local/lib/python3.8/site-packages/pyqt4topyqt5_pkg/pyqt4topyqt5.py', '.']
+

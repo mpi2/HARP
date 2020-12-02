@@ -26,7 +26,7 @@ For scaling to an arbitray pixel value, a memory-mapped numpy array is created, 
 resides on disk during processing. This will take up (volume size / scale factor)
 
 """
-from __future__ import division
+
 import numpy as np
 from SimpleITK import ReadImage, WriteImage, BinShrink, GetImageFromArray, GetArrayFromImage
 import os
@@ -38,15 +38,15 @@ if sys.platform == "win32" or sys.platform == "win64":
 else:
     windows = False
 if windows:
-    from lib import cv2
+    from harp.lib import cv2
 else:
     import cv2
-import lib.nrrd as nrrd
+import harp.lib.nrrd as nrrd
 
-from imgprocessing.io_ import Imreader
+from harp.imgprocessing.io_ import Imreader
 from multiprocessing import Value
 import tempfile
-import orientations
+from . import orientations
 
 
 def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminate_flag=Value('i', 0), center=''):
@@ -86,7 +86,7 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
     reader = Imreader(img_path_list)
 
     for img_path in img_path_list:
-        print img_path
+        print(img_path)
         count += 1
         if count % 50 == 0:
             if thread_terminate_flag.value == 1:
@@ -250,7 +250,7 @@ def get_img_paths(folder):
     :return: list of image file paths
     """
     extensions = ('.tiff', '.tif', '.bmp')
-    print 'here ' + folder
+    print('here ' + folder)
     return sorted([os.path.join(folder, x) for x in os.listdir(folder) if x.lower().endswith(extensions)])
 
 def mkdir_force(path):
@@ -272,7 +272,7 @@ if __name__ == '__main__':
 
     class DummyUpdate():
         def emit(self, msg):
-            print msg
+            print(msg)
 
     import argparse
     if __name__ == "__main__":

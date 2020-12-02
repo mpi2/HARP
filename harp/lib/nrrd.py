@@ -8,7 +8,7 @@ Copyright (c) 2012 Maarten H. Everts and contributors.
 import numpy as np
 import sys
 sys.path.append('..')
-import version
+from harp import version
 import os.path
 import os
 from datetime import datetime
@@ -212,7 +212,7 @@ def write(filename, data, options={}, separate_header=False):
     if data.dtype.itemsize > 1:
         options['endian'] = _NUMPY2NRRD_ENDIAN_MAP[data.dtype.str[:1]]
     # if 'space' is specified 'space dimension' can not. See http://teem.sourceforge.net/nrrd/format.html#space
-    if 'space' in options.keys() and 'space dimension' in options.keys():
+    if 'space' in list(options.keys()) and 'space dimension' in list(options.keys()):
         del options['space dimension']
     options['dimension'] = data.ndim
     options['sizes'] = list(data.shape)
@@ -227,14 +227,14 @@ def write(filename, data, options={}, separate_header=False):
 
         # Write the fields in order, this ignores fields not in _NRRD_FIELD_ORDER
         for field in _NRRD_FIELD_ORDER:
-            if options.has_key(field):
+            if field in options:
                 if field == 'harp_version':
                     print('p')
                 outline = (field + ': ' +
                            _NRRD_FIELD_FORMATTERS[field](options[field]) +
                            '\n')
                 filehandle.write(outline)
-        for (k,v) in options.get('keyvaluepairs', {}).items():
+        for (k,v) in list(options.get('keyvaluepairs', {}).items()):
             outline = str(k) + ':=' + str(v) + '\n'
             filehandle.write(outline)
 
@@ -281,7 +281,7 @@ def write_nrrd_header(filehandle, shape, npdtype, ndim=3, options={}):
     if npdtype.itemsize > 1:
         options['endian'] = _NUMPY2NRRD_ENDIAN_MAP[npdtype.str[:1]]
     # if 'space' is specified 'space dimension' can not. See http://teem.sourceforge.net/nrrd/format.html#space
-    if 'space' in options.keys() and 'space dimension' in options.keys():
+    if 'space' in list(options.keys()) and 'space dimension' in list(options.keys()):
         del options['space dimension']
     options['dimension'] = ndim
     options['sizes'] = list(shape)
@@ -294,12 +294,12 @@ def write_nrrd_header(filehandle, shape, npdtype, ndim=3, options={}):
 
     # Write the fields in order, this ignores fields not in _NRRD_FIELD_ORDER
     for field in _NRRD_FIELD_ORDER:
-        if options.has_key(field):
+        if field in options:
             outline = (field + ': ' +
                        _NRRD_FIELD_FORMATTERS[field](options[field]) +
                        '\n')
             filehandle.write(outline)
-    for (k,v) in options.get('keyvaluepairs', {}).items():
+    for (k,v) in list(options.get('keyvaluepairs', {}).items()):
         outline = str(k) + ':=' + str(v) + '\n'
         filehandle.write(outline)
 

@@ -20,12 +20,12 @@ import sys
 sys.path.append('..')
 import skimage.io as skim_io
 if sys.platform == "win32" or sys.platform == "win64":
-    from lib import cv2
+    from harp.lib import cv2
 else:
     import cv2
 import os
-from appdata import HarpDataError
-from lib import tifffile
+from harp.appdata import HarpDataError
+from harp.lib import tifffile
 import time
 
 
@@ -37,7 +37,7 @@ class Imreader():
         else:
             usetiffile = False
 
-        print "utf", usetiffile
+        print("utf", usetiffile)
 
         if sys.platform in ["win32", "win64"]:
             if usetiffile:
@@ -132,7 +132,7 @@ class Imwriter():
         tifffile.imsave(path, img)
 
     def png_writer(self, img, path):
-        print 'png write'
+        print('png write')
         cv2.imwrite(path, img)
 
     def skimage_write(self, img, path):

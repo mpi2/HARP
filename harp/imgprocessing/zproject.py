@@ -17,14 +17,14 @@ E-mail the developers: sig@har.mrc.ac.uk
 
 """
 
-from __future__ import division
+
 import os
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 import sys
 import numpy as np
 sys.path.append('..')
-from appdata import HarpDataError
-from imgprocessing.io_ import Imreader, Imwriter
+from harp.appdata import HarpDataError
+from harp.imgprocessing.io_ import Imreader, Imwriter
 import math
 
 
@@ -51,14 +51,14 @@ class Zproject(QtCore.QThread):
         Run the Zprojection
         This is not in run, so we can bypass run() if we don't want to start a new thread
         """
-        print 'zproject thread id', QtCore.QThread.currentThreadId()
+        print('zproject thread id', QtCore.QThread.currentThreadId())
 
         if os.path.isfile(self.zprojection_output) is False or self.force:
 
-            print "Computing z-projection..."
+            print("Computing z-projection...")
 
             if len(self.imglist) < 1:
-                self.emit(QtCore.SIGNAL('update(QString)'),  "No recon images found!")
+                self.update.emit("No recon images found!")
 
             reader = Imreader(self.imglist)
             try:
@@ -72,16 +72,16 @@ class Zproject(QtCore.QThread):
 
             # make a new list by removing every nth image
             sparse_filelist = sorted(self.imglist)[0::self.skip_num]
-            print "No. z-projection images: {}".format(len(sparse_filelist))
+            print("No. z-projection images: {}".format(len(sparse_filelist)))
 
-            print "performing z-projection on sparse file list"
+            print("performing z-projection on sparse file list")
 
             max_array = self.max_projection(sparse_filelist, imdims, dtype)
             #max_array = max_array.astype(dtype)
             imwriter = Imwriter(self.zprojection_output)
             imwriter.imwrite(max_array, self.zprojection_output)
 
-        self.emit(QtCore.SIGNAL('update(QString)'), "Z-projection finished")
+        self.update.emit("Z-projection finished")
 
     def max_projection(self, filelist, imdims, bit_depth):
 
@@ -99,7 +99,7 @@ class Zproject(QtCore.QThread):
             inds = im_array > maxi
             maxi[inds] = im_array[inds]
             status_str = "Z-project: {}/{} images processed".format(count, len(filelist))
-            self.emit(QtCore.SIGNAL('update(QString)'), status_str)
+            self.update.emit(status_str)
             self.callback("Determining crop box ({:.1%})".format(count / len(filelist)))
         return maxi
 
