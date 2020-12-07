@@ -5,4 +5,4 @@ on Windows 7 with Anaconda Python and required packages installed, run
 
 pyinstaller.exe harp.py
 
-then copy AppData/Local/Lib/site-packages/skimage to the harp/dist/harp directory 
+

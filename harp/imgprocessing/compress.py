@@ -56,7 +56,7 @@ def bz2_nnrd(img_list, outfile, scan_name, update, center=''):
 
     with open(compressed_name, 'wb') as fh_w:
 
-        header_read = nrrd.GetNrrdHeader(shape, first_image.dtype, 3, options=orientations.RAS_HEADER_OPTIONS)
+        header_read = nrrd.read_header(shape, first_image.dtype, 3, options=orientations.RAS_HEADER_OPTIONS)
         header = header_read.header
         fh_w.write(compressor.compress(header))
 
