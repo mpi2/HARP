@@ -32,6 +32,7 @@ from SimpleITK import ReadImage, WriteImage, BinShrink, GetImageFromArray, GetAr
 import os
 import shutil
 import sys
+import tempfile
 sys.path.append('..')
 if sys.platform == "win32" or sys.platform == "win64":
     windows = True
@@ -42,8 +43,8 @@ import cv2
 import nrrd
 
 from harp.imgprocessing.io_ import Imreader
+from harp import version
 from multiprocessing import Value
-import tempfile
 from . import orientations
 
 
@@ -163,7 +164,9 @@ def resample(images, scale, outpath, scaleby_int, update_signal, thread_terminat
 
     ras_volume = orientations.orient_for_impc(xyz_scaled_mmap)
 
-    nrrd.write(outpath, ras_volume, orientations.RAS_HEADER_OPTIONS)
+    header = orientations.RAS_HEADER_OPTIONS.copy()
+    header['# harp_version'] = f'{version.__version__}'
+    nrrd.write(outpath, ras_volume, header)
 
     temp_xy.close()  # deletes temp file
     temp_xyz.close()

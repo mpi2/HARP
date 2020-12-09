@@ -146,7 +146,7 @@ class ProcessingThread(QtCore.QThread):
                 self.scaling()
             except Exception as e:
                 self.update.emit("Scaling failed!: {}".format(e))
-                logging.error("Scaling failed!: {}".format(e))
+                logging.exception("Scaling failed!: {}".format(e))
                 continue
 
             # Cropping function only copies over image files. Need to copy over other files now scaling and cropping
@@ -167,7 +167,7 @@ class ProcessingThread(QtCore.QThread):
                 continue
             except Exception as e:  # Try to catch the network errors
                 self.update.emit("compression failed, Possible network problems")
-                logging.error("compression failed. Possible network problems: {}".format(e))
+                logging.exception("compression failed. Possible network problems: {}".format(e))
                 continue
             else:
                 self.update.emit("Processing finished")

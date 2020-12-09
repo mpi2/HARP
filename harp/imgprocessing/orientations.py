@@ -6,6 +6,7 @@ All stacks should be in RAS format before submitting to the DCC
 UCD and TCP have there embryos in a non-stnadard orientation, so need extra transformations
 """
 import numpy as np
+from harp import version
 
 # For the NRRD header
 SPACE = 'right-anterior-superior'
@@ -16,7 +17,7 @@ RAS_HEADER_OPTIONS = {
         'space': SPACE,
         'space directions': SPACE_DIRECTIONS
     }
-
+#shape, first_image.dtype, 3,
 
 def orient_for_impc(volume):
     """

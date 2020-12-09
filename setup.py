@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='harp_image_preprocess',
-    version='2.4.0.1',
+    version='2.4.0.3',
     packages=find_packages(exclude=("dev")),
     include_package_data=True,
     install_requires=[
