@@ -1,4 +1,11 @@
 # coding: utf-8
+# PyQt Notes
+# Cannot get PyQt5>=5.14.2 on fedora 5.6.15-200.fc31.x86_64 installed
+# Ubuntu 20.04  5.15.2 was causing issues so used 5.14.2
+
+
+
+
 
 from setuptools import setup, find_packages
 
@@ -12,10 +19,10 @@ setup(
 	"logzero>=1.5.0",
 	"matplotlib>=3.3.0",
 	"scikit_image>=0.17.2",
-	"opencv_python>=4.4.0.46",
+	"opencv_python",
 	"Image>=1.5.33",
 	"Pillow>=8.0.1",
-	"PyQt5==5.14.2", # had problems with 5.15.2
+	"PyQt5", # had problems with 5.15.2
 	"PyYAML>=5.3.1",
 	"SimpleITK>=1.2.0",
 	"strconv>=0.4.2",

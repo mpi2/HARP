@@ -7,11 +7,11 @@ from os.path import isdir, join, split, isfile, basename, splitext, realpath
 from logzero import logger as logging
 import logzero
 import strconv
-from .imgprocessing.resampler import resample
-from .imgprocessing.compress import bz2_nnrd
-from .imgprocessing.crop import Crop
-from .appdata import AppData
-from .autofill import Autofill
+from harp.imgprocessing.resampler import resample
+from harp.imgprocessing.compress import bz2_nnrd
+from harp.imgprocessing.crop import Crop
+from harp.appdata import AppData
+from harp.autofill import Autofill
 import sys
 
 
@@ -86,7 +86,7 @@ def batch(proc_recon_root, csv_path, recon_root=None, clobber_bz2=False):
             continue
         log = join(cropped_dir, log_paths[0])
 
-        with open(log, 'rb') as log_file:
+        with open(log, 'r') as log_file:
             original_pixel_size = float(auto.get_pixel(stage, log_file))
 
         # Scaling
