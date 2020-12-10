@@ -12,3 +12,6 @@ build/
 *.spec
 Win*/
 tests/test_data/*
+build/**
+dist/**
+harp_image_preprocess.egg-info/**
