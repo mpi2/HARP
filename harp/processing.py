@@ -171,9 +171,8 @@ class ProcessingThread(QtCore.QThread):
                 continue
             else:
                 self.update.emit("Processing finished")
+                logging.info("Processing finished")
 
-            logging.info("Processing finished")
-        return
 
     def cleanup_on_reprocess(self):
         """
