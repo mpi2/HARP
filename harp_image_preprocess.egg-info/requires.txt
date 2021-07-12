@@ -7,7 +7,7 @@ appdirs
 logzero>=1.5.0
 matplotlib>=3.3.0
 numpy>=1.19.0
-opencv_python>=4.4.0.46
+opencv_python
 pynrrd
 scikit_image>=0.17.2
 strconv>=0.4.2

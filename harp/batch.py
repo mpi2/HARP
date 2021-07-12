@@ -227,8 +227,10 @@ class FakeUpdate(object):
         print(str_)
 
 
-if __name__ == "__main__":
-
+def main():
+    """
+    Entry point for setup.py
+    """
     parser = ArgumentParser()
     parser.add_argument('-r', '--recons', help="path to recons folder", required=False, default=None, dest='recons_path')
     parser.add_argument('-p', '--processed_recons', help="path to processed recons folder", required=True,
@@ -239,3 +241,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     batch(args.proc_recons_path, args.csv_path, args.recons_path, args.clobber_bz2)
+
+
+
+if __name__ == "__main__":
+    main()

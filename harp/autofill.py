@@ -24,7 +24,7 @@ The following functions are used to update the parameters tab based on the input
 --------------
 """
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets, QtCore
 import sys
 import os
 import re

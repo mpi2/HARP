@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: harp-image-preprocess
-Version: 2.4.0.3
+Version: 2.4.1.0
 Summary: Cross-platform application for automating the processing of μCT and OPT image data.
 Home-page: https://github.com/mpi2/HARP
 Author: Neil Horner

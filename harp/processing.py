@@ -161,10 +161,6 @@ class ProcessingThread(QtCore.QThread):
 
             try:
                 self.compression(cropped_imgs_list)
-            except HarpDataError as e:
-                self.update.emit("compression failed")
-                logging.error("compression failed: {}".format(e))
-                continue
             except Exception as e:  # Try to catch the network errors
                 self.update.emit("compression failed, Possible network problems")
                 logging.exception("compression failed. Possible network problems: {}".format(e))

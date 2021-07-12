@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='harp_image_preprocess',
-    version='2.4.0.3',
+    version='2.4.1.0',
     packages=find_packages(exclude=("dev")),
     include_package_data=True,
     install_requires=[
@@ -22,7 +22,7 @@ setup(
 	"opencv_python",
 	"Image>=1.5.33",
 	"Pillow>=8.0.1",
-	"PyQt5", # had problems with 5.15.2
+	"PyQt5==5.14.2", # had problems with 5.15.2
 	"PyYAML>=5.3.1",
 	"SimpleITK>=1.2.0",
 	"strconv>=0.4.2",
@@ -45,6 +45,7 @@ setup(
     entry_points ={
             'console_scripts': [
                 'harp_run=harp.run_harp:main',
+                'harp_batch=harp.batch:main'
             ]
         },
 )

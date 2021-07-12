@@ -105,7 +105,6 @@ def bz2_dir(dir_, outfile, update, update_name, terminate):
     tar.close()
 
 
-
 def nrrd_header_from_dict(shape, npdtype, ndim=3, header={}) -> str:
     """
     Adaptred from nrrd.write() and keeping only the bits needed in order to create a ascii-encoded byte string
