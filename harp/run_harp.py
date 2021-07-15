@@ -18,6 +18,9 @@ limitations under the License.
 E-mail the developers: sig@har.mrc.ac.uk
 
 
+to run from git-installed code
+$ cd HARP
+$ python3 harp/run_harp.py
 
 
 **Summary:**

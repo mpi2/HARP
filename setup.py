@@ -3,15 +3,16 @@
 # Cannot get PyQt5>=5.14.2 on fedora 5.6.15-200.fc31.x86_64 installed
 # Ubuntu 20.04  5.15.2 was causing issues so used 5.14.2
 
-
-
-
-
 from setuptools import setup, find_packages
+from pathlib import Path
+
+# Get __verison_dunder without importing lama
+version_file = Path(__file__).resolve().parent / 'harp' / 'version.py'
+exec(open(version_file).read())
 
 setup(
     name='harp_image_preprocess',
-    version='2.4.1.0',
+    version=__version__,
     packages=find_packages(exclude=("dev")),
     include_package_data=True,
     install_requires=[
